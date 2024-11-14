@@ -1,0 +1,118 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build:API dependencies",
+			"command": "dotnet",
+            "type": "process",
+			"group":{
+				"kind":"build",
+				"isDefault":true
+			},
+			"dependsOrder": "sequence",
+            "dependsOn": [
+                "Build:DTO",
+				"Build:BL",
+				"Build:DataAccess",
+                "Build: FitnessCenterAPI"
+            ],
+            "args": [
+                "build",
+                "${workspaceFolder}/DTO/DTO.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+			
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build",
+			"detail": "Build the DTO.csproj project using dotnet build"
+		},
+		{
+			"label": "Build:DTO",
+			"command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/DTO/DTO.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build",
+			
+			"detail": "Build the DTO.csproj for the FitnessCenterDB project"
+		},
+		{
+			"label": "Build:BL",
+			"command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/BL/BL.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build",
+			
+			"detail": "Build the BL.csproj for the FitnessCenterDB project"
+		},
+		{
+			"label": "Build:DataAccess",
+			"command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/DataAccess/DataAccess.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build",
+			
+			"detail": "Build the DataAccess.csproj for the FitnessCenterDB project"
+		},
+		{
+			"label": "Build:GymFrontend",
+			"command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/GymFrontend/GymFrontend.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+			
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build",
+			"detail": "Build the GymFrontend.csproj project using dotnet build"
+		},
+		{
+			"label": "Build: FitnessCenterAPI",
+			"command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/API/API.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build",
+			
+			"detail": "Build the API.csproj for the FitnessCenterDB project"
+		}
+	]
+}

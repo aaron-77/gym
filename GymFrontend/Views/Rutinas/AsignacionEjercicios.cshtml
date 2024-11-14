@@ -1,0 +1,194 @@
+﻿@model DTO.Dtos.AsignacionDeEjercicio;
+@{
+}
+@using DTO.Dtos;
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = null;
+
+    var listadoClientes = ViewBag.clientes as List<QueryUser>;
+    if (listadoClientes == null)
+    {
+        listadoClientes = new List<QueryUser>();
+    }
+    
+    var listadoRutinas = ViewBag.rutinas as List<Rutina>;
+    if (listadoRutinas == null)
+    {
+        listadoRutinas = new List<Rutina>();
+    }
+    var listadoEjercicios = ViewBag.ejercicios as List<Ejercicio>;
+    if (listadoEjercicios == null)
+    {
+        listadoEjercicios = new List<Ejercicio>();
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <title>Asignacion de ejercicios - FitnessGym</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/crearCuenta.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/GymFrontend.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/empleadosMainPage.css" />
+
+    <!-- Favicons -->
+    <link href="assets/img/favicon.png" rel="icon">
+    <!-- Google Fonts -->
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+    <!-- Vendor CSS Files -->
+    <link href="~/lib/bootstrap-icons2/bootstrap-icons.css" rel="stylesheet">
+    <!-- Template Main CSS File -->
+    <link href="~/css/styleNavBar.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+
+    <!-- ======= Header ======= -->
+    <header id="header" class="header fixed-top d-flex align-items-center">
+
+        <div class="d-flex align-items-center justify-content-between">
+            <a href="index.html" class="logo d-flex align-items-center">
+                <img src="assets/img/logo.png" alt="">
+                <span class="d-none d-lg-block">Fitness Gym</span>
+            </a>
+            <i class="bi bi-list toggle-sidebar-btn"></i>
+        </div><!-- End Logo -->
+        <nav class="header-nav ms-auto">
+            <ul class="d-flex align-items-center">
+
+                <li class="nav-item d-block d-lg-none">
+                    <a class="nav-link nav-icon search-bar-toggle " href="#">
+                        <i class="bi bi-search"></i>
+                    </a>
+                </li><!-- End Search Icon-->
+            </ul>
+        </nav><!-- End Icons Navigation -->
+
+    </header><!-- End Header -->
+    <!-- ======= Sidebar ======= -->
+    <aside id="sidebar" class="sidebar">
+        <ul class="sidebar-nav" id="sidebar-nav">
+            <li class="nav-heading">Pages</li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="https://localhost:7275/empleados">
+                    <span>Medidas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="https://localhost:7275/gestionRutinas?page=registrar">
+                    <span>Registrar rutina</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="https://localhost:7275/gestionRutinas?page=asignar">
+                    <span>Asignar Ejercicios</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="https://localhost:7275/registrarCita?page=asignar">
+                    <span>Registrar Cita</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="https://localhost:7275/registrarCita?page=asignar">
+                    <span>Modificar Cita</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="https://localhost:7275/duracionCitasMedicionPage">
+                    <span>Duracion citas medicion</span>
+                </a>
+            </li>
+        </ul>
+
+    </aside><!-- End Sidebar-->
+    <!-- ======= Footer ======= -->
+    <main id="main" class="main">
+
+        <div class="pagetitle">
+            <h1>Asignacion de ejercicios</h1>
+
+        </div><!-- End Page Title -->
+
+        <section class="section medidas-section">
+            <form id="formGestionRutinas" class="formulario" action="asignarEjercicios" method="post">
+                <span id="validationSumary" class="validation-error">@ViewBag.message</span>
+                <label for="inputCliente" class="form-label">Cliente</label>
+                <select id="inputCliente" class="form-select empleados-main-page-input" name="UsuarioID" aria-label="Default select example">      
+                    <option value="">Seleccciona un cliente</option>
+                    @foreach (var cliente in listadoClientes)
+                    {
+                        <option value="@cliente.UsuarioID">@cliente.Nombre @cliente.Apellido</option>
+                    }
+                </select>
+                <span asp-validation-for="@Model.UsuarioID" class="validation-error"></span>
+                
+                
+                <label for="inputRutina" class="form-label">Rutina</label>
+                <select id="inputRutina" class="form-select empleados-main-page-input desactivable" name="RutinaID" aria-label="Default select example">
+                    <option value="">Seleccciona una rutina</option>
+                </select>
+                <span asp-validation-for="@Model.RutinaId" class="validation-error"></span>
+                
+                <label for="inputEjercicio" class="form-label">Ejercicio</label>
+                <select id="inputEjercicio" class="form-select empleados-main-page-input desactivable" name="EjercicioID" aria-label="Default select example">
+                    <option value="">Seleccciona un ejercicio</option>
+                </select>
+                <span asp-validation-for="@Model.EjercicioID" class="validation-error"></span>
+
+                <label for="inputSets" class="form-label">Sets</label>
+                <input type="number" name="Sets" class="form-control empleados-main-page-input desactivable-g" id="inputSets">
+                <span asp-validation-for="@Model.Sets" class="validation-error"></span>
+
+                <label for="inputRepeticiones" class="form-label">Repeticiones</label>
+                <input type="number" name="Repeticiones" class="form-control empleados-main-page-input desactivable-g" id="inputRepeticiones">
+                
+
+                <label for="inputPeso" class="form-label">Peso</label>
+                <input type="number" name="Peso" value="0" class="form-control empleados-main-page-input desactivable-g" id="inputPeso">
+                
+                
+                <label for="inputTiempo" class="form-label">Tiempo</label>
+                <input type="number" name="Tiempo" value="0" class="form-control empleados-main-page-input desactivable-g" id="inputTiempo">
+                
+                
+                <label for="inputMetarepeticiones" class="form-label">Metarepeticiones</label>
+                <input type="number" name="MetaRepeticiones" value="0" class="form-control empleados-main-page-input" id="inputMetarepeticiones">
+                
+                
+                <button type="submit" class="btn btn-primary fix-margin">Asignar</button>
+            </form>
+        </section>
+
+    </main><!-- End #main -->
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+    <!-- Vendor JS Files -->
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/quill/quill.js"></script>
+    <script src="assets/vendor/tinymce/tinymce.min.js"></script>
+    -->
+    <!-- Template Main JS File -->
+    <script src="~/js/main.js"></script>
+    <script src="~/js/gestionRutinas.js" asp-append-version="true"></script>
+</body>
+
+</html>

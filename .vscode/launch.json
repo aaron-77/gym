@@ -1,0 +1,52 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "FitnessCenterAPI (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build:API dependencies",
+            "program": "${workspaceFolder}/API/bin/Debug/net7.0/API.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/API",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+
+
+        },
+        {
+            "name": "FitnessCenter Frontend (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build:GymFrontend",
+            "program": "${workspaceFolder}/GymFrontend/bin/Debug/net7.0/GymFrontend.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/GymFrontend",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        }
+
+
+    ]
+}

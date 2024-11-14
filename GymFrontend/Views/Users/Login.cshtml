@@ -1,0 +1,46 @@
+﻿@model DTO.Dtos.UserCredentials;
+
+
+@{
+	
+}
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+	<link href="~/css/login.css" rel="stylesheet" />
+	<title>
+		Inicar sesion
+	</title>
+	</head>
+    <body>
+	<div class="main-container">
+		
+		<div class="form-container" id="loginform">
+			<p class="title">Login</p>
+			
+			
+			<form class="form"  method="post" action="signIn">
+				<span id="validationSumary" class="validation-error">@ViewBag.message</span>
+				<div class="input-group">
+					<label for="username">Email</label>
+					<input asp-for="@Model.correo" type="text" name="correo" id="username" placeholder="">
+					<span asp-validation-for="@Model.correo" class="validation-error"></span>
+				</div>
+				<div class="input-group">
+					<label for="password">Contraseña</label>
+					<input asp-for="@Model.contrasena" type="password" name="contrasena" id="password" placeholder="">
+					<span asp-validation-for="@Model.contrasena" class="validation-error"></span>
+					<div class="forgot">
+						<a rel="noopener noreferrer" href="#">Olvidaste tu contraseña ?</a>
+					</div>
+				</div>
+				<button class="sign">Inicar sesion</button>
+			</form>
+			<p class="signup">
+				¿No tienes cuenta?
+				<a rel="noopener noreferrer" asp-area="" asp-controller="Users" asp-action="crearCuenta">Crear cuenta</a>
+			</p>
+		</div>
+	</div>
+    </body>
+</html>
