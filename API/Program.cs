@@ -7,7 +7,13 @@ using Quartz;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
 
-// Add services to the container.
+
+/* builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5274); // Habilitar HTTP en el puerto 5000
+    // options.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // Deshabilitar HTTPS
+});
+ */// Add services to the container.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("originsPolicyOne", policy =>
@@ -55,7 +61,7 @@ builder.Services.AddQuartz(configuration => {
 });
 builder.Services.AddQuartzHostedService(option => option.WaitForJobsToComplete = true);
 
-//builder.Services.AddQuartz(options => { options.UseMicrosoftDependencyInjectionJobFactory(); });
+builder.Services.AddQuartz(options => { options.UseMicrosoftDependencyInjectionJobFactory(); });
 
 
 var app = builder.Build();
