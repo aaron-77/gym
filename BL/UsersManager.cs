@@ -15,6 +15,7 @@ namespace BL
     {
         private HttpCustomClient httpClient; 
         public UsersManager(HttpCustomClient _httpClient ){
+            httpClient = null;
             httpClient = _httpClient;
         }
         public async Task<HttpLoginResponse> login(UserCredentials credenciales)
@@ -22,10 +23,12 @@ namespace BL
             
             JsonContent jsonCon = JsonContent.Create(credenciales);
             string categoriasResponse = await httpClient.post("api/autenticar", jsonCon);
-            HttpLoginResponse usuario = JsonSerializer.Deserialize<HttpLoginResponse>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            HttpLoginResponse usuario = null; 
+            
 
             try
             {
+                usuario = JsonSerializer.Deserialize<HttpLoginResponse>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return usuario;
             }
             catch (ArgumentNullException ex)

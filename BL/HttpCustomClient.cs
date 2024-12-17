@@ -10,16 +10,23 @@ namespace BL
     public class HttpCustomClient
     {
         private readonly EndPointsManager emanager;
+        //private  HttpClient client;
         private string requestAddress;
-        public HttpCustomClient(){
+        private static readonly HttpClient client = new()
+        {
+            BaseAddress = new Uri("http://localhost:5274/")
+      
+        };
+       /*  public HttpCustomClient(){
             
         }
         public HttpCustomClient(EndPointsManager _emanager){
+            client = new();
             emanager = _emanager;
-            requestAddress = emanager.getBaseUrl();
-             client.BaseAddress = new Uri("https://localhost:7269/");
+            requestAddress = emanager.getBaseUrl("api");
+             client.BaseAddress = new Uri("http://localhost:5274/");
         }
-        private static readonly HttpClient client = new();
+         */
 
 
         public async Task<string> post(string endPointUrl, HttpContent body)

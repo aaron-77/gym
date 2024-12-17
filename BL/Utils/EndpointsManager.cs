@@ -13,10 +13,17 @@ namespace BL.EnPointsLogic{
             _httpAccessor =httpAccesor;
         }
 
-        public string getBaseUrl(){
-            string baseUrl = config["EndPoints:ssl"];
+        public string getBaseUrl(string typeUrl){
+            string baseUrl = config["EndPoints:api:ssl"];
+             if(typeUrl == "frontend"){
+                baseUrl =config["EndPoints:frontend:ssl"];
+             }  
              if(!_httpAccessor.HttpContext.Request.IsHttps){
-             baseUrl = config["EndPoints:nossl"];
+                baseUrl = config["EndPoints:nossl"];
+                if(typeUrl == "frontend"){
+                    baseUrl =config["EndPoints:frontend:nossl"];
+                }
+             
             }
             return baseUrl; 
         }

@@ -185,7 +185,7 @@ F                respuesta.ok = false;
         public IActionResult AutenticarUsuario([FromBody] UserCredentials credenciales)
         {
             FitnessCenterDbContext db = new FitnessCenterDbContext();
-            string baseUrl = _emanager.getBaseUrl();
+            string baseUrl = _emanager.getBaseUrl("frontend");
             if (credenciales == null)
             {
                 return BadRequest("Credenciales no proporcionadas.");
@@ -249,7 +249,7 @@ F                respuesta.ok = false;
         {
             HttpLoginResponse response = new HttpLoginResponse();
             FitnessCenterDbContext db = new FitnessCenterDbContext();
-            string baseUrl = _emanager.getBaseUrl();
+            string baseUrl = _emanager.getBaseUrl("frontend");
             try
             {
                 TwilioClient.Init("AC9eff84d8dd8cfdd08c03d5652433397d", "b10c6a875be973bf0a565e0c6d4733b8");
