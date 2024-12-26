@@ -72,6 +72,7 @@ namespace GymFrontend.Controllers
         public IActionResult dirigirACrearPaginaDeClientes()
         {
             
+            
             return View("ClientesMainPage");
         }
 

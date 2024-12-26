@@ -204,7 +204,8 @@ F                respuesta.ok = false;
             Role matchedRole = db.Roles.FirstOrDefault(r => r.RolId == dbUser.RolId);
             respuesta.ok = true;
             respuesta.data = new NewUser(dbUser.Nombre, dbUser.FechaNacimiento, "no tiene direccion", "No tiene identificacion", dbUser.Email, dbUser.Telefono, dbUser.Apellido, "");
-            respuesta.urlPageForUser = baseUrl+"/validacionOTP";
+            //respuesta.urlPageForUser = baseUrl+"/validacionOTP";
+            respuesta.urlPageForUser = baseUrl+"/empleados";
 
 
             return Ok(respuesta);
@@ -224,7 +225,7 @@ F                respuesta.ok = false;
                     CreateAsync(channel: "sms", to:
                     canal.cel,
                     //serviceId
-                    pathServiceSid: "VA87fedc97aec36faf5397df04a74a1142");
+                    pathServiceSid: "VA7cfeb5608d0f76ca2bd2960546149332");
                 response.data.status = verificacion.Status;
                 response.data.channel = verificacion.Channel.ToString();
 
@@ -252,12 +253,13 @@ F                respuesta.ok = false;
             string baseUrl = _emanager.getBaseUrl("frontend");
             try
             {
-                TwilioClient.Init("AC9eff84d8dd8cfdd08c03d5652433397d", "b10c6a875be973bf0a565e0c6d4733b8");
+                
+                TwilioClient.Init("AC9ecb12865c83eb291ab8a2c520fcee14", "cb8c1ceafb83b80649f064806617eab8");
                 var verificacion = await VerificationCheckResource.
                     CreateAsync(
                     to: userVerification.cel,
                     code: userVerification.codigo,
-                    pathServiceSid: "VA22146594f40c2a094616178f93a82f6f");
+                    pathServiceSid: "VA7cfeb5608d0f76ca2bd2960546149332");
 
 
                 if (verificacion.Status == "approved")

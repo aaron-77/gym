@@ -85,39 +85,40 @@
         <ul class="sidebar-nav" id="sidebar-nav">
             <li class="nav-heading">Pages</li>
             <li class="nav-item">
-                <a class="nav-link collapsed" href="https://localhost:7275/empleados">
+                <a class="nav-link collapsed" href="/empleados">
                     <span>Medidas</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link collapsed" href="https://localhost:7275/gestionRutinas?page=registrar">
+                <a class="nav-link collapsed" href="/gestionRutinas?page=registrar">
                     <span>Registrar rutina</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="https://localhost:7275/gestionRutinas?page=asignar">
+                <a class="nav-link collapsed" href="/asignarEjercicios">
                     <span>Asignar Ejercicios</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="https://localhost:7275/registrarCita?page=asignar">
+                <a class="nav-link collapsed" href="/registrarCita?page=asignar">
                     <span>Registrar Cita</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="https://localhost:7275/registrarCita?page=asignar">
+                <a class="nav-link collapsed" href="/modificarCita?page=asignar">
                     <span>Modificar Cita</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="https://localhost:7275/duracionCitasMedicionPage">
+                <a class="nav-link collapsed" href="/duracionCitasMedicionPage">
                     <span>Duracion citas medicion</span>
                 </a>
             </li>
+
         </ul>
 
     </aside><!-- End Sidebar-->
@@ -182,13 +183,16 @@
     </main><!-- End #main -->
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
     <!-- Vendor JS Files -->
-    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/vendor/quill/quill.js"></script>
-    <script src="assets/vendor/tinymce/tinymce.min.js"></script>
-    -->
-    <!-- Template Main JS File -->
-    <script src="~/js/main.js"></script>
     <script src="~/js/gestionRutinas.js" asp-append-version="true"></script>
+    <script src="~/js/main.js"></script>
+    <script src="~/lib/booststrap2/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/quill/quill.js"></script>
+   @*  <script src="assets/vendor/tinymce/tinymce.min.js"></script> *@
+    
+    <!-- Template Main JS File -->
+    
+    
+    
 </body>
 
 </html>

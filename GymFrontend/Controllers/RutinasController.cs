@@ -30,7 +30,7 @@ namespace GymFrontend.Controllers
             HttpResponseListadoQueryUsers respuestaEntrenadores = manager.obtenerUsuariosPorRol("empleado", "activo").Result;
             ViewBag.clientes = respuestaClientes.data;
             ViewBag.entrenadores = respuestaEntrenadores.data;
-            return View("GestionRutinas", new Rutina());
+            return View("GestionRutinas", new   Rutina());
             
         }
         [HttpGet]
