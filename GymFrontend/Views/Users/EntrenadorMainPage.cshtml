@@ -1,5 +1,5 @@
 @using DTO.Dtos;
-@model DTO.Dtos.MedidaCorporal;
+@model DTO.Dtos.DTOMedida;
 
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -123,34 +123,14 @@
                 </select>
                 <span asp-validation-for="@Model.fkUsuario" class="validation-error"></span>
 
-                <label for="inputPeso" class="form-label">Peso(kilogramos)</label>
+                <label for="inputPeso" class="form-label">Parametro</label>
                 <input type="text" name="peso" class="form-control empleados-main-page-input" id="inputPeso">
-                <span asp-validation-for="@Model.peso" class="validation-error"></span>
+                <span asp-validation-for="@Model.fkParametro" class="validation-error"></span>
 
 
-                <label for="inputAltura" class="form-label">Altura(metros)</label>
+                <label for="inputAltura" class="form-label">valor</label>
                 <input type="text" name="altura" class="form-control empleados-main-page-input" id="inputAltura">
-                <span asp-validation-for="@Model.altura" class="validation-error"></span>
-
-
-                <label for="inputPorcentajeGrasa" class="form-label">IMC</label>
-                <input type="text" name="imc" class="form-control empleados-main-page-input" id="inputPorcentajeGrasa">
-                <span asp-validation-for="@Model.imc" class="validation-error"></span>
-
-
-                <label for="inputEdad" class="form-label">Edad</label>
-                <input type="text" name="edad" class="form-control empleados-main-page-input" id="inputEdad">
-                <span asp-validation-for="@Model.edad" class="validation-error"></span>
-
-
-                <label for="inputGenero" class="form-label">Genero</label>
-                <select id="inputGenero" class="form-select empleados-main-page-input" name="genero" aria-label="Default select example">
-                    <option selected>Genero</option>
-                    <option value="masculino">Masculino</option>
-                    <option value="femenino">Femenino</option>
-                </select>
-                <span asp-validation-for="@Model.genero" class="validation-error"></span>
-
+                <span asp-validation-for="@Model.valor" class="validation-error"></span>
                 <button type="submit" class="btn btn-primary fix-margin">Submit</button>
             </form>
         </section>

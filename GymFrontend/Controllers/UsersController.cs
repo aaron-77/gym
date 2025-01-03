@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Identity;
 using BL;
+using BL.Utils;
 using DTO.Dtos;
 namespace GymFrontend.Controllers
 {
@@ -12,9 +13,11 @@ namespace GymFrontend.Controllers
 
         private readonly IConfiguration config; 
         private UsersManager manager;
-        public UsersController(IConfiguration _config,UsersManager _manager){
+        private MedidasManager medidasManager;
+        public UsersController(IConfiguration _config,UsersManager _manager,MedidasManager _medidasManager){
             config = _config;
             manager = _manager;
+            medidasManager = _medidasManager;
         }
         [HttpGet]
         [Route("signIn")]
@@ -78,11 +81,17 @@ namespace GymFrontend.Controllers
 
         [HttpGet]
         [Route("empleados")]
-        public IActionResult dirigirACrearPaginaDeEmpelados()
+        public async Task<IActionResult> dirigirACrearPaginaDeEmpelados()
         {
             
             List<ExistingUser> usuarios = manager.obtenerUsuarios().Result.data;
+            ResponseParametroDeMedicion respuestaParametros = await medidasManager.obtenerParametrosDeMedicion();
+            
+            List<DTOUnidadDeMedida> unidadDeMedida = ExtractDataManager.extractMeasurementUnitData(respuestaParametros.data);
+            List<DTOParametroDeMedicion> parametrosDeMedicion =respuestaParametros.data.DistinctBy(p =>p.parametroMedicionId).ToList();
             ViewBag.usuarios = usuarios;
+            ViewBag.parametros = parametrosDeMedicion;
+            ViewBag.unidades = unidadDeMedida;
             return View("EmpleadosMainPage");
         }
 

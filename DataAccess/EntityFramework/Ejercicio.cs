@@ -17,5 +17,7 @@ public partial class Ejercicio
 
     public virtual ICollection<EjercicioEquipo> EjercicioEquipos { get; set; } = new List<EjercicioEquipo>();
 
+    public virtual ICollection<Meta> Meta { get; set; } = new List<Meta>();
+
     public virtual ICollection<RutinaEjercicio> RutinaEjercicios { get; set; } = new List<RutinaEjercicio>();
 }

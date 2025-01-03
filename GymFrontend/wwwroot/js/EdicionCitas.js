@@ -100,7 +100,7 @@ const disableElements = () => {
     }
 }
 const getCitasAgendadas = async () => {
-    const response = await fetch("https://localhost:5264/api/getCitasAgendadas?idUsuario=" + clientId);
+    const response = await fetch("http://localhost:5274/api/getCitasAgendadas?idUsuario=" + clientId);
     const jsonResponse = await response.json();
     if (!jsonResponse.ok) {
         console.log(jsonResponse.message);
@@ -110,7 +110,7 @@ const getCitasAgendadas = async () => {
 }
 const getEntrenadoresDisponibles = async () => {
     const fechaInicio = document.getElementById("inputFechaInicio").value;
-    const response = await fetch("https://localhost:5264/api/obtenerEntrenadoresDisponibles?fechaInicio=" + fechaInicio);
+    const response = await fetch("http://localhost:5274/api/obtenerEntrenadoresDisponibles?fechaInicio=" + fechaInicio);
 
     const jsonResponse = await response.json();
     if (!jsonResponse.ok) {
@@ -164,7 +164,7 @@ function fillEstados() {
     });
 }
 const getDuracionCitas = async () => {
-    const response = await fetch("https://localhost:5264/api/getDuracionCita");
+    const response = await fetch("http://localhost:5274/api/getDuracionCita");
     const jsonResponse = await response.json();
     if (!jsonResponse.ok) {
         console.log(jsonResponse.message);

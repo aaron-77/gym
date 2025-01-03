@@ -37,6 +37,8 @@ public partial class Usuario
 
     public virtual ICollection<Medida> Medida { get; set; } = new List<Medida>();
 
+    public virtual ICollection<Meta> Meta { get; set; } = new List<Meta>();
+
     public virtual ICollection<Pago> Pagos { get; set; } = new List<Pago>();
 
     public virtual ICollection<RegistrosEntrenamiento> RegistrosEntrenamientos { get; set; } = new List<RegistrosEntrenamiento>();

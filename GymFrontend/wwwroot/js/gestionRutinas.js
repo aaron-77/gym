@@ -46,7 +46,7 @@ const disableElements = () => {
     }
 }
 const getClientes = async() => {
-    const response = await fetch("https://localhost:5264/api/obtenerUsuariosPorRol?rol=cliente&estado=activo");
+    const response = await fetch("http://localhost:5274/api/obtenerUsuariosPorRol?rol=cliente&estado=activo");
     const jsonResponse = await response.json();
     if (!jsonResponse.ok) {
         console.log(jsonResponse.message);
@@ -56,7 +56,7 @@ const getClientes = async() => {
 }
 const getRutinas = async () => {
     if (clientId != null && clientId > 0) {
-        const response = await fetch("https://localhost:5264/api/consultarRutinas?UsuarioID=" + clientId);
+        const response = await fetch("http://localhost:5274/api/consultarRutinas?UsuarioID=" + clientId);
         const jsonResponse = await response.json();
         if (!jsonResponse.ok) {
             console.log(jsonResponse.message)
@@ -67,7 +67,7 @@ const getRutinas = async () => {
 }
 const getEjercicios = async() => {
     if (rutinaId != null && rutinaId > 0) {
-        const response = await fetch("https://localhost:5264/api/consultarEjercicios");
+        const response = await fetch("http://localhost:5274/api/consultarEjercicios");
         const jsonResponse = await response.json();
         if (!jsonResponse.ok) {
             console.log(jsonResponse.message)

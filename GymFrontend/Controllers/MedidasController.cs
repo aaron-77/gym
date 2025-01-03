@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using DTO.Dtos;
 using BL;
+using BL.Utils;
 
 namespace GymFrontend.Controllers
 {
@@ -11,30 +12,33 @@ namespace GymFrontend.Controllers
         private UsersManager usersManager;
         private MedidasManager medidasManager;
 
-        public MedidasController(UsersManager _usersManager,MedidasManager _medidasManager ){
+        public MedidasController(UsersManager _usersManager, MedidasManager _medidasManager)
+        {
             usersManager = _usersManager;
             medidasManager = _medidasManager;
         }
         [HttpPost]
         [Route("registrar")]
-        public async Task<IActionResult> registrarMedida(DTO.Dtos.MedidaCorporal medidaCorporal)
+        public async Task<IActionResult> registrarMedida(DTO.Dtos.DTOMedida medidaCorporal)
         {
 
-            
+
             ResponseHttpListadoUsers respuesta = await usersManager.obtenerUsuarios();
+            
             List<ExistingUser> usuarios = respuesta.data;
             ViewBag.usuarios = usuarios;
             if (!ModelState.IsValid)
+            {   
+                return Redirect("empleados");
+            }
+            if (medidaCorporal == null)
             {
-                return View("../Users/EmpleadosMainPage", medidaCorporal);
+                medidaCorporal = new DTOMedida();
             }
-            if (medidaCorporal == null) {
-                medidaCorporal = new DTO.Dtos.MedidaCorporal();
-            }
-            
+
             var response = await medidasManager.registrarMedida(medidaCorporal);
             ViewBag.message = response.message;
-            return View("../Users/EmpleadosMainPage",medidaCorporal);
+            return Redirect("empleados");
         }
     }
 }

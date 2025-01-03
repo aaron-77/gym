@@ -33,11 +33,23 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<Equipo> Equipos { get; set; }
 
+    public virtual DbSet<IconsForParameter> IconsForParameters { get; set; }
+
     public virtual DbSet<InscripcionClase> InscripcionClases { get; set; }
+
+    public virtual DbSet<Intencione> Intenciones { get; set; }
 
     public virtual DbSet<Medida> Medidas { get; set; }
 
+    public virtual DbSet<Meta> Metas { get; set; }
+
+    public virtual DbSet<NivelesDeLogro> NivelesDeLogros { get; set; }
+
     public virtual DbSet<Pago> Pagos { get; set; }
+
+    public virtual DbSet<ParametrosDeMedicion> ParametrosDeMedicions { get; set; }
+
+    public virtual DbSet<ParametrosUnidadesDeMedidum> ParametrosUnidadesDeMedida { get; set; }
 
     public virtual DbSet<RegistrosEntrenamiento> RegistrosEntrenamientos { get; set; }
 
@@ -49,17 +61,21 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<Servicio> Servicios { get; set; }
 
+    public virtual DbSet<UnidadesDeMedidum> UnidadesDeMedida { get; set; }
+
     public virtual DbSet<Usuario> Usuarios { get; set; }
-    public virtual DbSet<DTO.Dtos.Ejercicio> ejercicioSP { get; set; }
+
+     public virtual DbSet<DTO.Dtos.Ejercicio> ejercicioSP { get; set; }
     public virtual DbSet<DTO.Dtos.Rutina> rutinaSP { get; set; }
     public virtual DbSet<DTO.Dtos.QueryUser> userSP { get; set; }
     public virtual DbSet<DTO.Dtos.Cita> citaSP { get; set; }
     public virtual DbSet<DTO.Dtos.ClientesProximosACita> correosSP { get; set; }
+    public virtual DbSet<DTO.Dtos.DTOParametroDeMedicion> parametrosDeMedicionSP { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost ;Authentication=SqlPassword;Integrated Security=False ;User Id=aaronlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False");
+        => optionsBuilder.UseSqlServer("Server=localhost;Database=FitnessCenterDB;User Id=aaronlogin;Password=Terrabreak13;Integrated Security=False;TrustServerCertificate=True;Trusted_Connection=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -190,6 +206,18 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(e => e.NombreEquipo).HasMaxLength(100);
         });
 
+        modelBuilder.Entity<IconsForParameter>(entity =>
+        {
+            entity.HasKey(e => e.IconId).HasName("PK__iconsFor__5CE3968F35DA5BE8");
+
+            entity.ToTable("iconsForParameters");
+
+            entity.Property(e => e.IconId).HasColumnName("iconId");
+            entity.Property(e => e.Nombre).HasColumnName("nombre");
+            entity.Property(e => e.UrlPrivada).HasColumnName("urlPrivada");
+            entity.Property(e => e.UrlPublica).HasColumnName("urlPublica");
+        });
+
         modelBuilder.Entity<InscripcionClase>(entity =>
         {
             entity.HasKey(e => e.InscripcionId).HasName("PK__Inscripc__168316991F67D233");
@@ -211,6 +239,25 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasConstraintName("FK__Inscripci__Usuar__5EBF139D");
         });
 
+        modelBuilder.Entity<Intencione>(entity =>
+        {
+            entity.HasKey(e => e.IntencionId).HasName("PK__intencio__41F5EC2340AE7FEA");
+
+            entity.ToTable("intenciones");
+
+            entity.Property(e => e.IntencionId).HasColumnName("intencionId");
+            entity.Property(e => e.FechaDeRegistro)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeRegistro");
+            entity.Property(e => e.FechaModificacionDeRegistro)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaModificacionDeRegistro");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(100)
+                .HasColumnName("nombre");
+        });
+
         modelBuilder.Entity<Medida>(entity =>
         {
             entity.HasKey(e => e.MedidaId).HasName("PK__medidas__1C299EFA6221D68B");
@@ -218,25 +265,101 @@ public partial class FitnessCenterDbContext : DbContext
             entity.ToTable("medidas");
 
             entity.Property(e => e.MedidaId).HasColumnName("medidaId");
-            entity.Property(e => e.Altura)
-                .HasColumnType("decimal(5, 1)")
-                .HasColumnName("altura");
-            entity.Property(e => e.Edad).HasColumnName("edad");
+            entity.Property(e => e.FechaDeCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeCreacion");
+            entity.Property(e => e.FkParametro).HasColumnName("fkParametro");
             entity.Property(e => e.FkUsuario).HasColumnName("fkUsuario");
-            entity.Property(e => e.Genero)
-                .HasMaxLength(100)
-                .HasColumnName("genero");
-            entity.Property(e => e.Imc)
-                .HasColumnType("decimal(5, 1)")
-                .HasColumnName("imc");
-            entity.Property(e => e.Peso)
-                .HasColumnType("decimal(5, 1)")
-                .HasColumnName("peso");
+            entity.Property(e => e.Valor)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("valor");
+
+            entity.HasOne(d => d.FkParametroNavigation).WithMany(p => p.Medida)
+                .HasForeignKey(d => d.FkParametro)
+                .HasConstraintName("fk_medidas_parametros");
 
             entity.HasOne(d => d.FkUsuarioNavigation).WithMany(p => p.Medida)
                 .HasForeignKey(d => d.FkUsuario)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_UsuarioMedida");
+        });
+
+        modelBuilder.Entity<Meta>(entity =>
+        {
+            entity.HasKey(e => e.MetaId).HasName("PK__metas__8189FF8C363B9BB4");
+
+            entity.ToTable("metas");
+
+            entity.Property(e => e.MetaId).HasColumnName("metaId");
+            entity.Property(e => e.FechaDeInicioDeLaMeta)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeInicioDeLaMeta");
+            entity.Property(e => e.FechaDeModificacionDeRegistro)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeModificacionDeRegistro");
+            entity.Property(e => e.FechaDeRegistro)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeRegistro");
+            entity.Property(e => e.FechaLimite)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaLimite");
+            entity.Property(e => e.FkEjercicio).HasColumnName("fkEjercicio");
+            entity.Property(e => e.FkIntencion).HasColumnName("fkIntencion");
+            entity.Property(e => e.FkNivelDeLogro)
+                .HasDefaultValueSql("((1))")
+                .HasColumnName("fkNivelDeLogro");
+            entity.Property(e => e.FkParametro).HasColumnName("fkParametro");
+            entity.Property(e => e.FkUsuario).HasColumnName("fkUsuario");
+            entity.Property(e => e.ValorObjetivo)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("valorObjetivo");
+
+            entity.HasOne(d => d.FkEjercicioNavigation).WithMany(p => p.Meta)
+                .HasForeignKey(d => d.FkEjercicio)
+                .HasConstraintName("FK_Metas_Ejercicios");
+
+            entity.HasOne(d => d.FkIntencionNavigation).WithMany(p => p.Meta)
+                .HasForeignKey(d => d.FkIntencion)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Metas_Intenciones");
+
+            entity.HasOne(d => d.FkNivelDeLogroNavigation).WithMany(p => p.Meta)
+                .HasForeignKey(d => d.FkNivelDeLogro)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_metas_nivelesDeLogro");
+
+            entity.HasOne(d => d.FkParametroNavigation).WithMany(p => p.Meta)
+                .HasForeignKey(d => d.FkParametro)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Metas_Parametros");
+
+            entity.HasOne(d => d.FkUsuarioNavigation).WithMany(p => p.Meta)
+                .HasForeignKey(d => d.FkUsuario)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Metas_Usuarios");
+        });
+
+        modelBuilder.Entity<NivelesDeLogro>(entity =>
+        {
+            entity.HasKey(e => e.IdNivelDeLogro).HasName("PK__nivelesD__0A5FC0796013EA3F");
+
+            entity.ToTable("nivelesDeLogro");
+
+            entity.Property(e => e.IdNivelDeLogro).HasColumnName("idNivelDeLogro");
+            entity.Property(e => e.FechaDeRegistro)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeRegistro");
+            entity.Property(e => e.FechaModificacionDeRegistro)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaModificacionDeRegistro");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(100)
+                .HasColumnName("nombre");
         });
 
         modelBuilder.Entity<Pago>(entity =>
@@ -255,6 +378,55 @@ public partial class FitnessCenterDbContext : DbContext
             entity.HasOne(d => d.Usuario).WithMany(p => p.Pagos)
                 .HasForeignKey(d => d.UsuarioId)
                 .HasConstraintName("FK__Pagos__UsuarioID__6383C8BA");
+        });
+
+        modelBuilder.Entity<ParametrosDeMedicion>(entity =>
+        {
+            entity.HasKey(e => e.ParametroMedicionId).HasName("PK__parametr__FE4B91C8ECDB659E");
+
+            entity.ToTable("parametrosDeMedicion");
+
+            entity.Property(e => e.ParametroMedicionId).HasColumnName("parametroMedicionId");
+            entity.Property(e => e.FechaDeRegistro)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeRegistro");
+            entity.Property(e => e.FechaModificacionDeRegistro)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaModificacionDeRegistro");
+            entity.Property(e => e.FkIcon).HasColumnName("fkIcon");
+            entity.Property(e => e.FkUnidadDeMedida).HasColumnName("fkUnidadDeMedida");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(100)
+                .HasColumnName("nombre");
+
+            entity.HasOne(d => d.FkIconNavigation).WithMany(p => p.ParametrosDeMedicions)
+                .HasForeignKey(d => d.FkIcon)
+                .HasConstraintName("fk_parametrosDeMedicion_iconsForParameters");
+        });
+
+        modelBuilder.Entity<ParametrosUnidadesDeMedidum>(entity =>
+        {
+            entity.HasKey(e => new { e.FkParametroDeMedicion, e.FkUnidadDeMedida }).HasName("PK__Parametr__44945C4A9DEF7EB4");
+
+            entity.ToTable("parametros_unidadesDeMedida");
+
+            entity.Property(e => e.FkParametroDeMedicion).HasColumnName("fkParametroDeMedicion");
+            entity.Property(e => e.FkUnidadDeMedida).HasColumnName("fkUnidadDeMedida");
+            entity.Property(e => e.FechaDeRegistro)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeRegistro");
+
+            entity.HasOne(d => d.FkParametroDeMedicionNavigation).WithMany(p => p.ParametrosUnidadesDeMedida)
+                .HasForeignKey(d => d.FkParametroDeMedicion)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Parametro__fkPar__4924D839");
+
+            entity.HasOne(d => d.FkUnidadDeMedidaNavigation).WithMany(p => p.ParametrosUnidadesDeMedida)
+                .HasForeignKey(d => d.FkUnidadDeMedida)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Parametro__fkUni__4A18FC72");
         });
 
         modelBuilder.Entity<RegistrosEntrenamiento>(entity =>
@@ -337,6 +509,25 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(e => e.TipoServicio).HasMaxLength(50);
         });
 
+        modelBuilder.Entity<UnidadesDeMedidum>(entity =>
+        {
+            entity.HasKey(e => e.UnidadDeMedidaId).HasName("PK__unidades__935D876DD487B38F");
+
+            entity.ToTable("unidadesDeMedida");
+
+            entity.Property(e => e.UnidadDeMedidaId).HasColumnName("unidadDeMedidaId");
+            entity.Property(e => e.FechaDeRegistro)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeRegistro");
+            entity.Property(e => e.FechaModificacionDeRegistro)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaModificacionDeRegistro");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(100)
+                .HasColumnName("nombre");
+        });
+
         modelBuilder.Entity<Usuario>(entity =>
         {
             entity.HasKey(e => e.UsuarioId).HasName("PK__Usuarios__2B3DE7981B26D7DC");
@@ -365,6 +556,7 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasForeignKey(d => d.RolId)
                 .HasConstraintName("FK__Usuarios__RolID__3D5E1FD2");
         });
+
 
         modelBuilder.Entity<DTO.Dtos.Rutina>(entity => {
             entity.HasNoKey();
@@ -412,6 +604,17 @@ public partial class FitnessCenterDbContext : DbContext
             entity.HasNoKey();
             entity.Property(e => e.correo).HasColumnName("Email");
             entity.Property(e => e.fechaCita).HasColumnName("FechaHora");
+            
+        });
+
+        modelBuilder.Entity<DTO.Dtos.DTOParametroDeMedicion>(entity =>
+        {
+            entity.HasNoKey();
+            entity.Property(parametrosDeMedicion => parametrosDeMedicion.parametroMedicionId).HasColumnName("parametroMedicionId");
+            entity.Property(parametrosDeMedicion => parametrosDeMedicion.nombre).HasColumnName("nombre");
+            entity.Property(parametrosDeMedicion => parametrosDeMedicion.fkUnidadDeMedida).HasColumnName("fkUnidadDeMedida");
+            entity.Property(parametrosDeMedicion => parametrosDeMedicion.nombreUnidadDeMedida).HasColumnName("nombreUnidadDeMedida");
+            entity.Property(parametrosDeMedicion => parametrosDeMedicion.fkIcon).HasColumnName("fkIcon");
         });
 
         OnModelCreatingPartial(modelBuilder);

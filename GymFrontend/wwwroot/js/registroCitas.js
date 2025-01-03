@@ -61,7 +61,7 @@ const disableElements = () => {
     }
 }
 const getDuracionCitas = async () => {
-    const response = await fetch("https://localhost:5264/api/getDuracionCita");
+    const response = await fetch("http://localhost:5274/api/getDuracionCita");
     const jsonResponse = await response.json();
     if (!jsonResponse.ok) {
         console.log(jsonResponse.message);
@@ -71,7 +71,7 @@ const getDuracionCitas = async () => {
 }
 const getEntrenaoresDisponibles = async () => {
     const fechaInicio = document.getElementById("inputFechaInicio").value;
-    const response = await fetch("https://localhost:5264/api/obtenerEntrenadoresDisponibles?fechaInicio=" + fechaInicio);
+    const response = await fetch("http://localhost:5274/api/obtenerEntrenadoresDisponibles?fechaInicio=" + fechaInicio);
 
     const jsonResponse = await response.json();
     if (!jsonResponse.ok) {

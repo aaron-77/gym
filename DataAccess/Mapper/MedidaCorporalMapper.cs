@@ -25,7 +25,7 @@ namespace DataAccess.Mapper
 
         public BaseClass BuildObject(Dictionary<string, object> result)
         {
-            var medidaCorporal = new MedidaCorporal();
+            //var medidaCorporal = new DTOMedida();
             /*{
                 Id= int.Parse(result["medidaId"].ToString()),
                 peso= double.Parse(result["peso"].ToString()),
@@ -37,24 +37,25 @@ namespace DataAccess.Mapper
                 
             };*/
 
-            return medidaCorporal;
+            return null;
         }
 
 
 
         public SqlOperation GetCreateStatement(BaseClass entityDTO)
         {
+            /*
             SqlOperation operation = new SqlOperation();
             operation.ProcedureName = "dbo.sp_registrarMedida";
-            MedidaCorporal medidaCorporal = (MedidaCorporal)entityDTO;
-            operation.AddIntegerParam("@fkUsuario", medidaCorporal.fkUsuario);
-            operation.AddDecimalParam("@peso", medidaCorporal.peso);
-            operation.AddDecimalParam("@altura", medidaCorporal.altura);
-            operation.AddDecimalParam("@imc", medidaCorporal.imc);
-            operation.AddIntegerParam("@edad", medidaCorporal.edad);
-            operation.AddVarcharParam("@genero", medidaCorporal.genero);
-
+            DTOMedida medida = (DTOMedida)entityDTO;
+            operation.AddIntegerParam("@unidadDeMedidaId", medida.unidadDeMedidaId);
+            operation.AddIntegerParam("@fkUsuario", medida.fkUsuario);
+            operation.AddIntegerParam("@fkParametro", medida.fkParametro);
+            operation.AddVarcharParam("@nombreParametro", medida.nombreParametro);
+            operation.AddDecimalParam("@valor", medida.valor);
             return operation;
+            */
+            return null;
         }
         //Este metodo no es necesario implementarlo para las citas se resuelve con el update
         public SqlOperation GetDeleteStatement(BaseClass entityDTO)

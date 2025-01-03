@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DTO.Dtos;
+using BL.Utils;
 using DataAccess.EntityFramework;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace FitnessGymApi.Controllers
 {
@@ -9,7 +10,7 @@ namespace FitnessGymApi.Controllers
     {
         [HttpPost]
         [Route("api/RegistrarMedida")]
-        public IActionResult Index([FromBody]MedidaCorporal medida)
+        public IActionResult Index([FromBody] DTO.Dtos.DTOMedida medida)
         {
             HTTPResponseModelMedida respuesta = new HTTPResponseModelMedida();
             if (!ModelState.IsValid)
@@ -33,20 +34,18 @@ namespace FitnessGymApi.Controllers
             }
 
             FitnessCenterDbContext db = new FitnessCenterDbContext();
-            
+
             if (medida == null)
             {
 
                 return null;
             }
-            Medida newUserDB = new Medida() {
-                
-                Peso = medida.peso,
-                Edad = medida.edad,
-                Altura = medida.altura,
-                Imc = medida.imc,
+            Medida newUserDB = new Medida()
+            {
+
                 FkUsuario = medida.fkUsuario,
-                Genero = medida.genero
+                FkParametro = medida.fkParametro,
+                Valor = medida.valor
             };
             try
             {
@@ -69,5 +68,33 @@ namespace FitnessGymApi.Controllers
             }
             return Ok(respuesta);
         }
+
+        [HttpGet]
+        [Route("api/getParametrosDeMedicion")]
+        public async Task<IActionResult> getParametrosDeMedicion()
+        {
+            FitnessCenterDbContext db = new FitnessCenterDbContext();
+            ResponseParametroDeMedicion respuesta = new ResponseParametroDeMedicion();
+            List<DTOParametroDeMedicion> parametrosDeMedicion = null;
+            try
+            {
+                parametrosDeMedicion = await db.parametrosDeMedicionSP.FromSqlInterpolated($@"EXEC sp_obtenerParametrosDeMedicionConUnidad").ToListAsync();
+                List<DTOUnidadDeMedida> unidadesDeMedida = ExtractDataManager.extractMeasurementUnitData(parametrosDeMedicion);
+                respuesta.ok = true;
+                respuesta.message = "consulta exitosa";
+                respuesta.errors = null;
+                respuesta.data = parametrosDeMedicion;
+            }
+            catch (Exception ex)
+            {
+                respuesta.ok = false;
+                respuesta.message = "Error al consultar los parametros de medicion";
+                respuesta.errors = null;
+                respuesta.data = parametrosDeMedicion;
+            }
+            return Ok(respuesta);
+        }
     }
+
+
 }

@@ -1,5 +1,5 @@
 @using DTO.Dtos;
-@model DTO.Dtos.MedidaCorporal;
+@model DTO.Dtos.DTOMedida;
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
@@ -14,7 +14,7 @@
 }
 <!DOCTYPE html>
 <html lang="en">
-    
+
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -26,18 +26,20 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/global.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/GymFrontend.styles.css" asp-append-version="true" />
-    
+
     <!-- Favicons -->
     <link href="assets/img/favicon.png" rel="icon">
 
 
     <!-- Google Fonts -->
     <link href="https://fonts.gstatic.com" rel="preconnect">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+        rel="stylesheet">
 
     <!-- Vendor CSS Files -->
     <link href="~/lib/bootstrap-icons2/bootstrap-icons.css" rel="stylesheet">
-    
+
     <!--
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
@@ -51,7 +53,7 @@
     <!-- Template Main CSS File -->
     <link href="~/css/styleNavBar.css" rel="stylesheet">
 
-    
+
 </head>
 
 <body>
@@ -77,7 +79,7 @@
                     </a>
                 </li><!-- End Search Icon-->
 
-               
+
 
             </ul>
         </nav><!-- End Icons Navigation -->
@@ -94,21 +96,21 @@
 
             <li class="nav-item">
                 <a class="nav-link collapsed" href="#">
-                    
+
                     <span>Medidas</span>
-                    
+
                 </a>
                 <a class="nav-link collapsed" href="https://localhost:5264/clientes">
 
                     <span>Progreso</span>
 
                 </a>
-				<a class="nav-link collapsed" href="https://localhost:5264/clientes">
+                <a class="nav-link collapsed" href="https://localhost:5264/clientes">
 
                     <span>Matricula</span>
 
                 </a>
-                
+
             </li><!-- End Profile Page Nav -->
 
         </ul>
@@ -117,17 +119,19 @@
     <!-- ======= Footer ======= -->
     <main id="main" class="main">
 
-    <div class="pagetitle">
-      <h1>Medidas</h1>
-      
-    </div><!-- End Page Title -->
+        <div class="pagetitle">
+            <h1>Medidas</h1>
 
-    <section class="section medidas-section">
+        </div><!-- End Page Title -->
+
+        <section class="section medidas-section">
             <form id="formCitaMedicion" class="formulario" action="registrar" method="post">
 
-                <label for="inputPeso" class="form-label">Cliente</label>
-                <select class="form-select empleados-main-page-input" name="fkUsuario" aria-label="Default select example">
-                    <option class="fix-fontColor-option" selected>selecciona un cliente </option>
+                <span id="validationSumary" class="validation-error">@ViewBag.message</span>
+                <label for="inputPeso" class="form-label">Usuario</label>
+                <select class="form-select empleados-main-page-input" name="fkUsuario"
+                    aria-label="Default select example">
+                    <option class="fix-fontColor-option" selected>selecciona un usuario </option>
                     @foreach (var user in listadoUsuarios)
                     {
                         <option value="@user.Id" class="fix-fontColor-option">@user.NombreCompleto @user.Apellido</option>
@@ -135,47 +139,29 @@
                 </select>
                 <span asp-validation-for="@Model.fkUsuario" class="validation-error"></span>
 
-                <label for="inputPeso" class="form-label">Peso(kilogramos)</label>
+                <label for="inputPeso" class="form-label">Parametro</label>
                 <input type="text" name="peso" class="form-control empleados-main-page-input" id="inputPeso">
-                <span asp-validation-for="@Model.peso" class="validation-error"></span>
+                <span asp-validation-for="@Model.fkParametro" class="validation-error"></span>
 
 
-                <label for="inputAltura" class="form-label">Altura(metros)</label>
+                <label for="inputAltura" class="form-label">valor</label>
                 <input type="text" name="altura" class="form-control empleados-main-page-input" id="inputAltura">
-                <span asp-validation-for="@Model.altura" class="validation-error"></span>
-
-
-                <label for="inputPorcentajeGrasa" class="form-label">IMC</label>
-                <input type="text" name="imc" class="form-control empleados-main-page-input" id="inputPorcentajeGrasa">
-                <span asp-validation-for="@Model.imc" class="validation-error"></span>
-
-
-                <label for="inputEdad" class="form-label">Edad</label>
-                <input type="text" name="edad" class="form-control empleados-main-page-input" id="inputEdad">
-                <span asp-validation-for="@Model.edad" class="validation-error"></span>
-
-
-                <label for="inputGenero" class="form-label">Genero</label>
-                <select id="inputGenero" class="form-select empleados-main-page-input" name="genero" aria-label="Default select example">
-                    <option selected>Genero</option>
-                    <option value="masculino">Masculino</option>
-                    <option value="femenino">Femenino</option>
-                </select>
-                <span asp-validation-for="@Model.genero" class="validation-error"></span>
+                <span asp-validation-for="@Model.valor" class="validation-error"></span>
 
                 <button type="submit" class="btn btn-primary fix-margin">Submit</button>
             </form>
         </section>
 
-  </main><!-- End #main -->
+    </main><!-- End #main -->
 
 
-    
 
-    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+            class="bi bi-arrow-up-short"></i></a>
 
     <!-- Vendor JS Files -->
-        
+
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="assets/vendor/quill/quill.js"></script>
     <script src="assets/vendor/tinymce/tinymce.min.js"></script>
