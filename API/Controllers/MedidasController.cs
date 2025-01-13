@@ -69,28 +69,54 @@ namespace FitnessGymApi.Controllers
             return Ok(respuesta);
         }
 
+        
         [HttpGet]
         [Route("api/getParametrosDeMedicion")]
-        public async Task<IActionResult> getParametrosDeMedicion()
+        public async Task<IActionResult> getParametrosDeMedicion([FromQuery] int idUsuario)
         {
             FitnessCenterDbContext db = new FitnessCenterDbContext();
             ResponseParametroDeMedicion respuesta = new ResponseParametroDeMedicion();
-            List<DTOParametroDeMedicion> parametrosDeMedicion = null;
             try
             {
-                parametrosDeMedicion = await db.parametrosDeMedicionSP.FromSqlInterpolated($@"EXEC sp_obtenerParametrosDeMedicionConUnidad").ToListAsync();
-                List<DTOUnidadDeMedida> unidadesDeMedida = ExtractDataManager.extractMeasurementUnitData(parametrosDeMedicion);
+                var listadoParametrosDeMedicion = await db.parametrosDeMedicionSP.FromSqlInterpolated($@"EXEC sp_obtenerParametrosDeMedicionConUnidad").ToListAsync();    
                 respuesta.ok = true;
                 respuesta.message = "consulta exitosa";
                 respuesta.errors = null;
-                respuesta.data = parametrosDeMedicion;
+                respuesta.data = listadoParametrosDeMedicion;
             }
             catch (Exception ex)
             {
                 respuesta.ok = false;
                 respuesta.message = "Error al consultar los parametros de medicion";
                 respuesta.errors = null;
-                respuesta.data = parametrosDeMedicion;
+                respuesta.data = null;
+            }
+            return Ok(respuesta);
+        }
+        
+        [HttpGet]
+        [Route("api/progresoDeUsuario")]
+        public async Task<IActionResult> getProgresoDelCliente([FromQuery] int idUsuario)
+        {
+            FitnessCenterDbContext db = new FitnessCenterDbContext();
+            HttpResponseProgresoUsuario respuesta = new HttpResponseProgresoUsuario();
+            List<DTOItemProgreso> itemsProgreso = null;
+            try
+            {
+                var ultimasMedidas = await db.ultimasMedidasDeParametroSP.FromSqlInterpolated($@"EXEC sp_obtenerUltimasMedidasDelUsuario @idUsuario={idUsuario}").ToListAsync();    
+                var ultimasMetas = await db.ultimasMetasDeParametroSP.FromSqlInterpolated($@"EXEC sp_obtenerMetasActualesDelClientePorParametro @idUsuario={idUsuario}").ToListAsync();   
+                itemsProgreso = ObjectAssembler.ensamblarItemsProgreso(ultimasMedidas, ultimasMetas);
+                respuesta.ok = true;
+                respuesta.message = "consulta exitosa";
+                respuesta.errors = null;
+                respuesta.data = itemsProgreso;
+            }
+            catch (Exception ex)
+            {
+                respuesta.ok = false;
+                respuesta.message = "Error al consultar los parametros de medicion";
+                respuesta.errors = null;
+                respuesta.data = itemsProgreso;
             }
             return Ok(respuesta);
         }

@@ -4,9 +4,11 @@ namespace DTO.Dtos
 {
     public class ProgresoElement
     {
-        public string DatoPrincipal { get; set; }
-        public string DatoSecundario { get; set; }
-        public TipoDeElemento TipoDeElemento { get; set; }
+        public string datoPrincipal { get; set; }
+        public string datoSecundario { get; set; }
+        public string titulo{get;set;}
+        public string unidadDeMedida {get;set;}
+        public TipoDeElemento tipoDeElemento { get; set; }
     }
 
     

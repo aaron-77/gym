@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DTO.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.EntityFramework;
@@ -65,13 +66,16 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
 
-     public virtual DbSet<DTO.Dtos.Ejercicio> ejercicioSP { get; set; }
+    public virtual DbSet<DTO.Dtos.Ejercicio> ejercicioSP { get; set; }
     public virtual DbSet<DTO.Dtos.Rutina> rutinaSP { get; set; }
     public virtual DbSet<DTO.Dtos.QueryUser> userSP { get; set; }
     public virtual DbSet<DTO.Dtos.Cita> citaSP { get; set; }
     public virtual DbSet<DTO.Dtos.ClientesProximosACita> correosSP { get; set; }
     public virtual DbSet<DTO.Dtos.DTOParametroDeMedicion> parametrosDeMedicionSP { get; set; }
 
+    public virtual DbSet<DTO.Dtos.DTOUltimaMedidaDeParametro> ultimasMedidasDeParametroSP { get; set; }
+
+    public virtual DbSet<DTO.Dtos.DTOUltimaMetaDeParametro> ultimasMetasDeParametroSP { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
@@ -176,8 +180,13 @@ public partial class FitnessCenterDbContext : DbContext
 
             entity.Property(e => e.EjercicioId).HasColumnName("EjercicioID");
             entity.Property(e => e.Descripcion).HasMaxLength(255);
+            entity.Property(e => e.FkIcon).HasColumnName("fkIcon");
             entity.Property(e => e.NombreEjercicio).HasMaxLength(100);
             entity.Property(e => e.TipoEjercicio).HasMaxLength(50);
+
+            entity.HasOne(d => d.FkIconNavigation).WithMany(p => p.Ejercicios)
+                .HasForeignKey(d => d.FkIcon)
+                .HasConstraintName("fk_ejercicios_iconsForParameters");
         });
 
         modelBuilder.Entity<EjercicioEquipo>(entity =>
@@ -269,11 +278,16 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("fechaDeCreacion");
+            entity.Property(e => e.FkEjercicio).HasColumnName("fkEjercicio");
             entity.Property(e => e.FkParametro).HasColumnName("fkParametro");
             entity.Property(e => e.FkUsuario).HasColumnName("fkUsuario");
             entity.Property(e => e.Valor)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("valor");
+
+            entity.HasOne(d => d.FkEjercicioNavigation).WithMany(p => p.Medida)
+                .HasForeignKey(d => d.FkEjercicio)
+                .HasConstraintName("fk_medidas_ejercicios");
 
             entity.HasOne(d => d.FkParametroNavigation).WithMany(p => p.Medida)
                 .HasForeignKey(d => d.FkParametro)
@@ -557,8 +571,8 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasConstraintName("FK__Usuarios__RolID__3D5E1FD2");
         });
 
-
-        modelBuilder.Entity<DTO.Dtos.Rutina>(entity => {
+        modelBuilder.Entity<DTO.Dtos.Rutina>(entity =>
+        {
             entity.HasNoKey();
             entity.Property(e => e.RutinaId).HasColumnName("RutinaId");
             entity.Property(e => e.UsuarioID).HasColumnName("UsuarioID");
@@ -567,7 +581,8 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(e => e.Observaciones).HasColumnName("Observaciones");
         });
 
-        modelBuilder.Entity<DTO.Dtos.QueryUser>(entity => {
+        modelBuilder.Entity<DTO.Dtos.QueryUser>(entity =>
+        {
             entity.HasNoKey();
             entity.Property(e => e.UsuarioID).HasColumnName("UsuarioID");
             entity.Property(e => e.Nombre).HasColumnName("Nombre");
@@ -604,7 +619,7 @@ public partial class FitnessCenterDbContext : DbContext
             entity.HasNoKey();
             entity.Property(e => e.correo).HasColumnName("Email");
             entity.Property(e => e.fechaCita).HasColumnName("FechaHora");
-            
+
         });
 
         modelBuilder.Entity<DTO.Dtos.DTOParametroDeMedicion>(entity =>
@@ -615,6 +630,37 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(parametrosDeMedicion => parametrosDeMedicion.fkUnidadDeMedida).HasColumnName("fkUnidadDeMedida");
             entity.Property(parametrosDeMedicion => parametrosDeMedicion.nombreUnidadDeMedida).HasColumnName("nombreUnidadDeMedida");
             entity.Property(parametrosDeMedicion => parametrosDeMedicion.fkIcon).HasColumnName("fkIcon");
+        });
+
+        modelBuilder.Entity<DTO.Dtos.DTOUltimaMedidaDeParametro>(entity =>
+        {
+            entity.HasNoKey();
+            entity.Property(ultimasMedidasDeParametroSP => ultimasMedidasDeParametroSP.medidaId).HasColumnName("medidaId");
+            entity.Property(ultimasMedidasDeParametroSP => ultimasMedidasDeParametroSP.fkParametro).HasColumnName("fkParametro");
+            entity.Property(ultimasMedidasDeParametroSP => ultimasMedidasDeParametroSP.nombreParametro).HasColumnName("nombreParametro");
+            entity.Property(ultimasMedidasDeParametroSP => ultimasMedidasDeParametroSP.valor).HasColumnName("valor");
+            entity.Property(ultimasMedidasDeParametroSP => ultimasMedidasDeParametroSP.fechaDeCreacion).HasColumnName("fechaDeCreacion");
+            entity.Property(ultimasMedidasDeParametroSP => ultimasMedidasDeParametroSP.unidadDeMedidaId).HasColumnName("unidadDeMedidaId");
+            entity.Property(ultimasMedidasDeParametroSP => ultimasMedidasDeParametroSP.nombreUnidadDeMedida).HasColumnName("nombreUnidadDeMedida");
+            entity.Property(ultimasMedidasDeParametroSP => ultimasMedidasDeParametroSP.fkEjercicio).HasColumnName("fkEjercicio");
+            entity.Property(ultimasMedidasDeParametroSP => ultimasMedidasDeParametroSP.nombreEjercicio).HasColumnName("nombreEjercicio");
+            entity.Property(ultimasMedidasDeParametroSP => ultimasMedidasDeParametroSP.urlIconoParametro).HasColumnName("urlIconoParametro");
+            entity.Property(ultimasMedidasDeParametroSP => ultimasMedidasDeParametroSP.urlIconoEjercicio).HasColumnName("urlIconoEjercicio");
+        });
+
+
+        modelBuilder.Entity<DTO.Dtos.DTOUltimaMetaDeParametro>(entity =>
+        {
+            entity.HasNoKey();
+            entity.Property(meta => meta.metaId).HasColumnName("metaId");
+            entity.Property(meta => meta.intencion).HasColumnName("intencion");
+            entity.Property(meta => meta.nombreParametro).HasColumnName("nombreParametro");
+            entity.Property(meta => meta.nombreEjercicio).HasColumnName("nombreEjercicio");
+            entity.Property(meta => meta.valorObjetivo).HasColumnName("valorObjetivo");
+            entity.Property(meta => meta.nombreNivelDeLogro).HasColumnName("nombreNivelDeLogro");
+            entity.Property(meta => meta.fechaDeInicioDeLaMeta).HasColumnName("fechaDeInicioDeLaMeta");
+            entity.Property(meta => meta.fechaLimite).HasColumnName("fechaLimite");
+            entity.Property(meta => meta.fkEjercicio).HasColumnName("fkEjercicio");
         });
 
         OnModelCreatingPartial(modelBuilder);

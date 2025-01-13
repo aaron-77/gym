@@ -8,7 +8,7 @@ namespace GymFrontend.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _config;
-        public HomeController(ILogger<HomeController> logger,IConfiguration configuration)
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
         {
             _logger = logger;
             _config = configuration;
@@ -17,9 +17,10 @@ namespace GymFrontend.Controllers
         public IActionResult Index()
         {
 
-            var seccion = _config.GetValue<string>("EndPoints:Enpoint1","vacio");
-            
-            return View();
+            var seccion = _config.GetValue<string>("EndPoints:Enpoint1", "vacio");
+            string controllerPath = GetType().Assembly.Location;
+            Console.WriteLine($"Ubicación física del controlador: {controllerPath}");
+            return View("Index");
         }
 
         public IActionResult Privacy()

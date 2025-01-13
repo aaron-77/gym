@@ -205,7 +205,12 @@ F                respuesta.ok = false;
             respuesta.ok = true;
             respuesta.data = new NewUser(dbUser.Nombre, dbUser.FechaNacimiento, "no tiene direccion", "No tiene identificacion", dbUser.Email, dbUser.Telefono, dbUser.Apellido, "");
             //respuesta.urlPageForUser = baseUrl+"/validacionOTP";
-            respuesta.urlPageForUser = baseUrl+"/empleados";
+            respuesta.urlPageForUser = baseUrl+$"/clientes?idUser={dbUser.UsuarioId}&celular={dbUser.Telefono}&email={dbUser.Email}";
+            if(matchedRole.NombreRol == "empleado")
+            {
+                respuesta.urlPageForUser = baseUrl+"/empleados";
+            }
+            
 
 
             return Ok(respuesta);

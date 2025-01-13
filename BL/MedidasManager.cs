@@ -63,5 +63,27 @@ namespace BL
 
         }
 
+        public async Task<HttpResponseProgresoUsuario> obtenerProgresoDelUsuario(int idUsuario)
+        {
+            try
+            {
+                HttpCustomClient httpClient = new HttpCustomClient();
+                string progresoResponse = await httpClient.get($"api/progresoDeUsuario?idUsuario={idUsuario}");
+                HttpResponseProgresoUsuario response = JsonSerializer.Deserialize<HttpResponseProgresoUsuario>(progresoResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return response;
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+
+        }
+
     }
 }

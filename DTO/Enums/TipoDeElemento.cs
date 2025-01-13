@@ -5,6 +5,7 @@ namespace DTO.Enums
         Ejercicio,
         Medida,
         Meta,
+        Parametro,
         UnidadDeMedida,
         Detalle
     }

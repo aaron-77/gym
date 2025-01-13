@@ -2,14 +2,17 @@ namespace DTO.Dtos
 {
     public class DTOUltimaMedidaDeParametro
     {
-        public int MedidaId { get; set; }
-        public int FkParametro { get; set; }
-        public string NombreParametro { get; set; }
-        public decimal Valor { get; set; }
-        public DateTime FechaDeCreacion { get; set; }
-        public int UnidadDeMedidaId { get; set; }
-        public string NombreUnidadDeMedida { get; set; }
-        public int FkEjercicio { get; set; }
-        public string NombreEjercicio { get; set; }
+        public int medidaId { get; set; }
+        public int fkParametro { get; set; }
+        public string nombreParametro { get; set; }
+        public decimal valor { get; set; }
+        public DateTime fechaDeCreacion { get; set; }
+        public int unidadDeMedidaId { get; set; }
+        public string nombreUnidadDeMedida { get; set; }
+        public int? fkEjercicio { get; set; }
+        public string? nombreEjercicio { get; set; }
+        public string? urlIconoParametro { get; set; }
+        public string? urlIconoEjercicio { get; set; }
+        public int fkUsuario { get; set; }
     }
 }

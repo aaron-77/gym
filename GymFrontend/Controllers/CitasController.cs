@@ -58,8 +58,8 @@ namespace GymFrontend.Controllers
             ViewBag.clientes = respuestaClientes.data;
             if (respuestaClientes.ok == false)
             {
-                ViewBag.message = respuestaClientes.message;
-                return View("ModificarCita", cita);
+            ViewBag.message = respuestaClientes.message;
+            return View("ModificarCita", cita);
             }
             ViewBag.message = "";
             return View("ModificarCita", new CitaEdit());

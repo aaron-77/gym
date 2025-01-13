@@ -1,0 +1,54 @@
+@model DTO.Dtos.ProgresoElement;
+@using DTO.Dtos;
+
+@functions{
+    public string getTipoDeBorde(){
+        var tipoDeBorde = "";
+        if(Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida){
+            tipoDeBorde = "specialBorder-ultimoValor";
+        }else if(Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta){
+            tipoDeBorde = "specialBorder-meta";
+        }    
+        return tipoDeBorde;
+    }
+}
+<div id="containerProgesoElement" class="d-flex flex-column justify-content-center align-items-center container-progreso-element">
+    <div id="tituloProgresoElement" class="text-center tituloElement">
+        @Model.titulo
+    </div>
+ 
+   
+    <div id="datoPrincipalContainer" class="d-flex justify-content-center align-items-center container-dato-principal @getTipoDeBorde()">
+        @if (@Model.tipoDeElemento != DTO.Enums.TipoDeElemento.Ejercicio
+        && @Model.tipoDeElemento != DTO.Enums.TipoDeElemento.Detalle
+        && @Model.tipoDeElemento != DTO.Enums.TipoDeElemento.Parametro
+        )
+        {
+            <p id='datoPrincipalContentContainer' class="contenido-texto-dato-principal">
+                            @Model.datoPrincipal
+            </p>
+
+        }
+        else
+        {
+            <img src="@Model.datoPrincipal" class="exerciseIcon" />
+        }
+
+    </div>
+    @if (@Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida 
+    || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta)
+    {
+        <div id="unidadDeMedidaContainer" class="text-center container-unidadDeMedida">
+            @Model.unidadDeMedida
+        </div>
+
+    }
+    @if (@Model.tipoDeElemento != DTO.Enums.TipoDeElemento.Detalle)
+    {
+        <div id="datonSecundarioContainer" class="text-center container-dato-secundario">
+            @Model.datoSecundario
+        </div>
+    }
+
+
+</div>

@@ -46,7 +46,7 @@ namespace GymFrontend.Controllers
             ViewBag.cel = respuesta.data.Telefono;
             ViewBag.correo = respuesta.data.Correo;
             //return Redirect("https://localhost:7275/empleados");
-            return Redirect(respuesta.urlPageForUser+"?celular="+respuesta.data.Telefono+"&email="+respuesta.data.Correo);
+            return Redirect(respuesta.urlPageForUser);
         }
 
         [HttpGet]
@@ -72,11 +72,12 @@ namespace GymFrontend.Controllers
 
 		[HttpGet]
         [Route("clientes")]
-        public IActionResult dirigirACrearPaginaDeClientes()
+        public  async Task<IActionResult> dirigirACrearPaginaDeClientes([FromQuery] string celular,[FromQuery] int idUser)
         {
+            HttpResponseProgresoUsuario responseProgreso = await medidasManager.obtenerProgresoDelUsuario(idUser);
             
-            
-            return View("ClientesMainPage");
+
+            return View("ClientesMainPage",responseProgreso.data);
         }
 
         [HttpGet]
@@ -86,7 +87,6 @@ namespace GymFrontend.Controllers
             
             List<ExistingUser> usuarios = manager.obtenerUsuarios().Result.data;
             ResponseParametroDeMedicion respuestaParametros = await medidasManager.obtenerParametrosDeMedicion();
-            
             List<DTOUnidadDeMedida> unidadDeMedida = ExtractDataManager.extractMeasurementUnitData(respuestaParametros.data);
             List<DTOParametroDeMedicion> parametrosDeMedicion =respuestaParametros.data.DistinctBy(p =>p.parametroMedicionId).ToList();
             ViewBag.usuarios = usuarios;
@@ -120,3 +120,4 @@ namespace GymFrontend.Controllers
         }
     }
 }
+

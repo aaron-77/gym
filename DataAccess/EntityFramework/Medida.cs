@@ -5,7 +5,7 @@ namespace DataAccess.EntityFramework;
 
 public partial class Medida
 {
-    public int? MedidaId { get; set; }
+    public int MedidaId { get; set; }
 
     public int FkUsuario { get; set; }
 
@@ -14,6 +14,10 @@ public partial class Medida
     public int? FkParametro { get; set; }
 
     public decimal? Valor { get; set; }
+
+    public int? FkEjercicio { get; set; }
+
+    public virtual Ejercicio? FkEjercicioNavigation { get; set; }
 
     public virtual ParametrosDeMedicion? FkParametroNavigation { get; set; }
 

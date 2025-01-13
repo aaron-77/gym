@@ -13,5 +13,7 @@ public partial class IconsForParameter
 
     public string UrlPublica { get; set; } = null!;
 
+    public virtual ICollection<Ejercicio> Ejercicios { get; set; } = new List<Ejercicio>();
+
     public virtual ICollection<ParametrosDeMedicion> ParametrosDeMedicions { get; set; } = new List<ParametrosDeMedicion>();
 }

@@ -1,0 +1,89 @@
+.tituloElement {
+    width: 100%;
+    max-width: 100%;
+    font-weight: bolder;
+    font-size: clamp(1rem,5vw,1.5em);
+}
+
+.container-progreso-element {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.container-dato-principal {
+    width: 30%;
+    max-width: 30%;
+    min-width: 40.56px;
+    box-sizing: border-box;
+    width: 50%;
+    /* Relativo al ancho del contenedor padre */
+    aspect-ratio: 1 / 1;
+    margin: 0;
+    margin-top: 7%;
+}
+.container-progreso-element{
+    /* background-color: #EBE039; */
+}
+
+.specialBorder-ultimoValor {
+    border: 4px solid blue;
+}
+.specialBorder-meta{
+    border: 4px solid #3bff0c;
+}
+
+.container-dato-secundario {
+
+    max-width: 100%;
+    box-sizing: border-box;
+    font-weight: bolder;
+    
+    
+}
+
+.contenido-texto-dato-principal {
+    width: 100%;
+    min-width: 20.188px;
+    text-align: center;
+    margin: 0;
+    font-weight: bolder;
+    font-size: clamp(0.9em,1.65vw,2rem);
+    
+}
+.contenido-texto-dato-principal-v2 {
+    width: 100%;
+    min-width: 20.188px;
+    text-align: center;
+    margin: 0;
+    font-weight: bolder;
+    font-size: clamp(0.7em,1.2vw,2rem);
+    
+}
+
+.container-unidadDeMedida {
+    font-size: clamp(0.9em,1.65vw,2rem);
+    font-weight: bolder;
+}
+
+.exerciseIcon {
+    width: 80%;
+    min-width: 41px;
+}
+
+.detailsIcon {
+    width: 80%;
+    min-width: 41px;
+}
+
+.bold-font {
+    font-weight: bolder;
+}
+
+.progress-row {
+    flex-wrap: wrap;
+}
+
+
+.font-size-measure-unit {
+    font-size: clamp(20px, 5vw, 7rem);
+}
