@@ -28,6 +28,34 @@
 			],
 			"group": "build",
 			"detail": "Build the DTO.csproj project using dotnet build"
+		},{
+			
+			"label": "Build:GymFrontend dependencies",
+			"command": "dotnet",
+            "type": "process",
+			"group":{
+				"kind":"build",
+				"isDefault":true
+			},
+			"dependsOrder": "sequence",
+            "dependsOn": [
+                "Build:DTO",
+				"Build:BL",
+                "Build:GymFrontend"
+            ],
+            "args": [
+                "build",
+                "${workspaceFolder}/DTO/DTO.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+			
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build",
+			"detail": "Build the DTO.csproj project using dotnet build"
+
 		},
 		{
 			"label": "Build:DTO",

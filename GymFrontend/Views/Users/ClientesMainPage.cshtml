@@ -4,7 +4,7 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    Layout = "layoutSeccionClientes";
+Layout = "layoutSeccionClientes.cshtml";
 
     var listadoUsuarios = ViewBag.usuarios as List<ExistingUser>;
     if (listadoUsuarios == null)
@@ -18,7 +18,7 @@
     {
 
 
-        <div id="rowProgreso" class="row progress-row" data-fkejercicio="@progresoItem.medida.fkEjercicio">
+        <div id="rowProgreso" class="row progress-row" data-fkCliente="@progresoItem.medida.fkUsuario" data-fkParametro="@progresoItem.medida.fkParametro" data-fkejercicio="@progresoItem.medida.fkEjercicio">
             @if (progresoItem.medida.fkEjercicio != null)
             {
                 <div class="col">

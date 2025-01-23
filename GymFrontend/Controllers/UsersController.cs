@@ -81,6 +81,14 @@ namespace GymFrontend.Controllers
         }
 
         [HttpGet]
+        [Route("detallesDeProgreso")]
+        public  async Task<IActionResult> dirigirADetallesDeProgreso([FromQuery] int fkCLiente,[FromQuery] int fkParametro,[FromQuery] int fkEjercicio)
+        {
+            
+            return View("DetallesDeProgreso");
+        }
+
+        [HttpGet]
         [Route("empleados")]
         public async Task<IActionResult> dirigirACrearPaginaDeEmpelados()
         {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using DTO.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.EntityFramework;
@@ -65,6 +64,7 @@ public partial class FitnessCenterDbContext : DbContext
     public virtual DbSet<UnidadesDeMedidum> UnidadesDeMedida { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
+
 
     public virtual DbSet<DTO.Dtos.Ejercicio> ejercicioSP { get; set; }
     public virtual DbSet<DTO.Dtos.Rutina> rutinaSP { get; set; }
@@ -409,7 +409,6 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("fechaModificacionDeRegistro");
             entity.Property(e => e.FkIcon).HasColumnName("fkIcon");
-            entity.Property(e => e.FkUnidadDeMedida).HasColumnName("fkUnidadDeMedida");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)
                 .HasColumnName("nombre");
@@ -571,7 +570,7 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasConstraintName("FK__Usuarios__RolID__3D5E1FD2");
         });
 
-        modelBuilder.Entity<DTO.Dtos.Rutina>(entity =>
+         modelBuilder.Entity<DTO.Dtos.Rutina>(entity =>
         {
             entity.HasNoKey();
             entity.Property(e => e.RutinaId).HasColumnName("RutinaId");
@@ -662,6 +661,8 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(meta => meta.fechaLimite).HasColumnName("fechaLimite");
             entity.Property(meta => meta.fkEjercicio).HasColumnName("fkEjercicio");
         });
+
+
 
         OnModelCreatingPartial(modelBuilder);
     }

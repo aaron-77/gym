@@ -9,8 +9,6 @@ public partial class ParametrosDeMedicion
 
     public string? Nombre { get; set; }
 
-    public int FkUnidadDeMedida { get; set; }
-
     public DateTime FechaDeRegistro { get; set; }
 
     public DateTime? FechaModificacionDeRegistro { get; set; }

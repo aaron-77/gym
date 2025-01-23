@@ -30,7 +30,7 @@
             "name": "FitnessCenter Frontend (web)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "Build:GymFrontend",
+            "preLaunchTask": "Build:GymFrontend dependencies",
             "program": "${workspaceFolder}/GymFrontend/bin/Debug/net8.0/GymFrontend.dll",
             "args": [],
             "cwd": "${workspaceFolder}/GymFrontend",

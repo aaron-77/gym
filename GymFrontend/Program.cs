@@ -1,20 +1,18 @@
 using BL;
 using BL.EnPointsLogic;
-using System.Globalization;
-using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var defaultCulture = new CultureInfo("es-MX");
+/* var defaultCulture = new CultureInfo("es-MX");
 var localizationOptions = new RequestLocalizationOptions
 {
     DefaultRequestCulture = new RequestCulture(defaultCulture),
     SupportedCultures = new List<CultureInfo> { defaultCulture },
     SupportedUICultures = new List<CultureInfo> { defaultCulture }
-};
+}; */
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddScoped<HttpCustomClient>();
 builder.Services.AddScoped<EndPointsManager>();
