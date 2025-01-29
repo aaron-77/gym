@@ -46,7 +46,7 @@ namespace GymFrontend.Controllers
                 ViewBag.rutinas = respuestaRutinas.data;
                 ViewBag.ejercicios = respuestaEjercicios.data;
             }
-            return View("AsignacionEjercicios");
+            return View("AsignacionEjercicios.cshtml");
         }
            
     [HttpPost]
@@ -69,10 +69,10 @@ namespace GymFrontend.Controllers
             if (respuesta.ok == false)
             {
                 ViewBag.message = respuesta.message;
-                return View("GestionRutinas");
+                return View("GestionRutinas.cshtml");
             }
             ViewBag.message = respuesta.message;
-            return View("GestionRutinas");
+            return View("GestionRutinas.cshtml");
         }
 
 

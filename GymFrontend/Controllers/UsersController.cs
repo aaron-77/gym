@@ -24,7 +24,7 @@ namespace GymFrontend.Controllers
         public IActionResult Index()
         {
             var res = config["ConnectionStrings:DefaultConnection"];
-            return View("Login", new UserCredentials());
+            return View("Login.cshtml", new UserCredentials());
         }
 
         [HttpPost]
@@ -33,14 +33,14 @@ namespace GymFrontend.Controllers
         {
             var res = config["ConnectionStrings:DefaultConnection"];
             if (!ModelState.IsValid) { 
-                return View("Login",credenciales);
+                return View("Login.cshtml",credenciales);
             }
 
             
             HttpLoginResponse respuesta =  manager.login(credenciales).Result;
             if (respuesta.ok == false) {
                 ViewBag.message = "Usuario y/o contraseña incorrectos";
-                return View("Login");
+                return View("Login.cshtml");
             }
 			ViewBag.message = "";
             ViewBag.cel = respuesta.data.Telefono;
@@ -67,7 +67,7 @@ namespace GymFrontend.Controllers
 			
 			ResponseHttp respuesta = manager.registrarUsuario(usuario).Result;
 			ViewBag.message = respuesta.message;
-            return View("CrearCuenta");
+            return View("CrearCuenta.cshtml");
 		}
 
 		[HttpGet]
@@ -77,15 +77,15 @@ namespace GymFrontend.Controllers
             HttpResponseProgresoUsuario responseProgreso = await medidasManager.obtenerProgresoDelUsuario(idUser);
             
 
-            return View("ClientesMainPage",responseProgreso.data);
+            return View("ClientesMainPage.cshtml",responseProgreso.data);
         }
 
         [HttpGet]
         [Route("detallesDeProgreso")]
-        public  async Task<IActionResult> dirigirADetallesDeProgreso([FromQuery] int fkCLiente,[FromQuery] int fkParametro,[FromQuery] int fkEjercicio)
+        public  async Task<IActionResult> dirigirADetallesDeProgreso([FromQuery] int idCliente,[FromQuery] int idParametro,[FromQuery] int idEjercicio)
         {
             
-            return View("DetallesDeProgreso");
+            return View("DetallesDeProgreso.cshtml");
         }
 
         [HttpGet]
@@ -100,7 +100,7 @@ namespace GymFrontend.Controllers
             ViewBag.usuarios = usuarios;
             ViewBag.parametros = parametrosDeMedicion;
             ViewBag.unidades = unidadDeMedida;
-            return View("EmpleadosMainPage");
+            return View("EmpleadosMainPage.cshtml");
         }
 
 

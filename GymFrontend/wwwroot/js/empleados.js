@@ -38,10 +38,39 @@ const handleChange = (ev) => {
     $inputImc.value = imc.toString();
 }
 
+const navigateToPage = (url) => {
+    location.href = url;
+}
+
+const clickDetailsHandler = (event) => {
+    let parent = event.currentTarget.parentElement;
+    for (let i = 0; i < 3; i++) {
+        if (parent.parentElement) {
+            parent = parent.parentElement;
+        }
+    }
+    // Get data attributes
+    let idCliente = parent.getAttribute('data-fkCliente');
+    let idParametro = parent.getAttribute('data-fkParametro');
+    let idEjercicio = parent.getAttribute('data-fkEjercicio');
+    navigateToPage(`detallesDeProgreso?idCliente=${idCliente}&idParametro=${idParametro}&idEjercicio=${idEjercicio}`);
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
     $inputPeso = document.getElementById("inputPeso");
     $inputAltura = document.getElementById("inputAltura");
     $inputImc = document.getElementById("inputPorcentajeGrasa");
-    $inputAltura.addEventListener("blur", handleBlur);
-    $inputPeso.addEventListener("input", handleChange)
+    let $botonesDeDetalle = document.getElementsByClassName("details-button");
+    for (let boton of $botonesDeDetalle) {
+        boton.addEventListener("click", clickDetailsHandler);
+    }
+    if($inputAltura){
+        $inputAltura.addEventListener("blur", handleBlur);
+    }
+    if($inputPeso){
+        $inputPeso.addEventListener("input", handleChange)
+    }
+    
+    
 });

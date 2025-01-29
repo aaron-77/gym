@@ -11,6 +11,9 @@
         }    
         return tipoDeBorde;
     }
+    public bool isDetailButton(){
+        return Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Detalle;
+    }
 }
 <div id="containerProgesoElement" class="d-flex flex-column justify-content-center align-items-center container-progreso-element">
     <div id="tituloProgresoElement" class="text-center tituloElement">
@@ -19,9 +22,9 @@
  
    
     <div id="datoPrincipalContainer" class="d-flex justify-content-center align-items-center container-dato-principal @getTipoDeBorde()">
-        @if (@Model.tipoDeElemento != DTO.Enums.TipoDeElemento.Ejercicio
-        && @Model.tipoDeElemento != DTO.Enums.TipoDeElemento.Detalle
-        && @Model.tipoDeElemento != DTO.Enums.TipoDeElemento.Parametro
+        @if (@Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida
+            || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta
+            || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.UnidadDeMedida
         )
         {
             <p id='datoPrincipalContentContainer' class="contenido-texto-dato-principal">
@@ -29,11 +32,10 @@
             </p>
 
         }
-        else
+        else 
         {
-            <img src="@Model.datoPrincipal" class="exerciseIcon" />
+            <img id="@Model.idHtmlElement" src="@Model.datoPrincipal" class="exerciseIcon @(@isDetailButton() ? "details-button" : "") @Model.cssClasses" />
         }
-
     </div>
     @if (@Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida 
     || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta)

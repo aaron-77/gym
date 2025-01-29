@@ -12,7 +12,7 @@ var localizationOptions = new RequestLocalizationOptions
 }; */
 
 // Add services to the container.
-builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+builder.Services.AddControllersWithViews();//.AddRazorRuntimeCompilation();
 builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddScoped<HttpCustomClient>();
 builder.Services.AddScoped<EndPointsManager>();

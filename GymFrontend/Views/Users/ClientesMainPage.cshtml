@@ -23,7 +23,7 @@ Layout = "layoutSeccionClientes.cshtml";
             {
                 <div class="col">
 
-                    @Html.Partial("_ProgresoElement", new ProgresoElement
+                    @Html.Partial("_ProgresoElement.cshtml", new ProgresoElement
        {
            datoPrincipal = progresoItem.medida.urlIconoEjercicio,
            datoSecundario = progresoItem.medida.nombreEjercicio,
@@ -36,7 +36,7 @@ Layout = "layoutSeccionClientes.cshtml";
             }
 
             <div class="col">
-                @Html.Partial("_ProgresoElement", new ProgresoElement
+                @Html.Partial("_ProgresoElement.cshtml", new ProgresoElement
        {
            datoPrincipal = progresoItem.medida.urlIconoParametro,
            datoSecundario = progresoItem.medida.nombreParametro,
@@ -49,7 +49,7 @@ Layout = "layoutSeccionClientes.cshtml";
             </div>
             <div class="col">
 
-                @Html.Partial("_ProgresoElement", new ProgresoElement
+                @Html.Partial("_ProgresoElement.cshtml", new ProgresoElement
        {
            datoPrincipal = progresoItem.medida.valor.ToString(),
            datoSecundario = progresoItem.medida.fechaDeCreacion.ToString(),
@@ -60,7 +60,7 @@ Layout = "layoutSeccionClientes.cshtml";
 
             </div>
             <div class="col">
-                @Html.Partial("_ProgresoElement", new ProgresoElement
+                @Html.Partial("_ProgresoElement.cshtml", new ProgresoElement
        {
            datoPrincipal = progresoItem.medida.valor.ToString(),
            datoSecundario = progresoItem.medida.fechaDeCreacion.ToString(),
@@ -72,13 +72,14 @@ Layout = "layoutSeccionClientes.cshtml";
             </div>
             <div class="col">
 
-                @Html.Partial("_ProgresoElement", new ProgresoElement
+                @Html.Partial("_ProgresoElement.cshtml", new ProgresoElement
        {
            datoPrincipal = "/content/view-details-svgrepo-com.svg",
            datoSecundario = progresoItem.medida.fechaDeCreacion.ToString(),
            titulo = "Detalles",
            unidadDeMedida = null,
-           tipoDeElemento = DTO.Enums.TipoDeElemento.Detalle
+           tipoDeElemento = DTO.Enums.TipoDeElemento.Detalle,
+           idHtmlElement = "detailsButton" + progresoItem.medida.medidaId
        })
 
 

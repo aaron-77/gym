@@ -20,7 +20,7 @@ namespace GymFrontend.Controllers
             var seccion = _config.GetValue<string>("EndPoints:Enpoint1", "vacio");
             string controllerPath = GetType().Assembly.Location;
             Console.WriteLine($"Ubicación física del controlador: {controllerPath}");
-            return View("Index");
+            return View("Index.cshtml");
         }
 
         public IActionResult Privacy()

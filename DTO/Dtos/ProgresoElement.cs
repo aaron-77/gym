@@ -9,6 +9,8 @@ namespace DTO.Dtos
         public string titulo{get;set;}
         public string unidadDeMedida {get;set;}
         public TipoDeElemento tipoDeElemento { get; set; }
+        public string? cssClasses { get; set; }
+        public string? idHtmlElement { get; set; }
     }
 
     
