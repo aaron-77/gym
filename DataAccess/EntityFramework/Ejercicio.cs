@@ -19,6 +19,8 @@ public partial class Ejercicio
 
     public virtual ICollection<EjercicioEquipo> EjercicioEquipos { get; set; } = new List<EjercicioEquipo>();
 
+    public virtual ICollection<EjerciciosParametrosDeMedicion> EjerciciosParametrosDeMedicions { get; set; } = new List<EjerciciosParametrosDeMedicion>();
+
     public virtual IconsForParameter? FkIconNavigation { get; set; }
 
     public virtual ICollection<Medida> Medida { get; set; } = new List<Medida>();

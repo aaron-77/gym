@@ -25,5 +25,15 @@ namespace BL.Utils
             });
             return itemsProgresoList;
         }
+        public static List<DatosMetaDeMedida> ensamblarDatosMetaDeMedida(int[]? meses,int[]? años){
+                List<DatosMetaDeMedida> datosMetaDeMedidaList = new List<DatosMetaDeMedida>();
+                for(int index = 0;index < meses.Length;index ++){
+                    DatosMetaDeMedida datosMetaDeMedida = new DatosMetaDeMedida();
+                    datosMetaDeMedida.mes = meses[index];
+                    datosMetaDeMedida.año = años[index];
+                    datosMetaDeMedidaList.Add(datosMetaDeMedida);
+                }
+                return datosMetaDeMedidaList;
+        }
     }
 }

@@ -15,7 +15,6 @@ namespace DTO.Dtos
         public List<ErrorModel> errors { get; set; }
         public HttpResponseGenerateOTP()
         {
-            data = new OTPOrder();
             errors = new List<ErrorModel>();
         }
     }

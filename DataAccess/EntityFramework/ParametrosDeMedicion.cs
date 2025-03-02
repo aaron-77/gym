@@ -15,6 +15,8 @@ public partial class ParametrosDeMedicion
 
     public int? FkIcon { get; set; }
 
+    public virtual ICollection<EjerciciosParametrosDeMedicion> EjerciciosParametrosDeMedicions { get; set; } = new List<EjerciciosParametrosDeMedicion>();
+
     public virtual IconsForParameter? FkIconNavigation { get; set; }
 
     public virtual ICollection<Medida> Medida { get; set; } = new List<Medida>();

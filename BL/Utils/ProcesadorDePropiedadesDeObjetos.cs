@@ -18,9 +18,9 @@ namespace BL.Utils
             Type tipoObtenido = null;
             System.Reflection.PropertyInfo[] propiedades = objeto.GetType().GetProperties();
             var propiedad = propiedades.FirstOrDefault(p => p.Name == nombrePropiedad);
-            if (propiedad != null )
+            if (propiedad != null)
             {
-                tipoObtenido =  propiedad.PropertyType;     
+                tipoObtenido = propiedad.PropertyType;
             }
             else
             {
@@ -28,6 +28,17 @@ namespace BL.Utils
             }
             return tipoObtenido;
         }
+
+        /* public static List<Dictionary<string, int>> ObtenerMesesYAniosUnicos(List<DTOUltimaMedidaDeParametro> medidas)
+        {
+            return medidas
+                .Select(m => new { Mes = m.fechaDeCreacion.Month, Año = m.fechaDeCreacion.Year })
+                .Distinct()
+                .OrderBy(m => m.Año)
+                .ThenBy(m => m.Mes)
+                .Select(m => new Dictionary<string, int> { { "mes", m.Mes }, { "año", m.Año } })
+                .ToList();
+        } */
 
     }
 }

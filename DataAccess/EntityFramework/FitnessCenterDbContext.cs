@@ -31,6 +31,8 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<EjercicioEquipo> EjercicioEquipos { get; set; }
 
+    public virtual DbSet<EjerciciosParametrosDeMedicion> EjerciciosParametrosDeMedicions { get; set; }
+
     public virtual DbSet<Equipo> Equipos { get; set; }
 
     public virtual DbSet<IconsForParameter> IconsForParameters { get; set; }
@@ -64,8 +66,7 @@ public partial class FitnessCenterDbContext : DbContext
     public virtual DbSet<UnidadesDeMedidum> UnidadesDeMedida { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
-
-
+    // CUSTOM MODELS ADDED MANUALLY
     public virtual DbSet<DTO.Dtos.Ejercicio> ejercicioSP { get; set; }
     public virtual DbSet<DTO.Dtos.Rutina> rutinaSP { get; set; }
     public virtual DbSet<DTO.Dtos.QueryUser> userSP { get; set; }
@@ -76,7 +77,8 @@ public partial class FitnessCenterDbContext : DbContext
     public virtual DbSet<DTO.Dtos.DTOUltimaMedidaDeParametro> ultimasMedidasDeParametroSP { get; set; }
 
     public virtual DbSet<DTO.Dtos.DTOUltimaMetaDeParametro> ultimasMetasDeParametroSP { get; set; }
-
+    public virtual DbSet<DTO.Dtos.DTOEjerciciosYParametrosDelCliente> ejerciciosYParametrosDelClienteSP { get; set; }
+ 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=localhost;Database=FitnessCenterDB;User Id=aaronlogin;Password=Terrabreak13;Integrated Security=False;TrustServerCertificate=True;Trusted_Connection=False");
@@ -204,6 +206,41 @@ public partial class FitnessCenterDbContext : DbContext
             entity.HasOne(d => d.Equipo).WithMany(p => p.EjercicioEquipos)
                 .HasForeignKey(d => d.EquipoId)
                 .HasConstraintName("FK__Ejercicio__Equip__5812160E");
+        });
+
+        modelBuilder.Entity<EjerciciosParametrosDeMedicion>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__ejercici__3213E83FF0FCCAAC");
+
+            entity.ToTable("ejercicios_parametrosDeMedicion");
+
+            entity.HasIndex(e => e.FkEjercicio, "idx_ejercicios_parametrosDeMedicion_ejercicio");
+
+            entity.HasIndex(e => e.FkParametro, "idx_ejercicios_parametrosDeMedicion_parametro");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaModificacion)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaModificacion");
+            entity.Property(e => e.FkEjercicio).HasColumnName("fkEjercicio");
+            entity.Property(e => e.FkParametro).HasColumnName("fkParametro");
+            entity.Property(e => e.Valor)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("valor");
+
+            entity.HasOne(d => d.FkEjercicioNavigation).WithMany(p => p.EjerciciosParametrosDeMedicions)
+                .HasForeignKey(d => d.FkEjercicio)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ejercicios_parametrosDeMedicion_Ejercicios");
+
+            entity.HasOne(d => d.FkParametroNavigation).WithMany(p => p.EjerciciosParametrosDeMedicions)
+                .HasForeignKey(d => d.FkParametro)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ejercicios_parametrosDeMedicion_parametrosDeMedicion");
         });
 
         modelBuilder.Entity<Equipo>(entity =>
@@ -570,7 +607,8 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasConstraintName("FK__Usuarios__RolID__3D5E1FD2");
         });
 
-         modelBuilder.Entity<DTO.Dtos.Rutina>(entity =>
+        // CUSTOM MODELS DEFINITIONS ADDED MANUALLY
+        modelBuilder.Entity<DTO.Dtos.Rutina>(entity =>
         {
             entity.HasNoKey();
             entity.Property(e => e.RutinaId).HasColumnName("RutinaId");
@@ -662,6 +700,14 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(meta => meta.fkEjercicio).HasColumnName("fkEjercicio");
         });
 
+        modelBuilder.Entity<DTO.Dtos.DTOEjerciciosYParametrosDelCliente>(entity =>
+        {
+            entity.HasNoKey();
+            entity.Property(ep => ep.EjercicioId).HasColumnName("EjercicioId");
+            entity.Property(ep => ep.NombreEjercicio).HasColumnName("NombreEjercicio");
+            entity.Property(ep => ep.parametroMedicionId).HasColumnName("parametroMedicionId");
+            entity.Property(ep => ep.nombreParametro).HasColumnName("nombreParametro");
+        });
 
 
         OnModelCreatingPartial(modelBuilder);

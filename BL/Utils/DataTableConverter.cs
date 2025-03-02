@@ -7,6 +7,22 @@ namespace BL.Utils
     public static class DataTableConverter
     {
 
+        public static DataTable ConvertToDataTable(int[] dataList)
+        {
+            // Crear un nuevo DataTable
+            DataTable convertedTable =   new DataTable();
+            // Agregar una columna llamada "Value" para almacenar los enteros
+            convertedTable.Columns.Add("Value", typeof(int));
+            // Recorrer cada arreglo de enteros en la lista
+            foreach (var intValue in dataList)
+            {
+                    var row = convertedTable.NewRow();
+                        row["Value"] = intValue;
+                        convertedTable.Rows.Add(row);   
+            }
+            return convertedTable;
+        }
+
 
         public static DataTable ConvertToDataTable<T>(this IEnumerable<T> dataList) where T : class
         {
@@ -60,5 +76,6 @@ namespace BL.Utils
             }
             return convertedTable;
         }
+        
     }
 }

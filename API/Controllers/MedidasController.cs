@@ -5,6 +5,7 @@ using DataAccess.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Microsoft.Data.SqlClient;
+using EllipticCurve.Utils;
 
 
 namespace FitnessGymApi.Controllers
@@ -125,6 +126,32 @@ namespace FitnessGymApi.Controllers
             return Ok(respuesta);
         }
 
+        [HttpGet]
+        [Route("api/obtenerAñosConActividadDelCliente")]
+        public async Task<IActionResult> getAñosActivo([FromQuery] int idCliente)
+        {
+            FitnessCenterDbContext db = new FitnessCenterDbContext();
+            HttpResponseAñosActivo respuesta = new HttpResponseAñosActivo();
+            List<int> añosActivo = new List<int>();
+            try
+            {
+                añosActivo = await db.Medidas.Where(m => m.FkUsuario == idCliente).Select(m => m.FechaDeCreacion.Value.Year).Distinct().ToListAsync();
+                respuesta.ok = true;
+                respuesta.message = "consulta exitosa";
+                respuesta.errors = null;
+                respuesta.data = añosActivo;
+            }
+            catch (Exception ex)
+            {
+                respuesta.ok = false;
+                respuesta.message = "Error al consultar los parametros de medicion";
+                respuesta.errors = null;
+                respuesta.data = añosActivo;
+            }
+            return Ok(respuesta);
+        }
+
+
         [HttpGet("obtenerDetallesDeProgreso")]
         public async Task<ActionResult<List<DTOUltimaMedidaDeParametro>>> ObtenerDetallesDeProgreso(
     [FromQuery] int idCliente,
@@ -135,8 +162,9 @@ namespace FitnessGymApi.Controllers
     [FromQuery] DateTime? fechaDeInicio = null,
     [FromQuery] DateTime? fechaFin = null,
     [FromQuery] bool conDetalle = false,
-    [FromQuery] int? mesActual = null,
-    [FromQuery] int? añoActual = null
+    [FromQuery] int[]? mesesDeFiltro = null,
+    [FromQuery] int[]? añosDeFiltro = null,
+    [FromQuery] DateTime? fechaDeCreacion = null
     )
         {
             try
@@ -144,32 +172,25 @@ namespace FitnessGymApi.Controllers
                 FitnessCenterDbContext db = new FitnessCenterDbContext();
                 DataTable mesesPorDefecto = new DataTable();       // Mes por defecto        
                 DataTable añosPorDefecto = new DataTable();        // Año por defecto          
-                if (mesActual != null)
+                DataTable datosDeMedida = new DataTable();          // Datos de medida
+                List<DatosMetaDeMedida> datosMetaDeMedida = ObjectAssembler.ensamblarDatosMetaDeMedida(mesesDeFiltro, añosDeFiltro);
+                if (mesesDeFiltro != null && mesesDeFiltro.Length > 0)
                 {
-                    mesesPorDefecto = DataTableConverter.ConvertToDataTable(new List<Dictionary<string, int>> { new Dictionary<string, int> { { "mes", mesActual.Value } } });       // Mes por defecto        
+                    mesesPorDefecto = DataTableConverter.ConvertToDataTable(mesesDeFiltro);//(new List<Dictionary<string, int>> { new Dictionary<string, int> { { "mes", mesActual.Value } } });       // Mes por defecto        
                 }
-                if (añoActual != null)
+                if (añosDeFiltro != null && añosDeFiltro.Length > 0)
                 {
-                    añosPorDefecto = DataTableConverter.ConvertToDataTable(new List<Dictionary<string, int>> { new Dictionary<string, int> { { "año", añoActual.Value } } });        // Año por defecto
+                    añosPorDefecto = DataTableConverter.ConvertToDataTable(añosDeFiltro);//(new List<Dictionary<string, int>> { new Dictionary<string, int> { { "año", añoActual.Value } } });        // Año por defecto
                 }
-
                 HTTPResponseDetallesDeProgreso finalResponse = new HTTPResponseDetallesDeProgreso();
-
                 // Crear la conexión ADO.NET
-                var connection = (SqlConnection)db.Database.GetDbConnection();
-                await using (connection)
+                using var connection = (SqlConnection)db.Database.GetDbConnection();
+                if (connection.State == ConnectionState.Closed)
                 {
-                    if (connection.State == ConnectionState.Closed)
-                    {
-                        await connection.OpenAsync();
-                    }
-
-                    // Crear el comando para ejecutar el procedimiento almacenado
-                    var command = SqlCommandHelper.CreateSqlCommand(connection, "sp_obtenerMedidasDelUsuarioPorTiempo", CommandType.StoredProcedure, null);
-                    using (command)
-                    {
-
-                        Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)> parametersToSP = new Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)>{
+                    await connection.OpenAsync();
+                }
+                var command = SqlCommandHelper.CreateSqlCommand(connection, "sp_obtenerMedidasDelUsuarioPorTiempo", CommandType.StoredProcedure, null);
+                Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)> parametersToSP = new Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)>{
                             {"@idCliente",(SqlDbType.Int, idCliente,null)},
                             {"@idParametro",(SqlDbType.Int, idParametro,null)},
                             {"@idEjercicio",(SqlDbType.Int, idEjercicio,null)},
@@ -181,16 +202,53 @@ namespace FitnessGymApi.Controllers
                             {"@fechaFin",(SqlDbType.DateTime, (object)fechaFin ?? DBNull.Value,null)},
                             {"@conDetalles",(SqlDbType.Int, conDetalle,null)}
                         };
-                        SqlCommandHelper.AddParameters(command, parametersToSP);
-                        var reader = await SqlCommandHelper.ExecuteCommandAsync(command);
-                        List<DTOUltimaMedidaDeParametro> resultados = SqlCommandHelper.MapToList<DTOUltimaMedidaDeParametro>(reader);
-                        finalResponse.data.medidas = resultados;
-                        return Ok(resultados);
-                    }
 
+                SqlCommandHelper.AddParameters(command, parametersToSP);
+                var reader = await SqlCommandHelper.ExecuteCommandAsync(command);
+                List<DTOUltimaMedidaDeParametro> resultados = SqlCommandHelper.MapToList<DTOUltimaMedidaDeParametro>(reader);
+                finalResponse.data.medidas = resultados;
+                var commandObtenerMetas = SqlCommandHelper.CreateSqlCommand(connection, "sp_obtenerMetasDeMedidas", CommandType.StoredProcedure, null);
+                datosDeMedida = DataTableConverter.ConvertToDataTable(datosMetaDeMedida);
+                Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)> parametersToSP2 = new Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)>{
+                            {"@idCliente",(SqlDbType.Int, idCliente,null)},
+                            {"@idParametro",(SqlDbType.Int, idParametro,null)},
+                            {"@idEjercicio",(SqlDbType.Int, idEjercicio == 0 ? DBNull.Value : idEjercicio,null)},
+                            {"@datosDeMedida",(SqlDbType.Structured, datosDeMedida,null)}
+                        };
+                SqlCommandHelper.AddParameters(commandObtenerMetas, parametersToSP2);
+                reader.Close();
+                var reader2 = await SqlCommandHelper.ExecuteCommandAsync(commandObtenerMetas);
+                List<DTOUltimaMetaDeParametro> resultados2 = SqlCommandHelper.MapToList<DTOUltimaMetaDeParametro>(reader2);
+                finalResponse.data.metasDeMedida = resultados2;
+                finalResponse.ok = true;
+                finalResponse.message = "Consulta exitosa";
+                return Ok(finalResponse);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error al ejecutar el procedimiento almacenado: {ex.Message}");
+            }
+            return null;
+        }
 
-
+        [HttpGet("api/obtenerEjerciciosYParametros")]
+        public async Task<ActionResult<List<DTOEjerciciosYParametrosDelCliente>>> ObtenerDetallesDeProgreso
+        ([FromQuery] int idCliente)
+        {
+            try
+            {
+                FitnessCenterDbContext db = new FitnessCenterDbContext();
+                HttpResponseEjerciciosYParametrosDelCliente responseForFrontend = new HttpResponseEjerciciosYParametrosDelCliente();
+                var existingClient = db.Usuarios.Find(idCliente);
+                if( existingClient == null){
+                    return BadRequest("El cliente no existe");
                 }
+                var ejercicioYParametros = await db.ejerciciosYParametrosDelClienteSP.FromSqlInterpolated($@"EXEC sp_obtenerEjerciciosYParametrosDelCliente @idCliente={idCliente}").ToListAsync();
+                responseForFrontend.ok = true;
+                responseForFrontend.message = "Consulta exitosa";
+                responseForFrontend.errors = null;  
+                responseForFrontend.data = ejercicioYParametros;
+                return Ok(responseForFrontend);
             }
             catch (Exception ex)
             {

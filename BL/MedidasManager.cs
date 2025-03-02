@@ -85,5 +85,27 @@ namespace BL
 
         }
 
+        public async Task<HttpResponseAñosActivo> obtenerAñosActivosDelCliente(int idUsuario)
+        {
+            try
+            {
+                HttpCustomClient httpClient = new HttpCustomClient();
+                string añosMedidasRegistradas = await httpClient.get($"api/obtenerAñosConActividadDelCliente?idCliente={idUsuario}");
+                HttpResponseAñosActivo response = JsonSerializer.Deserialize<HttpResponseAñosActivo>(añosMedidasRegistradas, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return response;
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+
+        }
+
     }
 }
