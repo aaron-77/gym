@@ -4,7 +4,7 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-Layout = "layoutSeccionClientes.cshtml";
+Layout = "layoutSeccionClientes";
 
     var listadoUsuarios = ViewBag.usuarios as List<ExistingUser>;
     if (listadoUsuarios == null)
@@ -18,12 +18,12 @@ Layout = "layoutSeccionClientes.cshtml";
     {
 
 
-        <div id="rowProgreso" class="row progress-row" data-fkCliente="@progresoItem.medida.fkUsuario" data-fkParametro="@progresoItem.medida.fkParametro" data-fkejercicio="@progresoItem.medida.fkEjercicio">
+        <div id="rowProgreso" class="row progress-row" data-fkCliente="@progresoItem.medida.fkUsuario" data-fkParametro="@progresoItem.medida.fkParametro" data-fkejercicio="@progresoItem.medida.fkEjercicio" data-fechaCreacion="@progresoItem.medida.fechaDeCreacion">
             @if (progresoItem.medida.fkEjercicio != null)
             {
                 <div class="col">
 
-                    @Html.Partial("_ProgresoElement.cshtml", new ProgresoElement
+                    @Html.Partial("_ProgresoElement", new ProgresoElement
        {
            datoPrincipal = progresoItem.medida.urlIconoEjercicio,
            datoSecundario = progresoItem.medida.nombreEjercicio,
@@ -36,7 +36,7 @@ Layout = "layoutSeccionClientes.cshtml";
             }
 
             <div class="col">
-                @Html.Partial("_ProgresoElement.cshtml", new ProgresoElement
+                @Html.Partial("_ProgresoElement", new ProgresoElement
        {
            datoPrincipal = progresoItem.medida.urlIconoParametro,
            datoSecundario = progresoItem.medida.nombreParametro,
@@ -49,7 +49,7 @@ Layout = "layoutSeccionClientes.cshtml";
             </div>
             <div class="col">
 
-                @Html.Partial("_ProgresoElement.cshtml", new ProgresoElement
+                @Html.Partial("_ProgresoElement", new ProgresoElement
        {
            datoPrincipal = progresoItem.medida.valor.ToString(),
            datoSecundario = progresoItem.medida.fechaDeCreacion.ToString(),
@@ -60,7 +60,7 @@ Layout = "layoutSeccionClientes.cshtml";
 
             </div>
             <div class="col">
-                @Html.Partial("_ProgresoElement.cshtml", new ProgresoElement
+                @Html.Partial("_ProgresoElement", new ProgresoElement
        {
            datoPrincipal = progresoItem.medida.valor.ToString(),
            datoSecundario = progresoItem.medida.fechaDeCreacion.ToString(),
@@ -72,7 +72,7 @@ Layout = "layoutSeccionClientes.cshtml";
             </div>
             <div class="col">
 
-                @Html.Partial("_ProgresoElement.cshtml", new ProgresoElement
+                @Html.Partial("_ProgresoElement", new ProgresoElement
        {
            datoPrincipal = "/content/view-details-svgrepo-com.svg",
            datoSecundario = progresoItem.medida.fechaDeCreacion.ToString(),

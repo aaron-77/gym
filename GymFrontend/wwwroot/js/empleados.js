@@ -53,7 +53,8 @@ const clickDetailsHandler = (event) => {
     let idCliente = parent.getAttribute('data-fkCliente');
     let idParametro = parent.getAttribute('data-fkParametro');
     let idEjercicio = parent.getAttribute('data-fkEjercicio');
-    navigateToPage(`detallesDeProgreso?idCliente=${idCliente}&idParametro=${idParametro}&idEjercicio=${idEjercicio}`);
+    let fechaDeCreacion = parent.getAttribute('data-fechaCreacion');
+    navigateToPage(`detallesDeProgreso?idCliente=${idCliente}&idParametro=${idParametro}&idEjercicio=${idEjercicio}&fechaDeCreacion=${fechaDeCreacion}`);
 }
 
 

@@ -24,7 +24,7 @@ namespace GymFrontend.Controllers
         public IActionResult Index()
         {
             var res = config["ConnectionStrings:DefaultConnection"];
-            return View("Login.cshtml", new UserCredentials());
+            return View("Login", new UserCredentials());
         }
 
         [HttpPost]
@@ -33,14 +33,14 @@ namespace GymFrontend.Controllers
         {
             var res = config["ConnectionStrings:DefaultConnection"];
             if (!ModelState.IsValid) { 
-                return View("Login.cshtml",credenciales);
+                return View("Login",credenciales);
             }
 
             
             HttpLoginResponse respuesta =  manager.login(credenciales).Result;
             if (respuesta.ok == false) {
                 ViewBag.message = "Usuario y/o contraseña incorrectos";
-                return View("Login.cshtml");
+                return View("Login");
             }
 			ViewBag.message = "";
             ViewBag.cel = respuesta.data.Telefono;
@@ -67,7 +67,7 @@ namespace GymFrontend.Controllers
 			
 			ResponseHttp respuesta = manager.registrarUsuario(usuario).Result;
 			ViewBag.message = respuesta.message;
-            return View("CrearCuenta.cshtml");
+            return View("CrearCuenta");
 		}
 
 		[HttpGet]
@@ -77,15 +77,15 @@ namespace GymFrontend.Controllers
             HttpResponseProgresoUsuario responseProgreso = await medidasManager.obtenerProgresoDelUsuario(idUser);
             
 
-            return View("ClientesMainPage.cshtml",responseProgreso.data);
+            return View("ClientesMainPage",responseProgreso.data);
         }
 
         [HttpGet]
         [Route("detallesDeProgreso")]
-        public  async Task<IActionResult> dirigirADetallesDeProgreso([FromQuery] int idCliente,[FromQuery] int idParametro,[FromQuery] int idEjercicio)
+        public  async Task<IActionResult> dirigirADetallesDeProgreso([FromQuery] int idCliente)
         {
-            
-            return View("DetallesDeProgreso.cshtml");
+            HttpResponseAñosActivo responseAñosActivo    = await medidasManager.obtenerAñosActivosDelCliente(idCliente);            
+            return View("DetallesDeProgreso",responseAñosActivo.data);
         }
 
         [HttpGet]
@@ -100,7 +100,7 @@ namespace GymFrontend.Controllers
             ViewBag.usuarios = usuarios;
             ViewBag.parametros = parametrosDeMedicion;
             ViewBag.unidades = unidadDeMedida;
-            return View("EmpleadosMainPage.cshtml");
+            return View("EmpleadosMainPage");
         }
 
 
