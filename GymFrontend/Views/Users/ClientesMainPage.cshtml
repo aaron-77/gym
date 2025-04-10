@@ -18,7 +18,10 @@ Layout = "layoutSeccionClientes";
     {
 
 
-        <div id="rowProgreso" class="row progress-row" data-fkCliente="@progresoItem.medida.fkUsuario" data-fkParametro="@progresoItem.medida.fkParametro" data-fkejercicio="@progresoItem.medida.fkEjercicio" data-fechaCreacion="@progresoItem.medida.fechaDeCreacion">
+        <div id="rowProgreso" class="row progress-row" data-fkCliente="@progresoItem.medida.fkUsuario" 
+        data-fkParametro="@progresoItem.medida.fkParametro" 
+        data-fkejercicio="@progresoItem.medida.fkEjercicio" 
+        data-fechaCreacion="@progresoItem.medida.fechaDeCreacion">
             @if (progresoItem.medida.fkEjercicio != null)
             {
                 <div class="col">

@@ -30,7 +30,7 @@ namespace BL.Utils
                 for(int index = 0;index < meses.Length;index ++){
                     DatosMetaDeMedida datosMetaDeMedida = new DatosMetaDeMedida();
                     datosMetaDeMedida.mes = meses[index];
-                    datosMetaDeMedida.año = años[index];
+                    datosMetaDeMedida.año = (index < años.Length)? años[index]:años[años.Length -1];
                     datosMetaDeMedidaList.Add(datosMetaDeMedida);
                 }
                 return datosMetaDeMedidaList;

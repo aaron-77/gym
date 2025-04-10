@@ -1,13 +1,15 @@
-
-
+import { ObservadorSujeto } from "./observerPattern.js"
 let dataForCharts = null;
 // Method to obtain the month of the current date in number format
+let $chartContainer = document.querySelector(".chart-container");
+let myChart = null;
+let $chartCanvas = document.getElementById("myChart");
 let idCliente = null;
 let idParametro = null;
 let idEjercicio = null;
-let espaciadoTemporal = 'individual';
+let espaciadoTemporal = '';
 let fechaCreacionMedida = null;
-let tipoDeBusqueda = 'mes';
+let tipoDeBusqueda = '';
 let fechaDeInicio = null;
 let fechaFin = null;
 let conDetalle = true;
@@ -24,8 +26,39 @@ const $customTimeSearchItems = document.querySelectorAll('.custom-time-search-it
 const $conDetalle = document.getElementById('conDetalle');
 const $ejercicios = document.getElementById('inputEjercicio');
 const $parametros = document.getElementById('inputParametro');
+const $errorMessageContainer = document.getElementById("errorMessageContainer");
+const parametrosObserver = new ObservadorSujeto();
+const espaciadoTemporalObserver = new ObservadorSujeto();
+const tipoDeBusquedaObserver = new ObservadorSujeto();
+const fechaInicioOserver = new ObservadorSujeto();
+const fechaFinObserver = new ObservadorSujeto();
+let mesesObsevers = [];
+let añosObservers = [];
+let observersOfObserverPattern = [];
+let ejerciciosYParametrosDelCliente = [];
+let ejercicioSeleccionado = null;
+let parametroSeleccionado = null;
 let ejerciciosDelCliente = [];
 let parametrosDelCliente = [];
+let isFormVisible = true;
+
+function isEmpty(value) {
+  return !value;
+}
+function validarOrdenDeFechas(fechaInicio, fechaFin) {
+
+}
+
+let nameFormFieldsAndDependiencies = {
+  inputEjercicio: { name: "idEjercicio", dependencies: [], validations: [isEmpty] },
+  inputParametro: { name: "idParametro", dependencies: ["espaciadoTemporal", "tipoDeBusqueda", "fechaInicio", "fechaFin", "mesesDeFiltro", "añosDeFiltro"], validations: [isEmpty] },
+  espaciadoTemporal: { name: "espaciadoTemporal", dependencies: ["mesesDeFiltro", "añosDeFiltro", "fechaInicio", "fechaFin"], validations: [isEmpty] },
+  tipoDeBusqueda: { name: "tipoDeBusqueda", dependencies: ["mesesDeFiltro", "añosDeFiltro", "fechaInicio", "fechaFin"], validations: [isEmpty] },
+  fechaInicio: { name: "fechaInicio", dependencies: [], validations: [isEmpty] },
+  fechaFin: { name: "fechaFin", dependencies: [], validations: [isEmpty] },
+  mesesDeFiltro: { name: "mesesDeFiltro", dependencies: [], validations: [isEmpty] },
+  añosDeFiltro: { name: "añosDeFiltro", dependencies: [], validations: [isEmpty] }
+}
 
 function getYearOfCustomDate(customDate) {
   return customDate.getFullYear();
@@ -46,9 +79,10 @@ function populateSelect(selectElement, data, valueProperty = 'value', textProper
   selectElement.innerHTML = '';
   // Iterar sobre los datos y agregar un option por cada uno
   let defaultOption = document.createElement('option');
-    defaultOption.value = null;  // Usar la propiedad para el value
-    defaultOption.textContent = "Selecciona una opcion"
-    selectElement.appendChild(defaultOption);
+  defaultOption.id = "defaultOption";
+  defaultOption.value = null;  // Usar la propiedad para el value
+  defaultOption.textContent = "Selecciona una opcion"
+  selectElement.appendChild(defaultOption);
   data.forEach(item => {
     let option = document.createElement('option');
     option.value = item[valueProperty];  // Usar la propiedad para el value
@@ -104,7 +138,10 @@ function getQueryParams() {
   idCliente = params.get('idCliente');
   idParametro = params.get('idParametro');
   idEjercicio = params.get('idEjercicio');
+  espaciadoTemporal = params.get('espaciadoTemporal');
+  tipoDeBusqueda = params.get('tipoDeBusqueda');
   fechaCreacionMedida = parseDate(params.get('fechaDeCreacion'));
+
 }
 
 export function assembleQueryParams(...parametersAndValues) {
@@ -133,6 +170,36 @@ export function assembleQueryParams(...parametersAndValues) {
   return queryParams;
 
 }
+
+function resetExercisesData() {
+  ejerciciosDelCliente = ejerciciosYParametrosDelCliente
+    .filter(ejercicio => ejercicio.ejercicioId != null)
+    .map(ejercicio => { return { ejercicioId: ejercicio.ejercicioId, nombreEjercicio: ejercicio.nombreEjercicio } });
+
+}
+function resetParametersData() {
+  parametrosDelCliente = ejerciciosYParametrosDelCliente
+    .map(parametro => { return { parametroMedicionId: parametro.parametroMedicionId, nombreParametro: parametro.nombreParametro } });
+}
+function setSelectedExercise(idEjercicio) {
+  let ejercicioConParametroEncontrado = ejerciciosYParametrosDelCliente.find(exer => exer.ejercicioId == idEjercicio);
+  let ejercicio = { ejercicioId: ejercicioConParametroEncontrado.ejercicioId, nombreEjercicio: ejercicioConParametroEncontrado.nombreEjercicio }
+  ejercicioSeleccionado = ejercicio;
+}
+function setClientParameters(idEjercicio) {
+  let parametrosDelEjercicio = ejerciciosYParametrosDelCliente.filter(ejerYpParam => ejerYpParam.ejercicioId == idEjercicio)
+    .map(exerYParm => {
+      return {
+        parametroMedicionId: exerYParm.parametroMedicionId, nombreParametro: exerYParm.nombreParametro
+      }
+    });
+  parametrosDelCliente = parametrosDelEjercicio;
+}
+function setSelectedParameter(idParametro) {
+  parametroSeleccionado = parametrosDelCliente.find(param => param.parametroMedicionId == idParametro)
+}
+
+
 async function fetchEjerciciosYParametrosDelCliente(idCliente) {
   try {
     let serverResponse = await fetch(`http://localhost:5274/api/obtenerEjerciciosYParametros?idCliente=${idCliente}`);
@@ -140,14 +207,9 @@ async function fetchEjerciciosYParametrosDelCliente(idCliente) {
     if (!jsonServerResponse.ok) {
       throw new Error('Error al consutar los ejercicios y parametros del cliente');
     }
-    const ejerciciosYParametrosDelCliente = jsonServerResponse.data
-    ejerciciosDelCliente = ejerciciosYParametrosDelCliente
-      .filter(ejercicio => ejercicio.ejercicioId != null)
-      .map(ejercicio => { return { ejercicioId: ejercicio.ejercicioId, nombreEjercicio: ejercicio.nombreEjercicio } });
-
-    parametrosDelCliente = ejerciciosYParametrosDelCliente
-      .map(parametro => { return { ejercicioId: parametro.parametroMedicionId, nombreParametro: parametro.nombreParametro } });
-
+    ejerciciosYParametrosDelCliente = jsonServerResponse.data;
+    resetExercisesData();
+    resetParametersData();
   } catch (error) {
     console.log(error)
   }
@@ -259,7 +321,8 @@ function getActualMontCheckBox() {
   let currentMonthCheckBox = null;
   for (let checkbox of $monthCheckBoxes) {
     if (parseInt(monthMapping[checkbox.value]) == getCurrentMonth()) {
-      checkbox.disabled = true;
+      return checkbox;
+      //checkbox.disabled = true;
     }
   }
 }
@@ -350,6 +413,24 @@ function createObjectFromMap(...map) {
   return objeto;
 }
 function makeConfigForChart() {
+  let annotations = {};
+  dataForCharts.data.metasDeMedida.forEach((meta, index) => {
+    annotations[`meta ${index + 1}`] = {
+      type: 'line',
+      yMin: meta.valorObjetivo,
+      yMax: meta.valorObjetivo,
+      borderColor: 'rgb(161, 255, 99)',
+      borderWidth: 2,
+      label: {
+        content: `meta ${index + 1}`,
+        display: true,
+        position: "end",
+        backgroundColor: "rgb(150, 150, 150)",
+        yAdjust: -17,
+        drawTime: 'afterDatasetsDraw'
+      }
+    }
+  })
   return {
     responsive: true,
     plugins: {
@@ -358,23 +439,7 @@ function makeConfigForChart() {
         text: makeMesageText("Tu progreso en", dataForCharts.data.medidas[0].nombreParametro)
       },
       annotation: {
-        annotations: {
-          line1: {
-            type: 'line',
-            yMin: dataForCharts.data.metasDeMedida[0].valorObjetivo,
-            yMax: dataForCharts.data.metasDeMedida[0].valorObjetivo,
-            borderColor: 'rgb(161, 255, 99)',
-            borderWidth: 2,
-            label: {
-              content: "Valor objetivo",
-              display: true,
-              position: "end",
-              backgroundColor: "rgb(150, 150, 150)",
-              yAdjust: -17,
-              drawTime: 'afterDatasetsDraw'
-            }
-          }
-        }
+        annotations: annotations
       }
     },
     scales: {
@@ -386,7 +451,9 @@ function makeConfigForChart() {
           text: generateTitleXAxis(selectedMonths, espaciadoTemporal, tipoDeBusqueda, fechaDeInicio, fechaFin)
         }
       }
-    }
+    },
+    responsive: true,
+    maintainAspectRatio: false 
 
   }
 }
@@ -416,7 +483,7 @@ function initializeChart(chartType) {
   let datasetTitle = makeMesageText("Tus mediciones de ", dataForCharts.data.medidas[0].nombreParametro);
   const dataSets = makeDatasetsForChart([datasetTitle], valoresMedidas);
   const options = makeConfigForChart();
-  return new Chart(ctx, {
+  myChart = new Chart(ctx, {
     type: chartType,
     data: {
       labels: labelsForXAxisValues,
@@ -424,9 +491,22 @@ function initializeChart(chartType) {
     },
     options: options
   });
+
+}
+function updateChart() {
+  let valoresMedidas = dataForCharts.data.medidas.map((medida, index) => { return medida.valor });
+  let labelsForXAxisValues = dataForCharts.data.medidas.map((medida, index) => { return makeDataLabelXAxis(medida.fechaDeCreacion, index + 1) })
+  let datasetTitle = makeMesageText("Tus mediciones de ", dataForCharts.data.medidas[0].nombreParametro);
+  const dataSets = makeDatasetsForChart([datasetTitle], valoresMedidas);
+  const options = makeConfigForChart();//las opciones no se pueden reemplazar con asignacion normal
+  myChart.data.labels = labelsForXAxisValues;
+  myChart.data.datasets = dataSets;
+  myChart.options = options;
+  myChart.update();
 }
 
 function handleRangeDateInputChange(event) {
+  tipoDeBusqueda=null;  
   if (event.currentTarget.id == "fechaInicio") {
     fechaDeInicio = event.currentTarget.value;
 
@@ -461,6 +541,37 @@ function handleYearSelection(event) {
   sortSelectedYears();
   console.log('Selected years', selectedYears);
 }
+function handleExersiceSelection(event) {
+  const $select = event.currentTarget;
+  let $option = $select.options[$select.selectedIndex];
+  let idOptionSelected = $option.id;
+  if (idOptionSelected == "defaultOption") {
+    idEjercicio = null;
+    resetExercisesData();
+    resetParametersData();
+    populateSelect($ejercicios, ejerciciosDelCliente, "ejercicioId", "nombreEjercicio");
+    populateSelect($parametros, parametrosDelCliente, "parametroMedicionId", "nombreParametro")
+    return;
+  }
+  idEjercicio = parseInt($select.value);
+  let idExerciseSelected = parseInt($select.value);
+  setSelectedExercise(idExerciseSelected);
+  setClientParameters(idExerciseSelected);
+  populateSelect($parametros, parametrosDelCliente, 'parametroMedicionId', 'nombreParametro');
+
+}
+function getParameterSelected($input) {
+  let $option = $input.options[$input.selectedIndex];
+  let idOptionSelected = $option.value;
+  return idOptionSelected;
+}
+function handleParameterSelection(event) {
+  const $select = event.currentTarget;
+  let idOptionSelected = getParameterSelected($select);
+  executeParametersIntarectionLogic(idOptionSelected);
+}
+
+
 // Function to add a month to the selection
 function addMonth(monthNumber) {
   if (!selectedMonths.includes(monthNumber)) {
@@ -481,43 +592,202 @@ function sortSelectedMonths() {
 function sortSelectedYears() {
   selectedYears.sort((a, b) => a - b);
 }
+function executeParametersIntarectionLogic(idOptionSelected) {
+  if (idOptionSelected == "defaultOption") {
+    resetExercisesData();
+    resetParametersData();
+    populateSelect($ejercicios, ejerciciosDelCliente, "ejercicioId", "nombreEjercicio");
+    populateSelect($parametros, parametrosDelCliente, "parametroMedicionId", "nombreParametro")
+    parametrosObserver.notificar(true);
+    return;
+  }
+  idParametro = parseInt(idOptionSelected);
+  setSelectedParameter(idParametro);
+  parametrosObserver.notificar(false);
+}
 
-
+function executeTemporalSpacingInteractionLogic(espaciadoTemporal) {
+  if (!espaciadoTemporal) {
+    espaciadoTemporalObserver.notificar(true);
+    return;
+  }
+  if (espaciadoTemporal == "rango") {
+    espaciadoTemporalObserver.notificarATodosExceptoA({ idInput: ["fechaInicio", "fechaFin"], isDisabled: true })
+    espaciadoTemporalObserver.notificarA({ idInput: ["fechaInicio", "fechaFin"], isDisabled: false });
+  } else {
+    espaciadoTemporalObserver.notificarA({ idInput: "tipoDeBusqueda", isDisabled: false });
+    espaciadoTemporalObserver.notificarATodosExceptoA({ idInput: "tipoDeBusqueda", isDisabled: true });
+  }
+}
+function executeTipoDeBusquedaInteractionLogic(tipoDeBusqueda) {
+  if (!tipoDeBusqueda) {
+    tipoDeBusquedaObserver.notificar(true);
+    return;
+  }
+  if (tipoDeBusqueda == "mes") {
+    addYear(getCurrentYear());
+    checkSelectedYears();
+    getActualMontCheckBox().checked = true;
+    tipoDeBusquedaObserver.notificarGrupo({ nameParticle: "mesesDeFiltro", isDisabled: false });
+    tipoDeBusquedaObserver.notificarGrupo({ nameParticle: "añosDeFiltro", isDisabled: true });
+    enableOrDiseableConDetalleCheckBox(fechaDeInicio, fechaFin);
+    addMonth(getCurrentMonth());
+    checkSelectedMonths();
+  } else {// tipos de busqueda = año
+    $conDetalle.checked = false;
+    uncheckCheckboxes(...$yearCheckBoxes)
+    addYear(getCurrentYear());
+    checkSelectedYears();
+    tipoDeBusquedaObserver.notificarGrupo({ nameParticle: "mesesDeFiltro", isDisabled: true });
+    tipoDeBusquedaObserver.notificarGrupo({ nameParticle: "añosDeFiltro", isDisabled: false });
+  }
+}
+function executeCheckBoxInteractionLogic($checkbox) {
+  if ($checkbox.disabled == true && checkbox.checked) {
+    $checkbox.disabled = false;
+  }
+}
 // Function to handle temporal spacing changes
 function handleTemporalSpacing(event) {
-  const isRango = event.target.value === 'rango';
   espaciadoTemporal = event.target.value;
-  if (isRango) {
-    desactivarInputs($tipoDeBusqueda)
-  }
-  toggleInputs(espaciadoTemporal);
+  executeTemporalSpacingInteractionLogic(espaciadoTemporal);
+  enableOrDiseableConDetalleCheckBox();
 }
 function handleTipoDeBusqueda(event) {
   tipoDeBusqueda = event.target.value;
-  toggleInputs(espaciadoTemporal);
+  // no se selecciono nada, o se selecciono el valor por defecto
+  executeTipoDeBusquedaInteractionLogic(tipoDeBusqueda);
+  //toggleInputs(espaciadoTemporal);
+}
+function handleMutationChecked(mutations, observer) {
+  mutations.forEach((mutation) => {
+    const mutatedElement = mutation.target;
+    if (mutation.attributeName === "disabled" && mutatedElement.disabled == true && mutatedElement.type == "checkbox" && mutatedElement.checked) {
+      mutatedElement.checked = false;
+    }
+  });
+}
+function handleMutationGeneralInput(mutations, observer) {
+
+  function isADisabledInput(mutation, mutatedElement) {
+    const isADisabledInput =
+      mutation.attributeName === "disabled"
+      && mutatedElement.disabled == true
+      && (mutatedElement.type == "input"
+        || mutatedElement.tagName == "SELECT"
+      );
+
+    return isADisabledInput;
+  }
+
+  function inputHasValueAndIsDisabled(mutation, mutatedElement) {
+    const inputHasValueAndIsDisabled = mutation.attributeName === "value" && mutatedElement.disabled == true && mutatedElement.value;
+    return inputHasValueAndIsDisabled;
+  }
+
+  mutations.forEach((mutation) => {
+    const mutatedElement = mutation.target;
+    if (isADisabledInput(mutation, mutatedElement)) {
+      resetValueInput(mutatedElement);
+      for (let observerPatterInstance of observersOfObserverPattern) {
+        if (mutatedElement.id == observerPatterInstance.htmlInput.id) {
+          observerPatterInstance.notificar(true);
+        }
+      }
+    } else if (inputHasValueAndIsDisabled(mutation, mutatedElement)) {
+      generalInputMutationLogic(mutatedElement);
+    }
+  });
+}
+function generalInputMutationLogic(input) {
+  if (!input) {
+    console.error("no hay un input para aplicarle la interaccion");
+    return;
+  }
+  const idInput = input.id;
+  let data = input.value;
+  switch (idInput) {
+    case "inputParametro":
+      data = getParameterSelected(input);
+      executeParametersIntarectionLogic(data);
+      break;
+
+    case "espaciadoTemporal":
+      executeTemporalSpacingInteractionLogic(data);
+      break;
+
+    case "tipoDeBusqueda":
+      executeTipoDeBusquedaInteractionLogic(data);
+      break;
+  }
+
+}
+function handleMutationDateInputs(mutations, observer) {
+  mutations.forEach((mutation) => {
+    const mutatedElement = mutation.target;
+    if (mutation.attributeName === "disabled" && mutatedElement.disabled == false && mutatedElement.type == "date") {
+      toggleRequiredAttributeToElement(true, mutatedElement)
+    } else if (mutation.attributeName === "disabled" && mutatedElement.disabled == true && mutatedElement.type == "date") {
+      toggleRequiredAttributeToElement(false, mutatedElement)
+      resetValueInput(mutatedElement);
+    }
+  });
 }
 
+function resetValueInput(input) {
+  input.value = "";
 
+}
+function attachMutationObserver(observer, ...elements) {
+  for (let element of elements) {
+    observer.observe(element, { attributes: true, characterData: true });
+  }
+}
+function groupObserverOfObserverPattern(...observers) {
+  for (let observer of observers) {
+    if (!observersOfObserverPattern.includes(observer)) {
+      observersOfObserverPattern.push(observer);
+    }
+  }
+}
+
+function toggleRequiredAttributeToElement(isRequired, ...elements) {
+  if (isRequired) {
+    for (let element of elements) {
+      element.required = true;
+    }
+  } else {
+    for (let element of elements) {
+      element.required = false;
+    }
+  }
+
+}
+
+function configureInputsAfterAutomaticDisplayData(...$inputs) {
+  for (let $input of $inputs) {
+    generalInputMutationLogic($input);
+  }
+}
 // Function to toggle date inputs
 function toggleInputs(espaciadoTemporal) {
   if (espaciadoTemporal == "rango") {
-    enableOrDiseableConDetalleCheckBox(fechaFin, fechaDeInicio);
-    desactivarInputs(...$customTimeSearchItems);
-    uncheckCheckboxes($conDetalle)
-    uncheckCheckboxes(...$monthCheckBoxes);
-    uncheckCheckboxes(...$yearCheckBoxes);
-    activarInputs(...$rangeDateElements);
-    for (let dateInput of $rangeDateElements) {
+    //enableOrDiseableConDetalleCheckBox(fechaFin, fechaDeInicio);
+    //desactivarInputs(...$customTimeSearchItems);
+    //uncheckCheckboxes($conDetalle)
+    //uncheckCheckboxes(...$monthCheckBoxes);
+    //uncheckCheckboxes(...$yearCheckBoxes);
+    //activarInputs(...$rangeDateElements);
+    /* for (let dateInput of $rangeDateElements) {
       dateInput.required = true;
       dateInput.required = true;
-    }
+    } */
   } else {
     if (tipoDeBusqueda == "mes") {
       $conDetalle.checked = true;
       addYear(getCurrentYear());
       checkSelectedYears();
       getActualMontCheckBox();
-
       activarInputs(...$customTimeSearchItems)
       desactivarInputs(document.getElementById("conDetalle"));
       desactivarInputs(...$yearCheckBoxes);
@@ -582,9 +852,58 @@ function displayDataToInputs() {
   $tipoDeBusqueda.value = tipoDeBusqueda;
   $fechaInicio.value = fechaDeInicio;
   $fechaFin.value = fechaFin;
+  $parametros.value = parametrosDelCliente.find(param => param.parametroMedicionId = parseInt(idParametro)).parametroMedicionId;
   checkSelectedMonths();
   checkSelectedYears()
   checkConDetallesCheckbox();
+}
+function configureCheckBoxObservers($checkboxes) {
+  const checkBoxObservers = [];
+  for (let checkbox of $checkboxes) {
+    let checkBoxObserver = new ObservadorSujeto();
+    checkBoxObserver.htmlInput = checkbox;
+    checkBoxObservers.push(checkBoxObserver);
+  }
+  return checkBoxObservers;
+}
+function configureObsevers() {
+  espaciadoTemporalObserver.htmlInput = $espaciadoTemporal;
+  tipoDeBusquedaObserver.htmlInput = $tipoDeBusqueda;
+  fechaInicioOserver.htmlInput = $fechaInicio;
+  fechaFinObserver.htmlInput = $fechaFin;
+  mesesObsevers = configureCheckBoxObservers($monthCheckBoxes)
+  añosObservers = configureCheckBoxObservers($yearCheckBoxes);
+  parametrosObserver.htmlInput = $parametros;
+  espaciadoTemporalObserver.suscribirVarios(mesesObsevers);
+  espaciadoTemporalObserver.suscribirVarios(añosObservers)
+  espaciadoTemporalObserver.suscribir(tipoDeBusquedaObserver);
+  espaciadoTemporalObserver.suscribirVarios([fechaInicioOserver, fechaFinObserver]);
+  tipoDeBusquedaObserver.suscribirVarios(mesesObsevers);
+  tipoDeBusquedaObserver.suscribirVarios(añosObservers)
+  parametrosObserver.suscribir(espaciadoTemporalObserver);
+  groupObserverOfObserverPattern(espaciadoTemporalObserver
+    , tipoDeBusquedaObserver
+    , fechaInicioOserver
+    , fechaFinObserver
+    , ...mesesObsevers
+    , ...añosObservers
+    , parametrosObserver
+    , espaciadoTemporalObserver
+  );
+}
+function toggleElementVisibility($input, isVisible) {
+  $input.style.visibility = (isVisible) ? "visible" : "hidden";
+}
+function toggleChartOrErrorMessage(data) {
+  if (data.length <= 0) {
+    toggleElementVisibility($errorMessageContainer, true);
+    toggleElementVisibility($chartCanvas, false);
+    return;
+  }
+  toggleElementVisibility($errorMessageContainer, false);
+  toggleElementVisibility($chartCanvas, true);
+  
+
 }
 
 
@@ -599,22 +918,77 @@ $yearCheckBoxes.forEach(checkbox => {
   checkbox.addEventListener('change', handleYearSelection);
 });
 
+$ejercicios.addEventListener('change', handleExersiceSelection);
+$parametros.addEventListener('change', handleParameterSelection);
+
 $espaciadoTemporal.addEventListener('change', handleTemporalSpacing);
 $tipoDeBusqueda.addEventListener('change', handleTipoDeBusqueda);
 $form.addEventListener('change', handleFormChange);
 $submitButton.addEventListener("click", async (ev) => {
-  await fetchProgressDetails()
+  const $button = ev.currentTarget;
+  $button.disabled = true;
+  dataForCharts = await fetchProgressDetails();
+  toggleForm();
+  $button.disabled = false;
+  if(dataForCharts.data.medidas.length >= 1){
+    toggleChartOrErrorMessage(dataForCharts.data.medidas);
+    updateChart();
+  }else{
+    toggleChartOrErrorMessage(dataForCharts.data.medidas);
+  }
+  
 })
 
+const mutationObserverMonthChecboxes = new MutationObserver(handleMutationChecked)
+const mutationObserverDateInputs = new MutationObserver(handleMutationDateInputs)
+const mutationObserverGeneralInputs = new MutationObserver(handleMutationGeneralInput);
+attachMutationObserver(mutationObserverMonthChecboxes, ...$monthCheckBoxes, ...$yearCheckBoxes)
+attachMutationObserver(mutationObserverDateInputs, ...$rangeDateElements)
+attachMutationObserver(mutationObserverGeneralInputs, $parametros, $espaciadoTemporal, $tipoDeBusqueda);
 getQueryParams();
+configureObsevers();
 await fetchEjerciciosYParametrosDelCliente(idCliente);
 dataForCharts = await fetchProgressDetails()
 populateSelect($ejercicios, ejerciciosDelCliente, 'ejercicioId', 'nombreEjercicio');
 populateSelect($parametros, parametrosDelCliente, 'parametroMedicionId', 'nombreParametro');
 displayDataToInputs();
-toggleInputs(espaciadoTemporal);
+configureInputsAfterAutomaticDisplayData($parametros, $espaciadoTemporal, $tipoDeBusqueda);
 console.log(dataForCharts)
-// Initialize chart
-const myChart = initializeChart("line");
+// Initialize chart or show error message
+if(dataForCharts.data.medidas.length >= 1){
+  toggleChartOrErrorMessage(dataForCharts.data.medidas);
+  initializeChart("line");
+}else{
+  toggleChartOrErrorMessage(dataForCharts.data.medidas);
+}
+
+/* function toggleForm() {
+    const formSlide = document.getElementById('formSlide');
+    const slideableContainer = document.querySelector('.slideable-container');
+    const chartContainer = document.querySelector('.chart-container');
+    const toggleBtn = document.querySelector('.toggle-form-btn i');
+    
+    formSlide.classList.toggle('hidden');
+    slideableContainer.classList.toggle('hidden');
+    chartContainer.classList.toggle('expanded');
+    isFormVisible = !isFormVisible;
+    
+    if (isFormVisible) {
+        toggleBtn.classList.remove('fa-chevron-right');
+        toggleBtn.classList.add('fa-chevron-left');
+    } else {
+        toggleBtn.classList.remove('fa-chevron-left');
+        toggleBtn.classList.add('fa-chevron-right');
+    }
+} */
+function toggleForm(){
+  let collapseElement = document.getElementById("collapseOne");
+  let bsCollapse = new bootstrap.Collapse(collapseElement, {
+      toggle: false
+  });
+  bsCollapse.hide();
+}
+
+
 
 

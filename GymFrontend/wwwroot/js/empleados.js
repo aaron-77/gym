@@ -8,7 +8,7 @@ const getTruncatedString = (stringAmount) => {
     let index = stringAmount.indexOf(".");
     let truncatedString = stringAmount;
     if (index != -1) {
-        truncatedString = stringAmount.slice(0, index + 2 );
+        truncatedString = stringAmount.slice(0, index + 2);
         console.log(truncatedString);
     }
     return truncatedString;
@@ -26,7 +26,7 @@ const handleBlur = (ev) => {
 const handleChange = (ev) => {
     let truncatedPeso = getTruncatedString($inputPeso.value);
     let truncatedAltura = getTruncatedString($inputAltura.value);
-    if (truncatedAltura == null || truncatedAltura == "" ){
+    if (truncatedAltura == null || truncatedAltura == "") {
         console.log("no hay altura para hacer el calculo");
         return;
     }
@@ -54,7 +54,9 @@ const clickDetailsHandler = (event) => {
     let idParametro = parent.getAttribute('data-fkParametro');
     let idEjercicio = parent.getAttribute('data-fkEjercicio');
     let fechaDeCreacion = parent.getAttribute('data-fechaCreacion');
-    navigateToPage(`detallesDeProgreso?idCliente=${idCliente}&idParametro=${idParametro}&idEjercicio=${idEjercicio}&fechaDeCreacion=${fechaDeCreacion}`);
+    let temporalSpacing = "individual"
+    let tipoDeBusqueda = "mes"
+    navigateToPage(`detallesDeProgreso?idCliente=${idCliente}&idParametro=${idParametro}&idEjercicio=${idEjercicio}&fechaDeCreacion=${fechaDeCreacion}&espaciadoTemporal=${temporalSpacing}&tipoDeBusqueda=${tipoDeBusqueda}`);
 }
 
 
@@ -66,12 +68,12 @@ document.addEventListener("DOMContentLoaded", () => {
     for (let boton of $botonesDeDetalle) {
         boton.addEventListener("click", clickDetailsHandler);
     }
-    if($inputAltura){
+    if ($inputAltura) {
         $inputAltura.addEventListener("blur", handleBlur);
     }
-    if($inputPeso){
+    if ($inputPeso) {
         $inputPeso.addEventListener("input", handleChange)
     }
-    
-    
+
+
 });

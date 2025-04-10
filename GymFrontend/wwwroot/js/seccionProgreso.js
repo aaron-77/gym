@@ -1,4 +1,3 @@
-
 const typesOfElements = {
     ejercicio: 'ejercicio',
 }

@@ -156,9 +156,9 @@ namespace FitnessGymApi.Controllers
         public async Task<ActionResult<List<DTOUltimaMedidaDeParametro>>> ObtenerDetallesDeProgreso(
     [FromQuery] int idCliente,
     [FromQuery] int idParametro,
-    [FromQuery] int idEjercicio,
-    [FromQuery] string espaciadoTemporal,
-    [FromQuery] string tipoDeBusqueda,
+    [FromQuery] int? idEjercicio,
+    [FromQuery] string? espaciadoTemporal,
+    [FromQuery] string? tipoDeBusqueda,
     [FromQuery] DateTime? fechaDeInicio = null,
     [FromQuery] DateTime? fechaFin = null,
     [FromQuery] bool conDetalle = false,
@@ -202,19 +202,25 @@ namespace FitnessGymApi.Controllers
                             {"@fechaFin",(SqlDbType.DateTime, (object)fechaFin ?? DBNull.Value,null)},
                             {"@conDetalles",(SqlDbType.Int, conDetalle,null)}
                         };
+                        
+                        datosDeMedida = DataTableConverter.ConvertToDataTable(datosMetaDeMedida);
+                        Dictionary<string, (SqlDbType DbType, 
+                                    object Value,
+                                    int? lengthType)> 
+                        parametersToSP2 = new Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)>{
+                            {"@idCliente",(SqlDbType.Int, idCliente,null)},
+                            {"@idParametro",(SqlDbType.Int, idParametro,null)},
+                            {"@idEjercicio",(SqlDbType.Int, idEjercicio == 0 ? DBNull.Value : idEjercicio,null)},
+                            {"@datosDeMedida",(SqlDbType.Structured, datosDeMedida,null)}
+                        };
 
                 SqlCommandHelper.AddParameters(command, parametersToSP);
                 var reader = await SqlCommandHelper.ExecuteCommandAsync(command);
                 List<DTOUltimaMedidaDeParametro> resultados = SqlCommandHelper.MapToList<DTOUltimaMedidaDeParametro>(reader);
                 finalResponse.data.medidas = resultados;
                 var commandObtenerMetas = SqlCommandHelper.CreateSqlCommand(connection, "sp_obtenerMetasDeMedidas", CommandType.StoredProcedure, null);
-                datosDeMedida = DataTableConverter.ConvertToDataTable(datosMetaDeMedida);
-                Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)> parametersToSP2 = new Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)>{
-                            {"@idCliente",(SqlDbType.Int, idCliente,null)},
-                            {"@idParametro",(SqlDbType.Int, idParametro,null)},
-                            {"@idEjercicio",(SqlDbType.Int, idEjercicio == 0 ? DBNull.Value : idEjercicio,null)},
-                            {"@datosDeMedida",(SqlDbType.Structured, datosDeMedida,null)}
-                        };
+                
+                
                 SqlCommandHelper.AddParameters(commandObtenerMetas, parametersToSP2);
                 reader.Close();
                 var reader2 = await SqlCommandHelper.ExecuteCommandAsync(commandObtenerMetas);
@@ -226,8 +232,11 @@ namespace FitnessGymApi.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al ejecutar el procedimiento almacenado: {ex.Message}");
-            }
+                finalResponse.ok = false;
+                finalResponse.message = "Error al ejecutar el procedimiento almacenado";
+                finalResponse.errors.add(new ErrorModel { message = ex.Message }); ;
+                return StatusCode(500, finalResponse);
+            }   
             return null;
         }
 

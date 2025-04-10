@@ -43,7 +43,7 @@
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },
             "sourceFileMap": {
-                "/Views": "${workspaceFolder}/GymFrontend/Views"
+                "/Views": "${workspaceFolder}/Views"
             }
         }
 

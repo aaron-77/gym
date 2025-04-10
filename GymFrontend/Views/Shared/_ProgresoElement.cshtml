@@ -15,13 +15,16 @@
         return Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Detalle;
     }
 }
-<div id="containerProgesoElement" class="d-flex flex-column justify-content-center align-items-center container-progreso-element">
+<div id="containerProgesoElement" 
+    class="d-flex flex-column justify-content-center align-items-center container-progreso-element">
     <div id="tituloProgresoElement" class="text-center tituloElement">
         @Model.titulo
     </div>
  
    
-    <div id="datoPrincipalContainer" class="d-flex justify-content-center align-items-center container-dato-principal @getTipoDeBorde()">
+    <div id="datoPrincipalContainer" 
+    class="d-flex justify-content-center align-items-center container-dato-principal 
+    @getTipoDeBorde()">
         @if (@Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida
             || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta
             || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.UnidadDeMedida
