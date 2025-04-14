@@ -11,8 +11,6 @@ public partial class EjerciciosParametrosDeMedicion
 
     public int FkParametro { get; set; }
 
-    public decimal? Valor { get; set; }
-
     public DateTime FechaCreacion { get; set; }
 
     public DateTime? FechaModificacion { get; set; }

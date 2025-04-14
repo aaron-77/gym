@@ -15,7 +15,15 @@ public partial class Rutina
 
     public string? Observaciones { get; set; }
 
+    public int? FkClase { get; set; }
+
+    public int? FkTipoRutina { get; set; }
+
     public virtual Usuario? Entrenador { get; set; }
+
+    public virtual Clase? FkClaseNavigation { get; set; }
+
+    public virtual TipoRutina? FkTipoRutinaNavigation { get; set; }
 
     public virtual ICollection<RegistrosEntrenamiento> RegistrosEntrenamientos { get; set; } = new List<RegistrosEntrenamiento>();
 

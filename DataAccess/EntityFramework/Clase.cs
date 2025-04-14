@@ -13,11 +13,27 @@ public partial class Clase
 
     public int Cupo { get; set; }
 
-    public DateTime Horario { get; set; }
-
     public string? Descripcion { get; set; }
 
-    public virtual ICollection<InscripcionClase> InscripcionClases { get; set; } = new List<InscripcionClase>();
+    public int? DuracionEnMinutos { get; set; }
+
+    public int? FkIntensidad { get; set; }
+
+    public int? FkDificultad { get; set; }
+
+    public virtual ICollection<BeneficiosDeClase> BeneficiosDeClases { get; set; } = new List<BeneficiosDeClase>();
+
+    public virtual ICollection<ClasesProgramada> ClasesProgramada { get; set; } = new List<ClasesProgramada>();
+
+    public virtual ICollection<ConsejosParaLasClase> ConsejosParaLasClases { get; set; } = new List<ConsejosParaLasClase>();
+
+    public virtual ICollection<EstructuraDeClase> EstructuraDeClases { get; set; } = new List<EstructuraDeClase>();
+
+    public virtual NivelesDeDificultadDeClase? FkDificultadNavigation { get; set; }
+
+    public virtual NivelesDeIntensidadDeClase? FkIntensidadNavigation { get; set; }
 
     public virtual Usuario? Instructor { get; set; }
+
+    public virtual ICollection<Rutina> Rutinas { get; set; } = new List<Rutina>();
 }

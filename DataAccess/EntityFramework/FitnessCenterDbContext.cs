@@ -15,9 +15,15 @@ public partial class FitnessCenterDbContext : DbContext
     {
     }
 
+    public virtual DbSet<BeneficiosDeClase> BeneficiosDeClases { get; set; }
+
     public virtual DbSet<Cita> Citas { get; set; }
 
     public virtual DbSet<Clase> Clases { get; set; }
+
+    public virtual DbSet<ClasesProgramada> ClasesProgramadas { get; set; }
+
+    public virtual DbSet<ConsejosParaLasClase> ConsejosParaLasClases { get; set; }
 
     public virtual DbSet<Cupone> Cupones { get; set; }
 
@@ -35,15 +41,29 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<Equipo> Equipos { get; set; }
 
+    public virtual DbSet<EstadosClasesProgramada> EstadosClasesProgramadas { get; set; }
+
+    public virtual DbSet<EstadosInscripcione> EstadosInscripciones { get; set; }
+
+    public virtual DbSet<EstructuraDeClase> EstructuraDeClases { get; set; }
+
     public virtual DbSet<IconsForParameter> IconsForParameters { get; set; }
 
-    public virtual DbSet<InscripcionClase> InscripcionClases { get; set; }
+    public virtual DbSet<ImagesForExercise> ImagesForExercises { get; set; }
+
+    public virtual DbSet<InscripcionesDeClase> InscripcionesDeClases { get; set; }
 
     public virtual DbSet<Intencione> Intenciones { get; set; }
+
+    public virtual DbSet<LogErrore> LogErrores { get; set; }
 
     public virtual DbSet<Medida> Medidas { get; set; }
 
     public virtual DbSet<Meta> Metas { get; set; }
+
+    public virtual DbSet<NivelesDeDificultadDeClase> NivelesDeDificultadDeClases { get; set; }
+
+    public virtual DbSet<NivelesDeIntensidadDeClase> NivelesDeIntensidadDeClases { get; set; }
 
     public virtual DbSet<NivelesDeLogro> NivelesDeLogros { get; set; }
 
@@ -63,11 +83,15 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<Servicio> Servicios { get; set; }
 
+    public virtual DbSet<TipoRutina> TipoRutinas { get; set; }
+
     public virtual DbSet<UnidadesDeMedidum> UnidadesDeMedida { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
-    // CUSTOM MODELS ADDED MANUALLY
+
+    // propiedades agregadas manualmente
     public virtual DbSet<DTO.Dtos.Ejercicio> ejercicioSP { get; set; }
+    
     public virtual DbSet<DTO.Dtos.Rutina> rutinaSP { get; set; }
     public virtual DbSet<DTO.Dtos.QueryUser> userSP { get; set; }
     public virtual DbSet<DTO.Dtos.Cita> citaSP { get; set; }
@@ -78,13 +102,39 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<DTO.Dtos.DTOUltimaMetaDeParametro> ultimasMetasDeParametroSP { get; set; }
     public virtual DbSet<DTO.Dtos.DTOEjerciciosYParametrosDelCliente> ejerciciosYParametrosDelClienteSP { get; set; }
- 
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=localhost;Database=FitnessCenterDB;User Id=aaronlogin;Password=Terrabreak13;Integrated Security=False;TrustServerCertificate=True;Trusted_Connection=False");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<BeneficiosDeClase>(entity =>
+        {
+            entity.HasKey(e => e.IdBeneficio).HasName("PK__benefici__00AAC26A2D2E6E7C");
+
+            entity.ToTable("beneficiosDeClase");
+
+            entity.Property(e => e.IdBeneficio).HasColumnName("idBeneficio");
+            entity.Property(e => e.Beneficio)
+                .HasMaxLength(200)
+                .HasColumnName("beneficio");
+            entity.Property(e => e.FechaDeCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeCreacion");
+            entity.Property(e => e.FechaDeModificacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeModificacion");
+            entity.Property(e => e.FkClase).HasColumnName("fkClase");
+
+            entity.HasOne(d => d.FkClaseNavigation).WithMany(p => p.BeneficiosDeClases)
+                .HasForeignKey(d => d.FkClase)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Beneficio_Clase");
+        });
+
         modelBuilder.Entity<Cita>(entity =>
         {
             entity.HasKey(e => e.CitaId).HasName("PK__Citas__F0E2D9F2556E9C13");
@@ -112,13 +162,80 @@ public partial class FitnessCenterDbContext : DbContext
 
             entity.Property(e => e.ClaseId).HasColumnName("ClaseID");
             entity.Property(e => e.Descripcion).HasMaxLength(255);
-            entity.Property(e => e.Horario).HasColumnType("datetime");
+            entity.Property(e => e.DuracionEnMinutos).HasColumnName("duracionEnMinutos");
+            entity.Property(e => e.FkDificultad).HasColumnName("fkDificultad");
+            entity.Property(e => e.FkIntensidad).HasColumnName("fkIntensidad");
             entity.Property(e => e.InstructorId).HasColumnName("InstructorID");
             entity.Property(e => e.NombreClase).HasMaxLength(100);
+
+            entity.HasOne(d => d.FkDificultadNavigation).WithMany(p => p.Clases)
+                .HasForeignKey(d => d.FkDificultad)
+                .HasConstraintName("FK_Clases_Dificultad");
+
+            entity.HasOne(d => d.FkIntensidadNavigation).WithMany(p => p.Clases)
+                .HasForeignKey(d => d.FkIntensidad)
+                .HasConstraintName("FK_Clases_Intensidad");
 
             entity.HasOne(d => d.Instructor).WithMany(p => p.Clases)
                 .HasForeignKey(d => d.InstructorId)
                 .HasConstraintName("FK__Clases__Instruct__5AEE82B9");
+        });
+
+        modelBuilder.Entity<ClasesProgramada>(entity =>
+        {
+            entity.HasKey(e => e.IdProgramacionClase).HasName("PK__clasesPr__712E87EE8D30E7B0");
+
+            entity.ToTable("clasesProgramadas");
+
+            entity.Property(e => e.IdProgramacionClase).HasColumnName("idProgramacionClase");
+            entity.Property(e => e.CupoMaximo).HasColumnName("cupoMaximo");
+            entity.Property(e => e.FechaFin)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaFin");
+            entity.Property(e => e.FechaInicio)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaInicio");
+            entity.Property(e => e.FkClase).HasColumnName("fkClase");
+            entity.Property(e => e.FkEntrenador).HasColumnName("fkEntrenador");
+            entity.Property(e => e.FkEstadoClaseProgramada).HasColumnName("fkEstadoClaseProgramada");
+
+            entity.HasOne(d => d.FkClaseNavigation).WithMany(p => p.ClasesProgramada)
+                .HasForeignKey(d => d.FkClase)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ClasesProgramadas_Clase");
+
+            entity.HasOne(d => d.FkEntrenadorNavigation).WithMany(p => p.ClasesProgramada)
+                .HasForeignKey(d => d.FkEntrenador)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ClasesProgramadas_Usuarios");
+
+            entity.HasOne(d => d.FkEstadoClaseProgramadaNavigation).WithMany(p => p.ClasesProgramada)
+                .HasForeignKey(d => d.FkEstadoClaseProgramada)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ClasesProgramadas_EstadoClaseProgramada");
+        });
+
+        modelBuilder.Entity<ConsejosParaLasClase>(entity =>
+        {
+            entity.HasKey(e => e.IdConsejo).HasName("PK__consejos__3DB777ADDB7A6091");
+
+            entity.ToTable("consejosParaLasClases");
+
+            entity.Property(e => e.IdConsejo).HasColumnName("idConsejo");
+            entity.Property(e => e.Consejos).HasColumnName("consejos");
+            entity.Property(e => e.FkClase).HasColumnName("fkClase");
+            entity.Property(e => e.FkEjercicio).HasColumnName("fkEjercicio");
+            entity.Property(e => e.IntroduccionDeConsejo).HasColumnName("introduccionDeConsejo");
+
+            entity.HasOne(d => d.FkClaseNavigation).WithMany(p => p.ConsejosParaLasClases)
+                .HasForeignKey(d => d.FkClase)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Consejos_Clase");
+
+            entity.HasOne(d => d.FkEjercicioNavigation).WithMany(p => p.ConsejosParaLasClases)
+                .HasForeignKey(d => d.FkEjercicio)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Consejos_Ejercicio");
         });
 
         modelBuilder.Entity<Cupone>(entity =>
@@ -228,9 +345,6 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasColumnName("fechaModificacion");
             entity.Property(e => e.FkEjercicio).HasColumnName("fkEjercicio");
             entity.Property(e => e.FkParametro).HasColumnName("fkParametro");
-            entity.Property(e => e.Valor)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("valor");
 
             entity.HasOne(d => d.FkEjercicioNavigation).WithMany(p => p.EjerciciosParametrosDeMedicions)
                 .HasForeignKey(d => d.FkEjercicio)
@@ -249,7 +363,78 @@ public partial class FitnessCenterDbContext : DbContext
 
             entity.Property(e => e.EquipoId).HasColumnName("EquipoID");
             entity.Property(e => e.Descripcion).HasMaxLength(255);
+            entity.Property(e => e.FkIcon).HasColumnName("fkIcon");
             entity.Property(e => e.NombreEquipo).HasMaxLength(100);
+
+            entity.HasOne(d => d.FkIconNavigation).WithMany(p => p.Equipos)
+                .HasForeignKey(d => d.FkIcon)
+                .HasConstraintName("FK_Equipos_iconsForParameters");
+        });
+
+        modelBuilder.Entity<EstadosClasesProgramada>(entity =>
+        {
+            entity.HasKey(e => e.IdEstadoClaseProgramada).HasName("PK__estadosC__C0C65CED53670AA4");
+
+            entity.ToTable("estadosClasesProgramadas");
+
+            entity.Property(e => e.IdEstadoClaseProgramada).HasColumnName("idEstadoClaseProgramada");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaModificacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaModificacion");
+            entity.Property(e => e.NombresEstado).HasColumnName("nombresEstado");
+        });
+
+        modelBuilder.Entity<EstadosInscripcione>(entity =>
+        {
+            entity.HasKey(e => e.IdEstadoInscripcion).HasName("PK__estadosI__5CD68FF4850AB16F");
+
+            entity.ToTable("estadosInscripciones");
+
+            entity.Property(e => e.IdEstadoInscripcion).HasColumnName("idEstadoInscripcion");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaModificacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaModificacion");
+            entity.Property(e => e.NombreEstadoInscripcion).HasColumnName("nombreEstadoInscripcion");
+        });
+
+        modelBuilder.Entity<EstructuraDeClase>(entity =>
+        {
+            entity.HasKey(e => e.IdBloque).HasName("PK__estructu__EF4379A8928D581A");
+
+            entity.ToTable("estructuraDeClase");
+
+            entity.Property(e => e.IdBloque).HasColumnName("idBloque");
+            entity.Property(e => e.DescripcionBloque).HasColumnName("descripcionBloque");
+            entity.Property(e => e.DuracionMayorEnMinutos).HasColumnName("duracionMayorEnMinutos");
+            entity.Property(e => e.DuracionMenorEnMinutos).HasColumnName("duracionMenorEnMinutos");
+            entity.Property(e => e.FechaDeCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeCreacion");
+            entity.Property(e => e.FechaDeModificacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeModificacion");
+            entity.Property(e => e.FkClase).HasColumnName("fkClase");
+            entity.Property(e => e.NumeroConsecutivoDelBloque).HasColumnName("numeroConsecutivoDelBloque");
+            entity.Property(e => e.TituloBloque)
+                .HasMaxLength(200)
+                .HasColumnName("tituloBloque");
+
+            entity.HasOne(d => d.FkClaseNavigation).WithMany(p => p.EstructuraDeClases)
+                .HasForeignKey(d => d.FkClase)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Estructura_Clase");
         });
 
         modelBuilder.Entity<IconsForParameter>(entity =>
@@ -264,25 +449,55 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(e => e.UrlPublica).HasColumnName("urlPublica");
         });
 
-        modelBuilder.Entity<InscripcionClase>(entity =>
+        modelBuilder.Entity<ImagesForExercise>(entity =>
         {
-            entity.HasKey(e => e.InscripcionId).HasName("PK__Inscripc__168316991F67D233");
+            entity.HasKey(e => e.IdImage).HasName("PK__imagesFo__84D649AFC118D1B7");
 
-            entity.Property(e => e.InscripcionId).HasColumnName("InscripcionID");
-            entity.Property(e => e.ClaseId).HasColumnName("ClaseID");
-            entity.Property(e => e.Estado).HasMaxLength(50);
-            entity.Property(e => e.FechaInscripcion)
+            entity.ToTable("imagesForExercises");
+
+            entity.Property(e => e.IdImage).HasColumnName("idImage");
+            entity.Property(e => e.FkEjercicio).HasColumnName("fkEjercicio");
+            entity.Property(e => e.NombreParaElFront)
+                .HasMaxLength(200)
+                .HasColumnName("nombreParaElFront");
+            entity.Property(e => e.UrlPrivada).HasColumnName("urlPrivada");
+            entity.Property(e => e.UrlPublica).HasColumnName("urlPublica");
+
+            entity.HasOne(d => d.FkEjercicioNavigation).WithMany(p => p.ImagesForExercises)
+                .HasForeignKey(d => d.FkEjercicio)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ImagesForExercises_Ejercicio");
+        });
+
+        modelBuilder.Entity<InscripcionesDeClase>(entity =>
+        {
+            entity.HasKey(e => e.IdInscripcion).HasName("PK__inscripc__3D58AB69B61D8617");
+
+            entity.ToTable("inscripcionesDeClases");
+
+            entity.Property(e => e.IdInscripcion).HasColumnName("idInscripcion");
+            entity.Property(e => e.FechaDeInscripcion)
                 .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.UsuarioId).HasColumnName("UsuarioID");
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeInscripcion");
+            entity.Property(e => e.FkCliente).HasColumnName("fkCliente");
+            entity.Property(e => e.FkEstadoInscripcion).HasColumnName("fkEstadoInscripcion");
+            entity.Property(e => e.FkProgramacionClase).HasColumnName("fkProgramacionClase");
 
-            entity.HasOne(d => d.Clase).WithMany(p => p.InscripcionClases)
-                .HasForeignKey(d => d.ClaseId)
-                .HasConstraintName("FK__Inscripci__Clase__5DCAEF64");
+            entity.HasOne(d => d.FkClienteNavigation).WithMany(p => p.InscripcionesDeClases)
+                .HasForeignKey(d => d.FkCliente)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_InscripcionesDeClases_Cliente");
 
-            entity.HasOne(d => d.Usuario).WithMany(p => p.InscripcionClases)
-                .HasForeignKey(d => d.UsuarioId)
-                .HasConstraintName("FK__Inscripci__Usuar__5EBF139D");
+            entity.HasOne(d => d.FkEstadoInscripcionNavigation).WithMany(p => p.InscripcionesDeClases)
+                .HasForeignKey(d => d.FkEstadoInscripcion)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_InscripcionesDeClases_EstadoInscripcion");
+
+            entity.HasOne(d => d.FkProgramacionClaseNavigation).WithMany(p => p.InscripcionesDeClases)
+                .HasForeignKey(d => d.FkProgramacionClase)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_InscripcionesDeClases_ProgramacionClase");
         });
 
         modelBuilder.Entity<Intencione>(entity =>
@@ -302,6 +517,37 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(e => e.Nombre)
                 .HasMaxLength(100)
                 .HasColumnName("nombre");
+        });
+
+        modelBuilder.Entity<LogErrore>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__LogError__3213E83F2E02FD9A");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Aplicacion)
+                .HasMaxLength(200)
+                .HasDefaultValueSql("(app_name())")
+                .HasColumnName("aplicacion");
+            entity.Property(e => e.Estado).HasColumnName("estado");
+            entity.Property(e => e.Fecha)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fecha");
+            entity.Property(e => e.Host)
+                .HasMaxLength(100)
+                .HasDefaultValueSql("(host_name())")
+                .HasColumnName("host");
+            entity.Property(e => e.Mensaje)
+                .HasMaxLength(4000)
+                .HasColumnName("mensaje");
+            entity.Property(e => e.Procedimiento)
+                .HasMaxLength(200)
+                .HasColumnName("procedimiento");
+            entity.Property(e => e.Severidad).HasColumnName("severidad");
+            entity.Property(e => e.Usuario)
+                .HasMaxLength(100)
+                .HasDefaultValueSql("(suser_name())")
+                .HasColumnName("usuario");
         });
 
         modelBuilder.Entity<Medida>(entity =>
@@ -391,6 +637,36 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasForeignKey(d => d.FkUsuario)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Metas_Usuarios");
+        });
+
+        modelBuilder.Entity<NivelesDeDificultadDeClase>(entity =>
+        {
+            entity.HasKey(e => e.IdNivelDeDificultadDeClase).HasName("PK__nivelesD__86F5BA39539AB17D");
+
+            entity.ToTable("nivelesDeDificultadDeClase");
+
+            entity.Property(e => e.IdNivelDeDificultadDeClase).HasColumnName("idNivelDeDificultadDeClase");
+            entity.Property(e => e.FechaDeCreacion)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeCreacion");
+            entity.Property(e => e.FechaDeModificacion)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeModificacion");
+            entity.Property(e => e.NombreNivelDeDificultad).HasColumnName("nombreNivelDeDificultad");
+        });
+
+        modelBuilder.Entity<NivelesDeIntensidadDeClase>(entity =>
+        {
+            entity.HasKey(e => e.IdNivelDeIntensidad).HasName("PK__nivelesD__6F6E9594C607DCB8");
+
+            entity.ToTable("nivelesDeIntensidadDeClase");
+
+            entity.Property(e => e.IdNivelDeIntensidad).HasColumnName("idNivelDeIntensidad");
+            entity.Property(e => e.FechaDeCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeCreacion");
+            entity.Property(e => e.NombreNivelDeIntensidad).HasColumnName("nombreNivelDeIntensidad");
         });
 
         modelBuilder.Entity<NivelesDeLogro>(entity =>
@@ -518,12 +794,22 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(e => e.FechaCreacion)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+            entity.Property(e => e.FkClase).HasColumnName("fkClase");
+            entity.Property(e => e.FkTipoRutina).HasColumnName("fkTipoRutina");
             entity.Property(e => e.Observaciones).HasMaxLength(255);
             entity.Property(e => e.UsuarioId).HasColumnName("UsuarioID");
 
             entity.HasOne(d => d.Entrenador).WithMany(p => p.RutinaEntrenadors)
                 .HasForeignKey(d => d.EntrenadorId)
                 .HasConstraintName("FK__Rutinas__Entrena__4AB81AF0");
+
+            entity.HasOne(d => d.FkClaseNavigation).WithMany(p => p.Rutinas)
+                .HasForeignKey(d => d.FkClase)
+                .HasConstraintName("FK_Rutinas_Clases");
+
+            entity.HasOne(d => d.FkTipoRutinaNavigation).WithMany(p => p.Rutinas)
+                .HasForeignKey(d => d.FkTipoRutina)
+                .HasConstraintName("FK_Rutinas_TipoRutina");
 
             entity.HasOne(d => d.Usuario).WithMany(p => p.RutinaUsuarios)
                 .HasForeignKey(d => d.UsuarioId)
@@ -557,6 +843,26 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(e => e.Descripcion).HasMaxLength(255);
             entity.Property(e => e.NombreServicio).HasMaxLength(100);
             entity.Property(e => e.TipoServicio).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<TipoRutina>(entity =>
+        {
+            entity.HasKey(e => e.IdTipoRutina).HasName("PK__TipoRuti__55C9CD78F168D142");
+
+            entity.ToTable("TipoRutina");
+
+            entity.Property(e => e.IdTipoRutina).HasColumnName("idTipoRutina");
+            entity.Property(e => e.FechaDeCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeCreacion");
+            entity.Property(e => e.FechaDeModificacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeModificacion");
+            entity.Property(e => e.NombreTipoRutina)
+                .HasMaxLength(100)
+                .HasColumnName("nombreTipoRutina");
         });
 
         modelBuilder.Entity<UnidadesDeMedidum>(entity =>
@@ -607,7 +913,8 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasConstraintName("FK__Usuarios__RolID__3D5E1FD2");
         });
 
-        // CUSTOM MODELS DEFINITIONS ADDED MANUALLY
+        // propiedades agregadas manualmente
+
         modelBuilder.Entity<DTO.Dtos.Rutina>(entity =>
         {
             entity.HasNoKey();

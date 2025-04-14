@@ -33,7 +33,9 @@ public partial class Usuario
 
     public virtual ICollection<Clase> Clases { get; set; } = new List<Clase>();
 
-    public virtual ICollection<InscripcionClase> InscripcionClases { get; set; } = new List<InscripcionClase>();
+    public virtual ICollection<ClasesProgramada> ClasesProgramada { get; set; } = new List<ClasesProgramada>();
+
+    public virtual ICollection<InscripcionesDeClase> InscripcionesDeClases { get; set; } = new List<InscripcionesDeClase>();
 
     public virtual ICollection<Medida> Medida { get; set; } = new List<Medida>();
 

@@ -15,5 +15,7 @@ public partial class IconsForParameter
 
     public virtual ICollection<Ejercicio> Ejercicios { get; set; } = new List<Ejercicio>();
 
+    public virtual ICollection<Equipo> Equipos { get; set; } = new List<Equipo>();
+
     public virtual ICollection<ParametrosDeMedicion> ParametrosDeMedicions { get; set; } = new List<ParametrosDeMedicion>();
 }

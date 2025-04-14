@@ -11,5 +11,9 @@ public partial class Equipo
 
     public string? Descripcion { get; set; }
 
+    public int? FkIcon { get; set; }
+
     public virtual ICollection<EjercicioEquipo> EjercicioEquipos { get; set; } = new List<EjercicioEquipo>();
+
+    public virtual IconsForParameter? FkIconNavigation { get; set; }
 }
