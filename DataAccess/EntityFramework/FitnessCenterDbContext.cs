@@ -102,6 +102,8 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<DTO.Dtos.DTOUltimaMetaDeParametro> ultimasMetasDeParametroSP { get; set; }
     public virtual DbSet<DTO.Dtos.DTOEjerciciosYParametrosDelCliente> ejerciciosYParametrosDelClienteSP { get; set; }
+    public virtual DbSet<DTO.Dtos.DetalleDeClase> detalleDeClaseSP { get; set; }
+    public virtual DbSet<DTO.Dtos.DetalleDeClaseRaw> detalleDeClaseRawSP { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
@@ -1016,6 +1018,37 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(ep => ep.nombreParametro).HasColumnName("nombreParametro");
         });
 
+        modelBuilder.Entity<DTO.Dtos.DetalleDeClase>(entity =>
+        {
+            entity.HasNoKey();
+            entity.Property(d => d.Duracion).HasColumnName("Duracion");
+            entity.Property(d => d.NivelDeIntensidad).HasColumnName("NivelDeIntensidad");
+            entity.Property(d => d.NivelDeDificultad).HasColumnName("NivelDeDificultad");
+            entity.Property(d => d.DescripcionDeLaClase).HasColumnName("DescripcionDeLaClase");
+            entity.Ignore(d => d.BeneficiosDeLaClase);
+            entity.Ignore(d => d.EstructuraDeLaClase);
+            entity.Ignore(d => d.EjerciciosDeClase);
+            entity.Ignore(d => d.Consejos);
+            entity.Ignore(d => d.EquipamientoRecomendado);
+            entity.Ignore(d => d.HorariosProgramados);
+        });
+
+        modelBuilder.Entity<DTO.Dtos.DetalleDeClaseRaw>(entity =>
+        {
+            entity.HasNoKey();
+            entity.Property(d => d.ClaseId).HasColumnName("claseId");
+            entity.Property(d => d.NombreClase).HasColumnName("nombreClase");
+            entity.Property(d => d.Duracion).HasColumnName("Duracion");
+            entity.Property(d => d.NivelDeIntensidad).HasColumnName("NivelDeIntensidad");
+            entity.Property(d => d.NivelDeDificultad).HasColumnName("NivelDeDificultad");
+            entity.Property(d => d.DescripcionDeLaClase).HasColumnName("DescripcionDeLaClase");
+            entity.Property(d => d.BeneficiosDeLaClase).HasColumnName("BeneficiosDeLaClase");
+            entity.Property(d => d.EstructuraDeLaClase).HasColumnName("EstructuraDeLaClase");
+            entity.Property(d => d.EjerciciosDeClase).HasColumnName("EjerciciosDeClase");
+            entity.Property(d => d.Consejos).HasColumnName("Consejos");
+            entity.Property(d => d.EquipamientoRecomendado).HasColumnName("EquipamientoRecomendado");
+            entity.Property(d => d.HorariosProgramados).HasColumnName("HorariosProgramados");
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }

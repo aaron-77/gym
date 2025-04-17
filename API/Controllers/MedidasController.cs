@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using DTO.Dtos;
 using BL.Utils;
 using DataAccess.EntityFramework;
@@ -167,6 +167,7 @@ namespace FitnessGymApi.Controllers
     [FromQuery] DateTime? fechaDeCreacion = null
     )
         {
+            HTTPResponseDetallesDeProgreso finalResponse = new HTTPResponseDetallesDeProgreso();
             try
             {
                 FitnessCenterDbContext db = new FitnessCenterDbContext();
@@ -182,7 +183,7 @@ namespace FitnessGymApi.Controllers
                 {
                     añosPorDefecto = DataTableConverter.ConvertToDataTable(añosDeFiltro);//(new List<Dictionary<string, int>> { new Dictionary<string, int> { { "año", añoActual.Value } } });        // Año por defecto
                 }
-                HTTPResponseDetallesDeProgreso finalResponse = new HTTPResponseDetallesDeProgreso();
+                
                 // Crear la conexión ADO.NET
                 using var connection = (SqlConnection)db.Database.GetDbConnection();
                 if (connection.State == ConnectionState.Closed)
@@ -234,7 +235,7 @@ namespace FitnessGymApi.Controllers
             {
                 finalResponse.ok = false;
                 finalResponse.message = "Error al ejecutar el procedimiento almacenado";
-                finalResponse.errors.add(new ErrorModel { message = ex.Message }); ;
+                finalResponse.errors.Add(new ErrorModel { message = ex.Message });
                 return StatusCode(500, finalResponse);
             }   
             return null;
@@ -267,14 +268,3 @@ namespace FitnessGymApi.Controllers
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
