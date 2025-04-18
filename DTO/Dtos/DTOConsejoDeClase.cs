@@ -9,7 +9,7 @@ namespace DTO.Dtos
     {
         public int FkClase { get; set; }
         public string IntroduccionDeConsejo { get; set; }
-         [JsonConverter(typeof(ConsejosStringToArrayConverter))]
+         
         public List<string> Consejos { get; set; }
         }
 }
