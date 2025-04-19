@@ -10,6 +10,7 @@ namespace DTO.Dtos
         public string NivelDeIntensidad { get; set; }
         public string NivelDeDificultad { get; set; }
         public string DescripcionDeLaClase { get; set; }
+        public DTOImagenesDeClase imagenesDeClase { get; set; }
         public List<string> BeneficiosDeLaClase { get; set; }
         public List<EstructuraDeClase> EstructuraDeLaClase { get; set; }
         public List<EjercicioPreview> EjerciciosDeClase { get; set; }

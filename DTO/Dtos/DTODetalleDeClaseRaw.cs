@@ -8,6 +8,7 @@ namespace DTO.Dtos
         public string NivelDeIntensidad { get; set; }
         public string NivelDeDificultad { get; set; }
         public string DescripcionDeLaClase { get; set; }
+        public string imagenesDeClase { get; set; }
         public string BeneficiosDeLaClase { get; set; }
         public string EstructuraDeLaClase { get; set; }
         public string EjerciciosDeClase { get; set; }
@@ -16,4 +17,3 @@ namespace DTO.Dtos
         public string HorariosProgramados { get; set; }
     }
 }
-        
