@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -1042,6 +1042,7 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(d => d.NivelDeIntensidad).HasColumnName("NivelDeIntensidad");
             entity.Property(d => d.NivelDeDificultad).HasColumnName("NivelDeDificultad");
             entity.Property(d => d.DescripcionDeLaClase).HasColumnName("DescripcionDeLaClase");
+            entity.Property(d => d.imagenesDeClase).HasColumnName("imagenesDeClase");
             entity.Property(d => d.BeneficiosDeLaClase).HasColumnName("BeneficiosDeLaClase");
             entity.Property(d => d.EstructuraDeLaClase).HasColumnName("EstructuraDeLaClase");
             entity.Property(d => d.EjerciciosDeClase).HasColumnName("EjerciciosDeClase");

@@ -1,10 +1,204 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-Layout = "_Layout";
+@{
+    ViewData["Title"] = "GymPower - Libera tu Potencial";
+    Layout = "_Layout";
 }
-<!DOCTYPE html>
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps w
-            ith ASP.NET Core</a>.</p>
-</div>
+
+<link rel="stylesheet" href="~/css/landing-styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<body class="landing-page">
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <img src="~/img/svgprincipallogo.svg" alt="Logo GymPower">
+                <span class="logo-text">GYM<span class="text-accent">POWER</span></span>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="#home" class="nav-link">Inicio</a>
+                <a href="#about" class="nav-link">Acerca de</a>
+                <a href="#classes" class="nav-link">Clases</a>
+                <a href="#trainers" class="nav-link">Entrenadores</a>
+                <a href="#testimonials" class="nav-link">Testimonios</a>
+                <a asp-area="" asp-controller="Users" asp-action="Index" class="nav-link">Iniciar Sesión</a>
+                <a asp-area="" asp-controller="Users" asp-action="crearCuenta" class="nav-link">Registrarse</a>
+            </div>
+            <button id="botonUneteAhora" href="#membership" class="btn btn-primary">Únete Ahora</button>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Sección Hero -->
+    <section id="home" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">LIBERA TU <span class="text-accent">POTENCIAL</span></h1>
+                <p class="hero-subtitle">Supera tus límites. Transforma tu cuerpo. Eleva tu mente.</p>
+                <div class="hero-buttons">
+                    <button id="botonComienzaHoy" href="#membership" class="btn btn-primary">
+                        Comienza Hoy
+                        <img src="~/img/svgarrow.svg" alt="Flecha">
+                    </button>
+                    <button class="btn btn-outline">
+                        Aprende Más
+                        <img src="~/img/svgarrow.svg" alt="Flecha">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Acerca de -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content">
+                    <h2 class="section-title">ACERCA DE <span class="text-accent">GYMPOWER</span></h2>
+                    <p class="section-text">
+                        En GymPower, creemos en superar límites y romper barreras. Nuestras instalaciones de última generación están diseñadas para inspirarte y motivarte a alcanzar tus objetivos fitness.
+                    </p>
+                    <p class="section-text">
+                        Con entrenadores expertos, equipos de vanguardia y una comunidad de apoyo, te proporcionamos todo lo que necesitas para transformar tu cuerpo y mente.
+                    </p>
+                    <div class="features-grid">
+                        <div class="feature">
+                            <div class="feature-icon">
+                                <img src="~/img/equiposvg.svg" alt="Icono Equipo">
+                            </div>
+                            <div>
+                                <h3 class="feature-title">Equipo Premium</h3>
+                                <p class="feature-text">Tecnología fitness más reciente</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">
+                                <img src="~/img/svgtrainer.svg" alt="Icono Entrenador">
+                            </div>
+                            <div>
+                                <h3 class="feature-title">Entrenadores Expertos</h3>
+                                <p class="feature-text">Guía profesional</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">
+                                <img src="~/img/svgplanes.svg" alt="Icono Planes">
+                            </div>
+                            <div>
+                                <h3 class="feature-title">Planes Personalizados</h3>
+                                <p class="feature-text">Diseñados para ti</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">
+                                <img src="~/img/svgacceso.svg" alt="Icono Acceso">
+                            </div>
+                            <div>
+                                <h3 class="feature-title">Acceso 24/7</h3>
+                                <p class="feature-text">Entrena en tu horario</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="~/img/about1.jpg" alt="Interior del gimnasio">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Clases -->
+    <section id="classes" class="classes">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">NUESTRAS <span class="text-accent">CLASES</span></h2>
+                <p class="section-subtitle">
+                    Desafíate a ti mismo con nuestra diversa gama de clases de alta intensidad diseñadas para superar tus límites y lograr resultados máximos.
+                </p>
+            </div>
+            
+            <div class="classes-grid">
+                @* Esta sección generará dinámicamente los cards con el modelo DTOClasePreview *@
+                @foreach (var clase in Model)
+                {
+                    <div class="class-card">
+                        <div class="class-image">
+                            <img src="@clase.urlImage" alt="@clase.nombreClase">
+                        </div>
+                        <div class="class-content">
+                            <h3 class="class-title">@clase.nombreClase</h3>
+                            <p class="class-description">@clase.descripcionCortaClase</p>
+                            <a href="/api/clases/detallesDeClase?idClase=@clase.idClase" class="class-btn">
+                                Aprende Más 
+                                <img src="~/img/svgredarrow.svg" alt="Flecha roja">
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo">
+                        <img src="~/img/svgprincipallogo.svg" alt="Logo GymPower">
+                        <span class="logo-text">GYM<span class="text-accent">POWER</span></span>
+                    </div>
+                    <p class="footer-text">
+                        Libera tu potencial y transforma tu cuerpo con nuestros entrenadores expertos y nuestras instalaciones de última generación.
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">Enlaces Rápidos</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home">Inicio</a></li>
+                        <li><a href="#about">Acerca de</a></li>
+                        <li><a href="#classes">Clases</a></li>
+                        <li><a href="#trainers">Entrenadores</a></li>
+                        <li><a href="#testimonials">Testimonios</a></li>
+                        <li><a asp-area="" asp-controller="Users" asp-action="Index">Iniciar Sesión</a></li>
+                        <li><a asp-area="" asp-controller="Users" asp-action="crearCuenta">Registrarse</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">Horarios</h3>
+                    <ul class="footer-info">
+                        <li>Lunes - Viernes: 5am - 11pm</li>
+                        <li>Sábado: 7am - 9pm</li>
+                        <li>Domingo: 8am - 8pm</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">Contacto</h3>
+                    <ul class="footer-info">
+                        <li>123 Fitness Street, Gym City</li>
+                        <li>info@gympower.com</li>
+                        <li>(555) 123-4567</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear"></span> GymPower. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Actualizar el año actual en el footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // Menú móvil toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+    </script>
+</body>

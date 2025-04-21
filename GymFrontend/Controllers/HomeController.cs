@@ -1,6 +1,8 @@
-﻿using GymFrontend.Models;
+using GymFrontend.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using DTO.Dtos;
+using System.Collections.Generic;
 
 namespace GymFrontend.Controllers
 {
@@ -16,11 +18,54 @@ namespace GymFrontend.Controllers
 
         public IActionResult Index()
         {
+            // Crear una lista de ejemplo de clases basada en las descripciones originales
+            var clasesPreview = new List<DTOClasePreview>
+            {
+                new DTOClasePreview
+                {
+                    idClase = 1,
+                    urlImage = "/img/hiit.jpg",
+                    nombreClase = "Entrenamiento HIIT",
+                    descripcionCortaClase = "Entrenamiento de intervalos de alta intensidad para maximizar la quema de caloru00edas y mejorar la salud cardiovascular."
+                },
+                new DTOClasePreview
+                {
+                    idClase = 2,
+                    urlImage = "/img/strength.jpg",
+                    nombreClase = "Fuerza y Potencia",
+                    descripcionCortaClase = "Desarrolla mu00fasculo, aumenta la fuerza y desarrolla potencia explosiva con nuestro programa de fuerza integral."
+                },
+                new DTOClasePreview
+                {
+                    idClase = 3,
+                    urlImage = "/img/crossfit.jpg",
+                    nombreClase = "CrossFit",
+                    descripcionCortaClase = "Combina fuerza y acondicionamiento en movimientos funcionales variados realizados a alta intensidad."
+                },
+                new DTOClasePreview
+                {
+                    idClase = 4,
+                    urlImage = "/img/boxing.jpg",
+                    nombreClase = "Boxeo",
+                    descripcionCortaClase = "Aprende tu00e9cnicas de boxeo mientras obtienes un entrenamiento de cuerpo completo que mejora la coordinaciu00f3n y quema caloru00edas."
+                },
+                new DTOClasePreview
+                {
+                    idClase = 5,
+                    urlImage = "/img/functional.jpg",
+                    nombreClase = "Entrenamiento Funcional",
+                    descripcionCortaClase = "Mejora tus movimientos diarios con ejercicios que simulan actividades comunes."
+                },
+                new DTOClasePreview
+                {
+                    idClase = 6,
+                    urlImage = "/img/personal.jpg",
+                    nombreClase = "Entrenamiento Personal",
+                    descripcionCortaClase = "Obtu00e9n atenciu00f3n personalizada y entrenamientos personalizados para alcanzar tus objetivos especu00edficos de fitness."
+                }
+            };
 
-            var seccion = _config.GetValue<string>("EndPoints:Enpoint1", "vacio");
-            string controllerPath = GetType().Assembly.Location;
-            Console.WriteLine($"Ubicación física del controlador: {controllerPath}");
-            return View("Index");
+            return View(clasesPreview);
         }
 
         public IActionResult Privacy()
