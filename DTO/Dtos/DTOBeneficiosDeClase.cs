@@ -2,6 +2,8 @@ namespace DTO.Dtos
 {
     public class DTOBeneficiosDeClase
     {
-        public string name { get; set; }
+        public string beneficio { get; set; }
+        public string descripcionBeneficio { get; set; }
+
     }
 }

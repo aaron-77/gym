@@ -17,7 +17,14 @@ public partial class ClasesProgramada
 
     public int CupoMaximo { get; set; }
 
+    /// <summary>
+    /// los estados seran: disponible,no disponible,cancelada
+    /// </summary>
     public int FkEstadoClaseProgramada { get; set; }
+
+    public DateTime? FechaCreacion { get; set; }
+
+    public DateTime? FechaModificacion { get; set; }
 
     public virtual Clase FkClaseNavigation { get; set; } = null!;
 

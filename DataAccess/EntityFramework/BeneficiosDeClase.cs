@@ -15,5 +15,11 @@ public partial class BeneficiosDeClase
 
     public DateTime? FechaDeModificacion { get; set; }
 
+    public int? FkIcon { get; set; }
+
+    public string? DescripcionBeneficio { get; set; }
+
     public virtual Clase FkClaseNavigation { get; set; } = null!;
+
+    public virtual IconsForParameter? FkIconNavigation { get; set; }
 }

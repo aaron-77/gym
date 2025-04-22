@@ -21,6 +21,10 @@ public partial class Clase
 
     public int? FkDificultad { get; set; }
 
+    public int TiempoDeDescansoEnMinutos { get; set; }
+
+    public int DuracionEnMinutosConDescansoIncluido { get; set; }
+
     public virtual ICollection<BeneficiosDeClase> BeneficiosDeClases { get; set; } = new List<BeneficiosDeClase>();
 
     public virtual ICollection<ClasesProgramada> ClasesProgramada { get; set; } = new List<ClasesProgramada>();
@@ -32,6 +36,8 @@ public partial class Clase
     public virtual NivelesDeDificultadDeClase? FkDificultadNavigation { get; set; }
 
     public virtual NivelesDeIntensidadDeClase? FkIntensidadNavigation { get; set; }
+
+    public virtual ICollection<ImagesForClase> ImagesForClases { get; set; } = new List<ImagesForClase>();
 
     public virtual Usuario? Instructor { get; set; }
 

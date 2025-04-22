@@ -2,7 +2,7 @@ namespace DTO.Dtos
 {
     public class DetalleDeClaseRaw
     {
-        public int ClaseId { get; set; }
+        public int claseId { get; set; }
         public string NombreClase { get; set; }
         public int Duracion { get; set; }
         public string NivelDeIntensidad { get; set; }

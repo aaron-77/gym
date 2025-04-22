@@ -67,11 +67,7 @@ namespace API.Controllers
                     NivelDeIntensidad = detalleRaw.NivelDeIntensidad,
                     NivelDeDificultad = detalleRaw.NivelDeDificultad,
                     DescripcionDeLaClase = detalleRaw.DescripcionDeLaClase,
-                    BeneficiosDeLaClase = JsonSerializer
-                    .Deserialize<JsonDocument>(detalleRaw.BeneficiosDeLaClase)
-                    .RootElement.EnumerateArray()
-                    .Select(item => item.GetProperty("beneficio").GetString())
-                    .ToList(),
+                    BeneficiosDeLaClase = JsonSerializer.Deserialize<List<DTO.Dtos.DTOBeneficiosDeClase>>(detalleRaw.BeneficiosDeLaClase),
                     EstructuraDeLaClase = JsonSerializer.Deserialize<List<DTO.Dtos.EstructuraDeClase>>(
                         detalleRaw.EstructuraDeLaClase
                     ),
