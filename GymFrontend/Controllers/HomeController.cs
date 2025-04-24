@@ -23,7 +23,7 @@ namespace GymFrontend.Controllers
             {
                 new DTOClasePreview
                 {
-                    idClase = 1,
+                    idClase = 5,
                     urlImage = "/img/hiit.jpg",
                     nombreClase = "Entrenamiento HIIT",
                     descripcionCortaClase = "Entrenamiento de intervalos de alta intensidad para maximizar la quema de caloru00edas y mejorar la salud cardiovascular."
@@ -51,7 +51,7 @@ namespace GymFrontend.Controllers
                 },
                 new DTOClasePreview
                 {
-                    idClase = 5,
+                    idClase = 1,
                     urlImage = "/img/functional.jpg",
                     nombreClase = "Entrenamiento Funcional",
                     descripcionCortaClase = "Mejora tus movimientos diarios con ejercicios que simulan actividades comunes."

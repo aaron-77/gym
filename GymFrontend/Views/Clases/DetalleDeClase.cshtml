@@ -1,3 +1,4 @@
+@model DTO.Dtos.DetalleDeClase
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -35,7 +36,7 @@
     </nav>
 
     <!-- Cabecera de la Clase -->
-    <section class="class-header">
+    <section class="class-header" style="background-image: url('@Model.imagenesDeClase.urlParaBanner');">
         <div class="class-header-overlay"></div>
         <div class="container">
             <div class="class-header-content">
@@ -73,33 +74,35 @@
                         Este tipo de entrenamiento te proporciona un entrenamiento completo mientras mejora tu condición cardiovascular y maximiza la quema de calorías. Los estudios han demostrado que el HIIT puede quemar hasta un 30% más de calorías que otras formas de cardio en el mismo período de tiempo.
                     </p>
                     <div class="description-features">
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <img src="../img/heart.svg" alt="Beneficio" class="icon">
-                            </div>
-                            <div>
-                                <h3 class="feature-title">Mejora Cardiovascular</h3>
-                                <p class="feature-text">Aumenta la capacidad aeróbica y anaeróbica</p>
-                            </div>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <img src="../img/flame.svg" alt="Beneficio" class="icon">
-                            </div>
-                            <div>
-                                <h3 class="feature-title">Quema de Grasa</h3>
-                                <p class="feature-text">Mayor quema calórica durante y después del ejercicio</p>
-                            </div>
-                        </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">
-                                <img src="../img/svgacceso24black.svg" alt="Beneficio" class="icon">
-                            </div>
-                            <div>
-                                <h3 class="feature-title">Eficiencia</h3>
-                                <p class="feature-text">Resultados máximos en tiempo mínimo</p>
-                            </div>
-                        </div>
+                        @if (Model.BeneficiosDeLaClase != null && Model.BeneficiosDeLaClase.Any())
+                        {
+                            @foreach (var beneficio in Model.BeneficiosDeLaClase)
+                            {
+                                @await Html.PartialAsync("~/Views/Shared/_BeneficioItem.cshtml", new { 
+                                    beneficio = beneficio.beneficio, 
+                                    descripcionBeneficio = beneficio.descripcionBeneficio, 
+                                    urlPublica = "../img/heart.svg" 
+                                })
+                            }
+                        }
+                        else
+                        {
+                            @await Html.PartialAsync("~/Views/Shared/_BeneficioItem.cshtml", new { 
+                                beneficio = "Mejora Cardiovascular", 
+                                descripcionBeneficio = "Aumenta la capacidad aeróbica y anaeróbica", 
+                                urlPublica = "../img/heart.svg" 
+                            })
+                            @await Html.PartialAsync("~/Views/Shared/_BeneficioItem.cshtml", new { 
+                                beneficio = "Quema de Grasa", 
+                                descripcionBeneficio = "Mayor quema calórica durante y después del ejercicio", 
+                                urlPublica = "../img/flame.svg" 
+                            })
+                            @await Html.PartialAsync("~/Views/Shared/_BeneficioItem.cshtml", new { 
+                                beneficio = "Eficiencia", 
+                                descripcionBeneficio = "Resultados máximos en tiempo mínimo", 
+                                urlPublica = "../img/svgacceso24black.svg" 
+                            })
+                        }
                     </div>
                 </div>
                 <div class="description-image">
@@ -114,33 +117,37 @@
         <div class="container">
             <h2 class="section-title text-center">ESTRUCTURA DE LA <span class="text-accent">CLASE</span></h2>
             <div class="structure-timeline">
-                <div class="timeline-item">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <h3 class="timeline-title">Calentamiento (5-7 min)</h3>
-                        <p class="timeline-text">
-                            Comenzamos con un calentamiento dinámico para preparar el cuerpo para el ejercicio intenso. Incluye movilidad articular, activación muscular y elevación gradual del ritmo cardíaco.
-                        </p>
-                    </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <h3 class="timeline-title">Bloques HIIT (30 min)</h3>
-                        <p class="timeline-text">
-                            El núcleo de la clase consiste en 4-6 bloques de ejercicios de alta intensidad. Cada bloque alterna entre 20-40 segundos de trabajo máximo y 10-20 segundos de descanso. Realizamos 3-4 rondas de cada bloque con un minuto de recuperación entre bloques.
-                        </p>
-                    </div>
-                </div>
-                <div class="timeline-item">
-                    <div class="timeline-marker"></div>
-                    <div class="timeline-content">
-                        <h3 class="timeline-title">Enfriamiento (5-7 min)</h3>
-                        <p class="timeline-text">
-                            Finalizamos con ejercicios de baja intensidad para reducir gradualmente el ritmo cardíaco, seguidos de estiramientos estáticos para mejorar la flexibilidad y acelerar la recuperación.
-                        </p>
-                    </div>
-                </div>
+                @if (Model.EstructuraDeLaClase != null && Model.EstructuraDeLaClase.Any())
+                {
+                    @foreach (var estructura in Model.EstructuraDeLaClase)
+                    {
+                        @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", estructura)
+                    }
+                }
+                else
+                {
+                    @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", new DTO.Dtos.DTOEstructuraDeClase
+                    {
+                        TituloBloque = "Calentamiento",
+                        DuracionMenorEnMinutos = 5,
+                        DuracionMayorEnMinutos = 7,
+                        DescripcionBloque = "Comenzamos con un calentamiento dinámico para preparar el cuerpo para el ejercicio intenso. Incluye movilidad articular, activación muscular y elevación gradual del ritmo cardíaco."
+                    })
+                    @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", new DTO.Dtos.DTOEstructuraDeClase
+                    {
+                        TituloBloque = "Bloques HIIT",
+                        DuracionMenorEnMinutos = 30,
+                        DuracionMayorEnMinutos = 30,
+                        DescripcionBloque = "El núcleo de la clase consiste en 4-6 bloques de ejercicios de alta intensidad. Cada bloque alterna entre 20-40 segundos de trabajo máximo y 10-20 segundos de descanso. Realizamos 3-4 rondas de cada bloque con un minuto de recuperación entre bloques."
+                    })
+                    @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", new DTO.Dtos.DTOEstructuraDeClase
+                    {
+                        TituloBloque = "Enfriamiento",
+                        DuracionMenorEnMinutos = 5,
+                        DuracionMayorEnMinutos = 7,
+                        DescripcionBloque = "Finalizamos con ejercicios de baja intensidad para reducir gradualmente el ritmo cardíaco, seguidos de estiramientos estáticos para mejorar la flexibilidad y acelerar la recuperación."
+                    })
+                }
             </div>
         </div>
     </section>
@@ -154,72 +161,40 @@
             </p>
             
             <div class="exercises-grid">
-                <div class="exercise-card">
-                    <div class="exercise-image">
-                        <img src="../img/burpees.jpg" alt="Burpees">
-                    </div>
-                    <div class="exercise-content">
-                        <h3 class="exercise-title">Burpees</h3>
-                        <p class="exercise-description">
-                            Ejercicio de cuerpo completo que combina sentadilla, plancha, flexión y salto. Excelente para desarrollar resistencia cardiovascular y fuerza.
-                        </p>
-                    </div>
-                </div>
-                <div class="exercise-card">
-                    <div class="exercise-image">
-                        <img src="../img/mountainclimbers.webp" alt="Mountain Climbers">
-                    </div>
-                    <div class="exercise-content">
-                        <h3 class="exercise-title">Mountain Climbers</h3>
-                        <p class="exercise-description">
-                            En posición de plancha, alternamos llevando las rodillas hacia el pecho. Trabaja el core y eleva el ritmo cardíaco.
-                        </p>
-                    </div>
-                </div>
-                <div class="exercise-card">
-                    <div class="exercise-image">
-                        <img src="../img/jumpingjacks.webp" alt="Jumping Jacks">
-                    </div>
-                    <div class="exercise-content">
-                        <h3 class="exercise-title">Jumping Jacks</h3>
-                        <p class="exercise-description">
-                            Saltos abriendo y cerrando piernas y brazos simultáneamente. Excelente ejercicio cardiovascular que involucra todo el cuerpo.
-                        </p>
-                    </div>
-                </div>
-                <div class="exercise-card">
-                    <div class="exercise-image">
-                        <img src="../img/sentadillaconsalto.jpg" alt="Sentadillas con Salto">
-                    </div>
-                    <div class="exercise-content">
-                        <h3 class="exercise-title">Sentadillas con Salto</h3>
-                        <p class="exercise-description">
-                            Sentadilla tradicional seguida de un salto explosivo. Desarrolla potencia en el tren inferior y eleva el ritmo cardíaco.
-                        </p>
-                    </div>
-                </div>
-                <div class="exercise-card">
-                    <div class="exercise-image">
-                        <img src="../img/sentadillalateral.webp" alt="Planchas Laterales">
-                    </div>
-                    <div class="exercise-content">
-                        <h3 class="exercise-title">Planchas Laterales</h3>
-                        <p class="exercise-description">
-                            Mantenemos el cuerpo recto apoyados sobre un antebrazo y el lateral del pie. Fortalece el core y los estabilizadores laterales.
-                        </p>
-                    </div>
-                </div>
-                <div class="exercise-card">
-                    <div class="exercise-image">
-                        <img src="../img/highknees2.jpg" alt="High Knees">
-                    </div>
-                    <div class="exercise-content">
-                        <h3 class="exercise-title">High Knees</h3>
-                        <p class="exercise-description">
-                            Carrera estática elevando las rodillas al máximo. Excelente ejercicio cardiovascular que también trabaja el core.
-                        </p>
-                    </div>
-                </div>
+                @if (Model.EjerciciosDeClase != null && Model.EjerciciosDeClase.Any())
+                {
+                    @foreach (var ejercicio in Model.EjerciciosDeClase)
+                    {
+                        @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", ejercicio)
+                    }
+                }
+                else
+                {
+                    @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
+                    {
+                        NombreEjercicio = "Burpees",
+                        DescripcionEjercicio = "Ejercicio de cuerpo completo que combina sentadilla, plancha, flexión y salto. Excelente para desarrollar resistencia cardiovascular y fuerza.",
+                        UrlIcono = "../img/burpees.jpg"
+                    })
+                    @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
+                    {
+                        NombreEjercicio = "Mountain Climbers",
+                        DescripcionEjercicio = "En posición de plancha, alternamos llevando las rodillas hacia el pecho. Trabaja el core y eleva el ritmo cardíaco.",
+                        UrlIcono = "../img/mountainclimbers.webp"
+                    })
+                    @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
+                    {
+                        NombreEjercicio = "Jumping Jacks",
+                        DescripcionEjercicio = "Saltos abriendo y cerrando piernas y brazos simultáneamente. Excelente ejercicio cardiovascular que involucra todo el cuerpo.",
+                        UrlIcono = "../img/jumpingjacks.webp"
+                    })
+                    @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
+                    {
+                        NombreEjercicio = "Sentadillas con Salto",
+                        DescripcionEjercicio = "Sentadilla tradicional seguida de un salto explosivo. Desarrolla potencia en el tren inferior y eleva el ritmo cardíaco.",
+                        UrlIcono = "../img/sentadillaconsalto.jpg"
+                    })
+                }
             </div>
         </div>
     </section>
@@ -229,35 +204,31 @@
         <div class="container">
             <div class="tips-content">
                 <h2 class="section-title">CONSEJOS PARA <span class="text-accent">PRINCIPIANTES</span></h2>
-                <p class="tips-intro">
-                    Si eres nuevo en el HIIT, estos consejos te ayudarán a sacar el máximo provecho de tus entrenamientos mientras minimizas el riesgo de lesiones:
-                </p>
-                <ul class="tips-list">
-                    <li class="tips-item">
-                        <img src="../img/check.svg" alt="Check" class="icon">
-                        <span>Comienza con versiones modificadas de los ejercicios hasta dominar la técnica correcta.</span>
-                    </li>
-                    <li class="tips-item">
-                        <img src="../img/check.svg" alt="Check" class="icon">
-                        <span>Escucha a tu cuerpo y toma descansos adicionales si los necesitas.</span>
-                    </li>
-                    <li class="tips-item">
-                        <img src="../img/check.svg" alt="Check" class="icon">
-                        <span>Mantén una buena hidratación antes, durante y después de la clase.</span>
-                    </li>
-                    <li class="tips-item">
-                        <img src="../img/check.svg" alt="Check" class="icon">
-                        <span>Prioriza la técnica sobre la velocidad o el número de repeticiones.</span>
-                    </li>
-                    <li class="tips-item">
-                        <img src="../img/check.svg" alt="Check" class="icon">
-                        <span>Comienza con 1-2 clases por semana y aumenta gradualmente.</span>
-                    </li>
-                    <li class="tips-item">
-                        <img src="../img/check.svg" alt="Check" class="icon">
-                        <span>Informa al instructor sobre cualquier lesión o limitación que tengas.</span>
-                    </li>
-                </ul>
+                @if (Model.Consejos != null)
+                {
+                    @await Html.PartialAsync("~/Views/Shared/_ConsejoIntro.cshtml", Model.Consejos)
+                    @await Html.PartialAsync("~/Views/Shared/_ConsejosList.cshtml", Model.Consejos)
+                }
+                else
+                {
+                    <p class="tips-intro">
+                        Si eres nuevo en el HIIT, estos consejos te ayudarán a sacar el máximo provecho de tus entrenamientos mientras minimizas el riesgo de lesiones:
+                    </p>
+                    <ul class="tips-list">
+                        <li class="tips-item">
+                            <img src="../img/check.svg" alt="Check" class="icon">
+                            <span>Comienza con versiones modificadas de los ejercicios hasta dominar la técnica correcta.</span>
+                        </li>
+                        <li class="tips-item">
+                            <img src="../img/check.svg" alt="Check" class="icon">
+                            <span>Escucha a tu cuerpo y toma descansos adicionales si los necesitas.</span>
+                        </li>
+                        <li class="tips-item">
+                            <img src="../img/check.svg" alt="Check" class="icon">
+                            <span>Mantén una buena hidratación antes, durante y después de la clase.</span>
+                        </li>
+                    </ul>
+                }
             </div>
             <div class="tips-image">
                 <img src="../img/lesiongym.jpg" alt="Principiante en clase de HIIT">
@@ -274,34 +245,31 @@
             </p>
             
             <div class="equipment-grid">
-                <div class="equipment-item">
-                    <div class="equipment-icon">
-                        <img src="../img/svgmacuerna.svg" alt="Mancuernas" class="icon-large">
-                    </div>
-                    <h3 class="equipment-title">Mancuernas Ligeras</h3>
-                    <p class="equipment-description">Para añadir resistencia a ejercicios como sentadillas o press de hombros.</p>
-                </div>
-                <div class="equipment-item">
-                    <div class="equipment-icon">
-                        <img src="../img/svgklettlebells.svg" alt="Kettlebells" class="icon-large">
-                    </div>
-                    <h3 class="equipment-title">Kettlebells</h3>
-                    <p class="equipment-description">Ideales para ejercicios balísticos como swings o clean and press.</p>
-                </div>
-                <div class="equipment-item">
-                    <div class="equipment-icon">
-                        <img src="../img/esterilla.svg" alt="Esterilla" class="icon-large">
-                    </div>
-                    <h3 class="equipment-title">Esterilla</h3>
-                    <p class="equipment-description">Para mayor comodidad en ejercicios de suelo como planchas o abdominales.</p>
-                </div>
-                <div class="equipment-item">
-                    <div class="equipment-icon">
-                        <img src="../img/aquabottle.svg" alt="Botella de Agua" class="icon-large">
-                    </div>
-                    <h3 class="equipment-title">Botella de Agua</h3>
-                    <p class="equipment-description">Fundamental para mantenerte hidratado durante el entrenamiento intenso.</p>
-                </div>
+                @if (Model.EquipamientoRecomendado != null && Model.EquipamientoRecomendado.Any())
+                {
+                    @foreach (var equipo in Model.EquipamientoRecomendado)
+                    {
+                        @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", equipo)
+                    }
+                }
+                else
+                {
+                    @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
+                    {
+                        NombreEquipo = "Mancuernas Ligeras",
+                        Descripcion = "Para añadir resistencia a ejercicios como sentadillas o press de hombros."
+                    })
+                    @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
+                    {
+                        NombreEquipo = "Kettlebells",
+                        Descripcion = "Ideales para ejercicios balísticos como swings o clean and press."
+                    })
+                    @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
+                    {
+                        NombreEquipo = "Esterilla",
+                        Descripcion = "Para mayor comodidad en ejercicios de suelo como planchas o abdominales."
+                    })
+                }
             </div>
         </div>
     </section>
@@ -314,44 +282,37 @@
                 Ofrecemos múltiples horarios para adaptarnos a tu agenda. ¡Reserva tu plaza ahora!
             </p>
             
-            <div class="schedule-table">
-                <div class="schedule-row schedule-header">
-                    <div class="schedule-cell">Día</div>
-                    <div class="schedule-cell">Horario</div>
-                    <div class="schedule-cell">Instructor</div>
-                    <div class="schedule-cell">Acción</div>
-                </div>
-                <div class="schedule-row">
-                    <div class="schedule-cell">Lunes</div>
-                    <div class="schedule-cell">6:00 - 6:45</div>
-                    <div class="schedule-cell">Sara Jiménez</div>
-                    <div class="schedule-cell"><button class="btn btn-small btn-primary">Reservar</button></div>
-                </div>
-                <div class="schedule-row">
-                    <div class="schedule-cell">Martes</div>
-                    <div class="schedule-cell">17:30 - 18:15</div>
-                    <div class="schedule-cell">Miguel Martínez</div>
-                    <div class="schedule-cell"><button class="btn btn-small btn-primary">Reservar</button></div>
-                </div>
-                <div class="schedule-row">
-                    <div class="schedule-cell">Jueves</div>
-                    <div class="schedule-cell">6:00 - 6:45</div>
-                    <div class="schedule-cell">Sara Jiménez</div>
-                    <div class="schedule-cell"><button class="btn btn-small btn-primary">Reservar</button></div>
-                </div>
-                <div class="schedule-row">
-                    <div class="schedule-cell">Viernes</div>
-                    <div class="schedule-cell">17:30 - 18:15</div>
-                    <div class="schedule-cell">Miguel Martínez</div>
-                    <div class="schedule-cell"><button class="btn btn-small btn-primary">Reservar</button></div>
-                </div>
-                <div class="schedule-row">
-                    <div class="schedule-cell">Sábado</div>
-                    <div class="schedule-cell">9:00 - 9:45</div>
-                    <div class="schedule-cell">Emma Díaz</div>
-                    <div class="schedule-cell"><button class="btn btn-small btn-primary">Reservar</button></div>
-                </div>
-            </div>
+            @if (Model.HorariosProgramados != null && Model.HorariosProgramados.Any())
+            {
+                @await Html.PartialAsync("~/Views/Shared/_HorarioClases.cshtml", Model.HorariosProgramados)
+            }
+            else
+            {
+                @await Html.PartialAsync("~/Views/Shared/_HorarioClases.cshtml", new List<DTO.Dtos.ClaseProgramada>
+                {
+                    new DTO.Dtos.ClaseProgramada
+                    {
+                        DiaDeLaSemana = "Lunes",
+                        HoraInicio = "6:00",
+                        HoraFin = "6:45",
+                        NombreEntrenador = "Sara Jiménez"
+                    },
+                    new DTO.Dtos.ClaseProgramada
+                    {
+                        DiaDeLaSemana = "Martes",
+                        HoraInicio = "17:30",
+                        HoraFin = "18:15",
+                        NombreEntrenador = "Miguel Martínez"
+                    },
+                    new DTO.Dtos.ClaseProgramada
+                    {
+                        DiaDeLaSemana = "Jueves",
+                        HoraInicio = "6:00",
+                        HoraFin = "6:45",
+                        NombreEntrenador = "Sara Jiménez"
+                    }
+                })
+            }
         </div>
     </section>
 
