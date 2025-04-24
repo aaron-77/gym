@@ -3,7 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using DTO.Dtos;
 using System.Collections.Generic;
-
+using System.Text.Json.Serialization;
+using System.Net.Http;
+using System.Threading.Tasks;
+using BL;
+using System.Text.Json;
 namespace GymFrontend.Controllers
 {
     public class HomeController : Controller
@@ -77,6 +81,23 @@ namespace GymFrontend.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public async Task<IActionResult> DetalleDeClase(int idClase)
+        {
+            var client = new HttpCustomClient();
+            string endpointUrl = $"api/clases/detallesDeClase?idClase={idClase}";
+            var responseString = await client.get(endpointUrl);
+            var response = JsonSerializer.Deserialize<DTOResponse<DetalleDeClase>>(responseString);
+
+            if (response != null && response.success)
+            {
+                return View("DetalleDeClase", response.payload);
+            }
+            else
+            {
+                return View("Error");
+            }
         }
     }
 }

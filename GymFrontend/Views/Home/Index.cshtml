@@ -1,3 +1,5 @@
+@model List<DTO.Dtos.DTOClasePreview>
+
 @{
     ViewData["Title"] = "GymPower - Libera tu Potencial";
     Layout = "_Layout";
@@ -48,6 +50,7 @@
                         Aprende Más
                         <img src="~/img/svgarrow.svg" alt="Flecha">
                     </button>
+
                 </div>
             </div>
         </div>
@@ -132,7 +135,7 @@
                         <div class="class-content">
                             <h3 class="class-title">@clase.nombreClase</h3>
                             <p class="class-description">@clase.descripcionCortaClase</p>
-                            <a href="/api/clases/detallesDeClase?idClase=@clase.idClase" class="class-btn">
+                            <a asp-controller="Home" asp-action="DetalleDeClase" asp-route-idClase="@clase.idClase" class="class-btn">
                                 Aprende Más 
                                 <img src="~/img/svgredarrow.svg" alt="Flecha roja">
                             </a>
