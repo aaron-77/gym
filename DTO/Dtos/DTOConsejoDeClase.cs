@@ -9,7 +9,7 @@ namespace DTO.Dtos
     {
         public int FkClase { get; set; }
         public string IntroduccionDeConsejo { get; set; }
-         
-        public List<string> Consejos { get; set; }
-        }
+          
+        public List<string> consejos { get; set; }
+    }
 }

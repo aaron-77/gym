@@ -67,22 +67,24 @@ namespace API.Controllers
                     NivelDeIntensidad = detalleRaw.NivelDeIntensidad,
                     NivelDeDificultad = detalleRaw.NivelDeDificultad,
                     DescripcionDeLaClase = detalleRaw.DescripcionDeLaClase,
-                    BeneficiosDeLaClase = JsonSerializer.Deserialize<List<DTO.Dtos.DTOBeneficiosDeClase>>(detalleRaw.BeneficiosDeLaClase),
-                    EstructuraDeLaClase = JsonSerializer.Deserialize<List<DTO.Dtos.EstructuraDeClase>>(
-                        detalleRaw.EstructuraDeLaClase
-                    ),
-                    EjerciciosDeClase = JsonSerializer.Deserialize<List<EjercicioPreview>>(
-                        detalleRaw.EjerciciosDeClase
-                    ),
-                    Consejos = JsonSerializer.Deserialize<List<DTOConsejoDeClase>>(
-                        detalleRaw.Consejos
-                    )?.FirstOrDefault(),
-                    EquipamientoRecomendado = JsonSerializer.Deserialize<List<DTO.Dtos.DTOEquipo>>(
-                        detalleRaw.EquipamientoRecomendado
-                    ),
-                    HorariosProgramados = JsonSerializer.Deserialize<List<ClaseProgramada>>(
-                        detalleRaw.HorariosProgramados
-                    ),
+                    BeneficiosDeLaClase = !string.IsNullOrEmpty(detalleRaw.BeneficiosDeLaClase) 
+                        ? JsonSerializer.Deserialize<List<DTO.Dtos.DTOBeneficiosDeClase>>(detalleRaw.BeneficiosDeLaClase) 
+                        : new List<DTO.Dtos.DTOBeneficiosDeClase>(),
+                    EstructuraDeLaClase = !string.IsNullOrEmpty(detalleRaw.EstructuraDeLaClase)
+                        ? JsonSerializer.Deserialize<List<DTO.Dtos.EstructuraDeClase>>(detalleRaw.EstructuraDeLaClase)
+                        : new List<DTO.Dtos.EstructuraDeClase>(),
+                    EjerciciosDeClase = !string.IsNullOrEmpty(detalleRaw.EjerciciosDeClase)
+                        ? JsonSerializer.Deserialize<List<EjercicioPreview>>(detalleRaw.EjerciciosDeClase)
+                        : new List<EjercicioPreview>(),
+                    Consejos = !string.IsNullOrEmpty(detalleRaw.Consejos)
+                        ? JsonSerializer.Deserialize<List<DTOConsejoDeClase>>(detalleRaw.Consejos)?.FirstOrDefault()
+                        : null,
+                    EquipamientoRecomendado = !string.IsNullOrEmpty(detalleRaw.EquipamientoRecomendado)
+                        ? JsonSerializer.Deserialize<List<DTO.Dtos.DTOEquipo>>(detalleRaw.EquipamientoRecomendado)
+                        : new List<DTO.Dtos.DTOEquipo>(),
+                    HorariosProgramados = !string.IsNullOrEmpty(detalleRaw.HorariosProgramados)
+                        ? JsonSerializer.Deserialize<List<ClaseProgramada>>(detalleRaw.HorariosProgramados)
+                        : new List<ClaseProgramada>(),
                 };
 
                 // Construir y devolver la respuesta

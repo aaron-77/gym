@@ -3,7 +3,7 @@ declare @datosDeMedida DatosObtencionMetasDeMedida;
 INSERT INTO @datosDeMedida (Mes, Año)
 VALUES (7, 2025);
 
-
+select * from Usuarios u 
 --select * from medidas m 
 exec sp_obtenerMetasDeMedidas 
  @idCliente = 16,         -- ID del cliente
