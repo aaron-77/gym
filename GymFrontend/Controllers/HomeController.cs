@@ -38,7 +38,7 @@ namespace GymFrontend.Controllers
                 new DTOClasePreview
                 {
                     idClase = 2,
-                    urlImage = "/img/strength.jpg",
+                    urlImage = "/img/strenght.jpg",
                     nombreClase = "Fuerza y Potencia",
                     descripcionCortaClase =
                         "Desarrolla mu00fasculo, aumenta la fuerza y desarrolla potencia explosiva con nuestro programa de fuerza integral.",
@@ -70,7 +70,7 @@ namespace GymFrontend.Controllers
                 new DTOClasePreview
                 {
                     idClase = 6,
-                    urlImage = "/img/personal.jpg",
+                    urlImage = "/img/personaltraining.jpg",
                     nombreClase = "Entrenamiento Personal",
                     descripcionCortaClase =
                         "Obtu00e9n atenciu00f3n personalizada y entrenamientos personalizados para alcanzar tus objetivos especu00edficos de fitness.",
