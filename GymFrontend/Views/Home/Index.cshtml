@@ -5,8 +5,8 @@
     Layout = "_Layout";
 }
 
-<link rel="stylesheet" href="~/css/landing-styles.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="~/css/landing-styles.css" type="text/css">
+<link rel="stylesheet"  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <body class="landing-page">
     <!-- Navegación -->
@@ -82,7 +82,7 @@
                             <div class="feature-icon">
                                 <img src="~/img/svgtrainer.svg" alt="Icono Entrenador">
                             </div>
-                            <div>
+                             <div>
                                 <h3 class="feature-title">Entrenadores Expertos</h3>
                                 <p class="feature-text">Guía profesional</p>
                             </div>
@@ -142,6 +142,70 @@
                         </div>
                     </div>
                 }
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Testimonios -->
+    <section id="testimonials" class="testimonials">
+        <div class="container">
+            <div class="testimonials-grid">
+                <!-- Testimonios dinámicos -->
+                <div class="testimonial">
+                    <p class="testimonial-text">"GymPower me ha ayudado a alcanzar mis objetivos de fitness de una manera que nunca creí posible."</p>
+                    <p class="testimonial-author">- Juan Pérez</p>
+                </div>
+                <div class="testimonial">
+                    <p class="testimonial-text">"La comunidad aquí es increíble, y los entrenadores son muy profesionales."</p>
+                    <p class="testimonial-author">- María López</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Entrenadores -->
+    <section id="trainers" class="trainers">
+        <div class="container">
+            <h2 class="section-title">NUESTROS <span class="text-accent">ENTRENADORES</span></h2>
+            <div class="trainers-grid">
+                <div class="trainer">
+                    <img src="~/img/trainer1.jpg" alt="Entrenador 1">
+                    <h3 class="trainer-name">Carlos Díaz</h3>
+                    <p class="trainer-specialty">Especialista en HIIT</p>
+                </div>
+                <div class="trainer">
+                    <img src="~/img/trainer2.jpg" alt="Entrenador 2">
+                    <h3 class="trainer-name">Ana Gómez</h3>
+                    <p class="trainer-specialty">Nutricionista</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Membresías -->
+    <section id="membership" class="membership">
+        <div class="container">
+            <h2 class="section-title">PLANES DE <span class="text-accent">MEMBRESÍA</span></h2>
+            <div class="membership-grid">
+                <div class="membership-plan">
+                    <h3 class="plan-title">Básico</h3>
+                    <p class="plan-price">$29/mes</p>
+                    <ul class="plan-features">
+                        <li>Acceso al gimnasio</li>
+                        <li>Clases grupales ilimitadas</li>
+                    </ul>
+                    <button class="btn btn-primary">Elegir Plan</button>
+                </div>
+                <div class="membership-plan">
+                    <h3 class="plan-title">Premium</h3>
+                    <p class="plan-price">$49/mes</p>
+                    <ul class="plan-features">
+                        <li>Acceso al gimnasio</li>
+                        <li>Clases grupales ilimitadas</li>
+                        <li>Sesiones de entrenamiento personal</li>
+                    </ul>
+                    <button class="btn btn-primary">Elegir Plan</button>
+                </div>
             </div>
         </div>
     </section>

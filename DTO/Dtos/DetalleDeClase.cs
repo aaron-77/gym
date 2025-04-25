@@ -12,7 +12,7 @@ namespace DTO.Dtos
         public string DescripcionDeLaClase { get; set; }
         public DTOImagenesDeClase imagenesDeClase { get; set; }
         public List<DTOBeneficiosDeClase> BeneficiosDeLaClase { get; set; }
-        public List<EstructuraDeClase> EstructuraDeLaClase { get; set; }
+        public List<DTOEstructuraDeClase> EstructuraDeLaClase { get; set; }
         public List<EjercicioPreview> EjerciciosDeClase { get; set; }
         public DTOConsejoDeClase Consejos { get; set; }
         public List<DTOEquipo> EquipamientoRecomendado { get; set; }

@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Entrenamiento HIIT - GymPower</title>
     <meta name="description" content="Descubre nuestro entrenamiento HIIT en GymPower. Quema calorías y mejora tu condición física con nuestras clases de alta intensidad.">
-    <link rel="stylesheet" href="~/css/detalles-clase.css">
+    <link rel="stylesheet" href="~/css/stylesbaseDetallesDeClase.css">
+    <link rel="stylesheet" href="~/css/detallesclase.css">
     
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -16,7 +17,7 @@
     <nav class="navbar">
         <div class="container">
             <div class="logo">
-                <img src="../img/dumbbell-large.svg" alt="Logo" class="icon">
+                <img src="../img/svgprincipallogo.svg" alt="Logo" class="icon">
                 <span class="logo-text">GYM<span class="text-accent">POWER</span></span>
             </div>
             <div class="nav-links" id="navLinks">
@@ -170,7 +171,7 @@
                 }
                 else
                 {
-                    @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
+                   @*  @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
                     {
                         NombreEjercicio = "Burpees",
                         DescripcionEjercicio = "Ejercicio de cuerpo completo que combina sentadilla, plancha, flexión y salto. Excelente para desarrollar resistencia cardiovascular y fuerza.",
@@ -193,7 +194,7 @@
                         NombreEjercicio = "Sentadillas con Salto",
                         DescripcionEjercicio = "Sentadilla tradicional seguida de un salto explosivo. Desarrolla potencia en el tren inferior y eleva el ritmo cardíaco.",
                         UrlIcono = "../img/sentadillaconsalto.jpg"
-                    })
+                    }) *@
                 }
             </div>
         </div>
@@ -211,7 +212,7 @@
                 }
                 else
                 {
-                    <p class="tips-intro">
+                    @* <p class="tips-intro">
                         Si eres nuevo en el HIIT, estos consejos te ayudarán a sacar el máximo provecho de tus entrenamientos mientras minimizas el riesgo de lesiones:
                     </p>
                     <ul class="tips-list">
@@ -227,7 +228,7 @@
                             <img src="../img/check.svg" alt="Check" class="icon">
                             <span>Mantén una buena hidratación antes, durante y después de la clase.</span>
                         </li>
-                    </ul>
+                    </ul> *@
                 }
             </div>
             <div class="tips-image">
@@ -249,12 +250,13 @@
                 {
                     @foreach (var equipo in Model.EquipamientoRecomendado)
                     {
+                         
                         @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", equipo)
                     }
                 }
                 else
                 {
-                    @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
+                    @* @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
                     {
                         NombreEquipo = "Mancuernas Ligeras",
                         Descripcion = "Para añadir resistencia a ejercicios como sentadillas o press de hombros."
@@ -268,7 +270,7 @@
                     {
                         NombreEquipo = "Esterilla",
                         Descripcion = "Para mayor comodidad en ejercicios de suelo como planchas o abdominales."
-                    })
+                    }) *@
                 }
             </div>
         </div>

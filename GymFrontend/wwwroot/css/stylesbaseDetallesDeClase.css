@@ -200,7 +200,7 @@ ul {
     display: flex;
     align-items: center;
     overflow: hidden;
-    background-image: url('img/hero1.jpg');
+    background-image: url('https://placehold.co/1920x1080');
     background-size: cover;
     background-position: center;
 }
@@ -615,7 +615,7 @@ ul {
 /* CTA Section */
 .cta {
     padding: 5rem 0;
-    background-image: url('img/cta.jpg');
+    background-image: url('https://placehold.co/1920x1080');
     background-size: cover;
     background-position: center;
     position: relative;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Json;
@@ -47,10 +47,25 @@ namespace BL
 
         public async Task<string> get(string endPointUrl)
         {
-            using HttpResponseMessage response = await client.GetAsync(endPointUrl);
-            string responseString = await response.Content.ReadAsStringAsync();
-            // Deserializar el JSON a una lista de objetos BebidaResumen
-            return responseString;
+            try
+            {
+                using HttpResponseMessage response = await client.GetAsync(endPointUrl);
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseString = await response.Content.ReadAsStringAsync();
+                    return responseString;
+                }
+                else
+                {
+                    Console.WriteLine($"Error: {response.StatusCode}");
+                    return null;
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine($"Request error: {e.Message}");
+                return null;
+            }
         }
     }
 }
