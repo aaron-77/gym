@@ -26,7 +26,7 @@
     <a asp-area="" asp-controller="Users" asp-action="Index" class="nav-link">Iniciar Sesión</a>
     <a asp-area="" asp-controller="Users" asp-action="crearCuenta" class="nav-link">Registrarse</a>
 </div>
-<button id="botonUneteAhora" href="#membership" class="btn btn-primary">Únete Ahora</button>
+<button id="botonUneteAhora" class="btn btn-primary">Únete Ahora</button>
 <button class="mobile-menu-btn" id="mobileMenuBtn">
     <span></span>
     <span></span>
@@ -374,3 +374,24 @@
         </div>
     </div>
 </section>
+
+@section Scripts {
+    <script>
+        // Scroll to membership section when clicking the "Únete Ahora" button
+        document.getElementById('botonUneteAhora').addEventListener('click', function() {
+            document.getElementById('membership').scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Scroll to membership section when clicking the "Comienza Hoy" button
+        document.getElementById('botonComienzaHoy').addEventListener('click', function() {
+            document.getElementById('membership').scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Scroll to membership section when clicking any CTA button with href="#membership"
+        document.querySelectorAll('button[href="#membership"]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                document.getElementById('membership').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+}

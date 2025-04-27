@@ -6,6 +6,7 @@
     <title>@ViewData["Title"]</title>
     <meta name="description" content="@ViewData["Description"]">
     <link rel="stylesheet" href="~/css/landing-styles.css" type="text/css">
+    <link rel="stylesheet" href="~/css/custom-navbar.css" type="text/css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
     @RenderSection("Styles", required: false)
 </head>
@@ -26,7 +27,7 @@
                 <a asp-area="" asp-controller="Users" asp-action="Index" class="nav-link">Iniciar Sesión</a>
                 <a asp-area="" asp-controller="Users" asp-action="crearCuenta" class="nav-link">Registrarse</a>
             </div>
-            <button id="botonUneteAhora" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="membership" class="btn btn-primary">Únete Ahora</button>
+            <a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="membership" class="btn btn-primary" id="botonUneteAhora">Únete Ahora</a>
             <button class="mobile-menu-btn" id="mobileMenuBtn">
                 <span></span>
                 <span></span>

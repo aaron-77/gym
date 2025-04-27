@@ -1,7 +1,19 @@
-﻿@model DTO.Dtos.User
+@model DTO.Dtos.User
 @{
-Layout = "_Layout";
+    ViewData["Title"] = "GymPower - Crear Cuenta";
+    ViewData["Description"] = "Crea tu cuenta en GymPower y comienza tu viaje fitness.";
+    ViewData["BodyClass"] = "create-account-page";
+    Layout = "_NavbarLayout";
 }
+
+@section Styles {
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/login.css" type="text/css">
+    <link rel="stylesheet" href="~/css/crearCuenta.css" type="text/css">
+    <link rel="stylesheet" href="~/css/custom-navbar.css" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+}
+
 <div id="creteUserRootWrapper" class="create-user-root-wrapper">
     <div id="bgImageContainer" class="bg-split-image-container">
     </div>
@@ -70,3 +82,20 @@ Layout = "_Layout";
     </div>
 
 </div>
+
+@section Scripts {
+    <script>
+        // Mobile menu toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const navLinks = document.getElementById('navLinks');
+            
+            if (mobileMenuBtn && navLinks) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    navLinks.classList.toggle('active');
+                });
+            }
+        });
+    </script>
+}
