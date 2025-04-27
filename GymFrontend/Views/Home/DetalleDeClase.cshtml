@@ -1,387 +1,317 @@
 @model DTO.Dtos.DetalleDeClase
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrenamiento HIIT - GymPower</title>
-    <meta name="description" content="Descubre nuestro entrenamiento HIIT en GymPower. Quema calorías y mejora tu condición física con nuestras clases de alta intensidad.">
+
+@{
+    ViewData["Title"] = "Entrenamiento HIIT - GymPower";
+    ViewData["Description"] = "Descubre nuestro entrenamiento HIIT en GymPower. Quema caloru00edas y mejora tu condiciu00f3n fu00edsica con nuestras clases de alta intensidad.";
+    ViewData["BodyClass"] = "clase-detalle-page";
+    Layout = "_NavbarLayout";
+}
+
+@section Styles {
     <link rel="stylesheet" href="~/css/stylesbaseDetallesDeClase.css">
     <link rel="stylesheet" href="~/css/detallesclase.css">
-    
-    <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-</head>
-<body>
-    <!-- Navegación -->
-    <nav class="navbar">
-        <div class="container">
-            <div class="logo">
-                <img src="../img/svgprincipallogo.svg" alt="Logo" class="icon">
-                <span class="logo-text">GYM<span class="text-accent">POWER</span></span>
-            </div>
-            <div class="nav-links" id="navLinks">
-                <a href="../index.html#home" class="nav-link">Inicio</a>
-                <a href="../index.html#about" class="nav-link">Nosotros</a>
-                <a href="../index.html#classes" class="nav-link">Clases</a>
-                <a href="../index.html#trainers" class="nav-link">Entrenadores</a>
-                <a href="../index.html#testimonials" class="nav-link">Testimonios</a>
-            </div>
-            <button class="btn btn-primary">Únete Ahora</button>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
+}
 
-    <!-- Cabecera de la Clase -->
-    <section class="class-header" style="background-image: url('@Model.imagenesDeClase.urlParaBanner');">
-        <div class="class-header-overlay"></div>
-        <div class="container">
-            <div class="class-header-content">
-                <h1 class="class-header-title">ENTRENAMIENTO <span class="text-accent">HIIT</span></h1>
-                <p class="class-header-subtitle">Entrenamiento por Intervalos de Alta Intensidad</p>
-                <div class="class-header-info">
-                    <div class="info-badge">
-                        <img src="../img/svgacceso24black.svg" alt="Duración" class="icon">
-                        <span>45 minutos</span>
-                    </div>
-                    <div class="info-badge">
-                        <img src="../img/flame.svg" alt="Intensidad" class="icon">
-                        <span>Alta Intensidad</span>
-                    </div>
-                    <div class="info-badge">
-                        <img src="../img/target.svg" alt="Nivel" class="icon">
-                        <span>Intermedio a Avanzado</span>
-                    </div>
+<!-- Cabecera de la Clase -->
+<section class="class-header" style="background-image: url('@Model.imagenesDeClase.urlParaBanner');">
+    <div class="class-header-overlay"></div>
+    <div class="container">
+        <div class="class-header-content">
+            <h1 class="class-header-title">ENTRENAMIENTO <span class="text-accent">HIIT</span></h1>
+            <p class="class-header-subtitle">Entrenamiento por Intervalos de Alta Intensidad</p>
+            <div class="class-header-info">
+                <div class="info-badge">
+                    <img src="~/img/svgacceso24black.svg" alt="Duraciu00f3n" class="icon">
+                    <span>45 minutos</span>
                 </div>
-                <button class="btn btn-primary btn-lg">Reservar Clase</button>
+                <div class="info-badge">
+                    <img src="~/img/flame.svg" alt="Intensidad" class="icon">
+                    <span>Alta Intensidad</span>
+                </div>
+                <div class="info-badge">
+                    <img src="~/img/target.svg" alt="Nivel" class="icon">
+                    <span>Intermedio a Avanzado</span>
+                </div>
             </div>
+            <button class="btn btn-primary btn-lg">Reservar Clase</button>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Descripción General -->
-    <section class="class-description">
-        <div class="container">
-            <div class="description-grid">
-                <div class="description-content">
-                    <h2 class="section-title">SOBRE ESTA <span class="text-accent">CLASE</span></h2>
-                    <p class="description-text">
-                        El Entrenamiento por Intervalos de Alta Intensidad (HIIT) alterna entre ráfagas intensas de actividad y períodos fijos de actividad menos intensa o descanso. Nuestras clases HIIT están diseñadas para aumentar tu ritmo cardíaco y quemar más grasa en menos tiempo.
-                    </p>
-                    <p class="description-text">
-                        Este tipo de entrenamiento te proporciona un entrenamiento completo mientras mejora tu condición cardiovascular y maximiza la quema de calorías. Los estudios han demostrado que el HIIT puede quemar hasta un 30% más de calorías que otras formas de cardio en el mismo período de tiempo.
-                    </p>
-                    <div class="description-features">
-                        @if (Model.BeneficiosDeLaClase != null && Model.BeneficiosDeLaClase.Any())
-                        {
-                            @foreach (var beneficio in Model.BeneficiosDeLaClase)
-                            {
-                                @await Html.PartialAsync("~/Views/Shared/_BeneficioItem.cshtml", new { 
-                                    beneficio = beneficio.beneficio, 
-                                    descripcionBeneficio = beneficio.descripcionBeneficio, 
-                                    urlPublica = "../img/heart.svg" 
-                                })
-                            }
-                        }
-                        else
+<!-- Descripción General -->
+<section class="class-description">
+    <div class="container">
+        <div class="description-grid">
+            <div class="description-content">
+                <h2 class="section-title">SOBRE ESTA <span class="text-accent">CLASE</span></h2>
+                <p class="description-text">
+                    El Entrenamiento por Intervalos de Alta Intensidad (HIIT) alterna entre ráfagas intensas de actividad y períodos fijos de actividad menos intensa o descanso. Nuestras clases HIIT están diseñadas para aumentar tu ritmo cardíaco y quemar más grasa en menos tiempo.
+                </p>
+                <p class="description-text">
+                    Este tipo de entrenamiento te proporciona un entrenamiento completo mientras mejora tu condición cardiovascular y maximiza la quema de calorías. Los estudios han demostrado que el HIIT puede quemar hasta un 30% más de calorías que otras formas de cardio en el mismo período de tiempo.
+                </p>
+                <div class="description-features">
+                    @if (Model.BeneficiosDeLaClase != null && Model.BeneficiosDeLaClase.Any())
+                    {
+                        @foreach (var beneficio in Model.BeneficiosDeLaClase)
                         {
                             @await Html.PartialAsync("~/Views/Shared/_BeneficioItem.cshtml", new { 
-                                beneficio = "Mejora Cardiovascular", 
-                                descripcionBeneficio = "Aumenta la capacidad aeróbica y anaeróbica", 
-                                urlPublica = "../img/heart.svg" 
-                            })
-                            @await Html.PartialAsync("~/Views/Shared/_BeneficioItem.cshtml", new { 
-                                beneficio = "Quema de Grasa", 
-                                descripcionBeneficio = "Mayor quema calórica durante y después del ejercicio", 
-                                urlPublica = "../img/flame.svg" 
-                            })
-                            @await Html.PartialAsync("~/Views/Shared/_BeneficioItem.cshtml", new { 
-                                beneficio = "Eficiencia", 
-                                descripcionBeneficio = "Resultados máximos en tiempo mínimo", 
-                                urlPublica = "../img/svgacceso24black.svg" 
+                                beneficio = beneficio.beneficio, 
+                                descripcionBeneficio = beneficio.descripcionBeneficio, 
+                                  urlPublica = beneficio.urlPublica 
                             })
                         }
-                    </div>
+                    }
+                    else
+                    {
+                        @await Html.PartialAsync("~/Views/Shared/_BeneficioItem.cshtml", new { 
+                            beneficio = "Mejora Cardiovascular", 
+                            descripcionBeneficio = "Aumenta la capacidad aeróbica y anaeróbica", 
+                            urlPublica = "~/img/heart.svg" 
+                        })
+                        @await Html.PartialAsync("~/Views/Shared/_BeneficioItem.cshtml", new { 
+                            beneficio = "Quema de Grasa", 
+                            descripcionBeneficio = "Mayor quema calórica durante y después del ejercicio", 
+                            urlPublica = "~/img/flame.svg" 
+                        })
+                        @await Html.PartialAsync("~/Views/Shared/_BeneficioItem.cshtml", new { 
+                            beneficio = "Eficiencia", 
+                            descripcionBeneficio = "Resultados máximos en tiempo mínimo", 
+                            urlPublica = "~/img/svgacceso24black.svg" 
+                        })
+                    }
                 </div>
-                <div class="description-image">
-                    <img src="../img/hiit2.jpg" alt="Clase de HIIT en acción">
-                </div>
+            </div>
+            <div class="description-image">
+                <img src="~/img/hiit2.jpg" alt="Clase de HIIT en acción">
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Estructura de la Clase -->
-    <section class="class-structure">
-        <div class="container">
-            <h2 class="section-title text-center">ESTRUCTURA DE LA <span class="text-accent">CLASE</span></h2>
-            <div class="structure-timeline">
-                @if (Model.EstructuraDeLaClase != null && Model.EstructuraDeLaClase.Any())
-                {
-                    @foreach (var estructura in Model.EstructuraDeLaClase)
-                    {
-                        @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", estructura)
-                    }
-                }
-                else
-                {
-                    @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", new DTO.Dtos.DTOEstructuraDeClase
-                    {
-                        TituloBloque = "Calentamiento",
-                        DuracionMenorEnMinutos = 5,
-                        DuracionMayorEnMinutos = 7,
-                        DescripcionBloque = "Comenzamos con un calentamiento dinámico para preparar el cuerpo para el ejercicio intenso. Incluye movilidad articular, activación muscular y elevación gradual del ritmo cardíaco."
-                    })
-                    @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", new DTO.Dtos.DTOEstructuraDeClase
-                    {
-                        TituloBloque = "Bloques HIIT",
-                        DuracionMenorEnMinutos = 30,
-                        DuracionMayorEnMinutos = 30,
-                        DescripcionBloque = "El núcleo de la clase consiste en 4-6 bloques de ejercicios de alta intensidad. Cada bloque alterna entre 20-40 segundos de trabajo máximo y 10-20 segundos de descanso. Realizamos 3-4 rondas de cada bloque con un minuto de recuperación entre bloques."
-                    })
-                    @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", new DTO.Dtos.DTOEstructuraDeClase
-                    {
-                        TituloBloque = "Enfriamiento",
-                        DuracionMenorEnMinutos = 5,
-                        DuracionMayorEnMinutos = 7,
-                        DescripcionBloque = "Finalizamos con ejercicios de baja intensidad para reducir gradualmente el ritmo cardíaco, seguidos de estiramientos estáticos para mejorar la flexibilidad y acelerar la recuperación."
-                    })
-                }
-            </div>
-        </div>
-    </section>
-
-    <!-- Ejercicios Principales -->
-    <section class="class-exercises">
-        <div class="container">
-            <h2 class="section-title text-center">EJERCICIOS <span class="text-accent">PRINCIPALES</span></h2>
-            <p class="section-subtitle text-center">
-                Estos son algunos de los ejercicios que podrás encontrar en nuestras clases de HIIT. Cada sesión varía para mantener el entrenamiento desafiante y evitar estancamientos.
-            </p>
-            
-            <div class="exercises-grid">
-                @if (Model.EjerciciosDeClase != null && Model.EjerciciosDeClase.Any())
-                {
-                    @foreach (var ejercicio in Model.EjerciciosDeClase)
-                    {
-                        @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", ejercicio)
-                    }
-                }
-                else
-                {
-                   @*  @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
-                    {
-                        NombreEjercicio = "Burpees",
-                        DescripcionEjercicio = "Ejercicio de cuerpo completo que combina sentadilla, plancha, flexión y salto. Excelente para desarrollar resistencia cardiovascular y fuerza.",
-                        UrlIcono = "../img/burpees.jpg"
-                    })
-                    @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
-                    {
-                        NombreEjercicio = "Mountain Climbers",
-                        DescripcionEjercicio = "En posición de plancha, alternamos llevando las rodillas hacia el pecho. Trabaja el core y eleva el ritmo cardíaco.",
-                        UrlIcono = "../img/mountainclimbers.webp"
-                    })
-                    @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
-                    {
-                        NombreEjercicio = "Jumping Jacks",
-                        DescripcionEjercicio = "Saltos abriendo y cerrando piernas y brazos simultáneamente. Excelente ejercicio cardiovascular que involucra todo el cuerpo.",
-                        UrlIcono = "../img/jumpingjacks.webp"
-                    })
-                    @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
-                    {
-                        NombreEjercicio = "Sentadillas con Salto",
-                        DescripcionEjercicio = "Sentadilla tradicional seguida de un salto explosivo. Desarrolla potencia en el tren inferior y eleva el ritmo cardíaco.",
-                        UrlIcono = "../img/sentadillaconsalto.jpg"
-                    }) *@
-                }
-            </div>
-        </div>
-    </section>
-
-    <!-- Consejos para Principiantes -->
-    <section class="class-tips">
-        <div class="container">
-            <div class="tips-content">
-                <h2 class="section-title">CONSEJOS PARA <span class="text-accent">PRINCIPIANTES</span></h2>
-                @if (Model.Consejos != null)
-                {
-                    @await Html.PartialAsync("~/Views/Shared/_ConsejoIntro.cshtml", Model.Consejos)
-                    @await Html.PartialAsync("~/Views/Shared/_ConsejosList.cshtml", Model.Consejos)
-                }
-                else
-                {
-                    @* <p class="tips-intro">
-                        Si eres nuevo en el HIIT, estos consejos te ayudarán a sacar el máximo provecho de tus entrenamientos mientras minimizas el riesgo de lesiones:
-                    </p>
-                    <ul class="tips-list">
-                        <li class="tips-item">
-                            <img src="../img/check.svg" alt="Check" class="icon">
-                            <span>Comienza con versiones modificadas de los ejercicios hasta dominar la técnica correcta.</span>
-                        </li>
-                        <li class="tips-item">
-                            <img src="../img/check.svg" alt="Check" class="icon">
-                            <span>Escucha a tu cuerpo y toma descansos adicionales si los necesitas.</span>
-                        </li>
-                        <li class="tips-item">
-                            <img src="../img/check.svg" alt="Check" class="icon">
-                            <span>Mantén una buena hidratación antes, durante y después de la clase.</span>
-                        </li>
-                    </ul> *@
-                }
-            </div>
-            <div class="tips-image">
-                <img src="../img/lesiongym.jpg" alt="Principiante en clase de HIIT">
-            </div>
-        </div>
-    </section>
-
-    <!-- Equipamiento -->
-    <section class="class-equipment">
-        <div class="container">
-            <h2 class="section-title text-center">EQUIPAMIENTO <span class="text-accent">RECOMENDADO</span></h2>
-            <p class="section-subtitle text-center">
-                Aunque el HIIT puede realizarse sin equipamiento, estos elementos pueden mejorar tu experiencia:
-            </p>
-            
-            <div class="equipment-grid">
-                @if (Model.EquipamientoRecomendado != null && Model.EquipamientoRecomendado.Any())
-                {
-                    @foreach (var equipo in Model.EquipamientoRecomendado)
-                    {
-                         
-                        @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", equipo)
-                    }
-                }
-                else
-                {
-                    @* @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
-                    {
-                        NombreEquipo = "Mancuernas Ligeras",
-                        Descripcion = "Para añadir resistencia a ejercicios como sentadillas o press de hombros."
-                    })
-                    @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
-                    {
-                        NombreEquipo = "Kettlebells",
-                        Descripcion = "Ideales para ejercicios balísticos como swings o clean and press."
-                    })
-                    @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
-                    {
-                        NombreEquipo = "Esterilla",
-                        Descripcion = "Para mayor comodidad en ejercicios de suelo como planchas o abdominales."
-                    }) *@
-                }
-            </div>
-        </div>
-    </section>
-
-    <!-- Horarios -->
-    <section class="class-schedule">
-        <div class="container">
-            <h2 class="section-title text-center">HORARIOS <span class="text-accent">DISPONIBLES</span></h2>
-            <p class="section-subtitle text-center">
-                Ofrecemos múltiples horarios para adaptarnos a tu agenda. ¡Reserva tu plaza ahora!
-            </p>
-            
-            @if (Model.HorariosProgramados != null && Model.HorariosProgramados.Any())
+<!-- Estructura de la Clase -->
+<section class="class-structure">
+    <div class="container">
+        <h2 class="section-title text-center">ESTRUCTURA DE LA <span class="text-accent">CLASE</span></h2>
+        <div class="structure-timeline">
+            @if (Model.EstructuraDeLaClase != null && Model.EstructuraDeLaClase.Any())
             {
-                @await Html.PartialAsync("~/Views/Shared/_HorarioClases.cshtml", Model.HorariosProgramados)
+                @foreach (var estructura in Model.EstructuraDeLaClase)
+                {
+                    @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", estructura)
+                }
             }
             else
             {
-                @await Html.PartialAsync("~/Views/Shared/_HorarioClases.cshtml", new List<DTO.Dtos.ClaseProgramada>
+                @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", new DTO.Dtos.DTOEstructuraDeClase
                 {
-                    new DTO.Dtos.ClaseProgramada
-                    {
-                        DiaDeLaSemana = "Lunes",
-                        HoraInicio = "6:00",
-                        HoraFin = "6:45",
-                        NombreEntrenador = "Sara Jiménez"
-                    },
-                    new DTO.Dtos.ClaseProgramada
-                    {
-                        DiaDeLaSemana = "Martes",
-                        HoraInicio = "17:30",
-                        HoraFin = "18:15",
-                        NombreEntrenador = "Miguel Martínez"
-                    },
-                    new DTO.Dtos.ClaseProgramada
-                    {
-                        DiaDeLaSemana = "Jueves",
-                        HoraInicio = "6:00",
-                        HoraFin = "6:45",
-                        NombreEntrenador = "Sara Jiménez"
-                    }
+                    TituloBloque = "Calentamiento",
+                    DuracionMenorEnMinutos = 5,
+                    DuracionMayorEnMinutos = 7,
+                    DescripcionBloque = "Comenzamos con un calentamiento dinámico para preparar el cuerpo para el ejercicio intenso. Incluye movilidad articular, activación muscular y elevación gradual del ritmo cardíaco."
+                })
+                @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", new DTO.Dtos.DTOEstructuraDeClase
+                {
+                    TituloBloque = "Bloques HIIT",
+                    DuracionMenorEnMinutos = 30,
+                    DuracionMayorEnMinutos = 30,
+                    DescripcionBloque = "El núcleo de la clase consiste en 4-6 bloques de ejercicios de alta intensidad. Cada bloque alterna entre 20-40 segundos de trabajo máximo y 10-20 segundos de descanso. Realizamos 3-4 rondas de cada bloque con un minuto de recuperación entre bloques."
+                })
+                @await Html.PartialAsync("~/Views/Shared/_EstructuraClaseItem.cshtml", new DTO.Dtos.DTOEstructuraDeClase
+                {
+                    TituloBloque = "Enfriamiento",
+                    DuracionMenorEnMinutos = 5,
+                    DuracionMayorEnMinutos = 7,
+                    DescripcionBloque = "Finalizamos con ejercicios de baja intensidad para reducir gradualmente el ritmo cardíaco, seguidos de estiramientos estáticos para mejorar la flexibilidad y acelerar la recuperación."
                 })
             }
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- CTA -->
-    <section class="class-cta">
-        <div class="cta-overlay"></div>
-        <div class="container">
-            <div class="cta-content">
-                <h2 class="cta-title">¿LISTO PARA LLEVAR TU FITNESS AL <span class="text-accent">SIGUIENTE NIVEL</span>?</h2>
-                <p class="cta-text">
-                    Únete a nuestras clases de HIIT y experimenta una transformación física y mental. El primer paso hacia un nuevo tú comienza aquí.
+<!-- Ejercicios Principales -->
+<section class="class-exercises">
+    <div class="container">
+        <h2 class="section-title text-center">EJERCICIOS <span class="text-accent">PRINCIPALES</span></h2>
+        <p class="section-subtitle text-center">
+            Estos son algunos de los ejercicios que podrás encontrar en nuestras clases de HIIT. Cada sesión varía para mantener el entrenamiento desafiante y evitar estancamientos.
+        </p>
+        
+        <div class="exercises-grid">
+            @if (Model.EjerciciosDeClase != null && Model.EjerciciosDeClase.Any())
+            {
+                @foreach (var ejercicio in Model.EjerciciosDeClase)
+                {
+                    @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", ejercicio)
+                }
+            }
+            else
+            {
+                @*  @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
+                {
+                    NombreEjercicio = "Burpees",
+                    DescripcionEjercicio = "Ejercicio de cuerpo completo que combina sentadilla, plancha, flexión y salto. Excelente para desarrollar resistencia cardiovascular y fuerza.",
+                    UrlIcono = "~/img/burpees.jpg"
+                })
+                @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
+                {
+                    NombreEjercicio = "Mountain Climbers",
+                    DescripcionEjercicio = "En posición de plancha, alternamos llevando las rodillas hacia el pecho. Trabaja el core y eleva el ritmo cardíaco.",
+                    UrlIcono = "~/img/mountainclimbers.webp"
+                })
+                @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
+                {
+                    NombreEjercicio = "Jumping Jacks",
+                    DescripcionEjercicio = "Saltos abriendo y cerrando piernas y brazos simultáneamente. Excelente ejercicio cardiovascular que involucra todo el cuerpo.",
+                    UrlIcono = "~/img/jumpingjacks.webp"
+                })
+                @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
+                {
+                    NombreEjercicio = "Sentadillas con Salto",
+                    DescripcionEjercicio = "Sentadilla tradicional seguida de un salto explosivo. Desarrolla potencia en el tren inferior y eleva el ritmo cardíaco.",
+                    UrlIcono = "~/img/sentadillaconsalto.jpg"
+                }) *@
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Consejos para Principiantes -->
+<section class="class-tips">
+    <div class="container">
+        <div class="tips-content">
+            <h2 class="section-title">CONSEJOS PARA <span class="text-accent">PRINCIPIANTES</span></h2>
+            @if (Model.Consejos != null)
+            {
+                @await Html.PartialAsync("~/Views/Shared/_ConsejoIntro.cshtml", Model.Consejos)
+                @await Html.PartialAsync("~/Views/Shared/_ConsejosList.cshtml", Model.Consejos)
+            }
+            else
+            {
+                @* <p class="tips-intro">
+                    Si eres nuevo en el HIIT, estos consejos te ayudarán a sacar el máximo provecho de tus entrenamientos mientras minimizas el riesgo de lesiones:
                 </p>
-                <div class="cta-buttons">
-                    <button class="btn btn-primary btn-lg">Reservar Clase</button>
-                    <button class="btn btn-outline btn-lg">Ver Todas las Clases</button>
-                </div>
+                <ul class="tips-list">
+                    <li class="tips-item">
+                        <img src="~/img/check.svg" alt="Check" class="icon">
+                        <span>Comienza con versiones modificadas de los ejercicios hasta dominar la técnica correcta.</span>
+                    </li>
+                    <li class="tips-item">
+                        <img src="~/img/check.svg" alt="Check" class="icon">
+                        <span>Escucha a tu cuerpo y toma descansos adicionales si los necesitas.</span>
+                    </li>
+                    <li class="tips-item">
+                        <img src="~/img/check.svg" alt="Check" class="icon">
+                        <span>Mantén una buena hidratación antes, durante y después de la clase.</span>
+                    </li>
+                </ul> *@
+            }
+        </div>
+        <div class="tips-image">
+            <img src="~/img/lesiongym.jpg" alt="Principiante en clase de HIIT">
+        </div>
+    </div>
+</section>
+
+<!-- Equipamiento -->
+<section class="class-equipment">
+    <div class="container">
+        <h2 class="section-title text-center">EQUIPAMIENTO <span class="text-accent">RECOMENDADO</span></h2>
+        <p class="section-subtitle text-center">
+            Aunque el HIIT puede realizarse sin equipamiento, estos elementos pueden mejorar tu experiencia:
+        </p>
+        
+        <div class="equipment-grid">
+            @if (Model.EquipamientoRecomendado != null && Model.EquipamientoRecomendado.Any())
+            {
+                @foreach (var equipo in Model.EquipamientoRecomendado)
+                {
+                     
+                    @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", equipo)
+                }
+            }
+            else
+            {
+                @* @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
+                {
+                    NombreEquipo = "Mancuernas Ligeras",
+                    Descripcion = "Para añadir resistencia a ejercicios como sentadillas o press de hombros."
+                })
+                @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
+                {
+                    NombreEquipo = "Kettlebells",
+                    Descripcion = "Ideales para ejercicios balísticos como swings o clean and press."
+                })
+                @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
+                {
+                    NombreEquipo = "Esterilla",
+                    Descripcion = "Para mayor comodidad en ejercicios de suelo como planchas o abdominales."
+                }) *@
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Horarios -->
+<section class="class-schedule">
+    <div class="container">
+        <h2 class="section-title text-center">HORARIOS <span class="text-accent">DISPONIBLES</span></h2>
+        <p class="section-subtitle text-center">
+            Ofrecemos múltiples horarios para adaptarnos a tu agenda. ¡Reserva tu plaza ahora!
+        </p>
+        
+        @if (Model.HorariosProgramados != null && Model.HorariosProgramados.Any())
+        {
+            @await Html.PartialAsync("~/Views/Shared/_HorarioClases.cshtml", Model.HorariosProgramados)
+        }
+        else
+        {
+            @await Html.PartialAsync("~/Views/Shared/_HorarioClases.cshtml", new List<DTO.Dtos.ClaseProgramada>
+            {
+                new DTO.Dtos.ClaseProgramada
+                {
+                    DiaDeLaSemana = "Lunes",
+                    HoraInicio = "6:00",
+                    HoraFin = "6:45",
+                    NombreEntrenador = "Sara Jiménez"
+                },
+                new DTO.Dtos.ClaseProgramada
+                {
+                    DiaDeLaSemana = "Martes",
+                    HoraInicio = "17:30",
+                    HoraFin = "18:15",
+                    NombreEntrenador = "Miguel Martínez"
+                },
+                new DTO.Dtos.ClaseProgramada
+                {
+                    DiaDeLaSemana = "Jueves",
+                    HoraInicio = "6:00",
+                    HoraFin = "6:45",
+                    NombreEntrenador = "Sara Jiménez"
+                }
+            })
+        }
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="class-cta">
+    <div class="cta-overlay"></div>
+    <div class="container">
+        <div class="cta-content">
+            <h2 class="cta-title">¿LISTO PARA LLEVAR TU FITNESS AL <span class="text-accent">SIGUIENTE NIVEL</span>?</h2>
+            <p class="cta-text">
+                Únete a nuestras clases de HIIT y experimenta una transformación física y mental. El primer paso hacia un nuevo tú comienza aquí.
+            </p>
+            <div class="cta-buttons">
+                <button class="btn btn-primary btn-lg">Reservar Clase</button>
+                <button class="btn btn-outline btn-lg">Ver Todas las Clases</button>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Pie de Página -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <div class="logo">
-                        <img src="../img/svgprincipallogo.svg" alt="Logo" class="icon">
-                        <span class="logo-text">GYM<span class="text-accent">POWER</span></span>
-                    </div>
-                    <p class="footer-text">
-                        Libera tu potencial y transforma tu cuerpo con nuestros entrenadores expertos e instalaciones de vanguardia.
-                    </p>
-                </div>
-                <div class="footer-col">
-                    <h3 class="footer-title">Enlaces Rápidos</h3>
-                    <ul class="footer-links">
-                        <li><a href="../index.html#home">Inicio</a></li>
-                        <li><a href="../index.html#about">Nosotros</a></li>
-                        <li><a href="../index.html#classes">Clases</a></li>
-                        <li><a href="../index.html#trainers">Entrenadores</a></li>
-                        <li><a href="../index.html#testimonials">Testimonios</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3 class="footer-title">Horarios</h3>
-                    <ul class="footer-info">
-                        <li>Lunes - Viernes: 5am - 11pm</li>
-                        <li>Sábado: 7am - 9pm</li>
-                        <li>Domingo: 8am - 8pm</li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3 class="footer-title">Contacto</h3>
-                    <ul class="footer-info">
-                        <li>Calle Fitness 123, Ciudad Gym</li>
-                        <li>info@gympower.com</li>
-                        <li>(+34) 123-456-789</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; <span id="currentYear"></span> GymPower. Todos los derechos reservados.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Cargar JavaScript como módulo -->
-    <script type="module" src="../js/detalles-clase.js"></script>
-</body>
-</html>
+@section Scripts {
+    <script type="module" src="~/js/detalles-clase.js"></script>
+}

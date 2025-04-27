@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <meta name="description" content="@ViewData["Description"]">
+    <link rel="stylesheet" href="~/css/landing-styles.css" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+    @RenderSection("Styles", required: false)
+</head>
+<body class="@ViewData["BodyClass"]">
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <img src="~/img/svgprincipallogo.svg" alt="Logo GymPower">
+                <span class="logo-text">GYM<span class="text-accent">POWER</span></span>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="home" class="nav-link">Inicio</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="about" class="nav-link">Acerca de</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="classes" class="nav-link">Clases</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="trainers" class="nav-link">Entrenadores</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="testimonials" class="nav-link">Testimonios</a>
+                <a asp-area="" asp-controller="Users" asp-action="Index" class="nav-link">Iniciar Sesión</a>
+                <a asp-area="" asp-controller="Users" asp-action="crearCuenta" class="nav-link">Registrarse</a>
+            </div>
+            <button id="botonUneteAhora" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="membership" class="btn btn-primary">Únete Ahora</button>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    @RenderBody()
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo">
+                        <img src="~/img/svgprincipallogo.svg" alt="Logo GymPower">
+                        <span class="logo-text">GYM<span class="text-accent">POWER</span></span>
+                    </div>
+                    <p class="footer-text">
+                        Libera tu potencial y transforma tu cuerpo con nuestros entrenadores expertos y nuestras instalaciones de última generación.
+                    </p>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">Enlaces Rápidos</h3>
+                    <ul class="footer-links">
+                        <li><a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="home">Inicio</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="about">Acerca de</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="classes">Clases</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="trainers">Entrenadores</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="testimonials">Testimonios</a></li>
+                        <li><a asp-area="" asp-controller="Users" asp-action="Index">Iniciar Sesión</a></li>
+                        <li><a asp-area="" asp-controller="Users" asp-action="crearCuenta">Registrarse</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">Horarios</h3>
+                    <ul class="footer-info">
+                        <li>Lunes - Viernes: 5am - 11pm</li>
+                        <li>Sábado: 7am - 9pm</li>
+                        <li>Domingo: 8am - 8pm</li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3 class="footer-title">Contacto</h3>
+                    <ul class="footer-info">
+                        <li>123 Fitness Street, Gym City</li>
+                        <li>info@gympower.com</li>
+                        <li>(555) 123-4567</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear"></span> GymPower. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Actualizar el año actual en el footer
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // Menú móvil toggle
+        document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+            this.classList.toggle('active');
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+    </script>
+    
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
