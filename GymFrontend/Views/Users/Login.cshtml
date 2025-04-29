@@ -51,6 +51,7 @@
 </html>
 
 @section Scripts {
+    
     <script>
         // Mobile menu toggle functionality
         document.addEventListener('DOMContentLoaded', function() {
@@ -60,7 +61,7 @@
             if (mobileMenuBtn && navLinks) {
                 mobileMenuBtn.addEventListener('click', function() {
                     this.classList.toggle('active');
-                    navLinks.classList.toggle('active');
+                    mobileMenuBtn.classList.toggle('active');
                 });
             }
         });

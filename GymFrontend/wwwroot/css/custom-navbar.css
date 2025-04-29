@@ -30,6 +30,7 @@
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--color-dark-300);
     padding: 0.75rem 0;
+    justify-content: center;/* sobre estrita de navbar scss */
 }
 
 .navbar .container {
@@ -67,6 +68,7 @@
     list-style: none;
     flex-grow: 1;
     justify-content: center;
+    align-items: center;
 }
 
 .nav-link {
@@ -181,13 +183,13 @@
         transform: translateY(-100%);
         opacity: 0;
         transition: transform 0.3s ease, opacity 0.3s ease;
-        display: none;
+        visibility: hidden;
     }
     
     .nav-links.active {
         transform: translateY(0);
         opacity: 1;
-        display: flex;
+        visibility: visible;
     }
     
     .mobile-menu-btn {
@@ -207,4 +209,7 @@
     .logo-text {
         font-size: 1.25rem;
     }
+}
+.fix-margin-button-uneteAhora {
+    margin-top: 0;
 }

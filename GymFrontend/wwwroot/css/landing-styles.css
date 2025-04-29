@@ -54,8 +54,10 @@ ul {
 .container {
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
+    margin: 0 0;
+    padding: 0 1rem;    
+    margin-left:0 !important;/* sobrescrita de container.scss */
+    margin-right:0 !important;/* sobrescrita de container.scss */
 }
 
 .text-accent {
