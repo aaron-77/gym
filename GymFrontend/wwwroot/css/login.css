@@ -131,6 +131,7 @@ body {
     color: var(--color-light);
     font-family: var(--font-family);
     transition: var(--transition);
+    width: 100%;
 }
 
 .input-group input:focus {
