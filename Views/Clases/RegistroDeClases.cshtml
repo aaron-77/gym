@@ -1,0 +1,136 @@
+@{
+    ViewData["Title"] = "Registro de Clases";
+    Layout = "_LayoutSeccionAdministracion";
+}
+
+<div class="pagetitle">
+    <h1>Registro de Clases</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+            <li class="breadcrumb-item active">Registro de Clases</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Formulario de Registro</h5>
+
+                    <form id="formRegistroClase" class="needs-validation" novalidate>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="nombreClase" class="form-label">Nombre de la Clase</label>
+                                <input type="text" class="form-control" id="nombreClase" name="nombreClase" required>
+                                <div class="invalid-feedback">
+                                    Por favor ingrese el nombre de la clase.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="instructor" class="form-label">Instructor</label>
+                                <select class="form-select" id="instructor" name="instructor" required>
+                                    <option value="" selected disabled>Seleccione un instructor</option>
+                                    @foreach (var instructor in ViewBag.Instructores)
+                                    {
+                                        <option value="@instructor.Id">@instructor.Nombre</option>
+                                    }
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor seleccione un instructor.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="descripcion" class="form-label">Descripción</label>
+                                <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+                                <div class="invalid-feedback">
+                                    Por favor ingrese una descripción para la clase.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="duracionMinutos" class="form-label">Duración en minutos</label>
+                                <input type="number" class="form-control" id="duracionMinutos" name="duracionMinutos" min="1" required>
+                                <div class="invalid-feedback">
+                                    Por favor ingrese la duración de la clase.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="tiempoDescanso" class="form-label">Tiempo de descanso (minutos)</label>
+                                <input type="number" class="form-control" id="tiempoDescanso" name="tiempoDescanso" min="0" required>
+                                <div class="invalid-feedback">
+                                    Por favor ingrese el tiempo de descanso.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="intensidad" class="form-label">Intensidad</label>
+                                <select class="form-select" id="intensidad" name="intensidad" required>
+                                    <option value="" selected disabled>Seleccione la intensidad</option>
+                                    @foreach (var intensidad in ViewBag.Intensidades)
+                                    {
+                                        <option value="@intensidad.Id">@intensidad.Nombre</option>
+                                    }
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor seleccione una intensidad.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="dificultad" class="form-label">Dificultad</label>
+                                <select class="form-select" id="dificultad" name="dificultad" required>
+                                    <option value="" selected disabled>Seleccione la dificultad</option>
+                                    @foreach (var dificultad in ViewBag.Dificultades)
+                                    {
+                                        <option value="@dificultad.Id">@dificultad.Nombre</option>
+                                    }
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor seleccione una dificultad.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campo duracionTotal ahora oculto -->
+                        <input type="hidden" id="duracionTotal" name="duracionTotal">
+
+                        <div class="row">
+                            <div class="col-12 d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary me-2">Guardar</button>
+                                <button type="reset" class="btn btn-secondary">Limpiar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Definir objeto apiEndpoints desde Razor
+        window.apiEndpoints = {
+            registrarClase: 'http://localhost:5062/api/registrarClase'
+        };
+    </script>
+    <script src="~/js/registroDeClaseLogic.js"></script>
+} 
