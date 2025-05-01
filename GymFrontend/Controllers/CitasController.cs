@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace GymFrontend.Controllers
 {
     public class CitasController : Controller
-    {
+    {   
         private UsersManager managerUsers;
         private CitasManager citasManager;
 
