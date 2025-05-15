@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Intencion del proyecto
+- guardar todos los DataTransferObject que se usen en la aplicacion asi como funcionalidades muy relacionados a esos DTO
+# Estructura del Proyecto
+
+-El proyecto está organizado en las siguientes carpetas:
+
+- **convertersAnSerializers/**: Contiene clases para deserielizaciones personalizadas de json.
+- **CustomValidations/**: ignora esta carpeta
+- **Dtos/**: Contiene todas las clases data transfer object que se usan en la aplicacion,estos tambien funcionan como viewModels
+- **Enums/**: Contiene enums de c# utilizados en los DTO

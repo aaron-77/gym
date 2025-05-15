@@ -111,6 +111,52 @@ CREATE TABLE FitnessCenterDB.dbo.estadosClasesProgramadas (
 );
 
 
+-- FitnessCenterDB.dbo.estadosDeActividadLaboral definition
+
+-- Drop table
+
+-- DROP TABLE FitnessCenterDB.dbo.estadosDeActividadLaboral;
+
+CREATE TABLE FitnessCenterDB.dbo.estadosDeActividadLaboral (
+	idEstadoActividadLaboral int IDENTITY(1,1) NOT NULL,
+	nombreEstadoActividadLaboral nvarchar(100) COLLATE Modern_Spanish_CI_AS NULL,
+	fechaCreacion datetime DEFAULT getdate() NULL,
+	fcehaModificacion datetime DEFAULT getdate() NULL,
+	CONSTRAINT PK__estadosD__F41B8ED8EC454C75 PRIMARY KEY (idEstadoActividadLaboral)
+);
+
+
+-- FitnessCenterDB.dbo.estadosDeClases definition
+
+-- Drop table
+
+-- DROP TABLE FitnessCenterDB.dbo.estadosDeClases;
+
+CREATE TABLE FitnessCenterDB.dbo.estadosDeClases (
+	idEstadoClase int IDENTITY(1,1) NOT NULL,
+	nombreEstado nvarchar(50) COLLATE Modern_Spanish_CI_AS NOT NULL,
+	descripcionEstado nvarchar(MAX) COLLATE Modern_Spanish_CI_AS NULL,
+	fechaCreacion datetime DEFAULT getdate() NULL,
+	fechaModificacion datetime DEFAULT getdate() NULL,
+	CONSTRAINT PK__estadosD__A4F595D46615EEBC PRIMARY KEY (idEstadoClase)
+);
+
+
+-- FitnessCenterDB.dbo.estadosHorarioClaseProgramada definition
+
+-- Drop table
+
+-- DROP TABLE FitnessCenterDB.dbo.estadosHorarioClaseProgramada;
+
+CREATE TABLE FitnessCenterDB.dbo.estadosHorarioClaseProgramada (
+	idEstadoHorarioClase int IDENTITY(1,1) NOT NULL,
+	nombreEstadoHorario nvarchar(50) COLLATE Modern_Spanish_CI_AS NULL,
+	fechaCreacion datetime DEFAULT getdate() NULL,
+	fechaModificacion datetime DEFAULT getdate() NULL,
+	CONSTRAINT PK__estadosH__FE1509CB80800E66 PRIMARY KEY (idEstadoHorarioClase)
+);
+
+
 -- FitnessCenterDB.dbo.estadosInscripciones definition
 
 -- Drop table
@@ -123,6 +169,22 @@ CREATE TABLE FitnessCenterDB.dbo.estadosInscripciones (
 	fechaCreacion datetime DEFAULT getdate() NULL,
 	fechaModificacion datetime DEFAULT getdate() NULL,
 	CONSTRAINT PK__estadosI__5CD68FF4850AB16F PRIMARY KEY (idEstadoInscripcion)
+);
+
+
+-- FitnessCenterDB.dbo.horasLaborales definition
+
+-- Drop table
+
+-- DROP TABLE FitnessCenterDB.dbo.horasLaborales;
+
+CREATE TABLE FitnessCenterDB.dbo.horasLaborales (
+	idHora int IDENTITY(1,1) NOT NULL,
+	horaInicio time NOT NULL,
+	horaFin time NOT NULL,
+	fechaCreacion datetime DEFAULT getdate() NULL,
+	fechaModificacion datetime DEFAULT getdate() NULL,
+	CONSTRAINT PK__horasLab__770403DB6FE2950B PRIMARY KEY (idHora)
 );
 
 
@@ -215,6 +277,25 @@ CREATE TABLE FitnessCenterDB.dbo.sysdiagrams (
 	CONSTRAINT PK__sysdiagr__C2B05B6153CBA9AD PRIMARY KEY (diagram_id),
 	CONSTRAINT UK_principal_name UNIQUE (principal_id,name)
 );
+
+
+-- FitnessCenterDB.dbo.tiposDeRecurrenciaDeDiasFestivos definition
+
+-- Drop table
+
+-- DROP TABLE FitnessCenterDB.dbo.tiposDeRecurrenciaDeDiasFestivos;
+
+CREATE TABLE FitnessCenterDB.dbo.tiposDeRecurrenciaDeDiasFestivos (
+	idTipoDeRecurrenciaDeDiaFestivo int IDENTITY(1,1) NOT NULL,
+	nombreTipoDeRecurrencia nvarchar(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
+	descripcion nvarchar(MAX) COLLATE Modern_Spanish_CI_AS NULL,
+	fechaCreacion datetime DEFAULT getdate() NOT NULL,
+	fechaModificacion datetime NULL,
+	CONSTRAINT PK__tiposDeR__3A34B1D521F4C5E6 PRIMARY KEY (idTipoDeRecurrenciaDeDiaFestivo)
+);
+ CREATE NONCLUSTERED INDEX IX_tiposDeRecurrenciaDeDiasFestivos_Nombre ON dbo.tiposDeRecurrenciaDeDiasFestivos (  nombreTipoDeRecurrencia ASC  )  
+	 WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )
+	 ON [PRIMARY ] ;
 
 
 -- FitnessCenterDB.dbo.unidadesDeMedida definition
@@ -311,6 +392,51 @@ CREATE TABLE FitnessCenterDB.dbo.Usuarios (
 ALTER TABLE FitnessCenterDB.dbo.Usuarios WITH NOCHECK ADD CONSTRAINT CK__Usuarios__Estado__3E52440B CHECK (([Estado]='PendienteVerificacion' OR [Estado]='Inactivo' OR [Estado]='Activo'));
 
 
+-- FitnessCenterDB.dbo.diasFestivosVariables definition
+
+-- Drop table
+
+-- DROP TABLE FitnessCenterDB.dbo.diasFestivosVariables;
+
+CREATE TABLE FitnessCenterDB.dbo.diasFestivosVariables (
+	idDiaFestivoVariable int IDENTITY(1,1) NOT NULL,
+	nombreDiasFestivoVariable nvarchar(100) COLLATE Modern_Spanish_CI_AS NOT NULL,
+	deQueSemana int NULL,
+	deQueMes int NULL,
+	deQueDia int NOT NULL,
+	fechaCreacion datetime DEFAULT getdate() NOT NULL,
+	fechaModificacion datetime NULL,
+	fkTipoDeRecurrenciaDeDiaFestivo int NULL,
+	fkTipoDeRecurrenciaDelFestivo int NOT NULL,
+	fkEstadoActividadLaboral int NOT NULL,
+	CONSTRAINT PK__diasFest__499CE46553695ECB PRIMARY KEY (idDiaFestivoVariable),
+	CONSTRAINT fk_estadosDeActividdadLaboral_diasFestivosVariables FOREIGN KEY (fkEstadoActividadLaboral) REFERENCES FitnessCenterDB.dbo.estadosDeActividadLaboral(idEstadoActividadLaboral),
+	CONSTRAINT fk_tiposDeRecurrenciaDeDiasFestivos_diasFestivosVariables FOREIGN KEY (fkTipoDeRecurrenciaDelFestivo) REFERENCES FitnessCenterDB.dbo.tiposDeRecurrenciaDeDiasFestivos(idTipoDeRecurrenciaDeDiaFestivo)
+);
+
+
+-- FitnessCenterDB.dbo.diasFestivosYDescansos definition
+
+-- Drop table
+
+-- DROP TABLE FitnessCenterDB.dbo.diasFestivosYDescansos;
+
+CREATE TABLE FitnessCenterDB.dbo.diasFestivosYDescansos (
+	idDiaFestivo int IDENTITY(1,1) NOT NULL,
+	fechaFestivaODescanso date NOT NULL,
+	descripcion nvarchar(MAX) COLLATE Modern_Spanish_CI_AS NULL,
+	fkEstadoActividadLaboral int NOT NULL,
+	fechaCreacion datetime DEFAULT getdate() NULL,
+	fcehaModificacion datetime DEFAULT getdate() NULL,
+	tipoDeRecurrenciaDelFestivo int NOT NULL,
+	CONSTRAINT PK__diasFest__A066CE26B7DC05E6 PRIMARY KEY (idDiaFestivo),
+	CONSTRAINT FK_diasFestivosYDescansos_EstadoActividadLaboral FOREIGN KEY (fkEstadoActividadLaboral) REFERENCES FitnessCenterDB.dbo.estadosDeActividadLaboral(idEstadoActividadLaboral)
+);
+ CREATE NONCLUSTERED INDEX IX_diasFestivosYDescansos_Fecha ON dbo.diasFestivosYDescansos (  fechaFestivaODescanso ASC  )  
+	 WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )
+	 ON [PRIMARY ] ;
+
+
 -- FitnessCenterDB.dbo.imagesForExercises definition
 
 -- Drop table
@@ -361,6 +487,24 @@ CREATE TABLE FitnessCenterDB.dbo.parametros_unidadesDeMedida (
 );
 
 
+-- FitnessCenterDB.dbo.preReservasDeHorario definition
+
+-- Drop table
+
+-- DROP TABLE FitnessCenterDB.dbo.preReservasDeHorario;
+
+CREATE TABLE FitnessCenterDB.dbo.preReservasDeHorario (
+	idPreReserva int IDENTITY(1,1) NOT NULL,
+	fechaInicioDeLaReserva datetime NOT NULL,
+	fechaDeExpiracionDeLaReserva datetime NOT NULL,
+	fkHoraLaboral int NOT NULL,
+	idUsuarioQueReserva int NOT NULL,
+	fechaReservada date NOT NULL,
+	CONSTRAINT PK__preReser__0FAC6FC5DD04E13F PRIMARY KEY (idPreReserva),
+	CONSTRAINT FK_preReservasDeHorario_horariosClasesProgramadas FOREIGN KEY (fkHoraLaboral) REFERENCES FitnessCenterDB.dbo.horasLaborales(idHora)
+);
+
+
 -- FitnessCenterDB.dbo.Citas definition
 
 -- Drop table
@@ -400,9 +544,11 @@ CREATE TABLE FitnessCenterDB.dbo.Clases (
 	fkDificultad int NULL,
 	tiempoDeDescansoEnMinutos int DEFAULT 15 NOT NULL,
 	duracionEnMinutosConDescansoIncluido int DEFAULT 60 NOT NULL,
+	fkEstadoClase int NULL,
 	CONSTRAINT PK__Clases__F54296B30E7E66FD PRIMARY KEY (ClaseID),
 	CONSTRAINT FK_Clases_Dificultad FOREIGN KEY (fkDificultad) REFERENCES FitnessCenterDB.dbo.nivelesDeDificultadDeClase(idNivelDeDificultadDeClase),
 	CONSTRAINT FK_Clases_Intensidad FOREIGN KEY (fkIntensidad) REFERENCES FitnessCenterDB.dbo.nivelesDeIntensidadDeClase(idNivelDeIntensidad),
+	CONSTRAINT FK_Clases_estadosDeClases FOREIGN KEY (fkEstadoClase) REFERENCES FitnessCenterDB.dbo.estadosDeClases(idEstadoClase),
 	CONSTRAINT FK__Clases__Instruct__5AEE82B9 FOREIGN KEY (InstructorID) REFERENCES FitnessCenterDB.dbo.Usuarios(UsuarioID)
 );
 
@@ -494,8 +640,6 @@ CREATE TABLE FitnessCenterDB.dbo.beneficiosDeClase (
 CREATE TABLE FitnessCenterDB.dbo.clasesProgramadas (
 	idProgramacionClase int IDENTITY(1,1) NOT NULL,
 	fkClase int NOT NULL,
-	fechaInicio datetime NOT NULL,
-	fechaFin datetime NOT NULL,
 	fkEntrenador int NOT NULL,
 	cupoMaximo int NOT NULL,
 	fkEstadoClaseProgramada int NOT NULL,
@@ -568,6 +712,28 @@ CREATE TABLE FitnessCenterDB.dbo.estructuraDeClase (
 	fechaDeModificacion datetime DEFAULT getdate() NULL,
 	CONSTRAINT PK__estructu__EF4379A8928D581A PRIMARY KEY (idBloque),
 	CONSTRAINT FK_Estructura_Clase FOREIGN KEY (fkClase) REFERENCES FitnessCenterDB.dbo.Clases(ClaseID)
+);
+
+
+-- FitnessCenterDB.dbo.horariosDeClasesProgramadas definition
+
+-- Drop table
+
+-- DROP TABLE FitnessCenterDB.dbo.horariosDeClasesProgramadas;
+
+CREATE TABLE FitnessCenterDB.dbo.horariosDeClasesProgramadas (
+	idHorarioDeClaseProgramada int IDENTITY(1,1) NOT NULL,
+	fkClaseProgramada int NOT NULL,
+	fkHorarioLaboral int NOT NULL,
+	fkEstadoHorarioClase int DEFAULT 1 NOT NULL,
+	fkEntrenador int NOT NULL,
+	fechaDeLaClase date NULL,
+	CONSTRAINT PK__horarios__873B1A4EFA42A731 PRIMARY KEY (idHorarioDeClaseProgramada),
+	CONSTRAINT UQ_horariosDeClasesProgramadas_Compuesto UNIQUE (fkClaseProgramada,fkHorarioLaboral),
+	CONSTRAINT FK_horariosDeClasesProgramadas_clasesProgramadas FOREIGN KEY (fkClaseProgramada) REFERENCES FitnessCenterDB.dbo.clasesProgramadas(idProgramacionClase),
+	CONSTRAINT FK_horasLborales_horariosClasesProgramadas FOREIGN KEY (fkHorarioLaboral) REFERENCES FitnessCenterDB.dbo.horasLaborales(idHora),
+	CONSTRAINT fk_estadosClasesProgramadas_horariosDeClasesProgramadas FOREIGN KEY (fkEstadoHorarioClase) REFERENCES FitnessCenterDB.dbo.estadosHorarioClaseProgramada(idEstadoHorarioClase),
+	CONSTRAINT fk_usuarios_horariosClasesProgramadas FOREIGN KEY (fkEntrenador) REFERENCES FitnessCenterDB.dbo.Usuarios(UsuarioID)
 );
 
 
@@ -712,3 +878,25 @@ CREATE TABLE FitnessCenterDB.dbo.DetalleEntrenamiento (
 	CONSTRAINT FK__DetalleEn__Ejerc__74AE54BC FOREIGN KEY (EjercicioID) REFERENCES FitnessCenterDB.dbo.Ejercicios(EjercicioID),
 	CONSTRAINT FK__DetalleEn__Regis__73BA3083 FOREIGN KEY (RegistroID) REFERENCES FitnessCenterDB.dbo.RegistrosEntrenamiento(RegistroID)
 );
+
+
+-- dbo.v_nivelesDeDificultad source
+
+CREATE VIEW v_nivelesDeDificultad
+AS
+SELECT 
+    idNivelDeDificultadDeClase,
+    nombreNivelDeDificultad
+FROM 
+    FitnessCenterDB.dbo.nivelesDeDificultadDeClase;
+
+
+-- dbo.v_nivelesDeIntensidad source
+
+CREATE VIEW v_nivelesDeIntensidad
+AS
+SELECT 
+    idNivelDeIntensidad,
+    nombreNivelDeIntensidad
+FROM 
+    FitnessCenterDB.dbo.nivelesDeIntensidadDeClase;

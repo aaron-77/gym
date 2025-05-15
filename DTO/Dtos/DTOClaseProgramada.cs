@@ -1,15 +1,23 @@
 using System;
 using System.Collections.Generic;
-
+using System.ComponentModel.DataAnnotations;
 namespace DTO.Dtos
 {
     public class DTOClaseProgramada
     {
         public int IdProgramacionClase { get; set; }
-        public string NombreClase { get; set; }
-        public string DiaDeLaSemana { get; set; } // Always from the current year
-        public string HoraInicio { get; set; }
-        public string HoraFin { get; set; }
-        public string NombreEntrenador { get; set; }
+        [Required]
+        public int FkClase { get; set; }
+        [Required]
+        public DateTime FechaInicio { get; set; }
+        [Required]
+        public DateTime FechaFin { get; set; }
+        [Required]
+        public int FkEntrenador { get; set; }
+        [Required]
+        public int CupoMaximo { get; set; }
+        public int FkEstadoClaseProgramada { get; set; }
+        [Required]
+        public string fkHorarioLaboral {get;set;}
     }
 }

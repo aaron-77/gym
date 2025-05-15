@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Estructura del Proyecto
+
+El proyecto está organizado en las siguientes carpetas:
+
+- **Controllers/**: Contiene los controladores con los endpoints de api bakend
+- **BackGroundWork/**: contiene clases .cs con funcionalidad que se ejecutara en segundo plano,por lo regular ejecutada por medio de quartz

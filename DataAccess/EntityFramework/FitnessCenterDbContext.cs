@@ -15,6 +15,8 @@ public partial class FitnessCenterDbContext : DbContext
     {
     }
 
+    public virtual DbSet<Año> Años { get; set; }
+
     public virtual DbSet<BeneficiosDeClase> BeneficiosDeClases { get; set; }
 
     public virtual DbSet<Cita> Citas { get; set; }
@@ -31,6 +33,10 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<DetalleEntrenamiento> DetalleEntrenamientos { get; set; }
 
+    public virtual DbSet<DiasDeLaSemana> DiasDeLaSemanas { get; set; }
+
+    public virtual DbSet<DiasDeLaSemanaHorasLaborale> DiasDeLaSemanaHorasLaborales { get; set; }
+
     public virtual DbSet<DuracionCita> DuracionCitas { get; set; }
 
     public virtual DbSet<Ejercicio> Ejercicios { get; set; }
@@ -43,9 +49,15 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<EstadosClasesProgramada> EstadosClasesProgramadas { get; set; }
 
+    public virtual DbSet<EstadosDeClase> EstadosDeClases { get; set; }
+
     public virtual DbSet<EstadosInscripcione> EstadosInscripciones { get; set; }
 
     public virtual DbSet<EstructuraDeClase> EstructuraDeClases { get; set; }
+
+    public virtual DbSet<HorariosDeClasesProgramada> HorariosDeClasesProgramadas { get; set; }
+
+    public virtual DbSet<HorasLaborale> HorasLaborales { get; set; }
 
     public virtual DbSet<IconsForParameter> IconsForParameters { get; set; }
 
@@ -75,6 +87,8 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<ParametrosUnidadesDeMedidum> ParametrosUnidadesDeMedida { get; set; }
 
+    public virtual DbSet<PreReservasDeHorario> PreReservasDeHorarios { get; set; }
+
     public virtual DbSet<RegistrosEntrenamiento> RegistrosEntrenamientos { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
@@ -90,6 +104,11 @@ public partial class FitnessCenterDbContext : DbContext
     public virtual DbSet<UnidadesDeMedidum> UnidadesDeMedida { get; set; }
 
     public virtual DbSet<Usuario> Usuarios { get; set; }
+
+    public virtual DbSet<VNivelesDeDificultad> VNivelesDeDificultads { get; set; }
+
+    public virtual DbSet<VNivelesDeIntensidad> VNivelesDeIntensidads { get; set; }
+    // campos agregados manualmente
     public virtual DbSet<DTO.Dtos.Ejercicio> ejercicioSP { get; set; }
     
     public virtual DbSet<DTO.Dtos.Rutina> rutinaSP { get; set; }
@@ -102,12 +121,10 @@ public partial class FitnessCenterDbContext : DbContext
 
     public virtual DbSet<DTO.Dtos.DTOUltimaMetaDeParametro> ultimasMetasDeParametroSP { get; set; }
     public virtual DbSet<DTO.Dtos.DTOEjerciciosYParametrosDelCliente> ejerciciosYParametrosDelClienteSP { get; set; }
-    //public virtual DbSet<DTO.Dtos.DetalleDeClase> detalleDeClaseSP { get; set; }
     public virtual DbSet<DTO.Dtos.DetalleDeClaseRaw> detalleDeClaseRawSP { get; set; }
-    //public virtual DbSet<DTO.Dtos.DTOImagenesDeClase> imagenesDeClaseSP { get; set; }
-   // public virtual DbSet<DTO.Dtos.DTOConsejoDeClase> consejoDeClaseSP { get; set; }
-    //public virtual DbSet<DTO.Dtos.DTOBeneficiosDeClase> beneficiosDeClaseSP { get; set; }
-
+    public virtual DbSet<DTO.Dtos.DTOClaseSimple> FN_ObtenerClases { get; set; }
+    
+    
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
@@ -115,6 +132,22 @@ public partial class FitnessCenterDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Año>(entity =>
+        {
+            entity.HasKey(e => e.IdAño).HasName("PK__años__3E033B60DDD23740");
+            entity.ToTable("años");
+            entity.Property(e => e.IdAño).HasColumnName("idAño");
+            entity.Property(e => e.Año1).HasColumnName("año");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaModificacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaModificacion");
+        });
+
         modelBuilder.Entity<BeneficiosDeClase>(entity =>
         {
             entity.HasKey(e => e.IdBeneficio).HasName("PK__benefici__00AAC26A2D2E6E7C");
@@ -178,6 +211,7 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasDefaultValueSql("((60))")
                 .HasColumnName("duracionEnMinutosConDescansoIncluido");
             entity.Property(e => e.FkDificultad).HasColumnName("fkDificultad");
+            entity.Property(e => e.FkEstadoClase).HasColumnName("fkEstadoClase");
             entity.Property(e => e.FkIntensidad).HasColumnName("fkIntensidad");
             entity.Property(e => e.InstructorId).HasColumnName("InstructorID");
             entity.Property(e => e.NombreClase).HasMaxLength(100);
@@ -188,6 +222,10 @@ public partial class FitnessCenterDbContext : DbContext
             entity.HasOne(d => d.FkDificultadNavigation).WithMany(p => p.Clases)
                 .HasForeignKey(d => d.FkDificultad)
                 .HasConstraintName("FK_Clases_Dificultad");
+
+            entity.HasOne(d => d.FkEstadoClaseNavigation).WithMany(p => p.Clases)
+                .HasForeignKey(d => d.FkEstadoClase)
+                .HasConstraintName("FK_Clases_estadosDeClases");
 
             entity.HasOne(d => d.FkIntensidadNavigation).WithMany(p => p.Clases)
                 .HasForeignKey(d => d.FkIntensidad)
@@ -311,6 +349,55 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasConstraintName("FK__DetalleEn__Regis__73BA3083");
         });
 
+        modelBuilder.Entity<DiasDeLaSemana>(entity =>
+        {
+            entity.HasKey(e => e.IdDia).HasName("PK__diasDeLa__3E416597E1AE4B2B");
+
+            entity.ToTable("diasDeLaSemana");
+
+            entity.Property(e => e.IdDia).HasColumnName("idDia");
+            entity.Property(e => e.Activo).HasDefaultValueSql("((1))");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.FechaModificacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.NombreDia)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("nombreDia");
+        });
+
+        modelBuilder.Entity<DiasDeLaSemanaHorasLaborale>(entity =>
+        {
+            entity.HasKey(e => e.IdHorarioLaboral).HasName("PK__diasDeLa__AC96C3A6A1255770");
+
+            entity.ToTable("diasDeLaSemana_horasLaborales");
+
+            entity.HasIndex(e => new { e.FkDiaDeLaSemana, e.FkHoraLaboral, e.FkAño }, "UQ_diasDeLaSemana_horasLaborales_Compuesto").IsUnique();
+
+            entity.Property(e => e.IdHorarioLaboral).HasColumnName("idHorarioLaboral");
+            entity.Property(e => e.FkAño).HasColumnName("fkAño");
+            entity.Property(e => e.FkDiaDeLaSemana).HasColumnName("fkDiaDeLaSemana");
+            entity.Property(e => e.FkHoraLaboral).HasColumnName("fkHoraLaboral");
+
+            entity.HasOne(d => d.FkAñoNavigation).WithMany(p => p.DiasDeLaSemanaHorasLaborales)
+                .HasForeignKey(d => d.FkAño)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_diasDeLaSemana_horasLaborales_años");
+
+            entity.HasOne(d => d.FkDiaDeLaSemanaNavigation).WithMany(p => p.DiasDeLaSemanaHorasLaborales)
+                .HasForeignKey(d => d.FkDiaDeLaSemana)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_diasDeLaSemana_horasLaborales_diasDeLaSemana");
+
+            entity.HasOne(d => d.FkHoraLaboralNavigation).WithMany(p => p.DiasDeLaSemanaHorasLaborales)
+                .HasForeignKey(d => d.FkHoraLaboral)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_diasDeLaSemana_horasLaborales_horasLaborales");
+        });
+
         modelBuilder.Entity<DuracionCita>(entity =>
         {
             entity.HasKey(e => e.DuracionId).HasName("PK__duracion__3B2C07DA2413E2C8");
@@ -416,6 +503,27 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(e => e.NombresEstado).HasColumnName("nombresEstado");
         });
 
+        modelBuilder.Entity<EstadosDeClase>(entity =>
+        {
+            entity.HasKey(e => e.IdEstadoClase).HasName("PK__estadosD__A4F595D46615EEBC");
+
+            entity.ToTable("estadosDeClases");
+
+            entity.Property(e => e.IdEstadoClase).HasColumnName("idEstadoClase");
+            entity.Property(e => e.DescripcionEstado).HasColumnName("descripcionEstado");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaModificacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaModificacion");
+            entity.Property(e => e.NombreEstado)
+                .HasMaxLength(50)
+                .HasColumnName("nombreEstado");
+        });
+
         modelBuilder.Entity<EstadosInscripcione>(entity =>
         {
             entity.HasKey(e => e.IdEstadoInscripcion).HasName("PK__estadosI__5CD68FF4850AB16F");
@@ -462,6 +570,48 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasForeignKey(d => d.FkClase)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Estructura_Clase");
+        });
+
+        modelBuilder.Entity<HorariosDeClasesProgramada>(entity =>
+        {
+            entity.HasKey(e => e.IdHorarioDeClaseProgramada).HasName("PK__horarios__873B1A4EFA42A731");
+
+            entity.ToTable("horariosDeClasesProgramadas");
+
+            entity.HasIndex(e => new { e.FkClaseProgramada, e.FkHorarioLaboral }, "UQ_horariosDeClasesProgramadas_Compuesto").IsUnique();
+
+            entity.Property(e => e.IdHorarioDeClaseProgramada).HasColumnName("idHorarioDeClaseProgramada");
+            entity.Property(e => e.FkClaseProgramada).HasColumnName("fkClaseProgramada");
+            entity.Property(e => e.FkHorarioLaboral).HasColumnName("fkHorarioLaboral");
+
+            entity.HasOne(d => d.FkClaseProgramadaNavigation).WithMany(p => p.HorariosDeClasesProgramada)
+                .HasForeignKey(d => d.FkClaseProgramada)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_horariosDeClasesProgramadas_clasesProgramadas");
+
+            entity.HasOne(d => d.FkHorarioLaboralNavigation).WithMany(p => p.HorariosDeClasesProgramada)
+                .HasForeignKey(d => d.FkHorarioLaboral)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_horariosDeClasesProgramadas_diasDeLaSemana_horasLaborales");
+        });
+
+        modelBuilder.Entity<HorasLaborale>(entity =>
+        {
+            entity.HasKey(e => e.IdHora).HasName("PK__horasLab__770403DB6FE2950B");
+
+            entity.ToTable("horasLaborales");
+
+            entity.Property(e => e.IdHora).HasColumnName("idHora");
+            entity.Property(e => e.FechaCreacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaCreacion");
+            entity.Property(e => e.FechaModificacion)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("fechaModificacion");
+            entity.Property(e => e.HoraFin).HasColumnName("horaFin");
+            entity.Property(e => e.HoraInicio).HasColumnName("horaInicio");
         });
 
         modelBuilder.Entity<IconsForParameter>(entity =>
@@ -805,6 +955,27 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasConstraintName("FK__Parametro__fkUni__4A18FC72");
         });
 
+        modelBuilder.Entity<PreReservasDeHorario>(entity =>
+        {
+            entity.HasKey(e => e.IdPreReserva).HasName("PK__preReser__0FAC6FC5DD04E13F");
+
+            entity.ToTable("preReservasDeHorario");
+
+            entity.Property(e => e.IdPreReserva).HasColumnName("idPreReserva");
+            entity.Property(e => e.FechaDeExpiracionDeLaReserva)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaDeExpiracionDeLaReserva");
+            entity.Property(e => e.FechaInicioDeLaReserva)
+                .HasColumnType("datetime")
+                .HasColumnName("fechaInicioDeLaReserva");
+            entity.Property(e => e.FkHorarioClaseProgramada).HasColumnName("fkHorarioClaseProgramada");
+
+            entity.HasOne(d => d.FkHorarioClaseProgramadaNavigation).WithMany(p => p.PreReservasDeHorarios)
+                .HasForeignKey(d => d.FkHorarioClaseProgramada)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_preReservasDeHorario_horariosClasesProgramadas");
+        });
+
         modelBuilder.Entity<RegistrosEntrenamiento>(entity =>
         {
             entity.HasKey(e => e.RegistroId).HasName("PK__Registro__B897313EAB9C2539");
@@ -963,6 +1134,30 @@ public partial class FitnessCenterDbContext : DbContext
                 .HasConstraintName("FK__Usuarios__RolID__3D5E1FD2");
         });
 
+        modelBuilder.Entity<VNivelesDeDificultad>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("v_nivelesDeDificultad");
+
+            entity.Property(e => e.IdNivelDeDificultadDeClase)
+                .ValueGeneratedOnAdd()
+                .HasColumnName("idNivelDeDificultadDeClase");
+            entity.Property(e => e.NombreNivelDeDificultad).HasColumnName("nombreNivelDeDificultad");
+        });
+
+        modelBuilder.Entity<VNivelesDeIntensidad>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("v_nivelesDeIntensidad");
+
+            entity.Property(e => e.IdNivelDeIntensidad)
+                .ValueGeneratedOnAdd()
+                .HasColumnName("idNivelDeIntensidad");
+            entity.Property(e => e.NombreNivelDeIntensidad).HasColumnName("nombreNivelDeIntensidad");
+        });
+
         // definiciones personalizadas agregadas manualmente
         modelBuilder.Entity<DTO.Dtos.Rutina>(entity =>
         {
@@ -1066,22 +1261,7 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(ep => ep.nombreParametro).HasColumnName("nombreParametro");
         });
 
-        /* modelBuilder.Entity<DTO.Dtos.DetalleDeClase>(entity =>
-        {
-            entity.HasNoKey();
-            entity.Property(d => d.Duracion).HasColumnName("Duracion");
-            entity.Property(d => d.NivelDeIntensidad).HasColumnName("NivelDeIntensidad");
-            entity.Property(d => d.NivelDeDificultad).HasColumnName("NivelDeDificultad");
-            entity.Property(d => d.DescripcionDeLaClase).HasColumnName("DescripcionDeLaClase");
-            entity.Property(d => d.imagenesDeClase);
-            entity.Property(d => d.BeneficiosDeLaClase);
-            entity.Property(d => d.EstructuraDeLaClase);
-            entity.Property(d => d.EjerciciosDeClase);
-            entity.Property(d => d.Consejos);
-            entity.Property(d => d.EquipamientoRecomendado);
-            entity.Property(d => d.HorariosProgramados);
-        }); */
-
+        
         modelBuilder.Entity<DTO.Dtos.DetalleDeClaseRaw>(entity =>
         {
             entity.HasNoKey();
@@ -1100,34 +1280,16 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(d => d.HorariosProgramados).HasColumnName("HorariosProgramados");
         });
 
-        /*
-        modelBuilder.Entity<DTO.Dtos.DTOImagenesDeClase>(entity =>
+        modelBuilder.Entity<DTO.Dtos.DTOClaseSimple>(entity =>
         {
             entity.HasNoKey();
-            entity.Property(d => d.urlParaBanner).HasColumnName("urlParaBanner");
-            entity.Property(d => d.urlParaParaDescripcionDeClase).HasColumnName("urlParaParaDescripcionDeClase");
-            entity.Property(d => d.urlParaBloqueConsejos).HasColumnName("urlParaBloqueConsejos");
+            entity.Property(d => d.ClaseID).HasColumnName("ClaseID");
+            entity.Property(d => d.NombreClase).HasColumnName("NombreClase"); 
         });
-        */
 
-        /*
-        modelBuilder.Entity<DTO.Dtos.DTOConsejoDeClase>(entity =>
-        {
-            entity.HasNoKey();
-            entity.Property(d => d.Consejos).HasColumnName("Consejos");
-            entity.Property(d => d.FkClase).HasColumnName("FkClase");
-            entity.Property(d => d.IntroduccionDeConsejo).HasColumnName("IntroduccionDeConsejo");
-        });
-        */
+        
+         
 
-        /*
-        modelBuilder.Entity<DTO.Dtos.DTOBeneficiosDeClase>(entity =>
-        {
-            entity.HasNoKey();
-            entity.Property(d => d.beneficio).HasColumnName("beneficio");
-            entity.Property(d => d.descripcionBeneficio).HasColumnName("descripcionBeneficio");
-        });
-        */
 
         OnModelCreatingPartial(modelBuilder);
     }

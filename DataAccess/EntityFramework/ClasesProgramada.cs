@@ -32,5 +32,7 @@ public partial class ClasesProgramada
 
     public virtual EstadosClasesProgramada FkEstadoClaseProgramadaNavigation { get; set; } = null!;
 
+    public virtual ICollection<HorariosDeClasesProgramada> HorariosDeClasesProgramada { get; set; } = new List<HorariosDeClasesProgramada>();
+
     public virtual ICollection<InscripcionesDeClase> InscripcionesDeClases { get; set; } = new List<InscripcionesDeClase>();
 }

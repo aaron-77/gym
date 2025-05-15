@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Estructura del Proyecto
+
+El proyecto está organizado en las siguientes carpetas, cada una contiene un proyecto de C# independiente:
+
+- **API/**: Contiene todo el código backend del API de la aplicación
+- **BL/**: Contiene la lógica de negocio de la aplicación, incluidos clientes HTTP configurados para hacer las peticiones
+- **DataAccess/**: Contiene los archivos de Entity Framework que manipulan la base de datos incluido el contexto de base de datos
+- **DTO/**: Contiene los data transfer objects que se usan en toda la aplicacion
+- **GymFrontend/**: Contiene la aplicación frontend
+- **bd/**: Contiene archivos SQL y documentación de la base de datos. Todo cambio SQL en la base de datos se genera en forma de scripts SQL en esta carpeta en el archivo [nuevosCambiosAbd.sql](mdc:bd/nuevosCambiosAbd.sql)

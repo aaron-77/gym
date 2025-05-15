@@ -76,6 +76,35 @@ namespace BL.Utils
             }
             return convertedTable;
         }
+
+        public static DataTable ConvertToDataTable<T>(T obj)
+    {
+        if (obj == null)
+            throw new ArgumentNullException(nameof(obj));
+
+        var type = typeof(T);
+        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+        var table = new DataTable(type.Name);
+
+        // Crear columnas a partir de las propiedades
+        foreach (var prop in properties)
+        {
+            var propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+            table.Columns.Add(prop.Name, propType);
+        }
+
+        // Crear una fila con los valores
+        var row = table.NewRow();
+        foreach (var prop in properties)
+        {
+            var value = prop.GetValue(obj) ?? DBNull.Value;
+            row[prop.Name] = value;
+        }
+
+        table.Rows.Add(row);
+        return table;
+    }
         
     }
 }

@@ -10,3 +10,9 @@ exec sp_obtenerMetasDeMedidas
    @idParametro = 1,       -- ID del parámetro
    @idEjercicio = null,       -- ID del ejercicio (puede ser NULL)
     @datosDeMedida = @datosDeMedida
+    
+    exec showtables 'clases'
+    select * from Clases c 
+    select * from Usuarios u 
+    update Usuarios set RolId = 2 where UsuarioID =22
+    select * from estadosClasesProgramadas ecp 
