@@ -305,9 +305,9 @@ BEGIN
         f.Fecha = dfd.fechaFestivaODescanso
     LEFT JOIN dbo.estadosDeActividadLaboral eal ON
         dfd.fkEstadoActividadLaboral = eal.idEstadoActividadLaboral
-    -- Verificación para días festivos variables
+    -- Verificación para días festivos variables usando la función fn_esDiaFestivoVariable
     LEFT JOIN dbo.diasFestivosVariables dfv ON
-        1=1 -- Join cruzado para verificar cada día festivo variable
+        dbo.fn_esDiaFestivoVariable(f.Fecha, dfv.deQueDia, dfv.deQueSemana, dfv.deQueMes, dfv.fkTipoDeRecurrenciaDelFestivo) = 1
     LEFT JOIN dbo.estadosDeActividadLaboral eal2 ON
         dfv.fkEstadoActividadLaboral = eal2.idEstadoActividadLaboral
     WHERE
@@ -318,22 +318,28 @@ BEGIN
         -- No es día festivo o de descanso fijo con estado "no se labora"
         AND (dfd.idDiaFestivo IS NULL OR eal.nombreEstadoActividadLaboral <> 'no se labora')
         -- No es día festivo variable con estado "no se labora"
-        AND NOT EXISTS (
-            SELECT 1
-            FROM dbo.diasFestivosVariables dfv2
-            INNER JOIN dbo.estadosDeActividadLaboral eal3 ON
-                dfv2.fkEstadoActividadLaboral = eal3.idEstadoActividadLaboral
-            INNER JOIN dbo.tiposDeRecurrenciaDeDiasFestivos tr ON
-                dfv2.fkTipoDeRecurrenciaDelFestivo = tr.idTipoDeRecurrenciaDeDiaFestivo
-            WHERE 
-                eal3.nombreEstadoActividadLaboral = 'no se labora'
-                AND dbo.fn_esDiaFestivoVariable(f.Fecha, dfv2.deQueDia, dfv2.deQueSemana, dfv2.deQueMes, tr.nombreTipoDeRecurrencia) = 1
-        )
+        AND (dfv.idDiaFestivoVariable IS NULL OR eal2.nombreEstadoActividadLaboral <> 'no se labora')
         -- La fecha no es anterior a la fecha actual
         AND f.Fecha >= CAST(GETDATE() AS DATE)
     ORDER BY
         f.Fecha,
         hl.horaInicio;
+END;
+
+-- Función para obtener el nombre del tipo de recurrencia
+CREATE OR ALTER FUNCTION dbo.fn_obtenerNombreTipoDeRecurrencia (
+    @idTipoDeRecurrencia INT
+)
+RETURNS NVARCHAR(100)
+AS
+BEGIN
+    DECLARE @nombreTipoDeRecurrencia NVARCHAR(100);
+    
+    SELECT @nombreTipoDeRecurrencia = nombreTipoDeRecurrencia
+    FROM dbo.tiposDeRecurrenciaDeDiasFestivos
+    WHERE idTipoDeRecurrenciaDeDiaFestivo = @idTipoDeRecurrencia;
+    
+    RETURN @nombreTipoDeRecurrencia;
 END;
 
 -- Función para determinar si una fecha coincide con un día festivo variable
@@ -342,21 +348,25 @@ CREATE OR ALTER FUNCTION dbo.fn_esDiaFestivoVariable (
     @diaDeFechaVariable INT,                -- Interpretación según los parámetros disponibles
     @semanaDeFechaVariable INT = NULL,      -- Semana del mes (1-4) o semana del año (1-52)
     @mesDeFechaVariable INT = NULL,         -- Mes (1-12)
-    @nombreTipoDeRecurrencia NVARCHAR(50) = NULL   -- 'relativo' o 'consecutivo', solo usado con día único
+    @idTipoDeRecurrencia INT = NULL         -- ID del tipo de recurrencia
 )
 RETURNS BIT
 AS
 BEGIN
     DECLARE @resultado BIT = 0;
     DECLARE @anioActual INT = YEAR(@fechaAnalizada);
+    DECLARE @nombreTipoDeRecurrencia NVARCHAR(50) = NULL;
+    
+    -- Obtener el nombre del tipo de recurrencia si se proporciona un ID
+    IF @idTipoDeRecurrencia IS NOT NULL
+    BEGIN
+        SET @nombreTipoDeRecurrencia = dbo.fn_obtenerNombreTipoDeRecurrencia(@idTipoDeRecurrencia);
+    END
     
     -- CASO 1: Día, semana y mes tienen valor (ej: "el segundo lunes de enero")
     IF @diaDeFechaVariable IS NOT NULL 
        AND @semanaDeFechaVariable IS NOT NULL 
        AND @mesDeFechaVariable IS NOT NULL
-       AND @diaDeFechaVariable BETWEEN 1 AND 7
-       AND @semanaDeFechaVariable BETWEEN 1 AND 4
-       AND @mesDeFechaVariable BETWEEN 1 AND 12
     BEGIN
         -- Solo proceder si la fecha analizada está en el mes especificado
         IF MONTH(@fechaAnalizada) = @mesDeFechaVariable
@@ -390,8 +400,6 @@ BEGIN
     ELSE IF @diaDeFechaVariable IS NOT NULL 
             AND @semanaDeFechaVariable IS NOT NULL
             AND @mesDeFechaVariable IS NULL
-            AND @diaDeFechaVariable BETWEEN 1 AND 7
-            AND @semanaDeFechaVariable BETWEEN 1 AND 52
     BEGIN
         -- Primer día del año actual
         DECLARE @primerDiaAnio DATE = DATEFROMPARTS(@anioActual, 1, 1);
@@ -419,7 +427,6 @@ BEGIN
     ELSE IF @diaDeFechaVariable IS NOT NULL 
             AND @semanaDeFechaVariable IS NULL
             AND @mesDeFechaVariable IS NULL
-            AND @diaDeFechaVariable BETWEEN 1 AND 7
             AND @nombreTipoDeRecurrencia = 'relativo'
     BEGIN
         -- Verificar si el día de la semana coincide
@@ -433,7 +440,6 @@ BEGIN
     ELSE IF @diaDeFechaVariable IS NOT NULL 
             AND @semanaDeFechaVariable IS NULL
             AND @mesDeFechaVariable IS NULL
-            AND @diaDeFechaVariable BETWEEN 1 AND 366
             AND @nombreTipoDeRecurrencia = 'consecutivo'
     BEGIN
         -- Calcular el día especificado dentro del año
