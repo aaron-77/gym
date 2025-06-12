@@ -1,14 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using BL;
 using BL.Utils;
 using DataAccess.EntityFramework;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace API.Controllers
 {
@@ -17,10 +21,12 @@ namespace API.Controllers
     public class ClasesController : ControllerBase
     {
         private readonly FitnessCenterDbContext _context;
+        private readonly HttpCustomClient _httpCustomClient;
 
-        public ClasesController(FitnessCenterDbContext context)
+        public ClasesController(FitnessCenterDbContext context, HttpCustomClient httpCustomClient)
         {
             _context = context;
+            _httpCustomClient = httpCustomClient;
         }
 
         /// <summary>
@@ -59,35 +65,63 @@ namespace API.Controllers
                         )
                     );
                 }
-                var deserializeOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var deserializeOptions = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                };
                 // Mapear los resultados al modelo DetalleDeClase
-                    var detalle = new DetalleDeClase
-                    {
-                        Duracion = detalleRaw.Duracion,
-                        NivelDeIntensidad = detalleRaw.NivelDeIntensidad,
-                        NivelDeDificultad = detalleRaw.NivelDeDificultad,
-                        DescripcionDeLaClase = detalleRaw.DescripcionDeLaClase,
-                        BeneficiosDeLaClase = !string.IsNullOrEmpty(detalleRaw.BeneficiosDeLaClase) 
-                            ? JsonSerializer.Deserialize<List<DTO.Dtos.DTOBeneficiosDeClase>>(detalleRaw.BeneficiosDeLaClase,deserializeOptions) 
-                            : new List<DTO.Dtos.DTOBeneficiosDeClase>(),
-                        EstructuraDeLaClase = !string.IsNullOrEmpty(detalleRaw.EstructuraDeLaClase)
-                            ? JsonSerializer.Deserialize<List<DTO.Dtos.DTOEstructuraDeClase>>(detalleRaw.EstructuraDeLaClase,deserializeOptions)
-                            : new List<DTO.Dtos.DTOEstructuraDeClase>(),
-                        EjerciciosDeClase = !string.IsNullOrEmpty(detalleRaw.EjerciciosDeClase)
-                            ? JsonSerializer.Deserialize<List<EjercicioPreview>>(detalleRaw.EjerciciosDeClase,deserializeOptions)
-                            : new List<EjercicioPreview>(),
-                        Consejos = !string.IsNullOrEmpty(detalleRaw.Consejos)
-                            ? JsonSerializer.Deserialize<List<DTOConsejoDeClase>>(detalleRaw.Consejos)?.FirstOrDefault()
-                            : null,
-                        EquipamientoRecomendado = !string.IsNullOrEmpty(detalleRaw.EquipamientoRecomendado)
-                            ? JsonSerializer.Deserialize<List<DTO.Dtos.DTOEquipo>>(detalleRaw.EquipamientoRecomendado,deserializeOptions)
-                            : new List<DTO.Dtos.DTOEquipo>(),
-                        HorariosProgramados = !string.IsNullOrEmpty(detalleRaw.HorariosProgramados)
-                            ? JsonSerializer.Deserialize<List<ClaseProgramada>>(detalleRaw.HorariosProgramados,deserializeOptions)
-                            : new List<ClaseProgramada>(),
-                        imagenesDeClase =  !string.IsNullOrEmpty(detalleRaw.imagenesDeClase)
-                            ? JsonSerializer.Deserialize<List<DTOImagenesDeClase>>(detalleRaw.imagenesDeClase,deserializeOptions)?.FirstOrDefault():new DTOImagenesDeClase()
-                    };
+                var detalle = new DetalleDeClase
+                {
+                    Duracion = detalleRaw.Duracion,
+                    NivelDeIntensidad = detalleRaw.NivelDeIntensidad,
+                    NivelDeDificultad = detalleRaw.NivelDeDificultad,
+                    DescripcionDeLaClase = detalleRaw.DescripcionDeLaClase,
+                    BeneficiosDeLaClase = !string.IsNullOrEmpty(detalleRaw.BeneficiosDeLaClase)
+                        ? JsonSerializer.Deserialize<List<DTO.Dtos.DTOBeneficiosDeClase>>(
+                            detalleRaw.BeneficiosDeLaClase,
+                            deserializeOptions
+                        )
+                        : new List<DTO.Dtos.DTOBeneficiosDeClase>(),
+                    EstructuraDeLaClase = !string.IsNullOrEmpty(detalleRaw.EstructuraDeLaClase)
+                        ? JsonSerializer.Deserialize<List<DTO.Dtos.DTOEstructuraDeClase>>(
+                            detalleRaw.EstructuraDeLaClase,
+                            deserializeOptions
+                        )
+                        : new List<DTO.Dtos.DTOEstructuraDeClase>(),
+                    EjerciciosDeClase = !string.IsNullOrEmpty(detalleRaw.EjerciciosDeClase)
+                        ? JsonSerializer.Deserialize<List<EjercicioPreview>>(
+                            detalleRaw.EjerciciosDeClase,
+                            deserializeOptions
+                        )
+                        : new List<EjercicioPreview>(),
+                    Consejos = !string.IsNullOrEmpty(detalleRaw.Consejos)
+                        ? JsonSerializer
+                            .Deserialize<List<DTOConsejoDeClase>>(detalleRaw.Consejos)
+                            ?.FirstOrDefault()
+                        : null,
+                    EquipamientoRecomendado = !string.IsNullOrEmpty(
+                        detalleRaw.EquipamientoRecomendado
+                    )
+                        ? JsonSerializer.Deserialize<List<DTO.Dtos.DTOEquipo>>(
+                            detalleRaw.EquipamientoRecomendado,
+                            deserializeOptions
+                        )
+                        : new List<DTO.Dtos.DTOEquipo>(),
+                    HorariosProgramados = !string.IsNullOrEmpty(detalleRaw.HorariosProgramados)
+                        ? JsonSerializer.Deserialize<List<ClaseProgramada>>(
+                            detalleRaw.HorariosProgramados,
+                            deserializeOptions
+                        )
+                        : new List<ClaseProgramada>(),
+                    imagenesDeClase = !string.IsNullOrEmpty(detalleRaw.imagenesDeClase)
+                        ? JsonSerializer
+                            .Deserialize<List<DTOImagenesDeClase>>(
+                                detalleRaw.imagenesDeClase,
+                                deserializeOptions
+                            )
+                            ?.FirstOrDefault()
+                        : new DTOImagenesDeClase(),
+                };
 
                 // Construir y devolver la respuesta
                 return Ok(
@@ -125,16 +159,18 @@ namespace API.Controllers
         /// <param name="activa">Filtro de estado: 1=activa, 0=inactiva</param>
         /// <returns>Lista de clases filtradas por estado</returns>
         [HttpGet("obtenerClases")]
-        public async Task<ActionResult<DTOResponse<List<DTOClaseSimple>>>> ObtenerClases([FromQuery] bool activa = false)
+        public async Task<ActionResult<DTOResponse<List<DTOClaseSimple>>>> ObtenerClases(
+            [FromQuery] bool activa = false
+        )
         {
             try
             {
-                var clases = await _context.Clases
-                    .Where(c => c.FkEstadoClase == (activa ? 1 : 2)) // Asumiendo 1=Activa, 2=Inactiva
+                var clases = await _context
+                    .Clases.Where(c => c.FkEstadoClase == (activa ? 1 : 2)) // Asumiendo 1=Activa, 2=Inactiva
                     .Select(c => new DTOClaseSimple
                     {
                         ClaseID = c.ClaseId,
-                        NombreClase = c.NombreClase
+                        NombreClase = c.NombreClase,
                     })
                     .ToListAsync();
 
@@ -170,12 +206,17 @@ namespace API.Controllers
         /// Obtiene los niveles de dificultad disponibles
         /// </summary>
         [HttpGet("nivelesDeDificultad")]
-        public async Task<ActionResult<DTOResponse<List<VNivelesDeDificultad>>>> ObtenerNivelesDeDificultad()
+        public async Task<
+            ActionResult<DTOResponse<List<VNivelesDeDificultad>>>
+        > ObtenerNivelesDeDificultad()
         {
             try
             {
                 // Usar la vista v_nivelesDeDificultad definida en el procedimiento almacenado
-                var nivelesDificultad = await _context.VNivelesDeDificultads.FromSqlInterpolated($"SELECT * FROM v_nivelesDeDificultad")
+                var nivelesDificultad = await _context
+                    .VNivelesDeDificultads.FromSqlInterpolated(
+                        $"SELECT * FROM v_nivelesDeDificultad"
+                    )
                     .ToListAsync();
 
                 return Ok(
@@ -210,12 +251,17 @@ namespace API.Controllers
         /// Obtiene los niveles de intensidad disponibles
         /// </summary>
         [HttpGet("nivelesDeIntensidad")]
-        public async Task<ActionResult<DTOResponse<List<VNivelesDeIntensidad>>>> ObtenerNivelesDeIntensidad()
+        public async Task<
+            ActionResult<DTOResponse<List<VNivelesDeIntensidad>>>
+        > ObtenerNivelesDeIntensidad()
         {
             try
             {
                 // Usar la vista v_nivelesDeIntensidad definida en el procedimiento almacenado
-                var nivelesIntensidad = await _context.VNivelesDeIntensidads.FromSqlInterpolated($@"SELECT * FROM v_nivelesDeIntensidad")
+                var nivelesIntensidad = await _context
+                    .VNivelesDeIntensidads.FromSqlInterpolated(
+                        $@"SELECT * FROM v_nivelesDeIntensidad"
+                    )
                     .ToListAsync();
 
                 return Ok(
@@ -250,13 +296,14 @@ namespace API.Controllers
         /// Registra una nueva clase
         /// </summary>
         [HttpPost("registrarClase")]
-        public async Task<ActionResult<DTOResponse<int>>> RegistrarClase([FromBody] DTOClase  modelo)
+        public async Task<ActionResult<DTOResponse<int>>> RegistrarClase([FromBody] DTOClase modelo)
         {
             try
             {
-            
                 // Ejecutar el procedimiento almacenado fn_obtenerClases
-                var resultado = await _context.Clases.Where(c => c.NombreClase == modelo.NombreClase).FirstOrDefaultAsync();
+                var resultado = await _context
+                    .Clases.Where(c => c.NombreClase == modelo.NombreClase)
+                    .FirstOrDefaultAsync();
 
                 if (resultado != null)
                 {
@@ -267,7 +314,11 @@ namespace API.Controllers
                             "Ya existe una clase con ese nombre",
                             new List<ErrorModel>
                             {
-                                new ErrorModel { propiedad = "nombreClase", message = "Nombre de clase duplicado" },
+                                new ErrorModel
+                                {
+                                    propiedad = "nombreClase",
+                                    message = "Nombre de clase duplicado",
+                                },
                             },
                             0
                         )
@@ -284,9 +335,13 @@ namespace API.Controllers
                     FkIntensidad = modelo.FkIntensidad,
                     FkDificultad = modelo.FkDificultad,
                     TiempoDeDescansoEnMinutos = modelo.TiempoDeDescansoEnMinutos,
-                    DuracionEnMinutosConDescansoIncluido = modelo.DuracionEnMinutosConDescansoIncluido,
+                    DuracionEnMinutosConDescansoIncluido =
+                        modelo.DuracionEnMinutosConDescansoIncluido,
                     Cupo = modelo.Cupo > 0 ? modelo.Cupo : 20, // Valor por defecto si no se especifica
-                    FkEstadoClase = modelo.FkEstadoClase ?? 1 // Activa por defecto
+                    FkEstadoClase =
+                        modelo.FkEstadoClase
+                        ?? 1 // Activa por defecto
+                    ,
                 };
 
                 _context.Clases.Add(nuevaClase);
@@ -324,30 +379,37 @@ namespace API.Controllers
         /// Registra una programación de clase
         /// </summary>
         [HttpPost("registrarClaseProgramada")]
-        public async Task<ActionResult<DTOResponse<int>>> RegistrarClaseProgramada([FromBody] DTODatosClaseProgramada modelo)
+        public async Task<ActionResult<DTOResponse<int>>> RegistrarClaseProgramada(
+            [FromBody] DTODatosClaseProgramada modelo
+        )
         {
             try
             {
-                // Parámetros para el procedimiento almacenado
-                var claseProgramadaParam = new SqlParameter("@datos", System.Data.SqlDbType.Structured);
-                claseProgramadaParam.TypeName = "dbo.DatosClaseProgramada";
-                claseProgramadaParam.Value = DataTableConverter.ConvertToDataTable<DTODatosClaseProgramada>(modelo);   
-                // Ejecutar el procedimiento almacenado
-                var idClaseProgramada = await _context.Database
-                    .ExecuteSqlRawAsync(
-                        "EXEC dbo.sp_registrarClaseProgramada @datos",
-                        claseProgramadaParam
-                    );
+                using (var connection = new SqlConnection(_context.Database.GetDbConnection().ConnectionString))
+                {
+                    await connection.OpenAsync();
 
-                return Ok(
-                    ResponseManager.BuildResponse(
-                        true,
-                        200,
-                        "Clase programada registrada correctamente",
-                        null,
-                        idClaseProgramada
-                    )
-                );
+                    using (var command = new SqlCommand("dbo.sp_registrarClaseProgramada", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        
+                        var datos = DataTableConverter
+                                    .ConvertToDataTable<DTODatosClaseProgramada>(modelo);
+                        // Aquí se deben agregar los parámetros necesarios para el procedimiento almacenado
+                        command.Parameters.AddWithValue("@datos", datos);
+                        var idClaseProgramada = await command.ExecuteScalarAsync();
+                        return Ok(
+                            ResponseManager.BuildResponse(
+                                true,
+                                200,
+                                "Clase programada registrada correctamente",
+                                null,
+                                idClaseProgramada
+                            )
+                        );
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -362,6 +424,217 @@ namespace API.Controllers
                             new ErrorModel { propiedad = "NONE", message = ex.Message },
                         },
                         0
+                    )
+                );
+            }
+        }
+
+        /// <summary>
+        /// Cancela clases programadas
+        /// </summary>
+        [HttpPost("cancelarClasesProgramadas")]
+        public async Task<ActionResult<DTOResponse<string>>> CancelarClasesProgramadas(
+            [FromBody] List<DTOClaseCancelada> solicitudes
+        )
+        {
+            try
+            {
+                foreach (var solicitud in solicitudes)
+                {
+                    // Obtener el correo del entrenador
+                    var entrenador = await _context.Usuarios.FindAsync(
+                        solicitud.claseCancelada.fkEntrenador
+                    );
+
+                    if (entrenador == null)
+                    {
+                        return BadRequest(
+                            ResponseManager.BuildResponse<string>(
+                                false,
+                                400,
+                                "Entrenador no encontrado",
+                                null,
+                                null
+                            )
+                        );
+                    }
+
+
+                    // Llamar al procedimiento almacenado para cancelar la clase programada
+                    var parametros = new SqlParameter[]
+                    {
+                        new SqlParameter(
+                            "@idClaseProgramada",
+                            solicitud.claseCancelada.idProgramacionClase
+                        ),
+                        new SqlParameter("@fechaParaCancelar", DateTime.Now), // O la fecha que desees usar
+                        new SqlParameter("@idEntrenador", solicitud.claseCancelada.fkEntrenador),
+                        new SqlParameter("@idClase", solicitud.claseCancelada.fkClase),
+                        new SqlParameter("@estadoDeOperaciones", SqlDbType.Int){Direction = ParameterDirection.Output}
+                    };
+
+                    var resultado = await _context.Database
+                    .ExecuteSqlRawAsync($"EXEC dbo.sp_procesoCompletoCancelarClasesProgramadas @idClaseProgramada, @fechaParaCancelar, @idEntrenador, @idClase, @estadoDeOperaciones OUTPUT", parametros);
+                    int exitoCancelacion = (int) parametros[parametros.Length -1 ].Value;
+                    if (exitoCancelacion > 0) // Si la cancelación fue exitosa
+                    {
+                        // Enviar correo de confirmación
+                        var emailManager = new EmailManagerMailKit(
+                            "smtp.gmail.com",
+                            587,
+                            "aaronlarabonfil@gmail.com",
+                            "kayxfchmpquogjgg"
+                        );
+                        var message = emailManager.crearEmail(
+                            "Fitness Gym",
+                            "aaronlarabonfil@gmail.com",
+                            $"{entrenador.Nombre} {entrenador.Apellido}",
+                            entrenador.Email,
+                            "Clase Cancelada",
+                            "La clase ha sido cancelada por el entrenador,en breve se te notificara la fecha de reagendacion de la clase.El entrenador se comunicara contigo para explicarte lso detalles de la cancelación"
+                        );
+                        emailManager.EnviarEmail(message);
+
+                        // Si hay una clase reagendada, registrar la nueva clase programada
+                        if (solicitud.claseReagendada != null)
+                        {
+                            var content = JsonContent.Create(solicitud.claseReagendada);
+                            var response = await _httpCustomClient.post(
+                                "api/clases/registrarClaseProgramada",
+                                content
+                            );
+
+                            if (string.IsNullOrEmpty(response))
+                            {
+                                return BadRequest(
+                                    ResponseManager.BuildResponse<string>(
+                                        false,
+                                        400,
+                                        "Error al reagendar la clase",
+                                        null,
+                                        null
+                                    )
+                                );
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest(
+                            ResponseManager.BuildResponse<string>(
+                                false,
+                                400,
+                                "No se pudo cancelar la clase programada",
+                                null,
+                                null
+                            )
+                        );
+                    }
+                }
+
+                return Ok(
+                    ResponseManager.BuildResponse(
+                        true,
+                        200,
+                        "Clases programadas canceladas exitosamente",
+                        null,
+                        "Cancelación exitosa"
+                    )
+                );
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(
+                    500,
+                    ResponseManager.BuildResponse<string>(
+                        false,
+                        500,
+                        "Error al cancelar las clases programadas",
+                        new List<ErrorModel>
+                        {
+                            new ErrorModel { propiedad = "NONE", message = ex.Message },
+                        },
+                        null
+                    )
+                );
+            }
+        }
+
+        /// <summary>
+        /// Reagenda una clase
+        /// </summary>
+        [HttpPost("reagendacionDeInscripcionAClase")]
+        public async Task<ActionResult<DTOResponse<string>>> ReagendarClase([FromBody] DTOReagendacionDeInscripcion modelo)
+        {
+            try
+            {
+                // Validar el modelo
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(
+                        ResponseManager.BuildResponse<string>(
+                            false,
+                            400,
+                            "Datos inválidos",
+                            ModelState.Values.SelectMany(v => v.Errors).Select(e => new ErrorModel { propiedad = "NONE", message = e.ErrorMessage }).ToList(),
+                            null
+                        )
+                    );
+                }
+
+                // Preparar los parámetros para el procedimiento almacenado
+                var parametros = new SqlParameter[]
+                {
+                    new SqlParameter("@idInscripcionCancelada", modelo.idInscripcionCancelada),
+                    new SqlParameter("@idClaseProgramadaNueva", modelo.idClaseProgramadaNueva),
+                    new SqlParameter("@idCliente", modelo.idCliente),
+                    new SqlParameter("@estadoOperacion", SqlDbType.Int) { Direction = ParameterDirection.Output }
+                };
+
+                // Ejecutar el procedimiento almacenado
+                await _context.Database.ExecuteSqlRawAsync("EXEC dbo.sp_procesoCompletoReagendacionDeInscripcion @idInscripcionCancelada, @idClaseProgramadaNueva, @idCliente, @estadoOperacion OUTPUT", parametros);
+
+                // Obtener el estado de operación
+                int estadoOperacion = (int)parametros.Last().Value;
+
+                if (estadoOperacion == 1)
+                {
+                    return Ok(
+                        ResponseManager.BuildResponse<string>(
+                            true,
+                            200,
+                            "Reagendación de clase completada exitosamente",
+                            null,
+                            null
+                        )
+                    );
+                }
+                else
+                {
+                    return BadRequest(
+                        ResponseManager.BuildResponse<string>(
+                            false,
+                            400,
+                            "Error en la reagendación de la clase",
+                            null,
+                            null
+                        )
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(
+                    500,
+                    ResponseManager.BuildResponse<string>(
+                        false,
+                        500,
+                        "Error al reagendar la clase",
+                        new List<ErrorModel>
+                        {
+                            new ErrorModel { propiedad = "NONE", message = ex.Message },
+                        },
+                        null
                     )
                 );
             }

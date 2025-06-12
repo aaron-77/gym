@@ -5,18 +5,15 @@ namespace DTO.Dtos
 {
     public class DTODatosClaseProgramada
     {
-        [Required]
-        public int FkClase { get; set; }
-        [Required]
-        public DateTime FechaInicio { get; set; }
-        [Required]
-        public DateTime FechaFin { get; set; }
-        [Required]
-        public int FkEntrenador { get; set; }
-        [Required]
-        public int CupoMaximo { get; set; }
-        public int FkEstadoClaseProgramada { get; set; }
-        [Required]
-        public string fkHorarioLaboral {get;set;}
+        public int fkClase { get; set; }
+        public int fkEntrenador { get; set; }
+        public int cupoMaximo { get; set; }
+        public int fkEstadoClaseProgramada { get; set; }
+        public DateOnly fechaDeLaClase { get; set; } // Use DateTime for SQL date storage
+        public int idUsuarioQueReserva { get; set; }
+        public int fkHoraLaboral { get; set; }
+        public int idPreservaDeHorario { get; set; }
     }
+
+ 
 }

@@ -131,64 +131,124 @@ CREATE TYPE FitnessCenterDB.dbo.DatosClaseProgramada AS TABLE (
 );
 
 -- Procedimiento almacenado para registrar clase programada
-CREATE PROCEDURE FitnessCenterDB.dbo.sp_registrarClaseProgramada
-    @datos DatosClaseProgramada READONLY,
-    @horariosData DatosHorarioClaseProgramada READONLY
+CREATE PROCEDURE dbo.sp_registrarClaseProgramada
+    @datos dbo.DatosClaseProgramada READONLY
 AS
 BEGIN
     SET NOCOUNT ON;
-    
-    DECLARE @idClaseProgramada INT;
-    DECLARE @fkClase INT, 
-    @fechaInicio DATETIME,
-     @fechaFin DATETIME,
-      @fkEntrenador INT,
-       @cupoMaximo INT, 
-       @fkEstadoClaseProgramada INT;
-    
-    -- Obtener datos de la tabla DatosClaseProgramada
-    SELECT TOP 1 
-        @fkClase = fkClase,
-        @fechaInicio = fechaInicio,
-        @fechaFin = fechaFin,
-        @fkEntrenador = fkEntrenador,
-        @cupoMaximo = cupoMaximo,
-        @fkEstadoClaseProgramada = fkEstadoClaseProgramada
-    FROM @datos;
-    
-    -- Insertar en clasesProgramadas
-    INSERT INTO FitnessCenterDB.dbo.clasesProgramadas (
-        fkClase, fechaInicio, fechaFin, fkEntrenador, cupoMaximo, fkEstadoClaseProgramada
-    )
-    VALUES (
-        @fkClase, @fechaInicio, @fechaFin, @fkEntrenador, @cupoMaximo, @fkEstadoClaseProgramada
-    );
-    
-    SET @idClaseProgramada = SCOPE_IDENTITY();
-    
-    -- Si hay datos de horarios, registrarlos
-    IF EXISTS (SELECT 1 FROM @horariosData)
-    BEGIN
-        DECLARE @fkHorarioLaboral INT;
-        DECLARE horarios_cursor CURSOR FOR SELECT fkHorarioLaboral FROM @horariosData;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE @idClaseProgramada INT;
+        DECLARE @fkClase INT, 
+                @fkEntrenador INT,
+                @cupoMaximo INT, 
+                @fkEstadoClaseProgramada INT,
+                @fkHorarioLaboralString NVARCHAR(MAX),
+                @idPreReservaDeHorario INT,
+               	@fechaDeLaClase DATE;
+
+        -- se extraen los datos del parametro en variables indepedientes para facilitar su insercion posterioemnete
+        SELECT TOP 1 
+            @fkClase = fkClase,
+            @fkEntrenador = fkEntrenador,
+            @cupoMaximo = cupoMaximo,
+            @fkEstadoClaseProgramada = fkEstadoClaseProgramada,
+            @fkHorarioLaboralString = fkHoraLaboral,
+            @idPreReservaDeHorario = idPreservaDeHorario,
+            @fechaDeLaClase = fechaDeLaClase
+        FROM @datos;
+
+        -- Insertar en clasesProgramadas
         
-        OPEN horarios_cursor;
-        FETCH NEXT FROM horarios_cursor INTO @fkHorarioLaboral;
-        
-        WHILE @@FETCH_STATUS = 0
+        -- Si hay datos de horarios, registrarlos
+        IF @fkHorarioLaboralString IS NOT NULL AND LEN(@fkHorarioLaboralString) > 0
         BEGIN
-            EXEC FitnessCenterDB.dbo.sp_registrarHorarioDeClaseProgramada 
-                @fkClaseProgramada = @idClaseProgramada,
-                @fkHorarioLaboral = @fkHorarioLaboral;
-                
-            FETCH NEXT FROM horarios_cursor INTO @fkHorarioLaboral;
-        END;
+            DECLARE @horarioId INT;
+            DECLARE @posicion INT = 1;
+            DECLARE @longitud INT = LEN(@fkHorarioLaboralString);
+            DECLARE @valorActual VARCHAR(20);
+           	DECLARE @estaDisponibleElHorario BIT = 0;
+			DECLARE @idsHorasLabotales IdsHorasLaborales;
+            WHILE @posicion <= @longitud
+            BEGIN
+                -- Extraer el siguiente valor hasta la coma
+                SET @valorActual = '';
+                WHILE @posicion <= @longitud AND SUBSTRING(@fkHorarioLaboralString, @posicion, 1) != ','
+                BEGIN
+                    SET @valorActual = @valorActual + SUBSTRING(@fkHorarioLaboralString, @posicion, 1);
+                    SET @posicion = @posicion + 1;
+                END
+
+                -- Saltar la coma
+                SET @posicion = @posicion + 1;
+				
+                	-- Convertir a entero y validar
+                	IF ISNUMERIC(@valorActual) = 1
+                		BEGIN
+                    	SET @horarioId = CAST(@valorActual AS INT);
+						insert into @idsHorasLabotales(fkHoraLaboral) values(@horarioId);
+                    	IF	dbo.fn_estaDisponibleElHorario(@fkClase,@fechaDeLaClase,@idsHorasLabotales) = 0
+							BEGIN
+			        			THROW 50001, 'El horario seleccionado no esta diponible', 1;
+			    			END
+				
+                   		
+                    	INSERT INTO FitnessCenterDB.dbo.clasesProgramadas (
+            				fkClase, fkEntrenador, cupoMaximo, fkEstadoClaseProgramada
+        				)
+				        VALUES (
+				            @fkClase, @fkEntrenador, @cupoMaximo, @fkEstadoClaseProgramada
+				        );
+
+        			SET @idClaseProgramada = SCOPE_IDENTITY();
+
+                    -- Registrar el horario
+                    IF @horarioId > 0
+                    BEGIN
+                        EXEC FitnessCenterDB.dbo.sp_registrarHorarioDeClaseProgramada 
+                            @fkClaseProgramada = @idClaseProgramada,
+                            @fkHorarioLaboral = @horarioId;
+                    END
+                    ELSE
+                    BEGIN
+                    	THROW 50001, 'El id horario no es valido', 1;
+                    END
+                    
+                END
+            END
+        END
+
+        COMMIT TRANSACTION;
+
+        SELECT @idClaseProgramada AS IdClaseProgramada;
+    END TRY
+    BEGIN CATCH
+        IF XACT_STATE() <> 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END
+	
+        DECLARE 
+        @ProcName NVARCHAR(128) = OBJECT_NAME(@@PROCID),
+        @ErrorNumber INT = ERROR_NUMBER(),
+        @ErrorSeverity INT = ERROR_SEVERITY(),
+        @ErrorState INT = ERROR_STATE(),
+        @ErrorMessage NVARCHAR(MAX) = ERROR_MESSAGE(),
+        @ErrorLine INT = ERROR_LINE(); 
         
-        CLOSE horarios_cursor;
-        DEALLOCATE horarios_cursor;
-    END;
-    
-    SELECT @idClaseProgramada AS IdClaseProgramada;
+       EXEC sp_RegistrarError 
+        @ProcName,
+        @ErrorNumber,
+        @ErrorSeverity,
+        @ErrorState,
+        @ErrorMessage,
+        @ErrorLine; 
+        
+        -- Opcional: volver a lanzar el error para que el cliente lo reciba
+        THROW;
+    END CATCH
 END;
 
 -- 17. Función para validar disponibilidad de horario
@@ -342,8 +402,10 @@ BEGIN
     RETURN @nombreTipoDeRecurrencia;
 END;
 
--- Función para determinar si una fecha coincide con un día festivo variable
-CREATE OR ALTER FUNCTION dbo.fn_esDiaFestivoVariable (
+
+
+
+ALTER FUNCTION dbo.fn_esDiaFestivoVariableVersionJoin (
     @fechaAnalizada DATE,                   -- Fecha a comprobar
     @diaDeFechaVariable INT,                -- Interpretación según los parámetros disponibles
     @semanaDeFechaVariable INT = NULL,      -- Semana del mes (1-4) o semana del año (1-52)
@@ -353,6 +415,8 @@ CREATE OR ALTER FUNCTION dbo.fn_esDiaFestivoVariable (
 RETURNS BIT
 AS
 BEGIN
+-- ////TODO VALIDAR QUE EL NUMERO DE SEMANA SEA VALIDO PARA EL MES,EN ALGUNOS HAY SEMANA 5 PERO EN FEBRERO NO
+-----//////////////////////////////////////////////////////////////////////
     DECLARE @resultado BIT = 0;
     DECLARE @anioActual INT = YEAR(@fechaAnalizada);
     DECLARE @nombreTipoDeRecurrencia NVARCHAR(50) = NULL;
@@ -363,7 +427,7 @@ BEGIN
         SET @nombreTipoDeRecurrencia = dbo.fn_obtenerNombreTipoDeRecurrencia(@idTipoDeRecurrencia);
     END
     
-    -- CASO 1: Día, semana y mes tienen valor (ej: "el segundo lunes de enero")
+    -- CASO 1:dia festivo anual con fecha variable (ej: "el segundo lunes de enero del año")
     IF @diaDeFechaVariable IS NOT NULL 
        AND @semanaDeFechaVariable IS NOT NULL 
        AND @mesDeFechaVariable IS NOT NULL
@@ -396,10 +460,12 @@ BEGIN
         END
     END
     
-    -- CASO 2: Día y semana tienen valor, mes es NULL (ej: "día 2 de la semana 15 del año")
+
+    -- CASO 2:  dia festivo de acuerdo a al numero consecutivo de la semana en el año (1-52),(ej: "día 2 de la semana 15 del año")
     ELSE IF @diaDeFechaVariable IS NOT NULL 
             AND @semanaDeFechaVariable IS NOT NULL
             AND @mesDeFechaVariable IS NULL
+            AND @nombreTipoDeRecurrencia = 'diaSemana'
     BEGIN
         -- Primer día del año actual
         DECLARE @primerDiaAnio DATE = DATEFROMPARTS(@anioActual, 1, 1);
@@ -422,12 +488,51 @@ BEGIN
             SET @resultado = 1;
         END
     END
+
+    --CASO 3 MENSUAL,un dia especifico de una semana especifica de cualquier mes
+
+    IF @diaDeFechaVariable IS NOT NULL 
+       AND @semanaDeFechaVariable IS NOT NULL 
+       AND @mesDeFechaVariable IS  NULL
+       AND @nombreTipoDeRecurrencia = 'mensual'
+    BEGIN
+        
+        -- Primer día del mes especificado
+        DECLARE @primerDiaMes DATE = DATEFROMPARTS(@anioActual, MONTH(GETDATE()), 1);
+            
+            -- Encontrar el primer día de la semana que sea igual a @diaDeFechaVariable en el mes
+            DECLARE @primerDiaDeSemanaEnMes DATE = @primerDiaMes;
+            WHILE (DATEPART(dw, @primerDiaDeSemanaEnMes) != @diaDeFechaVariable)
+            BEGIN
+                SET @primerDiaDeSemanaEnMes = DATEADD(DAY, 1, @primerDiaDeSemanaEnMes);
+            END
+            
+            -- Calcular el día festivo sumando las semanas necesarias
+            DECLARE @diaFestivo DATE = DATEADD(WEEK, @semanaDeFechaVariable - 1, @primerDiaDeSemanaEnMes);
+            
+             IF @fechaAnalizada = @diaFestivo
+                BEGIN
+                    SET @resultado = 1;
+                END 
+    END
     
-    -- CASO 3: Solo día tiene valor y el tipo es relativo (ej: "todos los martes")
+    -- CASO 4 solo dia y mes tienen valor,la fecha festiva es mensual un dia espeficico del mes(dia 1-31) 
+    ELSE IF   @diaDeFechaVariable IS NOT NULL 
+               AND @mesDeFechaVariable IS NOT NULL 
+               AND @semanaDeFechaVariable IS NULL
+        BEGIN
+            DECLARE @fechaFestiva = DATEFROMPARTS(YEAR(GETDATE()),MONTH(GETDATE()),@diaDeFechaVariable);
+            IF @fechaFestiva = @fechaAnalizada
+            BEGIN
+                SET @resultado = 1;
+            END   
+        END
+    
+    -- CASO 5: Solo día tiene valor y el tipo es relativo (ej: "todos los martes")
     ELSE IF @diaDeFechaVariable IS NOT NULL 
             AND @semanaDeFechaVariable IS NULL
             AND @mesDeFechaVariable IS NULL
-            AND @nombreTipoDeRecurrencia = 'relativo'
+            AND @nombreTipoDeRecurrencia = 'diaRelativo'
     BEGIN
         -- Verificar si el día de la semana coincide
         IF DATEPART(dw, @fechaAnalizada) = @diaDeFechaVariable
@@ -436,11 +541,11 @@ BEGIN
         END
     END
     
-    -- CASO 4: Solo día tiene valor y el tipo es consecutivo (ej: "día 100 del año")
+    -- CASO 6: Solo día tiene valor y el tipo es consecutivo (ej: "día 100 del año")
     ELSE IF @diaDeFechaVariable IS NOT NULL 
             AND @semanaDeFechaVariable IS NULL
             AND @mesDeFechaVariable IS NULL
-            AND @nombreTipoDeRecurrencia = 'consecutivo'
+            AND @nombreTipoDeRecurrencia = 'diaConsecutivo'
     BEGIN
         -- Calcular el día especificado dentro del año
         DECLARE @diaDelAnio DATE = DATEADD(DAY, @diaDeFechaVariable - 1, DATEFROMPARTS(@anioActual, 1, 1));
@@ -454,3 +559,50 @@ BEGIN
     
     RETURN @resultado;
 END;
+
+-- Función para determinar si una fecha es un día festivo variable utilizando solo la fecha como parámetro
+CREATE OR ALTER FUNCTION dbo.fn_esDiaFestivoVariableVersionNormal (
+    @fechaAnalizada DATE
+)
+RETURNS BIT
+AS
+BEGIN
+    DECLARE @esDiaFestivo BIT = 0;
+    
+    -- Consultar si existe algún día festivo variable que coincida con la fecha analizada
+    -- utilizando la función fn_esDiaFestivoVariable para cada registro en diasFestivosVariables
+    IF EXISTS (
+        SELECT 1
+        FROM dbo.diasFestivosVariables dfv
+        WHERE dbo.fn_esDiaFestivoVariableVersionJoin(
+            @fechaAnalizada, 
+            dfv.deQueDia, 
+            dfv.deQueSemana, 
+            dfv.deQueMes, 
+            dfv.fkTipoDeRecurrenciaDelFestivo
+        ) = 1
+    )
+    BEGIN
+        SET @esDiaFestivo = 1;
+    END
+    
+    RETURN @esDiaFestivo;
+END;
+
+
+CREATE FUNCTION dbo.fn_consultarHorariosPreReservados(@fechaTentativa DATE)
+RETURNS TABLE
+AS
+RETURN (
+    SELECT 
+    pr.idPreReserva,
+    pr.fechaReservada,
+    hl.horaInicio,
+    hl.horaFin,
+    idUsuarioQueReserva,
+    pr.fechaDeExpiracionDeLaReserva
+    FROM FitnessCenterDB.dbo.preReservasDeHorario pr
+    LEFT JOIN dbo.horasLaborales hl
+        ON pr.fkHoraLaboral = hl.idHora
+    WHERE (pr.fechaReservada >= @fechaTentativa and pr.fechaReservada >= GETDATE())
+);

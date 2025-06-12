@@ -141,6 +141,32 @@
 			"group": "build",
 			
 			"detail": "Build the API.csproj for the FitnessCenterDB project"
+		},
+		{
+			"label": "Build:Test dependencies",
+			"command": "dotnet",
+            "type": "process",
+			"group":{
+				"kind":"build",
+				"isDefault":true
+			},
+			"dependsOrder": "sequence",
+            "dependsOn": [
+                "Build:DTO",
+				"Build:BL"
+            ],
+            "args": [
+                "build",
+                "${workspaceFolder}/GymWebApp.Tests/GymWebApp.Tests.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+			
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"group": "build",
+			"detail": "Build the GymWebApp.Tests.csproj project using dotnet build"
 		}
 	]
 }

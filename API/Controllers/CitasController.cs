@@ -1,4 +1,5 @@
 ﻿using BL;
+using BL.Utils;
 using DataAccess.EntityFramework;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,8 @@ namespace API.Controllers
                         respuesta.errors.Add(error);
                     }
 
-                };
+                }
+                ;
                 respuesta.ok = false;
                 respuesta.message = "Error al registrar tu cita";
                 return BadRequest(respuesta);
@@ -45,10 +47,11 @@ namespace API.Controllers
                 @fechaHoraFin ={cita.fechaFinCita}
                 ");
                 var usuarioDeLaCita = db.Usuarios.Find(cita.fkCliente);
-                
-                EmailManager emailManager = new EmailManager();
-                EmailContent email = emailManager.buildHtmlEmail(usuarioDeLaCita.Email, "Has Agendado una cita", "recuerda venir a tu cita el dia " + cita.fechaInicioCita.ToString());
-                await emailManager.sendEmail(email);
+
+                var emailManager = new EmailManagerMailKit("smtp.server.com", 587, "aaronlarabonfil@gmail.com", "kayxfchmpquogjgg");
+                var message = emailManager.crearEmail("Fitness Gym", "aaronlarabonfil@gmail.com",usuarioDeLaCita.Nombre + usuarioDeLaCita.Apellido ,usuarioDeLaCita.Email, "Has Agendado una cita", "recuerda venir a tu cita el dia " + cita.fechaInicioCita.ToString());
+                emailManager.EnviarEmail(message);
+
                 respuesta.ok = true;
                 respuesta.data = cita;
                 respuesta.errors = null;
@@ -59,7 +62,7 @@ namespace API.Controllers
                 respuesta.ok = false;
                 respuesta.message = "no se pudo registrar tu cita";
                 respuesta.data = null;
-                respuesta.errors.Add(new ErrorModel {message=ex.Message,propiedad=null });
+                respuesta.errors.Add(new ErrorModel { message = ex.Message, propiedad = null });
                 return BadRequest(respuesta);
             }
             return Ok(respuesta);
@@ -85,7 +88,8 @@ namespace API.Controllers
                         respuesta.errors.Add(error);
                     }
 
-                };
+                }
+                ;
                 respuesta.ok = false;
                 respuesta.message = "Error al registrar la duracion";
                 return BadRequest(respuesta);
@@ -94,12 +98,14 @@ namespace API.Controllers
             try
             {
                 DuracionCita duracionDB = new DuracionCita() { Duracion = duracion.duracion, FrecuenciaNotificaciones = duracion.frecuenciaNotificaciones };
-                if (duracion.Id > 0) {
+                if (duracion.Id > 0)
+                {
                     duracionDB = db.DuracionCitas.FirstOrDefault();
                     duracionDB.Duracion = duracion.duracion;
                     duracionDB.FrecuenciaNotificaciones = duracion.frecuenciaNotificaciones;
                 }
-                else {
+                else
+                {
                     db.Add(duracionDB);
                 }
                 db.SaveChanges();
@@ -128,7 +134,7 @@ namespace API.Controllers
             HttpResponseCitaEdit respuesta = new HttpResponseCitaEdit();
             if (!ModelState.IsValid)
             {
-                List<string> nombresCampos = new List<string>() { "Id","fechaInicioCita", "fechaFinCita", "fkCliente", "fkEntrenador" };
+                List<string> nombresCampos = new List<string>() { "Id", "fechaInicioCita", "fechaFinCita", "fkCliente", "fkEntrenador" };
                 foreach (var item in ModelState.Values)
                 {
                     foreach (var item1 in item.Errors)
@@ -140,7 +146,8 @@ namespace API.Controllers
                         respuesta.errors.Add(error);
                     }
 
-                };
+                }
+                ;
                 respuesta.ok = false;
                 respuesta.message = "Error al modificar tu cita";
                 return BadRequest(respuesta);
@@ -195,8 +202,9 @@ namespace API.Controllers
             FitnessCenterDbContext db = new FitnessCenterDbContext();
 
             HttpResponseListadoCitas responseDuracion = new HttpResponseListadoCitas();
-            try {
-                
+            try
+            {
+
                 var result = await db.citaSP.FromSqlInterpolated($@"EXEC sp_obtenerCitasAgendadasPorUsuario 
                 @idUsuario = {idUsuario}
                 ").ToListAsync();
@@ -204,13 +212,15 @@ namespace API.Controllers
                 responseDuracion.message = "consulta exitosa";
                 responseDuracion.errors = null;
                 responseDuracion.data = result;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 responseDuracion.ok = false;
-                responseDuracion.message= "Error al consultar las citas agendadas";
+                responseDuracion.message = "Error al consultar las citas agendadas";
                 responseDuracion.errors.Add(new ErrorModel { message = ex.Message, propiedad = null });
                 responseDuracion.data = null;
             }
-                        
+
             return Ok(responseDuracion);
         }
 
@@ -223,23 +233,25 @@ namespace API.Controllers
             FitnessCenterDbContext db = new FitnessCenterDbContext();
             HttpResponseDuracionCitasMedicion responseDuracion = new HttpResponseDuracionCitasMedicion();
             var result = await db.DuracionCitas.Select
-                (d => new DuracionCitasMedicion 
-                { Id = d.DuracionId, 
-                    duracion = d.Duracion, 
+                (d => new DuracionCitasMedicion
+                {
+                    Id = d.DuracionId,
+                    duracion = d.Duracion,
                     frecuenciaNotificaciones = d.FrecuenciaNotificaciones
                 }).FirstOrDefaultAsync();
             responseDuracion.ok = true;
             responseDuracion.message = "consulta exitosa";
             responseDuracion.errors = null;
             responseDuracion.data = result;
-            
-            if (result == null) {
+
+            if (result == null)
+            {
                 responseDuracion.ok = false;
                 responseDuracion.message = "No hay configuracion de duracion registrada aun";
                 responseDuracion.errors = null;
                 responseDuracion.data = result;
             }
-            
+
             return Ok(responseDuracion);
         }
     }

@@ -3,9 +3,10 @@ using BL.EnPointsLogic;
 using BL.BackGroundWork.Jobs;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
+using BL.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
 
 
 /* builder.WebHost.ConfigureKestrel(options =>
@@ -38,8 +39,15 @@ builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>
 {
     options.UseSqlServer("Server=localhost ;Authentication=SqlPassword;Integrated Security=False ;User Id=aaronlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False");
 });
-builder.Services.AddScoped<EmailManager>();
 
+var smtpSettings = builder.Configuration.GetSection("SmtpSettings");
+string smtpServer = smtpSettings["Server"];
+int smtpPort = int.Parse(smtpSettings["Port"]);
+string smtpUsername = smtpSettings["Username"];
+string smtpPassword = smtpSettings["Password"];
+
+builder.Services.AddScoped(sp => new EmailManagerMailKit(smtpServer, smtpPort, smtpUsername, smtpPassword));
+builder.Services.AddScoped<HttpCustomClient>(); 
 builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddScoped<EndPointsManager>(); 
 builder.Services.AddQuartz(configuration => {

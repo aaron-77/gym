@@ -5,6 +5,7 @@ namespace DTO.Dtos
 {
     public class DTOClaseProgramada
     {
+        
         public int IdProgramacionClase { get; set; }
         [Required]
         public int FkClase { get; set; }
@@ -19,5 +20,12 @@ namespace DTO.Dtos
         public int FkEstadoClaseProgramada { get; set; }
         [Required]
         public string fkHorarioLaboral {get;set;}
+        [Required]
+        public DateTime fechaDeLaClase { get; set; }
+        [Required]
+        public int idUsuarioQueReserva { get; set; }
+        [Required]
+        public int fkHoraLaboral { get; set; }
+        public int idPreservaDeHorario { get; set; }
     }
 }

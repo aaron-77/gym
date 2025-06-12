@@ -1,17 +1,14 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "FitnessCenterAPI (web)",
+            "name": "Testing",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "Build:API dependencies",
-            "program": "${workspaceFolder}/API/bin/Debug/net8.0/API.dll",
+            "preLaunchTask": "Build:Test dependencies",
+            "program": "${workspaceFolder}/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll", // Cambia esto según tu versión y nombre de proyecto
             "args": [],
-            "cwd": "${workspaceFolder}/API",
+            "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
@@ -23,17 +20,15 @@
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
             }
-
-
         },
         {
-            "name": "FitnessCenter Frontend (web)",
+            "name": "GymAPI",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "Build:GymFrontend dependencies",
-            "program": "${workspaceFolder}/GymFrontend/bin/Debug/net8.0/GymFrontend.dll",
+            "preLaunchTask": "Build:API dependencies",
+            "program": "${workspaceFolder}/API/bin/Debug/net8.0/API.dll", // Cambia esto según tu versión y nombre de proyecto
             "args": [],
-            "cwd": "${workspaceFolder}/GymFrontend",
+            "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",
@@ -46,7 +41,26 @@
                 "/Views": "${workspaceFolder}/Views"
             }
         }
-
-
+        ,
+        {
+            "name": "GymFront",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build:GymFrontend dependencies",
+            "program": "${workspaceFolder}/GymFrontend/bin/Debug/net8.0/GymFrontend.dll", // Cambia esto según tu versión y nombre de proyecto
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        }
     ]
 }
