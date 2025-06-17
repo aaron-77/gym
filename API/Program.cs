@@ -4,7 +4,8 @@ using BL.BackGroundWork.Jobs;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
 using BL.Utils;
-
+using API.Hubs;
+using API.Services;
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
 
@@ -30,6 +31,7 @@ builder.Services.AddControllers(options =>
 {
   options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
 });
+ builder.Services.AddSignalR();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
@@ -47,6 +49,7 @@ string smtpUsername = smtpSettings["Username"];
 string smtpPassword = smtpSettings["Password"];
 
 builder.Services.AddScoped(sp => new EmailManagerMailKit(smtpServer, smtpPort, smtpUsername, smtpPassword));
+builder.Services.AddScoped<HorariosService>(); 
 builder.Services.AddScoped<HttpCustomClient>(); 
 builder.Services.AddHttpContextAccessor(); 
 builder.Services.AddScoped<EndPointsManager>(); 
@@ -87,7 +90,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("originsPolicyOne");
 app.UseAuthorization();
-
+app.MapHub<ReservacionesHub>("/reservacionesRt");
 app.MapControllers();
 
 app.Run();

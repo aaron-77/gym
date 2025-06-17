@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using DTO.Dtos;
 using BL.Utils;
 using DataAccess.EntityFramework;
@@ -6,9 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using EllipticCurve.Utils;
+using API.Services;
 
 
-namespace FitnessGymApi.Controllers
+namespace API.Controllers
 {
     public class MedidasController : Controller
     {

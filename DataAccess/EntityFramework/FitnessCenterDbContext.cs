@@ -123,8 +123,9 @@ public partial class FitnessCenterDbContext : DbContext
     public virtual DbSet<DTO.Dtos.DTOEjerciciosYParametrosDelCliente> ejerciciosYParametrosDelClienteSP { get; set; }
     public virtual DbSet<DTO.Dtos.DetalleDeClaseRaw> detalleDeClaseRawSP { get; set; }
     public virtual DbSet<DTO.Dtos.DTOClaseSimple> FN_ObtenerClases { get; set; }
-    
-    
+    public virtual DbSet<DTO.Dtos.DTOHorarioPreReservado> DtoHorariosPreReservados { get; set; }
+    public virtual DbSet<DTO.Dtos.DTOHorarioVisualizacion> DtoHorarioVisualizacion { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
@@ -1286,6 +1287,50 @@ public partial class FitnessCenterDbContext : DbContext
             entity.Property(d => d.ClaseID).HasColumnName("ClaseID");
             entity.Property(d => d.NombreClase).HasColumnName("NombreClase"); 
         });
+
+        modelBuilder.Entity<DTO.Dtos.DTOHorarioPreReservado>(entity =>
+    {
+        entity.HasNoKey(); // Configurar como entidad keyless
+        entity.ToView(null); // No se asocia a una tabla, solo se usa para consultas
+
+        // Configurar las propiedades
+        entity.Property(e => e.idPreReserva)
+            .HasColumnName("idPreReserva"); // Mapeo de la propiedad idPreReserva
+
+        entity.Property(e => e.fechaReservada)
+            .HasColumnName("fechaReservada"); // Mapeo de la propiedad fechaReservada
+             // Tipo de dato
+
+        entity.Property(e => e.horaInicio)
+            .HasColumnName("horaInicio") // Mapeo de la propiedad horaInicio
+            ; // Tipo de dato
+
+        entity.Property(e => e.horaFin)
+            .HasColumnName("horaFin") // Mapeo de la propiedad horaFin
+            ; // Tipo de dato
+
+        entity.Property(e => e.idUsuarioQueReserva)
+            .HasColumnName("idUsuarioQueReserva"); // Mapeo de la propiedad idUsuarioQueReserva
+
+        entity.Property(e => e.fechaDeExpiracionDeLaReserva)
+            .HasColumnName("fechaDeExpiracionDeLaReserva") // Mapeo de la propiedad fechaDeExpiracionDeLaReserva
+            ; // Tipo de dato
+    });
+
+    modelBuilder.Entity<DTO.Dtos.DTOHorarioVisualizacion>(entity =>
+    {
+        entity.HasNoKey(); // Configurar como entidad keyless
+        entity.ToView(null); // No se asocia a una tabla, solo se usa para consultas
+
+        // Definición de columnas
+        entity.Property(e => e.idHora).HasColumnName("idHora");
+        entity.Property(e => e.diaDeLaSemana).HasColumnName("diaDeLaSemana");
+        entity.Property(e => e.fechaDisponible).HasColumnName("fechaDisponible");
+        entity.Property(e => e.horaInicio).HasColumnName("horaInicio");
+        entity.Property(e => e.horaFin).HasColumnName("horaFin");
+        entity.Property(e => e.tipoDeDia).HasColumnName("tipoDeDia");
+    });
+
 
         
          
