@@ -1,0 +1,73 @@
+.calendario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px;
+    background-color: #f8f9fa; /* Color de fondo */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.mes, .anio {
+    padding: 10px;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.vista {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.dia {
+    width: 14.28%; /* 100% / 7 días */
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    margin: 2px;
+}
+
+.disponible {
+    background-color: green;
+}
+
+.no-disponible {
+    background-color: red;
+}
+
+.control {
+    cursor: pointer;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #e9ecef;
+    margin: 0 5px;
+}
+
+.meses, .anios {
+    display: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.meses div, .anios div {
+    padding: 5px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    margin: 2px;
+    border-radius: 5px;
+    background-color: #e9ecef;
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layout con Flexbox</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .cuadro {
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            height: 100px; /* Altura fija para los cuadros */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+        @media (min-width: 601px) {
+            .cuadro {
+                flex: 1 0 7.14%; /* 100% / 14 = 7.14% */
+            }
+        }
+        @media (max-width: 600px) and (min-width: 301px) {
+            .cuadro {
+                flex: 1 0 33.33%; /* 100% / 3 = 33.33% */
+            }
+        }
+        @media (max-width: 300px) {
+            .cuadro {
+                flex: 1 0 50%; /* 100% / 2 = 50% */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Generar 14 cuadros -->
+    <div class="cuadro">1</div>
+    <div class="cuadro">2</div>
+    <div class="cuadro">3</div>
+    <div class="cuadro">4</div>
+    <div class="cuadro">5</div>
+    <div class="cuadro">6</div>
+    <div class="cuadro">7</div>
+    <div class="cuadro">8</div>
+    <div class="cuadro">9</div>
+    <div class="cuadro">10</div>
+    <div class="cuadro">11</div>
+    <div class="cuadro">12</div>
+    <div class="cuadro">13</div>
+    <div class="cuadro">14</div>
+</body>
+</html>

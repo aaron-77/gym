@@ -1,0 +1,24 @@
+@{
+    var currentYear = DateTime.Now.Year;
+    var currentMonth = DateTime.Now.Month;
+}
+
+<div id="calendario" class="calendario">
+    <div class="header">
+        <div class="control" id="prevMonth">«</div>
+        <div class="mes" id="nombreMes" onclick="toggleMeses()">@currentMonth</div>
+        <div class="anio" id="anioActual" onclick="toggleAnios()">@currentYear</div>
+        <div class="control" id="nextMonth">»</div>
+    </div>
+    <div class="vista" id="vista"></div>
+    <div class="meses" id="listaMeses"></div>
+    <div class="anios" id="listaAnios"></div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/calendarioStyles.css" />
+}
+
+@section Scripts {
+    <script src="~/js/calendario.js"></script>
+}

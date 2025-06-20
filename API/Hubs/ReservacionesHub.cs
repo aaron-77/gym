@@ -17,7 +17,7 @@ namespace API.Hubs
             this._horariosService = horariosService;
         } 
 
-        public async Task enviarPreReservasActualizadas(string userId)
+        public async Task enviarPreReservasActualizadas(int userId)
         {
             
             try

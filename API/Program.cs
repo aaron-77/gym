@@ -7,7 +7,7 @@ using BL.Utils;
 using API.Hubs;
 using API.Services;
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
 
 
 /* builder.WebHost.ConfigureKestrel(options =>
