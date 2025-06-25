@@ -1,123 +1,267 @@
-const estadoCalendario = {};
-let añoActual = new Date().getFullYear();
-let mesActual = new Date().getMonth() + 1;
-let mostrandoMeses = false; // Estado para saber si se están mostrando los meses
-let mostrandoAnios = false; // Estado para saber si se están mostrando los años
-
-function inicializarCalendario() {
-    mostrarMes(añoActual, mesActual);
-    document.getElementById('prevMonth').addEventListener('click', () => cambiarMes(-1));
-    document.getElementById('nextMonth').addEventListener('click', () => cambiarMes(1));
-    document.getElementById('anioActual').innerText = añoActual;
-}
-
-function mostrarMes(año, mes) {
-    document.getElementById('nombreMes').innerText = obtenerNombreMes(mes);
-    const diasDelMes = obtenerDiasDelMes(año, mes);
-    const vista = document.getElementById('vista');
-    vista.innerHTML = ''; // Limpiar vista anterior
-
-    diasDelMes.forEach(dia => {
-        const diaDiv = document.createElement('div');
-        diaDiv.className = 'dia';
-        diaDiv.innerText = dia.dia;
-        diaDiv.classList.add(dia.disponible ? 'disponible' : 'no-disponible');
-        diaDiv.addEventListener('click', () => seleccionarDia(dia.dia));
-        vista.appendChild(diaDiv);
-    });
-}
-
-function obtenerNombreMes(mes) {
-    const nombresMeses = [
-        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+class Calendar {
+  constructor(containerId) {
+    this.container = document.getElementById(containerId);
+    this.currentDate = new Date();
+    this.viewMode = "days"; // 'days', 'months', 'years'
+    this.monthNames = [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
     ];
-    return nombresMeses[mes - 1];
-}
+    this.dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-function obtenerDiasDelMes(año, mes) {
-    const dias = [];
-    const totalDias = new Date(año, mes, 0).getDate(); // Total de días en el mes
-    for (let dia = 1; dia <= totalDias; dia++) {
-        dias.push({
-            dia: dia,
-            disponible: Math.random() < 0.5 // Simulación de disponibilidad
-        });
+    this.init();
+  }
+
+  init() {
+    this.bindEvents();
+    this.render();
+  }
+
+  bindEvents() {
+    const prevButton = this.container.querySelector("#prevButton");
+    const nextButton = this.container.querySelector("#nextButton");
+    const monthButton = this.container.querySelector("#monthButton");
+    const yearButton = this.container.querySelector("#yearButton");
+
+    prevButton?.addEventListener("click", () => this.navigatePrevious());
+    nextButton?.addEventListener("click", () => this.navigateNext());
+    monthButton?.addEventListener("click", () => this.showMonthView());
+    yearButton?.addEventListener("click", () => this.showYearView());
+  }
+
+  navigatePrevious() {
+    switch (this.viewMode) {
+      case "days":
+        this.changeMonth(-1);
+        break;
+      case "months":
+        this.changeYear(-1);
+        break;
+      case "years":
+        this.changeYearRange(-10);
+        break;
     }
-    return dias;
-}
+  }
 
-function cambiarMes(cambio) {
-    mesActual += cambio;
-    if (mesActual > 12) {
-        mesActual = 1;
-        añoActual++;
-    } else if (mesActual < 1) {
-        mesActual = 12;
-        añoActual--;
+  navigateNext() {
+    switch (this.viewMode) {
+      case "days":
+        this.changeMonth(1);
+        break;
+      case "months":
+        this.changeYear(1);
+        break;
+      case "years":
+        this.changeYearRange(10);
+        break;
     }
-    mostrarMes(añoActual, mesActual);
-}
+  }
 
-function seleccionarDia(dia) {
-    alert(`Seleccionaste el día ${dia} de ${obtenerNombreMes(mesActual)} ${añoActual}`);
-}
+  changeMonth(direction) {
+    this.currentDate.setMonth(this.currentDate.getMonth() + direction);
+    this.renderWithTransition();
+  }
 
-function toggleMeses() {
-    mostrandoAnios = false;
-    const listaMeses = document.getElementById('listaMeses');
-    const vista = document.getElementById('vista');
-    listaMeses.innerHTML = ''; // Limpiar lista anterior
-    vista.innerHTML = ''; // Limpiar días
+  changeYear(direction) {
+    this.currentDate.setFullYear(this.currentDate.getFullYear() + direction);
+    this.renderWithTransition();
+  }
 
-    if (mostrandoMeses) {
-        // Si ya se están mostrando los meses, volver a mostrar los días
-        mostrarMes(añoActual, mesActual);
-        mostrandoMeses = false;
-    } else {
-        // Mostrar los nombres de los meses
-        for (let i = 1; i <= 12; i++) {
-            const mesDiv = document.createElement('div');
-            mesDiv.innerText = obtenerNombreMes(i);
-            mesDiv.addEventListener('click', () => {
-                mesActual = i;
-                mostrarMes(añoActual, mesActual);
-                listaMeses.style.display = 'none';
-            });
-            listaMeses.appendChild(mesDiv);
-        }
-        listaMeses.style.display = 'flex';
-        mostrandoMeses = true;
+  changeYearRange(direction) {
+    this.currentDate.setFullYear(this.currentDate.getFullYear() + direction);
+    this.renderWithTransition();
+  }
+
+  showMonthView() {
+    this.viewMode = "months";
+    this.renderWithTransition();
+  }
+
+  showYearView() {
+    this.viewMode = "years";
+    this.renderWithTransition();
+  }
+
+  showDaysView(month) {
+    this.currentDate.setMonth(month);
+    this.viewMode = "days";
+    this.renderWithTransition();
+  }
+
+  selectYear(year) {
+    this.currentDate.setFullYear(year);
+    this.viewMode = "months";
+    this.renderWithTransition();
+  }
+
+  renderWithTransition() {
+    const content = this.container.querySelector(".calendar-content");
+
+    // Aplicar clase de transición
+    content.classList.add("calendar-content--transitioning");
+
+    setTimeout(() => {
+      this.render();
+      content.classList.remove("calendar-content--transitioning");
+      content.classList.add("calendar-content--entering");
+
+      setTimeout(() => {
+        content.classList.remove("calendar-content--entering");
+      }, 300);
+    }, 150);
+  }
+
+  render() {
+    this.updateHeader();
+    this.updateContent();
+  }
+
+  updateHeader() {
+    const monthButton = this.container.querySelector("#monthButton");
+    const yearButton = this.container.querySelector("#yearButton");
+
+    monthButton.textContent = this.monthNames[this.currentDate.getMonth()];
+    yearButton.textContent = this.currentDate.getFullYear();
+  }
+
+  updateContent() {
+    const grid = this.container.querySelector("#calendarGrid");
+
+    switch (this.viewMode) {
+      case "days":
+        this.renderDaysView(grid);
+        break;
+      case "months":
+        this.renderMonthsView(grid);
+        break;
+      case "years":
+        this.renderYearsView(grid);
+        break;
     }
-}
+  }
 
-function toggleAnios() {
-    mostrandoMeses = false;
-    const listaAnios = document.getElementById('listaAnios');
-    const vista = document.getElementById('vista');
-    listaAnios.innerHTML = ''; // Limpiar lista anterior
-    vista.innerHTML = ''; // Limpiar días
+  renderDaysView(grid) {
+    grid.className = "calendar-grid calendar-grid--days";
+    grid.innerHTML = "";
 
-    if (mostrandoAnios) {
-        // Si ya se están mostrando los años, volver a mostrar los meses
-        mostrarMes(añoActual, mesActual);
-        mostrandoAnios = false;
-    } else {
-        // Mostrar los años
-        for (let i = añoActual; i <= añoActual + 9; i++) {
-            const anioDiv = document.createElement('div');
-            anioDiv.innerText = i;
-            anioDiv.addEventListener('click', () => {
-                añoActual = i;
-                document.getElementById('anioActual').innerText = añoActual;
-                mostrarMes(añoActual, mesActual);
-                listaAnios.style.display = 'none';
-            });
-            listaAnios.appendChild(anioDiv);
-        }
-        listaAnios.style.display = 'flex';
-        mostrandoAnios = true;
+    // Agregar headers de días de la semana
+    this.dayNames.forEach((day) => {
+      const dayHeader = this.createElement("div", "day-header", day);
+      grid.appendChild(dayHeader);
+    });
+
+    // Obtener días del mes
+    const days = this.getDaysInMonth();
+
+    days.forEach((day) => {
+      const button = this.createElement("button", "calendar-cell", day.day);
+
+      if (day.isToday) {
+        button.classList.add("calendar-cell--today");
+      }
+
+      if (day.isOtherMonth) {
+        button.classList.add("calendar-cell--other-month");
+      }
+
+      grid.appendChild(button);
+    });
+  }
+
+  renderMonthsView(grid) {
+    grid.className = "calendar-grid calendar-grid--months";
+    grid.innerHTML = "";
+
+    this.monthNames.forEach((month, index) => {
+      const button = this.createElement("button", "calendar-cell calendar-cell--month", month);
+      button.addEventListener("click", () => this.showDaysView(index));
+      grid.appendChild(button);
+    });
+  }
+
+  renderYearsView(grid) {
+    grid.className = "calendar-grid calendar-grid--years";
+    grid.innerHTML = "";
+
+    const currentYear = this.currentDate.getFullYear();
+    const startYear = Math.floor(currentYear / 10) * 10;
+
+    for (let i = 0; i < 12; i++) {
+      const year = startYear + i;
+      const button = this.createElement("button", "calendar-cell calendar-cell--year", year);
+      button.addEventListener("click", () => this.selectYear(year));
+      grid.appendChild(button);
     }
+  }
+
+  getDaysInMonth() {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
+    const today = new Date();
+
+    // Primer día del mes
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    // Días a mostrar del mes anterior
+    const startDate = new Date(firstDay);
+    startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+    // Días a mostrar del mes siguiente
+    const endDate = new Date(lastDay);
+    const remainingDays = 6 - lastDay.getDay();
+    endDate.setDate(endDate.getDate() + remainingDays);
+
+    const days = [];
+    const currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      const isCurrentMonth = currentDate.getMonth() === month;
+      const isToday = this.isSameDay(currentDate, today);
+
+      days.push({
+        day: currentDate.getDate(),
+        isCurrentMonth,
+        isOtherMonth: !isCurrentMonth,
+        isToday,
+        date: new Date(currentDate),
+      });
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return days;
+  }
+
+  isSameDay(date1, date2) {
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    );
+  }
+
+  createElement(tag, className, content) {
+    const element = document.createElement(tag);
+    element.className = className;
+    element.textContent = content;
+    return element;
+  }
 }
 
-document.addEventListener('DOMContentLoaded', inicializarCalendario);
+// Inicialización automática cuando el DOM esté listo
+document.addEventListener("DOMContentLoaded", () => {
+  if (document.getElementById("calendar")) {
+    new Calendar("calendar");
+  }
+});

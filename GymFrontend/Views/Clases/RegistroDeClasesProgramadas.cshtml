@@ -1,0 +1,78 @@
+@{
+    ViewData["Title"] = "Registro de Clases Programadas";
+    Layout = "_LayoutSeccionAdministracion";
+}
+
+<div class="pagetitle">
+    <h1>Registro de Clases Programadas</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+            <li class="breadcrumb-item active">Registro de Clases Programadas</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    @Html.Partial("_AgendadorDeHorarios")
+                </div>
+            </div>
+        </div>
+    </div>
+</section> 
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/calendarioStyles.css" />
+    <link rel="stylesheet" href="~/css/horariosDelDia.css" />
+}
+
+@section Scripts {
+    <script src="~/js/calendario.js"></script>
+    <script src="~/js/horariosDelDia.js"></script>
+    <script>
+        // Funciones de demostración
+        function demoSetDate() {
+            const today = new Date();
+            const dateString = today.toLocaleDateString('es-ES', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            scheduleViewer.setSelectedDate(dateString);
+        }
+
+        function demoLoadSchedules() {
+            const sampleSchedules = [
+                { idHora: 1, labelHorario: '08:00 - 09:00', estado: 'disponible' },
+                { idHora: 2, labelHorario: '09:00 - 10:00', estado: 'ocupado' },
+                { idHora: 3, labelHorario: '10:00 - 11:00', estado: 'disponible' },
+                { idHora: 4, labelHorario: '11:00 - 12:00', estado: 'prereservado' },
+                { idHora: 5, labelHorario: '12:00 - 13:00', estado: 'disponible' },
+                { idHora: 6, labelHorario: '13:00 - 14:00', estado: 'ocupado' },
+                { idHora: 7, labelHorario: '14:00 - 15:00', estado: 'disponible' },
+                { idHora: 8, labelHorario: '15:00 - 16:00', estado: 'prereservado' }
+            ];
+            scheduleViewer.loadSchedules(sampleSchedules);
+        }
+
+        function demoShowSelected() {
+            const selectedId = document.getElementById('fkHoraLaboral').value;
+            if (selectedId) {
+                alert(`Hora seleccionada: ID ${selectedId}`);
+            } else {
+                alert('No hay ninguna hora seleccionada');
+            }
+        }
+
+        // Inicializar con datos de ejemplo
+        document.addEventListener('DOMContentLoaded', () => {
+            demoSetDate();
+            demoLoadSchedules();
+        });
+    </script>
+}

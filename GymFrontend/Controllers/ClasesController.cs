@@ -36,5 +36,12 @@ namespace GymFrontend.Controllers
 
             return View();
         }
+
+        [HttpGet]
+        [Route("registroClasesProgramadas")]
+        public IActionResult RegistroDeClasesProgramadas()
+        {
+            return View();
+        }
     }
 } 

@@ -78,6 +78,11 @@
                     <span>Duracion citas medicion</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="/registroClasesProgramadas">
+                    <span>Registro de Clases Programadas</span>
+                </a>
+            </li>
             <!-- End Profile Page Nav -->
         </ul>
     </aside>
@@ -86,12 +91,11 @@
     <main id="main" class="main">
         @RenderBody()
     </main>
-    <script src="~/js/gestionRutinas.js" asp-append-version="true"></script>
     <script src="~/js/main.js"></script>
-    <script src="~/lib/booststrap2/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/bootstrap2/bootstrap.bundle.min.js"></script>
     <script src="assets/vendor/quill/quill.js"></script>
 
 </body>
 @RenderSection("Scripts", required: false)
-
+@RenderSection("Styles", required: false)
 </html>

@@ -1,73 +1,249 @@
-.calendario {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 20px;
+/* Variables CSS personalizadas para el calendario */
+:root {
+  --color-primary: #e11d48;
+  --color-primary-dark: #be123c;
+  --color-primary-light: #f43f5e;
+  --color-dark: #000000;
+  --color-dark-100: #09090b;
+  --color-dark-200: #18181b;
+  --color-dark-300: #27272a;
+  --color-gray-100: #3f3f46;
+  --color-gray-200: #52525b;
+  --color-gray-300: #71717a;
+  --color-gray-400: #a1a1aa;
+  --color-light: #ffffff;
+  --color-light-100: #f4f4f5;
+  --color-light-200: #e4e4e7;
+  --font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+    "Helvetica Neue", sans-serif;
+  --border-radius: 0.375rem;
+  --transition: all 0.3s ease;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    padding: 10px;
-    background-color: #f8f9fa; /* Color de fondo */
-    border: 1px solid #ccc;
-    border-radius: 5px;
+/* Contenedor principal del calendario */
+.calendar-container {
+  max-width: 400px;
+  margin: 0 auto;
+  background: var(--color-light);
+  border: 1px solid var(--color-light-200);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  font-family: var(--font-family);
+  overflow: hidden;
 }
 
-.mes, .anio {
-    padding: 10px;
-    font-size: 1.5em;
-    cursor: pointer;
+/* Header del calendario */
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: var(--color-primary);
+  color: var(--color-light);
 }
 
-.vista {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 10px;
+/* Botones de navegación */
+.nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: var(--border-radius);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-light);
+  cursor: pointer;
+  transition: var(--transition);
 }
 
-.dia {
-    width: 14.28%; /* 100% / 7 días */
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    margin: 2px;
+.nav-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
 }
 
-.disponible {
-    background-color: green;
+.nav-button:active {
+  transform: scale(0.95);
 }
 
-.no-disponible {
-    background-color: red;
+/* Título del calendario */
+.calendar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.control {
-    cursor: pointer;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #e9ecef;
-    margin: 0 5px;
+.title-button {
+  background: none;
+  border: none;
+  color: var(--color-light);
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
 }
 
-.meses, .anios {
-    display: none;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 10px;
+.title-button:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.meses div, .anios div {
-    padding: 5px;
-    cursor: pointer;
-    border: 1px solid #ccc;
-    margin: 2px;
-    border-radius: 5px;
-    background-color: #e9ecef;
+/* Contenido del calendario */
+.calendar-content {
+  padding: 1rem;
+  min-height: 300px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Grid del calendario */
+.calendar-grid {
+  display: grid;
+  gap: 0.25rem;
+  transition: var(--transition);
+}
+
+/* Grid para días */
+.calendar-grid--days {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+/* Grid para meses */
+.calendar-grid--months {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Grid para años */
+.calendar-grid--years {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Headers de días de la semana */
+.day-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-300);
+  text-transform: uppercase;
+}
+
+/* Celdas del calendario */
+.calendar-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  border: none;
+  background: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-dark);
+  transition: var(--transition);
+  position: relative;
+}
+
+.calendar-cell:hover {
+  background: var(--color-light-100);
+  transform: scale(1.05);
+}
+
+.calendar-cell:active {
+  transform: scale(0.95);
+}
+
+/* Día actual */
+.calendar-cell--today {
+  background: var(--color-primary-light);
+  color: var(--color-light);
+  font-weight: 700;
+}
+
+.calendar-cell--today:hover {
+  background: var(--color-primary);
+}
+
+/* Días de otros meses */
+.calendar-cell--other-month {
+  color: var(--color-gray-400);
+}
+
+/* Celdas de meses y años */
+.calendar-cell--month,
+.calendar-cell--year {
+  min-height: 3rem;
+  font-size: 1rem;
+}
+
+/* Animaciones de transición */
+.calendar-content--transitioning {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.calendar-content--entering {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .calendar-container {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .calendar-header {
+    padding: 0.75rem;
+  }
+
+  .title-button {
+    font-size: 1rem;
+  }
+
+  .calendar-cell {
+    min-height: 2.25rem;
+    font-size: 0.8rem;
+  }
+
+  .calendar-cell--month,
+  .calendar-cell--year {
+    min-height: 2.75rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .calendar-grid--months,
+  .calendar-grid--years {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Estados de carga */
+.calendar-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Animación de entrada */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calendar-grid {
+  animation: slideIn 0.3s ease-out;
 }
