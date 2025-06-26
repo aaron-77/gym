@@ -1,3 +1,4 @@
+/* Variables CSS para el visualizador de horarios */
 :root {
   --primary-color: #012970;
   --primary-light: #1a4480;
@@ -55,6 +56,8 @@ body {
   font-weight: 600;
   margin: 0;
   text-transform: capitalize;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
 /* Contenido del visualizador */
@@ -86,6 +89,8 @@ body {
   min-height: 3rem;
   position: relative;
   overflow: hidden;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
 .schedule-viewer__item:hover {
@@ -175,6 +180,144 @@ body {
   .schedule-viewer__content {
     padding: 0.75rem;
   }
+
+  .schedule-viewer__item {
+    font-size: 0.75rem;
+    min-height: 2.25rem;
+  }
+}
+
+@media (max-width: 320px) {
+  .schedule-viewer__header {
+    padding: 0.5rem;
+  }
+
+  .schedule-viewer__title {
+    font-size: 1rem;
+  }
+
+  .schedule-viewer__content {
+    padding: 0.5rem;
+  }
+
+  .schedule-viewer__grid {
+    grid-template-columns: 1fr;
+    gap: 0.375rem;
+  }
+
+  .schedule-viewer__item {
+    font-size: 0.7rem;
+    min-height: 2rem;
+    padding: 0.5rem;
+  }
+}
+
+/* Estilos específicos para pantallas de 280px y menores */
+@media (max-width: 280px) {
+  .schedule-viewer {
+    border-radius: 0.25rem;
+  }
+
+  .schedule-viewer__header {
+    padding: 0.375rem;
+  }
+
+  .schedule-viewer__title {
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+
+  .schedule-viewer__content {
+    padding: 0.375rem;
+  }
+
+  .schedule-viewer__grid {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .schedule-viewer__item {
+    font-size: 0.65rem;
+    min-height: 1.75rem;
+    padding: 0.375rem 0.25rem;
+    border-radius: 0.25rem;
+    line-height: 1.2;
+  }
+}
+
+/* Estilos ultra específicos para 250px exactos */
+@media (max-width: 250px) {
+  .schedule-viewer {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 0.125rem;
+    margin: 0;
+  }
+
+  .schedule-viewer__header {
+    padding: 0.25rem;
+    min-height: 2rem;
+  }
+
+  .schedule-viewer__title {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    padding: 0.125rem;
+  }
+
+  .schedule-viewer__content {
+    padding: 0.25rem;
+  }
+
+  /* Grid de una sola columna para 250px */
+  .schedule-viewer__grid {
+    grid-template-columns: 1fr;
+    gap: 0.125rem;
+    width: 100%;
+  }
+
+  .schedule-viewer__item {
+    font-size: 0.6rem;
+    min-height: 1.5rem;
+    padding: 0.25rem;
+    border-radius: 0.125rem;
+    line-height: 1.1;
+    font-weight: 600;
+    border-width: 1px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .schedule-viewer__item:hover {
+    transform: none;
+    box-shadow: var(--shadow);
+  }
+
+  /* Ajustar indicador de estado para pantallas pequeñas */
+  .schedule-viewer__item::before {
+    height: 2px;
+  }
+
+  /* Estado seleccionado optimizado para 250px */
+  .schedule-viewer__item--selected {
+    box-shadow: 0 0 0 2px rgba(1, 41, 112, 0.3);
+    border-color: var(--primary-color);
+  }
+
+  /* Optimizar colores para mejor contraste en pantallas pequeñas */
+  .schedule-viewer__item--disponible {
+    background-color: #22c55e;
+  }
+
+  .schedule-viewer__item--prereservado {
+    background-color: #f59e0b;
+    color: var(--light-color);
+  }
+
+  .schedule-viewer__item--ocupado {
+    background-color: #ef4444;
+  }
 }
 
 /* Estilos para la demo */
@@ -221,6 +364,53 @@ body {
   transform: translateY(0);
 }
 
+/* Responsive para demo */
+@media (max-width: 480px) {
+  .demo-container {
+    margin: 1rem auto;
+    padding: 0 0.5rem;
+  }
+
+  .demo-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .demo-controls {
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .demo-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 250px) {
+  .demo-container {
+    margin: 0.5rem auto;
+    padding: 0 0.25rem;
+  }
+
+  .demo-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .demo-controls {
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .demo-button {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.7rem;
+    width: 100%;
+  }
+}
+
 /* Estados de carga */
 .schedule-viewer--loading {
   opacity: 0.6;
@@ -236,6 +426,13 @@ body {
   padding: 2rem;
   color: var(--medium-gray);
   font-style: italic;
+}
+
+@media (max-width: 250px) {
+  .schedule-viewer--loading .schedule-viewer__grid::after {
+    padding: 1rem 0.5rem;
+    font-size: 0.7rem;
+  }
 }
 
 /* Animaciones */
@@ -265,4 +462,12 @@ body {
   color: var(--medium-gray);
   font-style: italic;
   text-align: center;
-} 
+}
+
+@media (max-width: 250px) {
+  .schedule-viewer__grid:empty::after {
+    padding: 1.5rem 0.5rem;
+    font-size: 0.7rem;
+    line-height: 1.3;
+  }
+}
