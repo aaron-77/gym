@@ -1,0 +1,37 @@
+/* Estilos específicos para la página de Registro de Clases Programadas */
+
+/* Padding para evitar que el contenido se tape con la barra de menú */
+.section {
+/*     padding-top: 2rem; */
+    /* padding-bottom: 2rem; */
+}
+
+/* Separación entre los inputs del formulario */
+.section .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.section .row {
+    /* margin-bottom: 1rem; */
+}
+
+/* Separación adicional después del agendador */
+.section form > .row:first-of-type {
+    margin-top: 2rem;
+}
+
+/* Separación antes del botón */
+.section .row:last-child {
+    /* margin-top: 1rem; */
+} 
+
+.administrative-form{
+    box-sizing: border-box;
+    width: 40%;
+    padding:2%
+}
+.layout-registro-clases-programadas{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

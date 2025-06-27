@@ -18,27 +18,14 @@
   --transition: all 0.3s ease;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
-body {
-  font-family: var(--font-family);
-  background: var(--color-light-100);
-  padding: 2rem;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 /* Contenedor principal del calendario */
 .calendar-container {
   max-width: 400px;
   width: 100%;
   margin: 0 auto;
+  margin-bottom: 1.5rem;
   background: var(--color-light);
   border: 1px solid var(--color-light-200);
   border-radius: var(--border-radius);
@@ -114,7 +101,7 @@ body {
 /* Contenido del calendario */
 .calendar-content {
   padding: 1rem;
-  min-height: 300px;
+  min-height: 100px;
   position: relative;
   overflow: hidden;
 }

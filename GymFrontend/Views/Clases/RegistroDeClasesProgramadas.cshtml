@@ -14,56 +14,54 @@
 </div>
 
 <section class="section">
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-body">
-                    <form id="claseProgramadaForm">
-                    @Html.Partial("_AgendadorDeHorarios")
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="inputClase">Clase</label>
-                                    <select id="inputClase" class="form-control" name="claseId" required>
-                                        <option value="">Selecciona una clase</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="inputEntrenador">Entrenador</label>
-                                    <select id="inputEntrenador" class="form-control" name="usuarioId" required>
-                                        <option value="">Selecciona un entrenador</option>
-                                    </select>
-                                </div>
-                            </div>
+    <div class="row jusify-content-center">
+        <div class="col-lg-12 layout-registro-clases-programadas">
+            <form id="claseProgramadaForm" class="administrative-form ">
+                @Html.Partial("_AgendadorDeHorarios")
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="inputClase">Clase</label>
+                            <select id="inputClase" class="form-control" name="claseId" required>
+                                <option value="">Selecciona una clase</option>
+                            </select>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="inputCupoMaximo">Cupo Máximo</label>
-                                    <input type="number" id="inputCupoMaximo" class="form-control" name="cupoMaximo" min="1" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="inputEstadoActividad">Estado de Actividad</label>
-                                    <select id="inputEstadoActividad" class="form-control" name="fkEstadoClaseProgramada" required>
-                                        <option value="">Selecciona un estado</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12 text-center">
-                                <button type="submit" class="btn btn-primary">Guardar Clase Programada</button>
-                            </div>
-                        </div>
-                    </form>
-                    
-                    
+                    </div>
                 </div>
-            </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="inputEntrenador">Entrenador</label>
+                            <select id="inputEntrenador" class="form-control" name="usuarioId" required>
+                                <option value="">Selecciona un entrenador</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="inputCupoMaximo">Cupo Máximo</label>
+                            <input type="number" id="inputCupoMaximo" class="form-control" name="cupoMaximo" min="1" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="inputEstadoActividad">Estado de Actividad</label>
+                            <select id="inputEstadoActividad" class="form-control" name="fkEstadoClaseProgramada" required>
+                                <option value="">Selecciona un estado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <button type="submit" class="btn btn-primary">Registrar</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </section> 
@@ -71,6 +69,7 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/calendarioStyles.css" />
     <link rel="stylesheet" href="~/css/horariosDelDia.css" />
+    <link rel="stylesheet" href="~/css/registroClasesProgramadas.css" />
 }
 
 @section Scripts {
