@@ -335,7 +335,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Event listener para el evento personalizado
     scheduleContainer.addEventListener("scheduleSelected", (event) => {
-      console.log("Horario seleccionado:", event.detail)
+      // Mostrar la fecha y hora seleccionada en el label
+      const label = document.getElementById("labelHorarioSeleccionado");
+      if (label) {
+        const horario = event.detail.schedule;
+        // Obtener la fecha seleccionada del header del calendario
+        const fecha = document.getElementById("scheduleDate")?.textContent || "";
+        if (horario && fecha) {
+          label.textContent = `Seleccionaste: ${fecha} - ${horario.labelHorario}`;
+        } else if (horario) {
+          label.textContent = `Horario seleccionado: ${horario.labelHorario}`;
+        } else {
+          label.textContent = "No hay horario seleccionado";
+        }
+      }
     })
   }
 })

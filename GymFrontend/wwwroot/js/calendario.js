@@ -209,7 +209,7 @@ class Calendar {
       
       days.forEach(day => {
           const button = this.createElement('button', 'calendar-cell', day.day);
-          
+          button.type = 'button';
           if (day.isToday) {
               button.classList.add('calendar-cell--today');
           }
@@ -217,6 +217,7 @@ class Calendar {
           if (day.isOtherMonth) {
               button.classList.add('calendar-cell--other-month');
           }
+          button.addEventListener('click', (event) => this.handleSelectedDay(event));
           
           grid.appendChild(button);
       });
@@ -232,7 +233,8 @@ class Calendar {
       
       this.monthNames.forEach((month, index) => {
           const button = this.createElement('button', 'calendar-cell calendar-cell--month', month);
-          button.addEventListener('click', () => this.showDaysView(index));
+          button.type = 'button';
+          button.addEventListener('click', () => { this.currentDate.setMonth(index); this.showDaysView(index)});
           grid.appendChild(button);
       });
   }
@@ -251,9 +253,66 @@ class Calendar {
       for (let i = 0; i < 12; i++) {
           const year = startYear + i;
           const button = this.createElement('button', 'calendar-cell calendar-cell--year', year);
+          button.type = 'button';
           button.addEventListener('click', () => this.selectYear(year));
           grid.appendChild(button);
       }
+  }
+  clearAnteriorSelectedDays (){
+    const anteriorSelectedDays = document.getElementsByClassName('calendar-cell--selected');
+    for(let day of anteriorSelectedDays){
+        day.classList.remove('calendar-cell--selected');
+    }
+  }
+  
+  /**
+   * Desplaza el scroll suavemente hacia el header del visualizador de horarios
+   */
+  scrollToScheduleViewer() {
+    const header = document.querySelector('.schedule-viewer__header');
+    const offset = 60; // Ajusta este valor según la altura de tu menú fijo
+    if (header) {
+        const y = header.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }
+  
+  /**
+   * Obtiene la fecha seleccionada en el calendario
+   * @param {HTMLElement} dayElement - Elemento del día clickeado
+   * @returns {Object} Objeto con información de la fecha seleccionada
+   */
+  getSelectedDate(dayElement) {
+    const dayNumber = parseInt(dayElement.textContent);
+    // Obtener el año y mes actual del calendario
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
+    return this.currentDate;
+    
+  }
+  
+  handleSelectedDay (ev){
+    ev.preventDefault();
+    this.clearAnteriorSelectedDays();
+    const seletedElement = ev.currentTarget;
+    seletedElement.classList.add('calendar-cell--selected');
+    const selectedDay = parseInt(seletedElement.textContent);
+    this.currentDate.setDate(selectedDay);
+    
+    // Obtener la fecha seleccionada
+    const selectedDateInfo = this.getSelectedDate(ev.currentTarget);
+    
+    // Emitir evento personalizado con la fecha seleccionada
+    const fechaSeleccionadaEvent = new CustomEvent('fechaSeleccionada', {
+      detail: {
+        fecha: selectedDateInfo
+      }
+    });
+    
+    document.dispatchEvent(fechaSeleccionadaEvent);
+    
+    // Scroll suave hacia el header del visualizador de horarios
+    this.scrollToScheduleViewer();
   }
 
   /**
