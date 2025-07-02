@@ -18,17 +18,17 @@ namespace API.Services
             _context = context;
         }
 
-        public async Task<List<DTOHorarioVisualizacion>> ObtenerPreReservasDeHorario()
+        public async Task<List<DTOHorarioVisualizacion>> ObtenerPreReservasDeHorario(DateTime? fecha = null)
         {
             try
             {
-                // Obtener la fecha actual
-                var fechaActual = DateTime.Now;
+                // Usar la fecha proporcionada o la actual
+                var fechaConsulta = fecha ?? DateTime.Now;
 
                 // Ejecutar la función SQL para obtener los horarios pre reservados
                 var horariosRaw = await _context
                     .DtoHorariosPreReservados
-                    .FromSqlInterpolated($"SELECT * FROM dbo.fn_consultarHorariosPreReservados({fechaActual})")
+                    .FromSqlInterpolated($"SELECT * FROM dbo.fn_consultarHorariosPreReservados({fechaConsulta})")
                     .ToListAsync();
 
                 // Proyección a DTOHorarioVisualizacion
@@ -50,14 +50,15 @@ namespace API.Services
             }
         }
 
-        public async Task<List<DTOHorarioVisualizacion>> consultarHorariosDisponibles()
+        public async Task<List<DTOHorarioVisualizacion>> consultarHorariosDisponibles(DateTime? fecha = null)
         {
             try
             {
+                var fechaConsulta = fecha ?? DateTime.Now;
                 // Ejecutar el procedimiento almacenado para obtener los horarios disponibles
                 var horariosDisponibles = await _context
                     .DtoHorarioVisualizacion
-                    .FromSqlInterpolated($"EXEC sp_obtenerHorariosDisponibles")
+                    .FromSqlInterpolated($"EXEC sp_obtenerHorariosDisponibles @fecha={fechaConsulta}")
                     .ToListAsync();
 
                 return horariosDisponibles; // Devolver directamente la lista de DTOHorarioVisualizacion

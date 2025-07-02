@@ -1,4 +1,4 @@
-class ScheduleViewer {
+export class ScheduleViewer {
   constructor(containerId) {
     this.container = document.getElementById(containerId)
     this.dateElement = null
@@ -6,8 +6,9 @@ class ScheduleViewer {
     this.hiddenInput = null
     this.selectedScheduleId = null
     this.schedules = []
+    this.checkElement = null
 
-    this.init()
+    
   }
 
   /**
@@ -25,13 +26,17 @@ class ScheduleViewer {
     this.dateElement = this.container?.querySelector("#scheduleDate")
     this.gridElement = this.container?.querySelector("#scheduleGrid")
     this.hiddenInput = document.getElementById("fkHoraLaboral")
+    this.checkElement = document.getElementById("ocultarPreReservados")
   }
 
   /**
    * Configura los event listeners
    */
   bindEvents() {
-    // Los eventos se configuran dinámicamente en cada elemento de horario
+    this.checkElement.addEventListener("change", (event) => {
+      const ocultar = event.target.checked;
+      this.togglePreReservados(ocultar);
+    });
   }
 
   /**
@@ -78,21 +83,28 @@ class ScheduleViewer {
     this.setLoadingState(true)
 
     // Simular carga asíncrona
-    setTimeout(() => {
+    
       this.schedules.forEach((schedule, index) => {
         const scheduleElement = this.createScheduleElement(schedule)
+         // Configurar evento click solo si no está ocupado
+        if (scheduleElement.estado !== "ocupado") {
+          scheduleElement.addEventListener("click", (event) => {
+            this.handleScheduleClick(event)
+          });
+        }
         this.gridElement.appendChild(scheduleElement)
 
         // Animación escalonada
         setTimeout(() => {
-          scheduleElement.style.opacity = "1"
-          scheduleElement.style.transform = "translateY(0)"
+          scheduleElement.style.opacity = "1";
+          scheduleElement.style.transform = "translateY(0)";
         }, index * 50)
-      })
+    
 
-      this.setLoadingState(false)
-    }, 300)
+        this.setLoadingState(false)
+      })
   }
+  
 
   /**
    * Crea un elemento individual de horario
@@ -111,12 +123,8 @@ class ScheduleViewer {
     element.style.transform = "translateY(10px)"
     element.style.transition = "all 0.3s ease"
 
-    // Configurar evento click solo si no está ocupado
-    if (schedule.estado !== "ocupado") {
-      element.addEventListener("click", (event) => {
-        this.handleScheduleClick(event)
-      })
-    }
+   
+    
 
     return element
   }
@@ -157,6 +165,9 @@ class ScheduleViewer {
 
     // Disparar evento personalizado
     this.dispatchSelectionEvent(scheduleId)
+
+    // Scroll hacia el label de horario seleccionado
+    this.scrollToSelectedLabel()
   }
 
   /**
@@ -291,6 +302,34 @@ class ScheduleViewer {
     this.selectedScheduleId = null
     this.schedules = []
   }
+
+  /**
+   * Oculta o muestra los horarios pre-reservados
+   * @param {boolean} ocultar - True para ocultar, false para mostrar
+   */
+  togglePreReservados(ocultar) {
+    const preReservadosElements = this.gridElement?.querySelectorAll('.schedule-viewer__item--prereservado')
+    
+    if (preReservadosElements) {
+      preReservadosElements.forEach(element => {
+        element.style.display = ocultar ? 'none' : 'flex'
+      })
+    }
+  }
+
+  /**
+   * Desplaza el scroll suavemente hacia el label de horario seleccionado
+   */
+  scrollToSelectedLabel() {
+    const label = document.getElementById('labelHorarioSeleccionado');
+    const offset = 60; // Ajusta este valor según la altura de tu menú fijo
+    
+    if (label) {
+      const rect = label.getBoundingClientRect();
+      const y = rect.top + window.pageYOffset - offset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }
 }
 
 // Utilidades para integración con otros módulos
@@ -331,7 +370,7 @@ const ScheduleViewerUtils = {
 document.addEventListener("DOMContentLoaded", () => {
   const scheduleContainer = document.getElementById("scheduleViewer")
   if (scheduleContainer) {
-    window.scheduleViewer = new ScheduleViewer("scheduleViewer")
+    //window.scheduleViewer = new ScheduleViewer("scheduleViewer")
 
     // Event listener para el evento personalizado
     scheduleContainer.addEventListener("scheduleSelected", (event) => {
@@ -350,6 +389,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     })
+
+    // Event listener para el checkbox de ocultar pre-reservados
+    /* const checkboxOcultarPreReservados = document.getElementById("ocultarPreReservados"); */
+    /* if (checkboxOcultarPreReservados) {
+      checkboxOcultarPreReservados.addEventListener("change", (event) => {
+        const ocultar = event.target.checked;
+        window.scheduleViewer.togglePreReservados(ocultar);
+      });
+    } */
   }
 })
 

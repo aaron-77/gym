@@ -19,11 +19,11 @@ namespace API.Controllers
         }
 
         [HttpGet("obtenerPreReservas")]
-        public async Task<ActionResult<DTOResponse<List<DTOHorarioVisualizacion>>>> ConsultarHorariosPreReservados()
+        public async Task<ActionResult<DTOResponse<List<DTOHorarioVisualizacion>>>> ConsultarHorariosPreReservados([FromQuery] DateTime? fecha = null)
         {
             try
             {
-                var horarios = await _horariosService.ObtenerPreReservasDeHorario();
+                var horarios = await _horariosService.ObtenerPreReservasDeHorario(fecha);
 
                 // Crear el objeto DTOResponse
                 var response = new DTOResponse<List<DTOHorarioVisualizacion>>
@@ -54,40 +54,40 @@ namespace API.Controllers
             }
         }
 
-[HttpGet("obtenerHorariosDisponibles")]
-public async Task<ActionResult<DTOResponse<List<DTOHorarioVisualizacion>>>> obtenerHorariosDisponibles([FromQuery] DateTime? fecha = null)
-{
-    try
-    {
-        var horarios = await _horariosService.consultarHorariosDisponibles();
-
-        // Crear el objeto DTOResponse
-        var response = new DTOResponse<List<DTOHorarioVisualizacion>>
+        [HttpGet("obtenerHorariosDisponibles")]
+        public async Task<ActionResult<DTOResponse<List<DTOHorarioVisualizacion>>>> obtenerHorariosDisponibles([FromQuery] DateTime? fecha = null)
         {
-            success = true,
-            httpCode = 200,
-            message = "Horarios disponibles obtenidos correctamente",
-            payload = horarios
-        };
-
-        return Ok(response); // Devolver la respuesta HTTP
-    }
-    catch (Exception ex)
-    {
-        var response = new DTOResponse<List<DTOHorarioVisualizacion>>
-        {
-            success = false,
-            httpCode = 500,
-            message = "Error al consultar los horarios disponibles",
-            errors = new List<ErrorModel>
+            try
             {
-                new ErrorModel { propiedad = "NONE", message = ex.Message }
-            },
-            payload = null
-        };
+                var horarios = await _horariosService.consultarHorariosDisponibles(fecha);
 
-        return StatusCode(500, response); // Devolver error 500
-    }
-}
+                // Crear el objeto DTOResponse
+                var response = new DTOResponse<List<DTOHorarioVisualizacion>>
+                {
+                    success = true,
+                    httpCode = 200,
+                    message = "Horarios disponibles obtenidos correctamente",
+                    payload = horarios
+                };
+
+                return Ok(response); // Devolver la respuesta HTTP
+            }
+            catch (Exception ex)
+            {
+                var response = new DTOResponse<List<DTOHorarioVisualizacion>>
+                {
+                    success = false,
+                    httpCode = 500,
+                    message = "Error al consultar los horarios disponibles",
+                    errors = new List<ErrorModel>
+                    {
+                        new ErrorModel { propiedad = "NONE", message = ex.Message }
+                    },
+                    payload = null
+                };
+
+                return StatusCode(500, response); // Devolver error 500
+            }
+        }
     }
 }

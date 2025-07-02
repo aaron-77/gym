@@ -1,15 +1,17 @@
-class Calendar {
-  constructor(containerId) {
+export class Calendar {
+  constructor(containerId, disponibleDates = []) {
       this.container = document.getElementById(containerId);
       this.currentDate = new Date();
+      this.selectedDate = new Date();
       this.viewMode = 'days'; // 'days', 'months', 'years'
       this.monthNames = [
           'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
           'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
       ];
       this.dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      this.disponibleDates = disponibleDates;
       
-      this.init();
+      
   }
 
   /**
@@ -34,22 +36,74 @@ class Calendar {
       monthButton?.addEventListener('click', () => this.showMonthView());
       yearButton?.addEventListener('click', () => this.showYearView());
   }
+// param newDate recibe el nuevo objeto fecha que se pretende aisgnar
+  isValidPrevNavigation(newDate){
+    let validationResult = true;
+    if(newDate < this.currentDate){
+        validationResult = false;
+    }
+    return validationResult;
+    
+  }
+  // if supply subtracted months must be negative number
+  simulateChangeMonth(addedOrSubstractedMonths){
+    const newMonth = new Date(this.selectedDate);
+    newMonth.setMonth(this.selectedDate.getMonth() + addedOrSubstractedMonths ); 
 
+    return newMonth;
+  }
+  // if supply subtracted years must be negative number
+  simulateChangeYear(addedOrSubstractedYears){
+    const newYear = new Date(this.selectedDate);
+    newYear.setFullYear(this.selectedDate.getFullYear() + addedOrSubstractedMonths ); 
+    return newYear;
+  }
   /**
    * Navega al período anterior según el modo de vista actual
    */
   navigatePrevious() {
-      switch (this.viewMode) {
-          case 'days':
-              this.changeMonth(-1);
-              break;
-          case 'months':
-              this.changeYear(-1);
-              break;
-          case 'years':
-              this.changeYearRange(-10);
-              break;
-      }
+    
+    let resultValidation = false;
+    switch (this.viewMode) {
+        case 'days':
+            const newMonth = this.simulateChangeMonth(-1);
+            resultValidation = this.isValidPrevNavigation(newMonth, 'month');
+            if (!resultValidation) {
+                return false;
+            }
+            this.changeMonth(-1);
+            break;
+        case 'months':
+            const newYear = this.simulateChangeYear(-1);
+            resultValidation = this.isValidPrevNavigation(newYear, 'year');
+            if (!resultValidation) {
+                return false;
+            }
+            this.changeYear(-1);
+            break;
+        case 'years':
+            const newYear2 = this.simulateChangeYear(-10);
+            resultValidation = this.isValidPrevNavigation(newYear2, 'year');
+            if (!resultValidation) {
+                return false;
+            }
+            this.changeYearRange(-10);
+            break;
+        default:
+            resultValidation = false;
+    }
+    if(!resultValidation){
+        return false;
+    }
+
+    
+    const changedDateEvent = new CustomEvent('changedDate', {
+        detail: {
+                fecha: this.selectedDate
+        }
+    });
+    document.dispatchEvent(changedDateEvent);
+    
   }
 
   /**
@@ -67,6 +121,13 @@ class Calendar {
               this.changeYearRange(10);
               break;
       }
+      
+      const changedDateEvent = new CustomEvent('changedDate', {
+        detail: {
+          fecha: this.selectedDate
+        }
+      });
+      document.dispatchEvent(changedDateEvent);
   }
 
   /**
@@ -74,7 +135,7 @@ class Calendar {
    * @param {number} direction - Dirección del cambio (-1 o 1)
    */
   changeMonth(direction) {
-      this.currentDate.setMonth(this.currentDate.getMonth() + direction);
+      this.selectedDate.setMonth(this.selectedDate.getMonth() + direction);
       this.renderWithTransition();
   }
 
@@ -83,7 +144,7 @@ class Calendar {
    * @param {number} direction - Dirección del cambio (-1 o 1)
    */
   changeYear(direction) {
-      this.currentDate.setFullYear(this.currentDate.getFullYear() + direction);
+      this.selectedDate.setFullYear(this.selectedDate.getFullYear() + direction);
       this.renderWithTransition();
   }
 
@@ -92,7 +153,7 @@ class Calendar {
    * @param {number} direction - Dirección del cambio (-10 o 10)
    */
   changeYearRange(direction) {
-      this.currentDate.setFullYear(this.currentDate.getFullYear() + direction);
+      this.selectedDate.setFullYear(this.selectedDate.getFullYear() + direction);
       this.renderWithTransition();
   }
 
@@ -117,7 +178,7 @@ class Calendar {
    * @param {number} month - Mes seleccionado (0-11)
    */
   showDaysView(month) {
-      this.currentDate.setMonth(month);
+      this.selectedDate.setMonth(month);
       this.viewMode = 'days';
       this.renderWithTransition();
   }
@@ -127,7 +188,7 @@ class Calendar {
    * @param {number} year - Año seleccionado
    */
   selectYear(year) {
-      this.currentDate.setFullYear(year);
+      this.selectedDate.setFullYear(year);
       this.viewMode = 'months';
       this.renderWithTransition();
   }
@@ -167,8 +228,8 @@ class Calendar {
       const monthButton = this.container.querySelector('#monthButton');
       const yearButton = this.container.querySelector('#yearButton');
       
-      monthButton.textContent = this.monthNames[this.currentDate.getMonth()];
-      yearButton.textContent = this.currentDate.getFullYear();
+      monthButton.textContent = this.monthNames[this.selectedDate.getMonth()];
+      yearButton.textContent = this.selectedDate.getFullYear();
   }
 
   /**
@@ -197,6 +258,7 @@ class Calendar {
   renderDaysView(grid) {
       grid.className = 'calendar-grid calendar-grid--days';
       grid.innerHTML = '';
+      let today = new Date();
       
       // Agregar headers de días de la semana
       this.dayNames.forEach(day => {
@@ -213,12 +275,30 @@ class Calendar {
           if (day.isToday) {
               button.classList.add('calendar-cell--today');
           }
-          
           if (day.isOtherMonth) {
               button.classList.add('calendar-cell--other-month');
           }
-          button.addEventListener('click', (event) => this.handleSelectedDay(event));
+
+          // Generar la fecha usando el año y mes de currentDate y el día que se está renderizando
+          const year = day.year;
+          const month = day.month;
+          const fechaGenerada = new Date(year, month, day.day);
           
+          // disponibleDates es un arreglo de objetos con propiedad fecha tipo Date
+          const estaDisponible = (this.disponibleDates || []).some(obj =>
+              obj.fecha.getFullYear() === fechaGenerada.getFullYear() &&
+              obj.fecha.getMonth() === fechaGenerada.getMonth() &&
+              obj.fecha.getDate() === fechaGenerada.getDate()
+          );
+
+          // Si la fecha generada no está en disponibleDates, deshabilitar el botón y aplica la clase de fondo rojo
+          if ((fechaGenerada < today) || !estaDisponible ) {
+              button.disabled = true;
+              button.classList.add('calendar-cell--disabled');
+          } else {
+              button.addEventListener('click', (event) => this.handleSelectedDay(event));
+          }
+
           grid.appendChild(button);
       });
   }
@@ -234,7 +314,7 @@ class Calendar {
       this.monthNames.forEach((month, index) => {
           const button = this.createElement('button', 'calendar-cell calendar-cell--month', month);
           button.type = 'button';
-          button.addEventListener('click', () => { this.currentDate.setMonth(index); this.showDaysView(index)});
+          button.addEventListener('click', () => { this.selectedDate.setMonth(index); this.showDaysView(index)});
           grid.appendChild(button);
       });
   }
@@ -247,7 +327,7 @@ class Calendar {
       grid.className = 'calendar-grid calendar-grid--years';
       grid.innerHTML = '';
       
-      const currentYear = this.currentDate.getFullYear();
+      const currentYear = this.selectedDate.getFullYear();
       const startYear = Math.floor(currentYear / 10) * 10;
       
       for (let i = 0; i < 12; i++) {
@@ -269,10 +349,13 @@ class Calendar {
    * Desplaza el scroll suavemente hacia el header del visualizador de horarios
    */
   scrollToScheduleViewer() {
-    const header = document.querySelector('.schedule-viewer__header');
+    const scheduleViewer = document.getElementById('scheduleViewer');
     const offset = 60; // Ajusta este valor según la altura de tu menú fijo
-    if (header) {
-        const y = header.getBoundingClientRect().top + window.pageYOffset - offset;
+    
+    if (scheduleViewer) {
+        // Obtener la posición del contenedor completo del schedule-viewer
+        const rect = scheduleViewer.getBoundingClientRect();
+        const y = rect.top + window.pageYOffset - offset;
         window.scrollTo({ top: y, behavior: 'smooth' });
     }
   }
@@ -285,9 +368,9 @@ class Calendar {
   getSelectedDate(dayElement) {
     const dayNumber = parseInt(dayElement.textContent);
     // Obtener el año y mes actual del calendario
-    const year = this.currentDate.getFullYear();
-    const month = this.currentDate.getMonth();
-    return this.currentDate;
+    const year = this.selectedDate.getFullYear();
+    const month = this.selectedDate.getMonth();
+    return this.selectedDate;
     
   }
   
@@ -297,7 +380,7 @@ class Calendar {
     const seletedElement = ev.currentTarget;
     seletedElement.classList.add('calendar-cell--selected');
     const selectedDay = parseInt(seletedElement.textContent);
-    this.currentDate.setDate(selectedDay);
+    this.selectedDate.setDate(selectedDay);
     
     // Obtener la fecha seleccionada
     const selectedDateInfo = this.getSelectedDate(ev.currentTarget);
@@ -320,8 +403,8 @@ class Calendar {
    * @returns {Array} Array de objetos con información de cada día
    */
   getDaysInMonth() {
-      const year = this.currentDate.getFullYear();
-      const month = this.currentDate.getMonth();
+      const year = this.selectedDate.getFullYear();
+      const month = this.selectedDate.getMonth();
       const today = new Date();
       
       // Primer día del mes
@@ -331,6 +414,7 @@ class Calendar {
       // Días a mostrar del mes anterior
       const startDate = new Date(firstDay);
       startDate.setDate(startDate.getDate() - firstDay.getDay());
+      console.log(`START DATE ${startDate.toLocaleTimeString()}`)
       
       // Días a mostrar del mes siguiente
       const endDate = new Date(lastDay);
@@ -341,13 +425,18 @@ class Calendar {
       const currentDate = new Date(startDate);
       
       while (currentDate <= endDate) {
+        
           const isCurrentMonth = currentDate.getMonth() === month;
+          const isCurrentYear = currentDate.getFullYear() === year;
           const isToday = this.isSameDay(currentDate, today);
           
           days.push({
               day: currentDate.getDate(),
               isCurrentMonth,
               isOtherMonth: !isCurrentMonth,
+              isOtherYear:!isCurrentYear,
+              month:currentDate.getMonth(),
+              year:currentDate.getFullYear(),
               isToday,
               date: new Date(currentDate)
           });
