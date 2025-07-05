@@ -2,6 +2,7 @@ export class Calendar {
   constructor(containerId, disponibleDates = []) {
       this.container = document.getElementById(containerId);
       this.currentDate = new Date();
+      
       this.selectedDate = new Date();
       this.viewMode = 'days'; // 'days', 'months', 'years'
       this.monthNames = [
@@ -9,9 +10,7 @@ export class Calendar {
           'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
       ];
       this.dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-      this.disponibleDates = disponibleDates;
-      
-      
+      this.disponibleDates = disponibleDates;      
   }
 
   /**
@@ -39,6 +38,7 @@ export class Calendar {
 // param newDate recibe el nuevo objeto fecha que se pretende aisgnar
   isValidPrevNavigation(newDate){
     let validationResult = true;
+    
     if(newDate < this.currentDate){
         validationResult = false;
     }
@@ -259,6 +259,8 @@ export class Calendar {
       grid.className = 'calendar-grid calendar-grid--days';
       grid.innerHTML = '';
       let today = new Date();
+      //se pone la hora en cero por que no se utiizara y evita problemas en compraciones
+      today.setHours(0,0,0,0);
       
       // Agregar headers de días de la semana
       this.dayNames.forEach(day => {
@@ -278,12 +280,16 @@ export class Calendar {
           if (day.isOtherMonth) {
               button.classList.add('calendar-cell--other-month');
           }
+          if(day.day == this.selectedDate.getDate()){
+            button.classList.add('calendar-cell--selected');
+          }
 
           // Generar la fecha usando el año y mes de currentDate y el día que se está renderizando
           const year = day.year;
           const month = day.month;
           const fechaGenerada = new Date(year, month, day.day);
-          
+          // se coloca la hora en 0 para hacer comparar solo año,mes y dia
+          fechaGenerada.setHours(0,0,0,0);      
           // disponibleDates es un arreglo de objetos con propiedad fecha tipo Date
           const estaDisponible = (this.disponibleDates || []).some(obj =>
               obj.fecha.getFullYear() === fechaGenerada.getFullYear() &&
@@ -314,7 +320,26 @@ export class Calendar {
       this.monthNames.forEach((month, index) => {
           const button = this.createElement('button', 'calendar-cell calendar-cell--month', month);
           button.type = 'button';
-          button.addEventListener('click', () => { this.selectedDate.setMonth(index); this.showDaysView(index)});
+          const possibleNewMonth = new Date(this.selectedDate);
+          possibleNewMonth.setMonth(index); 
+          const resultValidation = this.isValidPrevNavigation(possibleNewMonth);
+            if (resultValidation) {
+                button.addEventListener('click', () => { 
+            
+                    this.selectedDate.setMonth(index);
+                    const changedDateEvent = new CustomEvent('changedDate', {
+                        detail: {
+                                fecha: this.selectedDate
+                        }
+                    });
+                    document.dispatchEvent(changedDateEvent);
+                    this.showDaysView(index)
+                });      
+            }else{
+                button.classList.add('.calendar-month-cell--disabled')
+                button.disabled= true;
+            }
+          
           grid.appendChild(button);
       });
   }
@@ -334,7 +359,15 @@ export class Calendar {
           const year = startYear + i;
           const button = this.createElement('button', 'calendar-cell calendar-cell--year', year);
           button.type = 'button';
-          button.addEventListener('click', () => this.selectYear(year));
+          const possibleNewMonth = new Date(this.selectedDate);
+          possibleNewMonth.setFullYear(year);          
+          const resultValidation = this.isValidPrevNavigation(possibleNewMonth);
+          if(resultValidation){
+            button.addEventListener('click', () => this.selectYear(year));
+          }else{
+            button.disabled = true;
+          }
+          
           grid.appendChild(button);
       }
   }
@@ -381,17 +414,12 @@ export class Calendar {
     seletedElement.classList.add('calendar-cell--selected');
     const selectedDay = parseInt(seletedElement.textContent);
     this.selectedDate.setDate(selectedDay);
-    
-    // Obtener la fecha seleccionada
-    const selectedDateInfo = this.getSelectedDate(ev.currentTarget);
-    
     // Emitir evento personalizado con la fecha seleccionada
     const fechaSeleccionadaEvent = new CustomEvent('fechaSeleccionada', {
       detail: {
-        fecha: selectedDateInfo
+        fecha: this.selectedDate
       }
     });
-    
     document.dispatchEvent(fechaSeleccionadaEvent);
     
     // Scroll suave hacia el header del visualizador de horarios

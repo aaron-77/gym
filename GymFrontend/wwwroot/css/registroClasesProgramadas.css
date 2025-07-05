@@ -27,11 +27,22 @@
 
 .administrative-form{
     box-sizing: border-box;
-    width: 40%;
-    padding:2%
+    width: 356px;
+    max-width: 400px;
+    min-width:  250px;
+    
 }
 .layout-registro-clases-programadas{
     display: flex;
     justify-content: center;
     align-items: center;
 }
+.fix-padding-accordion-body{
+    padding: 0;
+}
+
+@media (max-width: 356px) {
+    .administrative-form {
+      width: 100%;
+    }
+  }

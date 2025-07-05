@@ -457,3 +457,8 @@
     color: var(--color-light) !important;
     cursor: not-allowed;
 }
+.calendar-month-cell--disabled {
+  background-color: var(--color-primary-dark) !important;
+  color: var(--color-light) !important;
+  cursor: not-allowed;
+}

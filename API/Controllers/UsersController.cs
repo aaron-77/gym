@@ -50,14 +50,33 @@ namespace API.Controllers
         [Route("api/obtenerUsuariosPorRol")]
         public async Task<IActionResult> getUsuariosPorRol([FromQuery] string rol, [FromQuery] string estado)
         {
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
-            HttpResponseListadoQueryUsers respuesta = new HttpResponseListadoQueryUsers();
-            List<QueryUser> usuarios = await db.userSP.FromSqlInterpolated($@"EXEC dbo.sp_consultarUsuarios @tipoUsuario={rol},@estado={estado}").ToListAsync();
-            respuesta.ok = true;
-            respuesta.errors = null;
-            respuesta.message = "consulta exitosa";
-            respuesta.data = usuarios;
-            return Ok(respuesta);
+            try
+            {
+                FitnessCenterDbContext db = new FitnessCenterDbContext();
+                List<QueryUser> usuarios = await db.userSP.FromSqlInterpolated($@"EXEC dbo.sp_consultarUsuarios @tipoUsuario={rol},@estado={estado}").ToListAsync();
+                
+                var respuesta = BL.Utils.ResponseManager.BuildResponse(
+                    success: true,
+                    httpCode: 200,
+                    message: "Consulta exitosa",
+                    errors: null,
+                    payload: usuarios
+                );
+                
+                return Ok(respuesta);
+            }
+            catch (Exception ex)
+            {
+                var respuesta = BL.Utils.ResponseManager.BuildResponse(
+                    success: false,
+                    httpCode: 500,
+                    message: "Error al obtener usuarios",
+                    errors: new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } },
+                    payload: (List<QueryUser>)null
+                );
+                
+                return StatusCode(500, respuesta);
+            }
         }
 
         /*

@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using API.Services;
 
 namespace API.Controllers
 {
@@ -22,11 +23,13 @@ namespace API.Controllers
     {
         private readonly FitnessCenterDbContext _context;
         private readonly HttpCustomClient _httpCustomClient;
+        private readonly UserRoleService _userRoleService;
 
-        public ClasesController(FitnessCenterDbContext context, HttpCustomClient httpCustomClient)
+        public ClasesController(FitnessCenterDbContext context, HttpCustomClient httpCustomClient, UserRoleService userRoleService)
         {
             _context = context;
             _httpCustomClient = httpCustomClient;
+            _userRoleService = userRoleService;
         }
 
         /// <summary>
@@ -385,6 +388,61 @@ namespace API.Controllers
         {
             try
             {
+                // Validar el modelo usando las validaciones de Data Annotations
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => new ErrorModel { propiedad = "NONE", message = e.ErrorMessage })
+                        .ToList();
+
+                    return BadRequest(
+                        ResponseManager.BuildResponse<int>(
+                            false,
+                            400,
+                            "Datos inválidos",
+                            errors,
+                            0
+                        )
+                    );
+                }
+
+                // Validar que la clase existe
+                var clase = await _context.Clases.FindAsync(modelo.fkClase);
+                if (clase == null)
+                {
+                    return BadRequest(
+                        ResponseManager.BuildResponse<int>(
+                            false,
+                            400,
+                            "La clase especificada no existe",
+                            new List<ErrorModel>
+                            {
+                                new ErrorModel { propiedad = "fkClase", message = "Clase no encontrada" }
+                            },
+                            0
+                        )
+                    );
+                }
+
+                // Validar que el entrenador tiene rol de empleado
+                var esEmpleado = await _userRoleService.TieneRol(modelo.fkEntrenador, "empleado");
+                if (!esEmpleado)
+                {
+                    return BadRequest(
+                        ResponseManager.BuildResponse<int>(
+                            false,
+                            400,
+                            "El usuario especificado no tiene rol de empleado",
+                            new List<ErrorModel>
+                            {
+                                new ErrorModel { propiedad = "fkEntrenador", message = "El usuario debe tener rol de empleado" }
+                            },
+                            0
+                        )
+                    );
+                }
+
                 using (var connection = new SqlConnection(_context.Database.GetDbConnection().ConnectionString))
                 {
                     await connection.OpenAsync();
@@ -393,12 +451,11 @@ namespace API.Controllers
                     {
                         command.CommandType = CommandType.StoredProcedure;
 
-                        
                         var datos = DataTableConverter
                                     .ConvertToDataTable<DTODatosClaseProgramada>(modelo);
-                        // Aquí se deben agregar los parámetros necesarios para el procedimiento almacenado
                         command.Parameters.AddWithValue("@datos", datos);
                         var idClaseProgramada = await command.ExecuteScalarAsync();
+                        
                         return Ok(
                             ResponseManager.BuildResponse(
                                 true,
@@ -559,7 +616,6 @@ namespace API.Controllers
                 );
             }
         }
-
         /// <summary>
         /// Reagenda una clase
         /// </summary>
@@ -630,6 +686,49 @@ namespace API.Controllers
                         false,
                         500,
                         "Error al reagendar la clase",
+                        new List<ErrorModel>
+                        {
+                            new ErrorModel { propiedad = "NONE", message = ex.Message },
+                        },
+                        null
+                    )
+                );
+            }
+        }
+
+        /// <summary>
+        /// Obtiene todos los estados de clases programadas
+        /// </summary>
+        /// <returns>Lista de estados de clases programadas</returns>
+        [HttpGet("obtenerEstadosDeClasesProgramdas")]
+        public async Task<ActionResult<DTOResponse<List<DTOEstadoClaseProgramada>>>> ObtenerEstadosDeClasesProgramadas()
+        {
+            try
+            {
+                // Ejecutar la función SQL para obtener los estados usando el DTO registrado
+                var estados = await _context
+                    .DtoEstadoClaseProgramada
+                    .FromSqlInterpolated($"SELECT * FROM dbo.fn_obtenerEstadosDeClasesProgramdas()")
+                    .ToListAsync();
+
+                return Ok(
+                    ResponseManager.BuildResponse(
+                        true,
+                        200,
+                        "Estados de clases programadas obtenidos correctamente",
+                        null,
+                        estados
+                    )
+                );
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(
+                    500,
+                    ResponseManager.BuildResponse<List<DTOEstadoClaseProgramada>>(
+                        false,
+                        500,
+                        "Error al obtener los estados de clases programadas",
                         new List<ErrorModel>
                         {
                             new ErrorModel { propiedad = "NONE", message = ex.Message },

@@ -125,6 +125,7 @@ public partial class FitnessCenterDbContext : DbContext
     public virtual DbSet<DTO.Dtos.DTOClaseSimple> FN_ObtenerClases { get; set; }
     public virtual DbSet<DTO.Dtos.DTOHorarioPreReservado> DtoHorariosPreReservados { get; set; }
     public virtual DbSet<DTO.Dtos.DTOHorarioVisualizacion> DtoHorarioVisualizacion { get; set; }
+    public virtual DbSet<DTO.Dtos.DTOEstadoClaseProgramada> DtoEstadoClaseProgramada { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -1329,6 +1330,18 @@ public partial class FitnessCenterDbContext : DbContext
         entity.Property(e => e.horaInicio).HasColumnName("horaInicio");
         entity.Property(e => e.horaFin).HasColumnName("horaFin");
         entity.Property(e => e.tipoDeDia).HasColumnName("tipoDeDia");
+    });
+
+    modelBuilder.Entity<DTO.Dtos.DTOEstadoClaseProgramada>(entity =>
+    {
+        entity.HasNoKey(); // Configurar como entidad keyless
+        entity.ToView(null); // No se asocia a una tabla, solo se usa para consultas
+
+        // Definición de columnas
+        entity.Property(e => e.IdEstadoClaseProgramada).HasColumnName("idEstadoClaseProgramada");
+        entity.Property(e => e.NombresEstado).HasColumnName("nombresEstado");
+        entity.Property(e => e.FechaCreacion).HasColumnName("fechaCreacion");
+        entity.Property(e => e.FechaModificacion).HasColumnName("fechaModificacion");
     });
 
 

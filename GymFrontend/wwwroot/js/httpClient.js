@@ -26,17 +26,27 @@ async function realizarPeticionAPI(endpointPath, body, params) {
             options.body = JSON.stringify(body);
         }
         const response = await fetch(url, options);
+        const data = await response.json();
+        
+        // Verificar si la respuesta HTTP fue exitosa
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);
         }
-        const data = await response.json();
-        if (data && data.payload) {
-            return data.payload;
+        
+        // Si la respuesta tiene la estructura DTOResponse (con payload)
+        if (data && data.payload !== undefined) {
+            // Verificar si la respuesta indica éxito
+            if (!data.success) {
+                console.error('Error en la respuesta del API:', data.message, data.errors);
+                throw new Error(data.message || 'Error en la respuesta del servidor');
+            }
         }
+        
+        // Retornar la respuesta completa
         return data;
     } catch (error) {
         console.error('Error al realizar petición al API:', error);
-        return [];
+        throw error; // Re-lanzar el error para que el código que llama pueda manejarlo
     }
 }
 
