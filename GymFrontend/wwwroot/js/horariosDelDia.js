@@ -1,9 +1,10 @@
+import { realizarPeticionAPI } from './httpClient.js';
 export class ScheduleViewer {
   constructor(containerId) {
     this.container = document.getElementById(containerId)
     this.dateElement = null
     this.gridElement = null
-    this.hiddenInput = null
+    this.inputFkHoraLaboral = null
     this.selectedScheduleId = null
     this.schedules = []
     this.checkElement = null
@@ -25,7 +26,7 @@ export class ScheduleViewer {
   cacheElements() {
     this.dateElement = this.container?.querySelector("#scheduleDate")
     this.gridElement = this.container?.querySelector("#scheduleGrid")
-    this.hiddenInput = document.getElementById("fkHoraLaboral")
+    this.inputFkHoraLaboral = document.getElementById("fkHoraLaboral")
     this.checkElement = document.getElementById("ocultarPreReservados")
   }
 
@@ -37,6 +38,9 @@ export class ScheduleViewer {
       const ocultar = event.target.checked;
       this.togglePreReservados(ocultar);
     });
+
+    
+    
   }
 
   /**
@@ -123,8 +127,10 @@ export class ScheduleViewer {
     element.style.transform = "translateY(10px)"
     element.style.transition = "all 0.3s ease"
 
-   
-    
+    // Aplica la clase CSS si el estado es exactamente 'prereservado'
+    if (schedule.estado === "prereservado") {
+      element.classList.add("schedule-viewer__item--prereservado-disabled");
+    }
 
     return element
   }
@@ -145,10 +151,22 @@ export class ScheduleViewer {
    * Maneja el evento click en un horario
    * @param {Event} event - Evento de click
    */
-  handleScheduleClick(event) {
+  async handleScheduleClick(event) {
+    // Mostrar prompt de confirmación
+    const confirmacion = window.confirm("¿Está seguro que desea seleccionar este horario?");
+    if (!confirmacion) {
+      return;
+    }
     const element = event.currentTarget
     const scheduleId = element.getAttribute("data-idhora")
-
+    this.updateHiddenInput(scheduleId)
+    // Ejecutar pre-reserva antes de continuar
+    const preReservaExitosa = await this.registrarPreReservaDeHorario();
+    if (!preReservaExitosa) {
+      // Si hubo error, no continuar
+      return;
+    }
+    
     if (!scheduleId) {
       console.error("ID de horario no encontrado")
       return
@@ -161,13 +179,67 @@ export class ScheduleViewer {
     this.selectSchedule(element, scheduleId)
 
     // Actualizar campo oculto
-    this.updateHiddenInput(scheduleId)
+    
 
     // Disparar evento personalizado
     this.dispatchSelectionEvent(scheduleId)
 
     // Scroll hacia el label de horario seleccionado
     this.scrollToSelectedLabel()
+  }
+
+  /**
+   * Método para registrar una pre-reserva de horario
+   * @returns {Promise<boolean>} true si fue exitosa, false si hubo error
+   */
+  async registrarPreReservaDeHorario() {
+    // Validar que haya un horario seleccionado
+    const inputFkHoraLaboral = document.getElementById('fkHoraLaboral');
+    
+    const inputFecha = document.getElementById('fechaDeLaClase');
+
+    
+    if (!inputFecha.reportValidity()) {
+      return false;
+    }
+    if (!inputFkHoraLaboral.reportValidity()) {
+      return false;
+    }
+    
+
+    // Obtener los datos pertinentes
+    
+    const idUsuarioQueReserva = 16; // Aquí puedes cambiar por el usuario real si lo tienes
+    const fechaTentativa = inputFecha.value;
+    const idHoraLaboral = parseInt(inputFkHoraLaboral.value);
+
+    const body = {
+      idUsuarioQueReserva,
+      fechaTentativa,
+      idHoraLaboral
+    };
+
+    try {
+      const response = await realizarPeticionAPI('Horarios/preReservarHorario', body, undefined, 'POST');
+      if (response.success) {
+        // Se puede mostrar un mensaje si se desea
+        // alert('Pre-reserva registrada exitosamente.');
+        return true;
+      } else {
+        let errorMessage = 'Error al registrar la pre-reserva';
+        if (response.errors && response.errors.length > 0) {
+          errorMessage += ': ' + response.errors.map(e => e.message).join(', ');
+        } else if (response.message) {
+          errorMessage += ': ' + response.message;
+        }
+        alert(errorMessage);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error al registrar pre-reserva:', error);
+      alert('Error al registrar la pre-reserva: ' + error.message);
+      return false;
+    }
   }
 
   /**
@@ -202,8 +274,8 @@ export class ScheduleViewer {
    * @param {string} scheduleId - ID del horario seleccionado
    */
   updateHiddenInput(scheduleId) {
-    if (this.hiddenInput) {
-      this.hiddenInput.value = scheduleId
+    if (this.inputFkHoraLaboral) {
+      this.inputFkHoraLaboral.value = scheduleId
     }
   }
 
@@ -330,6 +402,29 @@ export class ScheduleViewer {
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
   }
+
+  handleSelectedDay(event) {
+    event.preventDefault();
+    this.clearAnteriorSelectedDays();
+    const seletedElement = event.currentTarget;
+    seletedElement.classList.add('calendar-cell--selected');
+    const selectedDay = parseInt(seletedElement.textContent);
+    this.selectedDate.setDate(selectedDay);
+    const fechaFormateada = this.selectedDate.toLocaleDateString('sv-SE');
+    
+    
+
+    // Emitir evento personalizado con la fecha seleccionada
+    const fechaSeleccionadaEvent = new CustomEvent('fechaSeleccionada', {
+      detail: {
+        fecha: this.selectedDate
+      }
+    });
+    document.dispatchEvent(fechaSeleccionadaEvent);
+
+    // Scroll suave hacia el header del visualizador de horarios
+    this.scrollToScheduleViewer();
+  }
 }
 
 // Utilidades para integración con otros módulos
@@ -366,40 +461,8 @@ const ScheduleViewerUtils = {
   },
 }
 
+
 // Inicialización automática
-document.addEventListener("DOMContentLoaded", () => {
-  const scheduleContainer = document.getElementById("scheduleViewer")
-  if (scheduleContainer) {
-    //window.scheduleViewer = new ScheduleViewer("scheduleViewer")
-
-    // Event listener para el evento personalizado
-    scheduleContainer.addEventListener("scheduleSelected", (event) => {
-      // Mostrar la fecha y hora seleccionada en el label
-      const label = document.getElementById("labelHorarioSeleccionado");
-      if (label) {
-        const horario = event.detail.schedule;
-        // Obtener la fecha seleccionada del header del calendario
-        const fecha = document.getElementById("scheduleDate")?.textContent || "";
-        if (horario && fecha) {
-          label.textContent = `Seleccionaste: ${fecha} - ${horario.labelHorario}`;
-        } else if (horario) {
-          label.textContent = `Horario seleccionado: ${horario.labelHorario}`;
-        } else {
-          label.textContent = "No hay horario seleccionado";
-        }
-      }
-    })
-
-    // Event listener para el checkbox de ocultar pre-reservados
-    /* const checkboxOcultarPreReservados = document.getElementById("ocultarPreReservados"); */
-    /* if (checkboxOcultarPreReservados) {
-      checkboxOcultarPreReservados.addEventListener("change", (event) => {
-        const ocultar = event.target.checked;
-        window.scheduleViewer.togglePreReservados(ocultar);
-      });
-    } */
-  }
-})
 
 // Exportar para uso en módulos
 if (typeof module !== "undefined" && module.exports) {

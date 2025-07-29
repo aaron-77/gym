@@ -462,3 +462,9 @@
   color: var(--color-light) !important;
   cursor: not-allowed;
 }
+
+.calendar-cell--not-available-red {
+  background-color: var(--color-primary-other) !important;
+  color: var(--color-light) !important;
+  cursor: not-allowed;
+}

@@ -14,6 +14,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using API.Services;
+using API.Hubs;
 
 namespace API.Controllers
 {
@@ -24,12 +25,14 @@ namespace API.Controllers
         private readonly FitnessCenterDbContext _context;
         private readonly HttpCustomClient _httpCustomClient;
         private readonly UserRoleService _userRoleService;
+        private readonly ServicioActualizacionesDeHorariosRealTime _servicioActualizaciones;
 
-        public ClasesController(FitnessCenterDbContext context, HttpCustomClient httpCustomClient, UserRoleService userRoleService)
+        public ClasesController(FitnessCenterDbContext context, HttpCustomClient httpCustomClient, UserRoleService userRoleService, ServicioActualizacionesDeHorariosRealTime servicioActualizaciones)
         {
             _context = context;
             _httpCustomClient = httpCustomClient;
             _userRoleService = userRoleService;
+            _servicioActualizaciones = servicioActualizaciones;
         }
 
         /// <summary>
@@ -443,9 +446,13 @@ namespace API.Controllers
                     );
                 }
 
-                using (var connection = new SqlConnection(_context.Database.GetDbConnection().ConnectionString))
-                {
+                var connection = (SqlConnection) _context.Database.GetDbConnection();
+                if (connection.State != ConnectionState.Open) { 
                     await connection.OpenAsync();
+                }
+                using (connection)
+                {
+                    
 
                     using (var command = new SqlCommand("dbo.sp_registrarClaseProgramada", connection))
                     {
@@ -454,8 +461,10 @@ namespace API.Controllers
                         var datos = DataTableConverter
                                     .ConvertToDataTable<DTODatosClaseProgramada>(modelo);
                         command.Parameters.AddWithValue("@datos", datos);
-                        var idClaseProgramada = await command.ExecuteScalarAsync();
-                        
+                        var idClaseProgramada = Convert.ToInt32(await command.ExecuteScalarAsync());
+                        await _servicioActualizaciones.enviarHorariosDisponiblesActualizados(modelo.idUsuarioQueReserva);
+                        await _servicioActualizaciones.enviarPreReservasActualizadas(modelo.idUsuarioQueReserva);
+                        await _servicioActualizaciones.enviarClaseProgramadaRegistrada(idClaseProgramada);
                         return Ok(
                             ResponseManager.BuildResponse(
                                 true,
@@ -734,6 +743,100 @@ namespace API.Controllers
                             new ErrorModel { propiedad = "NONE", message = ex.Message },
                         },
                         null
+                    )
+                );
+            }
+        }
+
+        /// <summary>
+        /// Obtiene las clases programadas por id de clase
+        /// </summary>
+        [HttpGet("obtenerClasesProgramadasPorId")]
+        public async Task<ActionResult<DTOResponse<List<DTOClaseProgramadaView>>>> obtenerClasesProgramadasPorId([FromQuery] int idClase)
+        {
+            try
+            {
+                var resultado = await _context.DTOClasesProgramadaView
+                    .FromSqlInterpolated($"SELECT * FROM dbo.fn_obtenerClasesProgramadasPorIdClase({idClase})")
+                    .ToListAsync();
+                return Ok(ResponseManager.BuildResponse(
+                    true,
+                    200,
+                    "Clases programadas obtenidas correctamente",
+                    null,
+                    resultado
+                ));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ResponseManager.BuildResponse<List<DTOClaseProgramadaView>>(
+                    false,
+                    500,
+                    "Error al obtener las clases programadas",
+                    new List<ErrorModel> { new ErrorModel { propiedad = "NONE", message = ex.Message } },
+                    null
+                ));
+            }
+        }
+
+        /// <summary>
+        /// Registra una inscripción a una clase programada
+        /// </summary>
+        [HttpPost("inscribirAClase")]
+        public async Task<ActionResult<DTOResponse<int>>> InscribirAClase([FromBody] DTOInscripcionAClase modelo)
+        {
+            try
+            {
+                // Validar el modelo
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(
+                        ResponseManager.BuildResponse<int>(
+                            false,
+                            400,
+                            "Datos inválidos",
+                            ModelState.Values
+                                .SelectMany(v => v.Errors)
+                                .Select(e => new ErrorModel { propiedad = "NONE", message = e.ErrorMessage })
+                                .ToList(),
+                            0
+                        )
+                    );
+                }
+
+                // Ejecutar el procedimiento almacenado usando ExecuteSqlInterpolatedAsync
+                var idInscripcion = await _context.Database.ExecuteSqlInterpolatedAsync(
+                    $@"EXEC dbo.sp_registrarInsrcipcionAClase 
+                        @idCliente={modelo.IdCliente},
+                        @fkProgramacionClase={modelo.IdProgramacionClase}"
+                );
+
+                // Notificar actualización de cupos
+                await _servicioActualizaciones.enviarCuposActualizadosDeClaseProgramada(modelo.IdProgramacionClase);
+
+                return Ok(
+                    ResponseManager.BuildResponse(
+                        true,
+                        200,
+                        "Inscripción registrada correctamente",
+                        null,
+                        idInscripcion
+                    )
+                );
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(
+                    500,
+                    ResponseManager.BuildResponse<int>(
+                        false,
+                        500,
+                        "Error al registrar la inscripción",
+                        new List<ErrorModel>
+                        {
+                            new ErrorModel { propiedad = "NONE", message = ex.Message },
+                        },
+                        0
                     )
                 );
             }

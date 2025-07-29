@@ -7,7 +7,7 @@ using BL.Utils;
 using API.Hubs;
 using API.Services;
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
 
 
 /* builder.WebHost.ConfigureKestrel(options =>
@@ -20,9 +20,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("originsPolicyOne", policy =>
     {
-        policy.AllowAnyOrigin() // Aqu� puedes agregar los or�genes permitidos
+        policy.WithOrigins("http://localhost:5062") 
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
+        
     });
 });
 
@@ -52,7 +54,10 @@ builder.Services.AddScoped(sp => new EmailManagerMailKit(smtpServer, smtpPort, s
 builder.Services.AddScoped<HorariosService>(); 
 builder.Services.AddScoped<HttpCustomClient>(); 
 builder.Services.AddHttpContextAccessor(); 
-builder.Services.AddScoped<EndPointsManager>(); 
+builder.Services.AddScoped<EndPointsManager>();
+builder.Services.AddScoped<UserRoleService>();
+builder.Services.AddScoped<ReservacionesHub>();
+builder.Services.AddScoped<ServicioActualizacionesDeHorariosRealTime>();  
 builder.Services.AddQuartz(configuration => {
     configuration.UseMicrosoftDependencyInjectionJobFactory();
 
@@ -90,7 +95,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("originsPolicyOne");
 app.UseAuthorization();
-app.MapHub<ReservacionesHub>("/reservacionesRt");
+app.MapHub<ReservacionesHub>("/reservacionesHub");
 app.MapControllers();
 
 app.Run();

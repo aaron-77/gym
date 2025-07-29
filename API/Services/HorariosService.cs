@@ -34,7 +34,8 @@ namespace API.Services
                 // Proyección a DTOHorarioVisualizacion
                 var horariosVisualizacion = horariosRaw.Select(h => new DTOHorarioVisualizacion
                 {
-                    idHora = h.idPreReserva,
+                    idHora = h.idHora,
+                    idPreReserva = h.idPreReserva,
                     diaDeLaSemana = h.fechaReservada.DayOfWeek.ToString(),
                     fechaDisponible = h.fechaReservada,
                     horaInicio = h.horaInicio,
@@ -55,17 +56,63 @@ namespace API.Services
             try
             {
                 var fechaConsulta = fecha ?? DateTime.Now;
-                // Ejecutar el procedimiento almacenado para obtener los horarios disponibles
-                var horariosDisponibles = await _context
-                    .DtoHorarioVisualizacion
+                // Ejecutar el procedimiento almacenado para obtener los horarios disponibles usando DTOHorariosDisponibles
+                var horariosDisponiblesRaw = await _context
+                    .DtoHorariosDisponibles
                     .FromSqlInterpolated($"EXEC sp_obtenerHorariosDisponibles @fecha={fechaConsulta}")
                     .ToListAsync();
 
-                return horariosDisponibles; // Devolver directamente la lista de DTOHorarioVisualizacion
+                // Proyección a DTOHorarioVisualizacion
+                var horariosDisponibles = horariosDisponiblesRaw.Select(h => new DTOHorarioVisualizacion
+                {
+                    idHora = h.idHora,
+                    idPreReserva = null, // No hay idPreReserva en horarios disponibles
+                    diaDeLaSemana = h.fechaDisponible.DayOfWeek.ToString(),
+                    fechaDisponible = h.fechaDisponible,
+                    horaInicio = h.horaInicio,
+                    horaFin = h.horaFin,
+                    tipoDeDia = h.fechaDisponible.DayOfWeek == DayOfWeek.Saturday || h.fechaDisponible.DayOfWeek == DayOfWeek.Sunday ? "Fin de semana" : "Laboral"
+                }).ToList();
+
+                return horariosDisponibles;
             }
             catch (Exception)
             {
-                throw; // Lanzar la excepción para manejarla en el controlador
+                throw;
+            }
+        }
+
+        public async Task<int> RegistrarPreReservaDeHorario(DTOPreReservaDeHorario preReserva)
+        {
+            try
+            {
+                var fechaDateTime = preReserva.fechaTentativa.ToDateTime(TimeOnly.MinValue);
+                
+                // Ejecutar el procedimiento almacenado sp_preReservarHorario
+                var idPreReserva = await _context.Database.ExecuteSqlInterpolatedAsync($@"
+                    EXEC sp_preReservarHorario  @idUsuarioQueReserva={preReserva.idUsuarioQueReserva}, @fechaTentativa={fechaDateTime}, @idHoraLaboral={preReserva.idHoraLaboral}");
+                return idPreReserva;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<DTOClaseProgramadaView>> obtenerClaseProgramadaConNuevoCupo(int idProgramacionClase)
+        {
+            try
+            {
+                var claseProgramada = await _context
+                    .DTOClasesProgramadaView
+                    .FromSqlInterpolated($"SELECT * FROM dbo.fn_obtenerClasesProgramadaPorIdProgramacionClase({idProgramacionClase})")
+                    .ToListAsync();
+
+                return claseProgramada;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }

@@ -126,11 +126,13 @@ public partial class FitnessCenterDbContext : DbContext
     public virtual DbSet<DTO.Dtos.DTOHorarioPreReservado> DtoHorariosPreReservados { get; set; }
     public virtual DbSet<DTO.Dtos.DTOHorarioVisualizacion> DtoHorarioVisualizacion { get; set; }
     public virtual DbSet<DTO.Dtos.DTOEstadoClaseProgramada> DtoEstadoClaseProgramada { get; set; }
+    public virtual DbSet<DTO.Dtos.DTOHorariosDisponibles> DtoHorariosDisponibles { get; set; }
+    public virtual DbSet<DTO.Dtos.DTOClaseProgramadaView> DTOClasesProgramadaView { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost;Database=FitnessCenterDB;User Id=aaronlogin;Password=Terrabreak13;Integrated Security=False;TrustServerCertificate=True;Trusted_Connection=False");
+        => optionsBuilder.UseSqlServer("Server=localhost;Database=FitnessCenterDB;User Id=aaronlogin;Password=Terrabreak13;Integrated Security=False;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -1325,6 +1327,7 @@ public partial class FitnessCenterDbContext : DbContext
 
         // Definición de columnas
         entity.Property(e => e.idHora).HasColumnName("idHora");
+        entity.Property(e => e.idPreReserva).HasColumnName("idPreReserva").IsRequired(false).HasDefaultValue(null);
         entity.Property(e => e.diaDeLaSemana).HasColumnName("diaDeLaSemana");
         entity.Property(e => e.fechaDisponible).HasColumnName("fechaDisponible");
         entity.Property(e => e.horaInicio).HasColumnName("horaInicio");
@@ -1344,9 +1347,37 @@ public partial class FitnessCenterDbContext : DbContext
         entity.Property(e => e.FechaModificacion).HasColumnName("fechaModificacion");
     });
 
+    modelBuilder.Entity<DTO.Dtos.DTOHorariosDisponibles>(entity =>
+    {
+        entity.HasNoKey(); // Configurar como entidad keyless
+        entity.ToView(null); // No se asocia a una tabla, solo se usa para consultas
 
+        // Definición de columnas
+        entity.Property(e => e.idHora).HasColumnName("idHora");
+        entity.Property(e => e.fechaDisponible).HasColumnName("fechaDisponible");
+        entity.Property(e => e.horaInicio).HasColumnName("horaInicio");
+        entity.Property(e => e.horaFin).HasColumnName("horaFin");
+        entity.Property(e => e.diaDeLaSemana).HasColumnName("diaDeLaSemana");
         
-         
+    });
+
+    modelBuilder.Entity<DTO.Dtos.DTOClaseProgramadaView>(entity =>
+    {
+        entity.HasNoKey();
+
+
+        entity.Property(e => e.idClaseProgramada).HasColumnName("idClaseProgramada");
+        entity.Property(e => e.fkClase).HasColumnName("fkClase");
+        entity.Property(e => e.fechaDeLaClase).HasColumnName("fechaDeLaClase");
+        entity.Property(e => e.idHora).HasColumnName("idHora");
+        entity.Property(e => e.horaInicio).HasColumnName("horaInicio");
+        entity.Property(e => e.horaFin).HasColumnName("horaFin");
+        entity.Property(e => e.labelHorario).HasColumnName("labelHorario");
+        entity.Property(e => e.fkEntrenador).HasColumnName("fkEntrenador");
+        entity.Property(e => e.nombreEntrenador).HasColumnName("nombreEntrenador");
+        entity.Property(e => e.cupoMaximo).HasColumnName("cupoMaximo");
+         entity.Property(e => e.cupoDisponible).HasColumnName("cupoDisponible");
+    });
 
 
         OnModelCreatingPartial(modelBuilder);

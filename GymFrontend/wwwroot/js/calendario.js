@@ -2,7 +2,7 @@ export class Calendar {
   constructor(containerId, disponibleDates = []) {
       this.container = document.getElementById(containerId);
       this.currentDate = new Date();
-      
+      this.inputFechaDeLaClase = document.getElementById('fechaDeLaClase')
       this.selectedDate = new Date();
       this.viewMode = 'days'; // 'days', 'months', 'years'
       this.monthNames = [
@@ -11,6 +11,8 @@ export class Calendar {
       ];
       this.dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
       this.disponibleDates = disponibleDates;      
+      const fechaFormateada = this.selectedDate.toLocaleDateString('sv-SE'); // Formato YYYY-MM-DD
+      this.inputFechaDeLaClase.value=fechaFormateada;
   }
 
   /**
@@ -30,10 +32,10 @@ export class Calendar {
       const monthButton = this.container.querySelector('#monthButton');
       const yearButton = this.container.querySelector('#yearButton');
 
-      prevButton?.addEventListener('click', () => this.navigatePrevious());
-      nextButton?.addEventListener('click', () => this.navigateNext());
-      monthButton?.addEventListener('click', () => this.showMonthView());
-      yearButton?.addEventListener('click', () => this.showYearView());
+      prevButton?.addEventListener('click', (ev) => this.navigatePrevious(ev));
+      nextButton?.addEventListener('click', (ev) => this.navigateNext(ev));
+      monthButton?.addEventListener('click', (ev) => this.showMonthView(ev));
+      yearButton?.addEventListener('click', (ev) => this.showYearView(ev));
   }
 // param newDate recibe el nuevo objeto fecha que se pretende aisgnar
   isValidPrevNavigation(newDate){
@@ -160,7 +162,8 @@ export class Calendar {
   /**
    * Muestra la vista de meses
    */
-  showMonthView() {
+  showMonthView(ev) {
+    ev.preventDefault();
       this.viewMode = 'months';
       this.renderWithTransition();
   }
@@ -168,7 +171,8 @@ export class Calendar {
   /**
    * Muestra la vista de años
    */
-  showYearView() {
+  showYearView(ev) {
+        ev.preventDefault();
       this.viewMode = 'years';
       this.renderWithTransition();
   }
@@ -274,6 +278,8 @@ export class Calendar {
       days.forEach(day => {
           const button = this.createElement('button', 'calendar-cell', day.day);
           button.type = 'button';
+          const fechaParaElBoton = new Date(`${day.year}-${day.month + 1}-${day.day}`).toLocaleDateString('sv-SE');
+          button.dataset.fecha= fechaParaElBoton;
           if (day.isToday) {
               button.classList.add('calendar-cell--today');
           }
@@ -299,8 +305,7 @@ export class Calendar {
 
           // Si la fecha generada no está en disponibleDates, deshabilitar el botón y aplica la clase de fondo rojo
           if ((fechaGenerada < today) || !estaDisponible ) {
-              button.disabled = true;
-              button.classList.add('calendar-cell--disabled');
+              this.deshabilitarDia(button);
           } else {
               button.addEventListener('click', (event) => this.handleSelectedDay(event));
           }
@@ -324,8 +329,8 @@ export class Calendar {
           possibleNewMonth.setMonth(index); 
           const resultValidation = this.isValidPrevNavigation(possibleNewMonth);
             if (resultValidation) {
-                button.addEventListener('click', () => { 
-            
+                button.addEventListener('click', (ev) => { 
+                ev.preventDefault();
                     this.selectedDate.setMonth(index);
                     const changedDateEvent = new CustomEvent('changedDate', {
                         detail: {
@@ -414,6 +419,17 @@ export class Calendar {
     seletedElement.classList.add('calendar-cell--selected');
     const selectedDay = parseInt(seletedElement.textContent);
     this.selectedDate.setDate(selectedDay);
+    
+    // Asignar la fecha seleccionada al input fechaDeLaClase
+    const fechaDeLaClaseInput = document.getElementById('fechaDeLaClase');
+    
+      const fechaFormateada = this.selectedDate.toLocaleDateString('sv-SE'); // Formato YYYY-MM-DD
+      fechaDeLaClaseInput.value = fechaFormateada;
+      console.log("fecha formateada ",fechaFormateada);
+      console.log("fecha plana ",this.selectedDate);
+      console.log("valor del input date ", fechaDeLaClaseInput.value);
+    
+    
     // Emitir evento personalizado con la fecha seleccionada
     const fechaSeleccionadaEvent = new CustomEvent('fechaSeleccionada', {
       detail: {
@@ -499,6 +515,26 @@ export class Calendar {
       element.className = className;
       element.textContent = content;
       return element;
+  }
+
+  /**
+   * Deshabilita un botón y agrega la clase CSS para indicar que está deshabilitado
+   * @param {HTMLButtonElement} button - El botón a deshabilitar
+   */
+  deshabilitarDia(button) {
+      button.disabled = true;
+      button.classList.add('calendar-cell--disabled');
+  }
+
+  /**
+   * Obtiene el botón HTML del día del mes que coincida con la fecha proporcionada
+   * @param {Date} fecha - La fecha para buscar el botón correspondiente
+   * @returns {HTMLButtonElement|null} El botón encontrado o null si no existe
+   */
+  obtenerDiaDelMesHtml(fecha) {
+      const fechaFormateada = fecha.toLocaleDateString('sv-SE'); // Formato YYYY-MM-DD
+      const boton = this.container.querySelector(`button[data-fecha="${fechaFormateada}"]`);
+      return boton;
   }
 }
 

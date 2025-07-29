@@ -5,7 +5,8 @@ namespace DTO.Dtos
 {
     public class DTOHorarioVisualizacion
     {
-        public int idHora { get; set; }          // ID de la hora
+        public int idHora { get; set; }
+        public int? idPreReserva { get; set; } = null;  // ID de la hora
         public string diaDeLaSemana { get; set; } // Día de la semana
         public DateTime fechaDisponible { get; set; } // Fecha disponible
         public TimeSpan horaInicio { get; set; }  // Hora de inicio

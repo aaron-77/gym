@@ -5,36 +5,46 @@ namespace DTO.Dtos
 {
     public class DTODatosClaseProgramada
     {
-        [Required(ErrorMessage = "La clase es requerida")]
-        [Range(1, int.MaxValue, ErrorMessage = "El ID de la clase debe ser mayor a 0")]
-        public int fkClase { get; set; }
+        [Required(ErrorMessage = "La clase es obligatoria")]
+        [Range(1, int.MaxValue, ErrorMessage = "El id de la clase debe ser mayor a 1")]
+        public int? fkClase { get; set; }
 
-        [Required(ErrorMessage = "El entrenador es requerido")]
-        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un entrenador")]
+        [Required(ErrorMessage = "El entrenador es obligatorio")]
+        [Range(1, int.MaxValue, ErrorMessage = "El id del entrenador debe ser mayor a 1")]
         public int fkEntrenador { get; set; }
 
-        [Required(ErrorMessage = "El cupo máximo es requerido")]
-        [Range(1, int.MaxValue, ErrorMessage = "El cupo máximo debe ser mayor a 0")]
+        [Required(ErrorMessage = "El cupo máximo es obligatorio")]
+        [Range(1, int.MaxValue, ErrorMessage = "El cupo máximo debe ser mayor o igual a 1")]
         public int cupoMaximo { get; set; }
 
-        [Required(ErrorMessage = "El estado de la clase programada es requerido")]
-        [Range(1, int.MaxValue, ErrorMessage = "El estado debe ser mayor a 0")]
+        [Required(ErrorMessage = "El estado de la clase programada es obligatorio")]
+        [Range(1, int.MaxValue, ErrorMessage = "El estado debe ser mayor o igual a 1")]
         public int fkEstadoClaseProgramada { get; set; }
 
-        [Required(ErrorMessage = "La fecha de la clase es requerida")]
-        public DateOnly fechaDeLaClase { get; set; } // Use DateTime for SQL date storage
+        [Required(ErrorMessage = "La fecha de la clase es obligatoria")]
+        [DataType(DataType.Date, ErrorMessage = "La fecha debe ser válida")]
+        [CustomValidation(typeof(DTODatosClaseProgramada), nameof(ValidarFechaNoMenorActual))]
+        public DateOnly? fechaDeLaClase { get; set; }
 
-        [Required(ErrorMessage = "El ID del usuario que reserva es requerido")]
-        [Range(1, int.MaxValue, ErrorMessage = "El ID del usuario debe ser mayor a 0")]
+        [Required(ErrorMessage = "El usuario que reserva es obligatorio")]
+        [Range(1, int.MaxValue, ErrorMessage = "El id del usuario debe ser mayor o igual a 0")]
         public int idUsuarioQueReserva { get; set; }
 
-        [Required(ErrorMessage = "La hora laboral es requerida")]
-        [Range(1, int.MaxValue, ErrorMessage = "El ID de la hora laboral debe ser mayor a 0")]
+        [Required(ErrorMessage = "La hora laboral es obligatoria")]
+        [Range(1, int.MaxValue, ErrorMessage = "El id de la hora laboral debe ser mayor o igual a 0")]
         public int fkHoraLaboral { get; set; }
 
-        [Required(ErrorMessage = "El ID de pre-reserva de horario es requerido")]
-        [Range(1, int.MaxValue, ErrorMessage = "El ID de pre-reserva debe ser mayor a 0")]
-        public int idPreservaDeHorario { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "El id de preserva de horario debe ser mayor o igual a 0")]
+        public int? idPreservaDeHorario { get; set; }
+
+        public static ValidationResult ValidarFechaNoMenorActual(DateOnly? fecha, ValidationContext context)
+        {
+            if (fecha < DateOnly.FromDateTime(DateTime.Now.Date))
+            {
+                return new ValidationResult("La fecha de la clase no puede ser menor a la fecha actual");
+            }
+            return ValidationResult.Success;
+        }
     }
 
  

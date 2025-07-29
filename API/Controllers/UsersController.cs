@@ -48,7 +48,7 @@ namespace API.Controllers
 
         [HttpGet]
         [Route("api/obtenerUsuariosPorRol")]
-        public async Task<IActionResult> getUsuariosPorRol([FromQuery] string rol, [FromQuery] string estado)
+        public async Task<IActionResult> getUsuariosPorRol([FromQuery] string rol, [FromQuery] string estado="activo")
         {
             try
             {

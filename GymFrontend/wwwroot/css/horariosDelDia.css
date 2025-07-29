@@ -460,3 +460,9 @@
     line-height: 1.3;
   }
 }
+
+.schedule-viewer__item--prereservado-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  pointer-events: none;
+}

@@ -43,5 +43,12 @@ namespace GymFrontend.Controllers
         {
             return View();
         }
+
+        [HttpGet]
+        [Route("inscripcionAClases")]
+        public IActionResult InscripcionAClases()
+        {
+            return View();
+        }
     }
 } 

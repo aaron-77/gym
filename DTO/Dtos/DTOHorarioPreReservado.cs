@@ -5,7 +5,8 @@ namespace DTO.Dtos
 {
     public class DTOHorarioPreReservado
     {
-        public int idPreReserva { get; set; }                // ID de la pre-reserva
+        public int idPreReserva { get; set; }  
+        public int idHora { get; set; }              // ID de la pre-reserva
         public DateTime fechaReservada { get; set; }         // Fecha reservada
         public TimeSpan horaInicio { get; set; }             // Hora de inicio
         public TimeSpan horaFin { get; set; }                // Hora de fin

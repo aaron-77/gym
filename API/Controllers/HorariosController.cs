@@ -12,10 +12,12 @@ namespace API.Controllers
     public class HorariosController : ControllerBase
     {
         private readonly HorariosService _horariosService;
+        private readonly ServicioActualizacionesDeHorariosRealTime _servicioActualizaciones;
 
-        public HorariosController(HorariosService horariosService)
+        public HorariosController(HorariosService horariosService, ServicioActualizacionesDeHorariosRealTime servicioActualizaciones)
         {
             _horariosService = horariosService;
+            _servicioActualizaciones = servicioActualizaciones;
         }
 
         [HttpGet("obtenerPreReservas")]
@@ -87,6 +89,42 @@ namespace API.Controllers
                 };
 
                 return StatusCode(500, response); // Devolver error 500
+            }
+        }
+
+        [HttpPost("preReservarHorario")]
+        public async Task<ActionResult<DTOResponse<int>>> registrarPreReservaDeHorario([FromBody] DTOPreReservaDeHorario preReserva)
+        {
+            try
+            {
+                // Llamar al método del servicio que ejecuta el procedimiento almacenado
+                var resultado = await _horariosService.RegistrarPreReservaDeHorario(preReserva);
+                // Notificar al frontend vía SignalR
+                await _servicioActualizaciones.enviarPreReservasActualizadas(preReserva.idUsuarioQueReserva);
+
+                var response = new DTOResponse<int>
+                {
+                    success = true,
+                    httpCode = 200,
+                    message = "Pre-reserva de horario registrada correctamente",
+                    payload = resultado
+                };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                var response = new DTOResponse<int>
+                {
+                    success = false,
+                    httpCode = 500,
+                    message = "Error al registrar la pre-reserva de horario",
+                    errors = new List<ErrorModel>
+                    {
+                        new ErrorModel { propiedad = "NONE", message = ex.Message }
+                    },
+                    payload = 0
+                };
+                return StatusCode(500, response);
             }
         }
     }

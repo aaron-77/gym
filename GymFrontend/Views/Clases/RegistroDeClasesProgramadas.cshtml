@@ -15,7 +15,7 @@
 
 <section class="section layout-registro-clases-programadas">
     
-    <form id="claseProgramadaForm" class="administrative-form">
+    <form id="claseProgramadaForm" class="administrative-form needs-validation" novalidate>
         <div class="accordion" id="accordionAgendador">
         <div class="accordion-item">
             <h2 class="accordion-header">
@@ -32,41 +32,60 @@
         </div>
     </div>
         <label id="labelHorarioSeleccionado" class="label-horario-seleccionado mt-3 mb-3" style="display:block; font-weight:bold; color:#012970;">Horario seleccionado:ninguno</label>
+        
+        <!-- Campo oculto para la fecha -->
+        
+        <div class="invalid-feedback">
+            Por favor selecciona una fecha en el calendario.
+        </div>
+        
         <div class="row">
             <div class="col-12">
                 <div class="form-group">
-                    <label for="inputClase">Clase</label>
-                    <select id="inputClase" class="form-control" name="claseId" required>
+                    <label for="inputClase" class="form-label">Clase</label>
+                    <select id="inputClase" class="form-select" name="fkClase" required>
                         <option value="">Selecciona una clase</option>
                     </select>
+                    <div class="invalid-feedback">
+                        Por favor selecciona una clase.
+                    </div>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-12">
                 <div class="form-group">
-                    <label for="inputEntrenador">Entrenador</label>
-                    <select id="inputEntrenador" class="form-control" name="usuarioId" required>
+                    <label for="inputEntrenador" class="form-label">Entrenador</label>
+                    <select id="inputEntrenador" class="form-select" name="fkEntrenador" required>
                         <option value="">Selecciona un entrenador</option>
                     </select>
+                    <div class="invalid-feedback">
+                        Por favor selecciona un entrenador.
+                    </div>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-12">
                 <div class="form-group">
-                    <label for="inputCupoMaximo">Cupo Máximo</label>
+                    <label for="inputCupoMaximo" class="form-label">Cupo Máximo</label>
                     <input type="number" id="inputCupoMaximo" class="form-control" name="cupoMaximo" min="1" required>
+                    <div class="invalid-feedback">
+                        Por favor ingresa un cupo máximo válido (mínimo 1).
+                    </div>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-12">
                 <div class="form-group">
-                    <label for="inputEstadoActividad">Estado de Actividad</label>
-                    <select id="inputEstadoActividad" class="form-control" name="fkEstadoClaseProgramada" required>
+                    <label for="inputEstadoActividad" class="form-label">Estado de Actividad</label>
+                    <select id="inputEstadoActividad" class="form-select" name="fkEstadoClaseProgramada" required>
                         <option value="">Selecciona un estado</option>
                     </select>
+                    <div class="invalid-feedback">
+                        Por favor selecciona un estado de actividad.
+                    </div>
                 </div>
             </div>
         </div>
@@ -86,6 +105,7 @@
 }
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
     <script type="module" src="~/js/httpClient.js"></script>
     <script type="module" src="~/js/calendario.js"></script>
     <script type="module" src="~/js/horariosDelDia.js"></script>
@@ -93,46 +113,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
 
 
-    <script>
-        /* // Funciones de demostración
-        function demoSetDate() {
-            const today = new Date();
-            const dateString = today.toLocaleDateString('es-ES', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            scheduleViewer.setSelectedDate(dateString);
-        }
-
-        function demoLoadSchedules() {
-            const sampleSchedules = [
-                { idHora: 1, labelHorario: '08:00 - 09:00', estado: 'disponible' },
-                { idHora: 2, labelHorario: '09:00 - 10:00', estado: 'ocupado' },
-                { idHora: 3, labelHorario: '10:00 - 11:00', estado: 'disponible' },
-                { idHora: 4, labelHorario: '11:00 - 12:00', estado: 'prereservado' },
-                { idHora: 5, labelHorario: '12:00 - 13:00', estado: 'disponible' },
-                { idHora: 6, labelHorario: '13:00 - 14:00', estado: 'ocupado' },
-                { idHora: 7, labelHorario: '14:00 - 15:00', estado: 'disponible' },
-                { idHora: 8, labelHorario: '15:00 - 16:00', estado: 'prereservado' }
-            ];
-            scheduleViewer.loadSchedules(sampleSchedules);
-        }
-
-        function demoShowSelected() {
-            const selectedId = document.getElementById('fkHoraLaboral').value;
-            if (selectedId) {
-                alert(`Hora seleccionada: ID ${selectedId}`);
-            } else {
-                alert('No hay ninguna hora seleccionada');
-            }
-        }
-
-        // Inicializar con datos de ejemplo
-        document.addEventListener('DOMContentLoaded', () => {
-            demoSetDate();
-            demoLoadSchedules();
-        }); */
-    </script>
+    
 }
