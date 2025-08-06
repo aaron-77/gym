@@ -7,7 +7,7 @@ import { realizarPeticionAPI } from './httpClient.js';
 import { Calendar } from './calendario.js';
 import { ScheduleViewer } from './horariosDelDia.js';
 import { formDataToJson } from './formDataToJson.js';
-
+import { showMessage,iconTypes } from './messageManager.mjs';
 // Variables globales para las instancias
 let calendarInstance;
 let scheduleViewerInstance;
@@ -116,12 +116,18 @@ function determinarFechasConHorariosDisponibles(horariosDisponibles) {
  * @returns {Array} Array de objetos formateados con estructura {idHora, fecha, labelHorario, estado}
  */
 function obtenerHorariosDisponiblesFormateados(arregloHorarios) {
-    return arregloHorarios.map(horario => ({
-        idHora: horario.idHora,
-        fecha: new Date(horario.fechaDisponible),
-        labelHorario: `${horario.horaInicio} - ${horario.horaFin}`,
-        estado: 'disponible'
-    }));
+    return arregloHorarios.map(horario =>{
+        let fechaDeHorario = horario.fechaDisponible || horario.fecha;
+        //let labelHorario = (horario.horaInicio)? `${horario.horaInicio} - ${horario.horaFin}`: horario.labelHorario;
+        return {
+            idHora: horario.idHora,
+            horaInicio: horario.horaInicio,
+            horaFin: horario.horaFin,
+            fecha: new Date(fechaDeHorario),
+            labelHorario:`${horario.horaInicio} - ${horario.horaFin}` ,
+            estado: 'disponible'
+        }
+    });
 }
 
 /**
@@ -214,6 +220,22 @@ function obtenerHorariosPorFecha(fechaSeleccionada) {
 }
 
 /**
+ * Obtiene los horarios para una fecha seleccionada que tengan un estado determinado
+ * @param {Date} fechaSeleccionada - Fecha seleccionada en el calendario
+ * @param {Date} estado - estado que deben tener los horarios recuperados
+ * @returns {Array} Lista de horarios para esa fecha
+ */
+function obtenerHorariosPorFechaYEstado(fechaSeleccionada,estado) {
+    const dia = fechaSeleccionada.getDate();
+    const mes = fechaSeleccionada.getMonth();
+    const año = fechaSeleccionada.getFullYear();
+    let horariosDeDiaSeleccionado = horarios[año][mes][dia].filter(horario => horario.estado === estado);
+    return (horariosDeDiaSeleccionado && Array.isArray(horariosDeDiaSeleccionado))?horariosDeDiaSeleccionado: [];
+    
+    
+}
+
+/**
  * Maneja el evento de fecha seleccionada en el calendario
  * @param {CustomEvent} event - Evento personalizado con la fecha seleccionada
  */
@@ -242,9 +264,16 @@ function existenEsosHorarios(fecha) {
     const año = fecha.getFullYear();
     const mes = fecha.getMonth();
     const dia = fecha.getDate();
-    const horariosDelMesSeleccionado = horarios[año][mes];
-    const existenDatosEnEseMes = (horariosDelMesSeleccionado)? Object.keys(horariosDelMesSeleccionado).length > 0:false
-    return  horariosDelMesSeleccionado && existenDatosEnEseMes;
+    let  existenHorariosEnEseMes = false;
+    if(horarios?.[año]?.[mes]){
+         existenHorariosEnEseMes = Object.entries(horarios[año][mes]).some(([key, value]) => {
+        // cada entry es un array con el numero de dia en la posicion 1(el par tiene la forma [numeroDeDia,arregloConLosHorariosDelDia]) y el valor de esa propiedad en la posicion 1 del array
+        return value.some((horarioDelDiaItem => horarioDelDiaItem.estado=='disponible'));// se recorren los horarios del dia buscando que exista almenos 1 con estado disponible
+    });
+    }
+    
+
+    return existenHorariosEnEseMes;
 }
 
 /**
@@ -543,7 +572,8 @@ async function registrarClaseProgramada(event) {
         const response = await realizarPeticionAPI('clases/registrarClaseProgramada', datosClaseProgramada);
         
         if (response.success) {
-            alert('Clase programada registrada exitosamente con ID: ' + response.payload);
+            showMessage(iconTypes.success,'Clase programada registrada exitosamente con ID: ');
+  
             // Limpiar el formulario
             limpiarFormularioExeptoFecha(formulario);
             // Limpiar la  del horario
@@ -558,18 +588,18 @@ async function registrarClaseProgramada(event) {
             }
             
         } else {
-            let errorMessage = 'Error al registrar la clase programada';
+            showMessage(iconTypes.success,response.message);
+            let detailedErrors = '';
             if (response.errors && response.errors.length > 0) {
-                errorMessage += ': ' + response.errors.map(e => e.message).join(', ');
-            } else if (response.message) {
-                errorMessage += ': ' + response.message;
-            }
-            alert(errorMessage);
+                detailedErrors += ': ' + response.errors.map(e => e.message).join(', ');
+                console.log(detailedErrors)
+            } 
+            
         }
         formulario.classList.remove('was-validated');
     } catch (error) {
+        showMessage(iconTypes.success,response.message);
         console.error('Error al registrar clase programada:', error);
-        alert('Error al registrar la clase programada: ' + error.message);
     }
 } 
 
@@ -667,10 +697,10 @@ function manejarActualizacionHorariosDisponibles(respuesta) {
         if (respuesta && respuesta.success && respuesta.payload) {
             // Limpiar completamente el objeto horarios
             limpiarHorariosPorFechaYEstado(calendarInstance.selectedDate,'disponible');
-            
+            let horariosPrereservadosExistentes = obtenerHorariosPorFechaYEstado(calendarInstance.selectedDate,'prereservado');
             // Agregar los nuevos horarios disponibles
             const horariosDisponibles = respuesta.payload;
-            agregarHorarios(horariosDisponibles, []);
+            agregarHorarios(horariosDisponibles, horariosPrereservadosExistentes);
             
             
             // Actualizar la vista si hay una fecha seleccionada
@@ -696,10 +726,10 @@ function manejarActualizacionPreReservas(respuesta) {
         if (respuesta && respuesta.success && respuesta.payload) {
             // Limpiar completamente el objeto horarios
             limpiarHorariosPorFechaYEstado(calendarInstance.selectedDate,'prereservado');
-            
+            let horariosDisponiblesExistentes = obtenerHorariosPorFechaYEstado(calendarInstance.selectedDate,'disponible');
             // Agregar las nuevas pre-reservas
             const preReservas = respuesta.payload;
-            agregarHorarios([], preReservas);
+            agregarHorarios(horariosDisponiblesExistentes, preReservas);
             
             // Actualizar la vista si hay una fecha seleccionada
             if (calendarInstance && calendarInstance.selectedDate) {   

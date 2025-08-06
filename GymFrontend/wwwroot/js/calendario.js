@@ -1,7 +1,7 @@
 export class Calendar {
   constructor(containerId, disponibleDates = []) {
       this.container = document.getElementById(containerId);
-      this.currentDate = new Date();
+      this.calendarCurrentDate = new Date();
       this.inputFechaDeLaClase = document.getElementById('fechaDeLaClase')
       this.selectedDate = new Date();
       this.viewMode = 'days'; // 'days', 'months', 'years'
@@ -41,7 +41,7 @@ export class Calendar {
   isValidPrevNavigation(newDate){
     let validationResult = true;
     
-    if(newDate < this.currentDate){
+    if(newDate < this.calendarCurrentDate){
         validationResult = false;
     }
     return validationResult;
@@ -286,7 +286,7 @@ export class Calendar {
           if (day.isOtherMonth) {
               button.classList.add('calendar-cell--other-month');
           }
-          if(day.day == this.selectedDate.getDate()){
+          if(this.isSameDay(day.date,this.selectedDate)){
             button.classList.add('calendar-cell--selected');
           }
 
@@ -298,9 +298,10 @@ export class Calendar {
           fechaGenerada.setHours(0,0,0,0);      
           // disponibleDates es un arreglo de objetos con propiedad fecha tipo Date
           const estaDisponible = (this.disponibleDates || []).some(obj =>
-              obj.fecha.getFullYear() === fechaGenerada.getFullYear() &&
-              obj.fecha.getMonth() === fechaGenerada.getMonth() &&
-              obj.fecha.getDate() === fechaGenerada.getDate()
+            fechaGenerada > obj.fecha ||
+             fechaGenerada.valueOf() === obj.fecha.valueOf() ||
+              fechaGenerada.valueOf() == this.calendarCurrentDate.valueOf() ||
+              fechaGenerada.valueOf() > this.calendarCurrentDate.valueOf()
           );
 
           // Si la fecha generada no está en disponibleDates, deshabilitar el botón y aplica la clase de fondo rojo

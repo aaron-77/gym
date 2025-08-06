@@ -14,6 +14,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using API.Services;
+using DataAccess.Infraestructure;
 using API.Hubs;
 
 namespace API.Controllers
@@ -804,6 +805,28 @@ namespace API.Controllers
                     );
                 }
 
+                var resultadoCupos = await DataAccess.Infraestructure.DatabaseExecutor.ExecuteStoredProcedureAsync(
+                    _context.Database.GetDbConnection(),
+                    "dbo.fn_cupoDisponibleClaseProgramada",
+                    new Dictionary<string, object>
+                    {
+                        { "idProgramacionClase",  new DatabaseParameter(modelo.IdProgramacionClase, ParameterDirection.Input, DbType.Int32) },
+                        { "cuposDisponibles",  new DatabaseParameter(null, ParameterDirection.ReturnValue, DbType.Int32) }
+                    }
+                );
+                var cupoDisponible = (int)resultadoCupos.OutputParameters["cuposDisponibles"];
+                if (cupoDisponible <= 0)
+                { 
+                    return BadRequest(
+                        ResponseManager.BuildResponse<int>(
+                            false,
+                            400,
+                            "No hay cupo disponible para la clase",
+                            new List<ErrorModel> { new ErrorModel { propiedad = "NONE", message = "No hay cupo disponible para la clase" } },
+                            0
+                        )
+                    );
+                }
                 // Ejecutar el procedimiento almacenado usando ExecuteSqlInterpolatedAsync
                 var idInscripcion = await _context.Database.ExecuteSqlInterpolatedAsync(
                     $@"EXEC dbo.sp_registrarInsrcipcionAClase 

@@ -1,4 +1,5 @@
 import { realizarPeticionAPI } from './httpClient.js';
+import { showMessage,iconTypes,showSimpleDialog,showComplexDialog } from './messageManager.mjs';
 export class ScheduleViewer {
   constructor(containerId) {
     this.container = document.getElementById(containerId)
@@ -153,25 +154,28 @@ export class ScheduleViewer {
    */
   async handleScheduleClick(event) {
     // Mostrar prompt de confirmación
-    const confirmacion = window.confirm("¿Está seguro que desea seleccionar este horario?");
-    if (!confirmacion) {
+    const element = event.currentTarget
+    const confirmacion = await showComplexDialog(iconTypes.warning, "¿Deseas reservar ese horario?,la reserva dura solo 5 minutos"); 
+    console.log(confirmacion)
+    if (!confirmacion.isConfirmed) {
+
       return;
     }
-    const element = event.currentTarget
+    
     const scheduleId = element.getAttribute("data-idhora")
     this.updateHiddenInput(scheduleId)
     // Ejecutar pre-reserva antes de continuar
     const preReservaExitosa = await this.registrarPreReservaDeHorario();
     if (!preReservaExitosa) {
-      // Si hubo error, no continuar
+     showMessage(iconTypes.error, "Error al registrar la pre-reserva");
       return;
     }
     
     if (!scheduleId) {
-      console.error("ID de horario no encontrado")
+      showMessage(iconTypes.error, "ID de horario no encontrado");
       return
     }
-
+    
     // Remover selección anterior
     this.clearSelection()
 
@@ -223,21 +227,22 @@ export class ScheduleViewer {
       const response = await realizarPeticionAPI('Horarios/preReservarHorario', body, undefined, 'POST');
       if (response.success) {
         // Se puede mostrar un mensaje si se desea
+
         // alert('Pre-reserva registrada exitosamente.');
         return true;
       } else {
-        let errorMessage = 'Error al registrar la pre-reserva';
+        let detailedError = 'Error al registrar la pre-reserva';
         if (response.errors && response.errors.length > 0) {
-          errorMessage += ': ' + response.errors.map(e => e.message).join(', ');
-        } else if (response.message) {
-          errorMessage += ': ' + response.message;
-        }
-        alert(errorMessage);
+          detailedError += ': ' + response.errors.map(e => e.message).join(', ');
+          console.log(detailedError)
+        } 
+        showMessage(iconTypes.error, "No se pudo reservar el horario, aun asi puedes intentar programar tu clase");
         return false;
       }
     } catch (error) {
+      showMessage(iconTypes.error, "No se pudo reservar el horario, aun asi puedes intentar programar tu clase");
       console.error('Error al registrar pre-reserva:', error);
-      alert('Error al registrar la pre-reserva: ' + error.message);
+      
       return false;
     }
   }

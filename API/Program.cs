@@ -6,8 +6,9 @@ using Quartz;
 using BL.Utils;
 using API.Hubs;
 using API.Services;
+using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
+//builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
 
 
 /* builder.WebHost.ConfigureKestrel(options =>
@@ -34,11 +35,13 @@ builder.Services.AddControllers(options =>
   options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
 });
  builder.Services.AddSignalR();
+ 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
 
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
 {
     options.UseSqlServer("Server=localhost ;Authentication=SqlPassword;Integrated Security=False ;User Id=aaronlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False");
@@ -81,8 +84,15 @@ builder.Services.AddQuartz(configuration => {
 builder.Services.AddQuartzHostedService(option => option.WaitForJobsToComplete = true);
 
 builder.Services.AddQuartz(options => { options.UseMicrosoftDependencyInjectionJobFactory(); });
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbIdentityContext>()
+    .AddDefaultTokenProviders();
 
-
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = $"{builder.Configuration["urls"]}/SignIn" ;
+    options.AccessDeniedPath = $"{builder.Configuration["urls"]}/SignIn";
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

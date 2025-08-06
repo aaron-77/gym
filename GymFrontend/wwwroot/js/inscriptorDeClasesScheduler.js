@@ -141,10 +141,17 @@ export class ScheduleViewerInscripciones {
    * @returns {string} Clases CSS concatenadas
    */
   getScheduleElementClasses(estado) {
-    const baseClass = "schedule-viewer__item"
-    const stateClass = `${baseClass}--${estado}`
+    let apliedClass = "";
+    let stateClass = "";
+    const baseClass = "schedule-viewer__item";
+    if(!estado){
+      stateClass = `${baseClass}--disponible`;
+    }else{
+      stateClass = `${baseClass}--${estado}`
+    }
+    apliedClass= `${baseClass} ${stateClass}`;
 
-    return `${baseClass} ${stateClass}`
+    return  apliedClass;
   }
 
   /**

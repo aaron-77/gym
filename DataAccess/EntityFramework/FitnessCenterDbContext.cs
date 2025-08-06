@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.EntityFramework;
 
-public partial class FitnessCenterDbContext : DbContext
+public partial class FitnessCenterDbContext : IdentityDbContext<ApplicationUser>
 {
     public FitnessCenterDbContext()
     {

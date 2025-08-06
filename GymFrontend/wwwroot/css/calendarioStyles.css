@@ -176,8 +176,10 @@
   font-weight: 700;
 }
 .calendar-cell--selected {
-  background: var(--color-selected);
-  color: var(--color-light);
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(58, 29, 225, 0.9);
+  /* background: var(--color-selected); */
+  color: var(--color-dark-200);
 }
 
 .calendar-cell--today:hover {
@@ -453,7 +455,7 @@
 }
 
 .calendar-cell--disabled {
-    background-color: var(--color-calendar-yellow) !important;
+    background-color: var(--color-gray-300) !important;
     color: var(--color-light) !important;
     cursor: not-allowed;
 }

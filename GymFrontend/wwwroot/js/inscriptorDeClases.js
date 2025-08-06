@@ -2,18 +2,20 @@ import { realizarPeticionAPI } from './httpClient.js';
 import { CalendarInscripcion } from './calendarioInscripcion.js';
 import { ScheduleViewerInscripciones } from './inscriptorDeClasesScheduler.js';
 import { formDataToJson } from './formDataToJson.js';
-
+import { showMessage,iconTypes,showSimpleDialog,showComplexDialog } from './messageManager.mjs';
 // Variables globales
 let calendarInstance;
 let scheduleViewerInstance;
 let horarios = {};
 let signalRConnection = null;
 let isSignalRConnected = false;
+let horaLaboralSeleccionada = null;
+let idProgramacionClaseSeleccionada = null;
 let comboClases = document.getElementById('comboClases');
 // Referencias globales a los inputs
 let inputFechaSeleccionada = document.getElementById('fechaDeLaClase');
 let inputHoraSeleccionada = document.getElementById('fkHoraLaboral');
-
+let idClaseSeleccionada = null;
 /**
  * Formatea un arreglo de clases disponibles al formato requerido
  * @param {Array} arregloClases - Array de objetos con clases disponibles
@@ -51,8 +53,9 @@ function agregarHorarios(clasesDisponibles) {
             horarios[año][mes][dia] = [];
         }
         // se elimina el horario en caso de que ya exista, para mantener solo las versiones más actuales
-        const horariosFiltrados = horarios[año][mes][dia].filter(horarioExistente => horarioExistente.idHora != horario.idHora)
+        let horariosFiltrados = horarios[año][mes][dia].filter(horarioExistente => horarioExistente.idHora != horario.idHora);
         horariosFiltrados.push(horario);
+        horariosFiltrados = horariosFiltrados.filter(horarioExistente => horarioExistente.cupoDisponible >= 1);        
         horarios[año][mes][dia] = horariosFiltrados;
     });
 }
@@ -157,43 +160,7 @@ async function obtenerClasesProgramadas(idClase = null) {
     }
 }
 
-/**
- * Handler para la selección de fecha en el calendario (similar a handleSelectedDate)
- * @param {CustomEvent} event - Evento personalizado con la fecha seleccionada
- */
-function selectedDateHandler(event) {
-    const selectedDate = event.detail.fecha;
-    const fechaFormateada = formatearFecha(selectedDate);
-    // Actualizar el visualizador de horarios con la fecha seleccionada
-    if (scheduleViewerInstance) {
-        // Obtener los horarios para la fecha seleccionada
-        const horarios = obtenerHorariosPorFecha(selectedDate);
-        scheduleViewerInstance.setSelectedDate(fechaFormateada);
-        scheduleViewerInstance.loadSchedules(horarios)
-    }
-    console.log('Fecha seleccionada en inscriptor:', fechaFormateada);
-}
-let clalendarDayClickHandler = (event) => {
-    event.preventDefault();
-    this.clearAnteriorSelectedDays();
-    const seletedElement = ev.currentTarget;
-    seletedElement.classList.add('calendar-cell--selected');
-    const selectedDay = parseInt(seletedElement.textContent);
-    this.selectedDate.setDate(selectedDay);
-    const fechaDeLaClaseInput = document.getElementById('fechaDeLaClase');
-    const fechaFormateada = this.selectedDate.toLocaleDateString('sv-SE'); // Formato YYYY-MM-DD
-    fechaDeLaClaseInput.value = fechaFormateada;
-    console.log("fecha formateada ", fechaFormateada);
-    console.log("fecha plana ", this.selectedDate);
-    console.log("valor del input date ", fechaDeLaClaseInput.value);
-    const fechaSeleccionadaEvent = new CustomEvent('fechaSeleccionada', {
-        detail: {
-            fecha: this.selectedDate
-        }
-    });
-    document.dispatchEvent(fechaSeleccionadaEvent);
-    this.scrollToScheduleViewer();
-}
+
 
 function fillCombobox(combobox, config, datos) {
     // Limpiar opciones existentes
@@ -260,9 +227,16 @@ function statusDeterminator(clasesProgramadas, fechaAnalizada) {
  */
 function inicializarCalendario(containerId, disponibleDates = [], selectedDayHandler = null, statusDeterminator = null) {
     try {
-        const clasesDelMes = disponibleDates.length > 0 ? disponibleDates : obtenerClasesDelMes(new Date());
-        calendarInstance = new CalendarInscripcion(containerId, clasesDelMes, selectedDayHandler, statusDeterminator);
+        let clasesDelMesDeClaseSeleccionada = disponibleDates.length > 0 ? disponibleDates : obtenerClasesDelMes(new Date()).filter(claseProgramada => claseProgramada.fkClase === idClaseSeleccionada);
+        
+        calendarInstance = new CalendarInscripcion(containerId, clasesDelMesDeClaseSeleccionada, selectedDayHandler, statusDeterminator);
         calendarInstance.init();
+        
+        document.dispatchEvent(new CustomEvent('fechaSeleccionada', {
+            detail: {
+                fecha: calendarInstance.selectedDate
+            }
+        }));
     } catch (error) {
         console.error('Error al inicializar el calendario:', error);
     }
@@ -277,7 +251,7 @@ async function claseDisponibleSeleccionadaHandler(event) {
         event.preventDefault();
         // Obtener el valor seleccionado en el combo usando el form (solo hay un form)
         const combo = document.querySelector('form').getElementById("comboClases");
-        const idClaseSeleccionada = parseInt(combo.value);
+        idClaseSeleccionada = parseInt(combo.value);
         // 3. Llamar a obtenerClasesProgramadas con el id de la clase seleccionada
         const { clasesProgramadas } = await obtenerClasesProgramadas(idClaseSeleccionada);
         // 4. Llamar a agregarHorarios con el resultado
@@ -303,7 +277,7 @@ const cargarAgendador = (fechaDeLasClasesProgramadas) => {
  */
 async function handleClaseSelected(ev) {
     try {
-        const idClaseSeleccionada = parseInt(ev.currentTarget.value);
+        idClaseSeleccionada = parseInt(ev.currentTarget.value);
         if (!idClaseSeleccionada) {
             return;
         }
@@ -314,11 +288,16 @@ async function handleClaseSelected(ev) {
             agregarHorarios(clasesProgramadasFormateadas); 
             
         }
-        let clasesProgramadasMensualesDeClaseSeleccionada = obtenerHorariosPorFecha(new Date()).filter(clase => clase.fkClase === idClaseSeleccionada);
+        let clasesProgramadasMensualesDeClaseSeleccionada = obtenerClasesDelMes(new Date()).filter(clase => clase.fkClase === idClaseSeleccionada);
         inicializarCalendario('calendar', clasesProgramadasMensualesDeClaseSeleccionada, null, hayClasesDisponibles);
         inicializarAgendador();
+         document.dispatchEvent(new CustomEvent('fechaSeleccionada', {
+            detail: {
+                fecha: calendarInstance.selectedDate
+            }
+        }));
 
-    } catch (error) {
+    } catch (error) {obtenerHorariosPorFecha
         console.error('Error en handleClaseSelected:', error);
     }
 }
@@ -455,7 +434,9 @@ function manejarActualizacionDeCuposDeClases(respuesta) {
                 const selectedDate = calendarInstance.selectedDate;
                 const fechaFormateada = formatearFecha(selectedDate);
                 const idClase = parseInt(comboClases.value);
+                let claseSeleccionada = obtenerHorariosPorFecha(selectedDate).filter(claseProgramada => claseProgramada.idHora === horaLaboralSeleccionada);
                 actualizarClasesDisponiblesPorClaseIdEnScheduler(selectedDate, idClase, fechaFormateada);
+                reseleccionarHorario(horaLaboralSeleccionada,claseSeleccionada);
             } if (!existenHorariosParaEsaFecha && calendarInstance) {
                 const botonDia = calendarInstance.obtenerDiaDelMesHtml(fecha);
                 if (botonDia) {
@@ -526,12 +507,13 @@ function actualizarHtmlElementDiaSeleccionado(fecha) {
         }
     }
 
-    if (scheduleViewerInstance) {
+    /* if (scheduleViewerInstance) {
         const horariosDelDia = obtenerHorariosPorFecha(fecha);
         const fechaFormateada = formatearFecha(fecha);
         scheduleViewerInstance.setSelectedDate(fechaFormateada);
         scheduleViewerInstance.loadSchedules(horariosDelDia);
-    }
+        reseleccionarHorario(horaLaboralSeleccionada);
+    } */
 
 }
 
@@ -571,6 +553,7 @@ function handleSelectedSchedule(event) {
     const inputFkHoraLaboral = document.getElementById("fkHoraLaboral");
     const inputIdProgramacionClase = document.getElementById("idProgramacionClase");
     inputFkHoraLaboral.value = horario.idHora;
+    horaLaboralSeleccionada = horario.idHora;
     inputIdProgramacionClase.value = horario.idClaseProgramada;
 
     if (horario) {
@@ -761,6 +744,7 @@ async function inscribirAClase(event) {
     event.preventDefault();
 
     if (!formulario.checkValidity()) {
+        
         event.stopPropagation();
         return;
     }
@@ -786,7 +770,7 @@ async function inscribirAClase(event) {
         const response = await realizarPeticionAPI('clases/inscribirAClase', datosClaseProgramada);
 
         if (response.success) {
-            alert('Inscripcion exitosa');
+            showMessage(iconTypes.success,'Inscripción exitosa' );
             // Limpiar el formulario
             //limpiarFormularioCompleto(formulario);
             limpiarFormularioPorCampos(formulario, ["idCliente", "fkHoraLaboral", "idProgramacionClase"]);
@@ -801,18 +785,18 @@ async function inscribirAClase(event) {
             labelEntrenador.textContent = 'Selecciona una clase';
             labelEspaciosDisponibles.textContent = '0';
         } else {
-            let errorMessage = 'La inscripcion ha fallado';
+            showMessage(iconTypes.error,response.message || 'Error al inscribir el cliente');
+            let detailedError = 'La inscripcion ha fallado';
             if (response.errors && response.errors.length > 0) {
-                errorMessage += ': ' + response.errors.map(e => e.message).join(', ');
-            } else if (response.message) {
-                errorMessage += ': ' + response.message;
-            }
-            alert(errorMessage);
+                detailedError += ': ' + response.errors.map(e => e.message).join(', ');
+            } 
+            
         }
         formulario.classList.remove('was-validated');
     } catch (error) {
+        showMessage(iconTypes.error,'No se pudo inscribir el cliente');
         console.error('Error al registrar clase programada:', error);
-        alert('Error al registrar la clase programada: ' + error.message);
+        
     }
 }
 
@@ -883,6 +867,7 @@ function actualizarClasesDisponiblesPorClaseIdEnScheduler(selectedDate,idClase, 
     const horariosDeClaseSeleccionada = obtenerHorariosPorFecha(selectedDate).filter(claseProgramada => claseProgramada.fkClase === idClase);
     scheduleViewerInstance.setSelectedDate(fechaFormateada);
     scheduleViewerInstance.loadSchedules(horariosDeClaseSeleccionada)
+    
 }
 
 /**
@@ -912,6 +897,33 @@ function existeClaseEnHorarios(datos, nombrePropiedad, valorDePropiedadBuscado) 
 
     } catch (error) {
         console.error('Error al buscar clase en horarios:', error);
+        return false;
+    }
+}
+
+/**
+ * Reselecciona un horario específico en el visualizador de horarios
+ * @param {number} idHoraSeleccionada - ID del horario a reseleccionar
+ * @returns {boolean} true si encontró y reseleccionó el horario, false si no
+ */
+function reseleccionarHorario(idHoraSeleccionada,claseSeleccionada) {
+    try {
+        // Buscar el botón del horario
+        const botonHorario = document.querySelector(`.schedule-viewer__item[data-idhora="${idHoraSeleccionada}"]`);
+            // Simular click en el botón
+        botonHorario.click();
+        // O alternativamente, disparar evento personalizado
+        const event = new CustomEvent('scheduleSelected', {
+            detail: {
+                scheduleId:claseSeleccionada[0].idHora,
+                schedule: claseSeleccionada[0]
+            },
+                bubbles: true
+        });
+        botonHorario.dispatchEvent(event);
+        return true;
+    } catch (error) {
+        console.error('Error al reseleccionar horario:', error);
         return false;
     }
 }

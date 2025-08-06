@@ -39,7 +39,7 @@
                 </h2>
                 <div id="collapseAgendador" class="accordion-collapse collapse show" data-bs-parent="#accordionAgendador">
                     <div class="accordion-body fix-padding-accordion-body">
-                        @Html.Partial("_AgendadorDeHorarios")
+                        @Html.Partial("_AgendadorDeHorarios",false)
                     </div>
                 </div>
             </div>
@@ -84,6 +84,7 @@
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script type="module" src="~/js/messageManager.mjs"></script>
     <script type="module" src="~/js/httpClient.js"></script>
     <script type="module" src="~/js/calendarioInscripcion.js"></script>
     <script type="module" src="~/js/inscriptorDeClasesScheduler.js"></script>
