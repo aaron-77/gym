@@ -10,6 +10,10 @@ using Twilio;
 using Twilio.Rest.Verify.V2.Service;
 using BL;
 using BL.EnPointsLogic;
+using Microsoft.AspNetCore.Identity;
+using API.Infraestructure.Auth;
+using BL.Utils;
+using API.Services;
 
 namespace API.Controllers
 {
@@ -18,10 +22,21 @@ namespace API.Controllers
         public readonly IConfiguration configuration;
         public readonly IHttpContextAccessor _httpAccesor;
         public readonly EndPointsManager _emanager;
-
-        public UsersController(EndPointsManager emanager)
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly JwtTokenGenerator _jwtTokenGenerator;
+        private readonly AuthService _authService;
+        public UsersController(EndPointsManager emanager, SignInManager<ApplicationUser> signInManager,
+        UserManager<ApplicationUser> userManager,
+        JwtTokenGenerator jwtTokenGenerator,
+        AuthService authService
+        )
         {
             _emanager = emanager;
+            _signInManager = signInManager;
+            _userManager = userManager;
+            _jwtTokenGenerator = jwtTokenGenerator;
+            _authService = authService;
         }
         public IActionResult Index()
         {
@@ -48,13 +63,13 @@ namespace API.Controllers
 
         [HttpGet]
         [Route("api/obtenerUsuariosPorRol")]
-        public async Task<IActionResult> getUsuariosPorRol([FromQuery] string rol, [FromQuery] string estado="activo")
+        public async Task<IActionResult> getUsuariosPorRol([FromQuery] string rol, [FromQuery] string estado = "activo")
         {
             try
             {
                 FitnessCenterDbContext db = new FitnessCenterDbContext();
                 List<QueryUser> usuarios = await db.userSP.FromSqlInterpolated($@"EXEC dbo.sp_consultarUsuarios @tipoUsuario={rol},@estado={estado}").ToListAsync();
-                
+
                 var respuesta = BL.Utils.ResponseManager.BuildResponse(
                     success: true,
                     httpCode: 200,
@@ -62,7 +77,7 @@ namespace API.Controllers
                     errors: null,
                     payload: usuarios
                 );
-                
+
                 return Ok(respuesta);
             }
             catch (Exception ex)
@@ -74,7 +89,7 @@ namespace API.Controllers
                     errors: new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } },
                     payload: (List<QueryUser>)null
                 );
-                
+
                 return StatusCode(500, respuesta);
             }
         }
@@ -123,9 +138,9 @@ F                respuesta.ok = false;
         [HttpPost]
         [Route("api/RegistrarUsuario")]
 
-        public IActionResult RegistrarUsuario([FromBody] NewUser usuario)
+        public async Task<IActionResult> RegistrarUsuario([FromBody] NewUser usuario)
         {
-            HttpResponseModel respuesta = new HttpResponseModel();
+            DTOResponse<DTOCreatedUser> respuesta = new DTOResponse<DTOCreatedUser>();
             if (!ModelState.IsValid)
             {
                 List<string> nombresCampos = new List<string>() { "nombre", "direccion", "correo", "contrasena", "identificacion", "fecha", "telefono" };
@@ -140,99 +155,95 @@ F                respuesta.ok = false;
                         respuesta.errors.Add(error);
                     }
 
-                };
-                respuesta.ok = false;
-                respuesta.message = "Error al registrar tu cuenta";
+                }
+               respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
+                    success: false,
+                    httpCode: 400,
+                    message: "Los datos proporcionados son inválidos",
+                    errors: respuesta.errors,
+                    payload: null
+                );
+                
                 return BadRequest(respuesta);
             }
-
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
-
+     
             if (usuario == null)
             {
-
-                return null;
+                respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
+                    success: false,
+                    httpCode: 400,
+                    message: "No has proporcionado ningun dato",
+                    errors: new List<ErrorModel> { new ErrorModel { message = "no se han enviado datos para el registro", propiedad = "ninguna" } },
+                    payload: null
+                );
+                return BadRequest(respuesta);
             }
-            Usuario newUserDB = new Usuario()
-            {
-                Nombre = usuario.NombreCompleto,
-                Apellido = usuario.Apellido,
-                NombreUsuario = "elusuario" + DateTime.Now.ToString(),
-                Email = usuario.Correo,
-                FechaNacimiento = usuario.FechaDeNacimiento,
-                Contrasena = usuario.Contrasena,
-                Telefono = usuario.Telefono,
-                Estado = "activo",
-                FechaRegistro = null,
-                RolId = 1
-
-            };
             try
             {
-                db.Add(newUserDB);
-                db.SaveChanges();
-                respuesta.ok = true;
-                respuesta.data = usuario;
-                respuesta.errors = null;
-                respuesta.message = "Registro exitoso";
+
+                var registerResult = await _authService.RegisterUserWithRoleAsync(usuario,usuario.Rol);
+                if (registerResult == null)
+                {
+                    ResponseManager.BuildResponse<DTOCreatedUser>(
+                        success: false,
+                        httpCode: 500,
+                        message: "Hubo un problema al registrar el usuario",
+                        errors: new List<ErrorModel> { new ErrorModel { message = "Problema no identificado", propiedad = "No definida" } },
+                        payload: null
+                    );
+                    return StatusCode(500, respuesta);
+                }
+                respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
+                    success: true,
+                    httpCode: 200,
+                    message: "Usuario registrado exitosamente",
+                    errors: null,
+                    payload: registerResult
+                );
+
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
-                respuesta.ok = false;
-                respuesta.data = null;
-                ErrorModel error = new ErrorModel();
-                if (ex.InnerException.Message.Contains("UNIQUE"))
-                {
-                    error.message = "correo duplicado";
-                    respuesta.message = "Ese correo ya esta registrado";
-                }
-                else
-                {
-                    error.message = "Error no definido del servidor";
-                    respuesta.message = "No se ha podido registrar tu cuenta";
-                }
-                respuesta.errors.Add(error);
-                return BadRequest(respuesta);
-
-
+                respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
+                        success: false,
+                        httpCode: 500,
+                        message: $"Error al registrar el usuario:{ex.Message}",
+                        errors: new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = "No definida" } },
+                        payload: null
+                    );
+                return StatusCode(500, respuesta);
             }
             return Ok(respuesta);
         }
 
         [HttpPost]
         [Route("api/autenticar")]
-        public IActionResult AutenticarUsuario([FromBody] UserCredentials credenciales)
+        public async Task<IActionResult> AutenticarUsuario([FromBody] UserCredentials credenciales)
         {
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
-            string baseUrl = _emanager.getBaseUrl("frontend");
-            if (credenciales == null)
+
+            var loggedUser = await _authService.AuthenticateUser(credenciales.correo, credenciales.contrasena);
+            DTOResponse<DTOLoggedUser> response = ResponseManager.BuildResponse<DTOLoggedUser>(
+                success: false,
+                httpCode: 400,
+                message: "Usuario o contraseña incorrectos",
+                errors: null,
+                payload: null
+            );
+            if (loggedUser == null)
             {
-                return BadRequest("Credenciales no proporcionadas.");
+                return Unauthorized(response);
             }
 
-            HttpLoginResponse respuesta = new HttpLoginResponse();
-            Usuario dbUser = db.Usuarios.FirstOrDefault(u => u.Email == credenciales.correo);
-
-            if (dbUser == null || !BCrypt.Net.BCrypt.Verify(credenciales.contrasena, dbUser.Contrasena))
-            {
-                respuesta.ok = false;
-                respuesta.data = null;
-                respuesta.urlPageForUser = baseUrl+"/SignIn";
-                return BadRequest(respuesta);
-            }
-            Role matchedRole = db.Roles.FirstOrDefault(r => r.RolId == dbUser.RolId);
-            respuesta.ok = true;
-            respuesta.data = new NewUser(dbUser.Nombre, dbUser.FechaNacimiento, "no tiene direccion", "No tiene identificacion", dbUser.Email, dbUser.Telefono, dbUser.Apellido, "");
-            //respuesta.urlPageForUser = baseUrl+"/validacionOTP";
-            respuesta.urlPageForUser = baseUrl+$"/clientes?idUser={dbUser.UsuarioId}&celular={dbUser.Telefono}&email={dbUser.Email}";
-            if(matchedRole.NombreRol == "empleado")
-            {
-                respuesta.urlPageForUser = baseUrl+"/empleados";
-            }
-            
-
-
-            return Ok(respuesta);
+             response = ResponseManager.BuildResponse<DTOLoggedUser>(
+                success: true,
+                httpCode: 200,
+                message: "Autenticación exitosa",
+                errors: null,
+                payload: loggedUser
+            );
+            // Devolver token
+            return Ok(response);
+           
         }
 
         [HttpPost]
@@ -277,7 +288,7 @@ F                respuesta.ok = false;
             string baseUrl = _emanager.getBaseUrl("frontend");
             try
             {
-                
+
                 TwilioClient.Init("AC9ecb12865c83eb291ab8a2c520fcee14", "cb8c1ceafb83b80649f064806617eab8");
                 var verificacion = await VerificationCheckResource.
                     CreateAsync(
@@ -307,11 +318,11 @@ F                respuesta.ok = false;
                     response.message = "Verificacion exitosa";
                     if (loggedUser.Rol.NombreRol == "empleado")
                     {
-                        response.urlPageForUser = baseUrl+"/empleados";
+                        response.urlPageForUser = baseUrl + "/empleados";
                     }
                     else if (loggedUser.Rol.NombreRol == "cliente")
                     {
-                        response.urlPageForUser = baseUrl+"/clientes";
+                        response.urlPageForUser = baseUrl + "/clientes";
                     }
                 }
                 else
@@ -319,7 +330,7 @@ F                respuesta.ok = false;
                     response.ok = true;
                     response.data = null;
                     response.message = "No se pudo verificar tu identidad";
-                    response.urlPageForUser = baseUrl+"/signIn";
+                    response.urlPageForUser = baseUrl + "/signIn";
                 }
             }
             catch (Exception ex)

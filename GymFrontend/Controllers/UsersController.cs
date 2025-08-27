@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using BL;
 using BL.Utils;
 using DTO.Dtos;
+using Microsoft.AspNetCore.Authorization;
 namespace GymFrontend.Controllers
 {
     public class UsersController : Controller
@@ -11,13 +12,20 @@ namespace GymFrontend.Controllers
 
 
 
-        private readonly IConfiguration config; 
+        private readonly IConfiguration config;
         private UsersManager manager;
         private MedidasManager medidasManager;
-        public UsersController(IConfiguration _config,UsersManager _manager,MedidasManager _medidasManager){
+        private JwtTokenGenerator _jwtTokenGenerator;
+        public UsersController(IConfiguration _config,
+        UsersManager _manager,
+        MedidasManager _medidasManager,
+        JwtTokenGenerator jwtTokenGenerator
+        )
+        {
             config = _config;
             manager = _manager;
             medidasManager = _medidasManager;
+            _jwtTokenGenerator = jwtTokenGenerator;
         }
         [HttpGet]
         [Route("signIn")]
@@ -32,21 +40,41 @@ namespace GymFrontend.Controllers
         public IActionResult executeSignIn(UserCredentials credenciales)
         {
             var res = config["ConnectionStrings:DefaultConnection"];
-            if (!ModelState.IsValid) { 
-                return View("Login",credenciales);
+            if (!ModelState.IsValid)
+            {
+                return View("Login", credenciales);
             }
 
-            
-            HttpLoginResponse respuesta =  manager.login(credenciales).Result;
-            if (respuesta.ok == false) {
+
+            DTOResponse<DTOLoggedUser> respuesta = manager.login(credenciales).Result;
+            if (respuesta.success == false)
+            {
                 ViewBag.message = "Usuario y/o contraseña incorrectos";
                 return View("Login");
             }
-			ViewBag.message = "";
-            ViewBag.cel = respuesta.data.Telefono;
-            ViewBag.correo = respuesta.data.Correo;
-            //return Redirect("https://localhost:7275/empleados");
-            return Redirect(respuesta.urlPageForUser);
+
+            var claims = _jwtTokenGenerator.ValidateToken(respuesta.payload.Token);
+            if (claims == null)
+            {
+                return View("Login");
+            }
+            Response.Cookies.Append("AuthToken", respuesta.payload.Token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict
+            });
+            var roles = _jwtTokenGenerator.GetRoles(claims);
+            var empleadoPage = config["pages:empleados"];
+            var clientePage = config["pages:clientes"];
+            if (roles.Contains("empleado"))
+            {
+                return Redirect(empleadoPage);
+            }
+            ViewBag.cel = respuesta.payload.Telefono;
+            ViewBag.correo = respuesta.payload.Correo;
+
+            return Redirect(clientePage);
         }
 
         [HttpGet]
@@ -60,43 +88,44 @@ namespace GymFrontend.Controllers
         [Route("signUp")]
         public IActionResult postCrearCuenta(User usuario)
         {
-			if (!ModelState.IsValid)
-			{
-				return View("CrearCuenta",usuario);
-			}
-			
-			ResponseHttp respuesta = manager.registrarUsuario(usuario).Result;
-			ViewBag.message = respuesta.message;
-            return View("CrearCuenta");
-		}
+            if (!ModelState.IsValid)
+            {
+                return View("CrearCuenta", usuario);
+            }
 
-		[HttpGet]
+            ResponseHttp respuesta = manager.registrarUsuario(usuario).Result;
+            ViewBag.message = respuesta.message;
+            return View("CrearCuenta");
+        }
+        [Authorize(Roles = "cliente")]
+        [HttpGet]
         [Route("clientes")]
-        public  async Task<IActionResult> dirigirACrearPaginaDeClientes([FromQuery] string celular,[FromQuery] int idUser)
+        public async Task<IActionResult> dirigirACrearPaginaDeClientes([FromQuery] string celular, [FromQuery] int idUser)
         {
             HttpResponseProgresoUsuario responseProgreso = await medidasManager.obtenerProgresoDelUsuario(idUser);
-            
 
-            return View("ClientesMainPage",responseProgreso.data);
+
+            return View("ClientesMainPage", responseProgreso.data);
         }
 
         [HttpGet]
         [Route("detallesDeProgreso")]
-        public  async Task<IActionResult> dirigirADetallesDeProgreso([FromQuery] int idCliente)
+        public async Task<IActionResult> dirigirADetallesDeProgreso([FromQuery] int idCliente)
         {
-            HttpResponseAñosActivo responseAñosActivo    = await medidasManager.obtenerAñosActivosDelCliente(idCliente);            
-            return View("DetallesDeProgreso",responseAñosActivo.data);
+            HttpResponseAñosActivo responseAñosActivo = await medidasManager.obtenerAñosActivosDelCliente(idCliente);
+            return View("DetallesDeProgreso", responseAñosActivo.data);
         }
 
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("empleados")]
         public async Task<IActionResult> dirigirACrearPaginaDeEmpelados()
         {
-            
+
             List<ExistingUser> usuarios = manager.obtenerUsuarios().Result.data;
             ResponseParametroDeMedicion respuestaParametros = await medidasManager.obtenerParametrosDeMedicion();
             List<DTOUnidadDeMedida> unidadDeMedida = ExtractDataManager.extractMeasurementUnitData(respuestaParametros.data);
-            List<DTOParametroDeMedicion> parametrosDeMedicion =respuestaParametros.data.DistinctBy(p =>p.parametroMedicionId).ToList();
+            List<DTOParametroDeMedicion> parametrosDeMedicion = respuestaParametros.data.DistinctBy(p => p.parametroMedicionId).ToList();
             ViewBag.usuarios = usuarios;
             ViewBag.parametros = parametrosDeMedicion;
             ViewBag.unidades = unidadDeMedida;
@@ -106,13 +135,13 @@ namespace GymFrontend.Controllers
 
         [HttpGet]
         [Route("validacionOTP")]
-        public IActionResult dirigirACrearPaginaValidacionOTP([FromQuery]string celular, [FromQuery] string email)
+        public IActionResult dirigirACrearPaginaValidacionOTP([FromQuery] string celular, [FromQuery] string email)
         {
             celular = celular.Trim();
             email = email.Trim();
-            
-            OTPCodeVerification verificacion = new OTPCodeVerification() { cel = "+"+celular, correo = email };
-            CanalDeEnvioOTP canal = new CanalDeEnvioOTP() {cel = "+"+celular,correo=email };
+
+            OTPCodeVerification verificacion = new OTPCodeVerification() { cel = "+" + celular, correo = email };
+            CanalDeEnvioOTP canal = new CanalDeEnvioOTP() { cel = "+" + celular, correo = email };
             HttpResponseGenerateOTP response = manager.obtenerCodigoOTP(canal).Result;
             return View("ValidacionOTP", verificacion);
         }
@@ -121,10 +150,19 @@ namespace GymFrontend.Controllers
         [Route("validacionOTPPost")]
         public IActionResult pedirValidacionDeCodigoOTP(OTPCodeVerification verificacion)
         {
-            
+
             HttpLoginResponse response = manager.validarCodigoOTP(verificacion).Result;
-            
+
             return Redirect(response.urlPageForUser);
+        }
+
+        
+        [HttpGet]
+        [Route("AccesoDenegado")]
+        public  async Task<IActionResult> dirigirAAccesoDenegado([FromQuery] int idCliente)
+        {
+            
+            return View("AccesoDenegado");
         }
     }
 }

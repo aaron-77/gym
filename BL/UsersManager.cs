@@ -18,17 +18,16 @@ namespace BL
             httpClient = null;
             httpClient = _httpClient;
         }
-        public async Task<HttpLoginResponse> login(UserCredentials credenciales)
+        public async Task<DTOResponse<DTOLoggedUser>> login(UserCredentials credenciales)
         {
             
             JsonContent jsonCon = JsonContent.Create(credenciales);
             string categoriasResponse = await httpClient.post("api/autenticar", jsonCon);
-            HttpLoginResponse usuario = null; 
-            
+            DTOResponse<DTOLoggedUser> usuario = null;
 
             try
             {
-                usuario = JsonSerializer.Deserialize<HttpLoginResponse>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                usuario = JsonSerializer.Deserialize<DTOResponse<DTOLoggedUser>>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return usuario;
             }
             catch (ArgumentNullException ex)

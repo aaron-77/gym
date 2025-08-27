@@ -132,11 +132,14 @@ public partial class FitnessCenterDbContext : IdentityDbContext<ApplicationUser>
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost;Database=FitnessCenterDB;User Id=aaronlogin;Password=Terrabreak13;Integrated Security=False;TrustServerCertificate=True");
+
+        => optionsBuilder.UseSqlServer("Server=localhost ;Authentication=SqlPassword;Integrated Security=False ;User Id=aaronlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False");  
+        //=> optionsBuilder.UseSqlServer("Server=localhost;Database=FitnessCenterDB;User Id=aaronlogin;Password=Terrabreak13;Integrated Security=False;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(FitnessCenterDbContext).Assembly);
         modelBuilder.Entity<Año>(entity =>
         {
             entity.HasKey(e => e.IdAño).HasName("PK__años__3E033B60DDD23740");
@@ -158,7 +161,6 @@ public partial class FitnessCenterDbContext : IdentityDbContext<ApplicationUser>
             entity.HasKey(e => e.IdBeneficio).HasName("PK__benefici__00AAC26A2D2E6E7C");
 
             entity.ToTable("beneficiosDeClase");
-
             entity.Property(e => e.IdBeneficio).HasColumnName("idBeneficio");
             entity.Property(e => e.Beneficio)
                 .HasMaxLength(200)

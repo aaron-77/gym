@@ -1,5 +1,11 @@
+using System.Text;
 using BL;
 using BL.EnPointsLogic;
+using BL.Utils;
+using DTO.Dtos;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +19,7 @@ var localizationOptions = new RequestLocalizationOptions
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();//.AddRazorRuntimeCompilation();
-builder.Services.AddHttpContextAccessor(); 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<HttpCustomClient>();
 builder.Services.AddScoped<EndPointsManager>();
 builder.Services.AddScoped<MedidasManager>();
@@ -21,7 +27,72 @@ builder.Services.AddScoped<CitasManager>();
 builder.Services.AddScoped<EjerciciosManager>();
 builder.Services.AddScoped<RutinasManager>();
 builder.Services.AddScoped<UsersManager>();
+builder.Services.AddScoped<JwtTokenGenerator>();
+//builder.Configuration.AddJsonFile("GymFrontend/appsettings.json", optional: false, reloadOnChange: false);
 
+var jwtSection = builder.Configuration.GetSection("JwtSettings");
+var pagesSection = builder.Configuration.GetSection("pages");
+builder.Services.Configure<JwtSettings>(jwtSection);
+builder.Services.Configure<PagesSettings>(pagesSection);
+var jwtSettings = jwtSection.Get<JwtSettings>();
+var pagesSettings = pagesSection.Get<PagesSettings>();
+var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+var LoginPath = pagesSettings.Login;
+var AccessDeniedPath = pagesSettings.Forbidden;
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        // Esto permite que lea el token desde una cookie en lugar de Authorization header
+        OnMessageReceived = context =>
+        {
+            var token = context.Request.Cookies["AuthToken"];
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Token = token;
+            }
+            return Task.CompletedTask;
+        },
+        OnChallenge = context =>
+        {
+            context.HandleResponse();
+            context.Response.Redirect(LoginPath);
+            return Task.CompletedTask;
+        },
+        OnForbidden = context =>
+        {
+            context.Response.Redirect(AccessDeniedPath);
+            return Task.CompletedTask;
+        }
+
+    };
+
+
+});
+
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = LoginPath;
+    options.AccessDeniedPath = AccessDeniedPath;
+});
+builder.Services.AddAuthorization();
+builder.Services.AddRazorPages();
 
 
 
@@ -35,11 +106,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

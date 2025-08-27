@@ -1,3 +1,4 @@
+
 export class CalendarInscripcion {
     constructor(containerId, monthDates = [], selectedDayHandler = null, statusDeterminator = null) {
         this.container = document.getElementById(containerId);

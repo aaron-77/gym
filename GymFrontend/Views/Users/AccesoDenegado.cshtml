@@ -1,0 +1,48 @@
+@{
+Layout = null;
+
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>401 - No Autorizado</title>
+    <!-- linking external CSS file -->
+    <link rel="stylesheet" href="~/css/unauthorized.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Main content container with semi-transparent black background -->
+        <div class="main-content">
+            <!-- Error code -->
+            <div class="error-code">
+                <h1 class="error-number">401</h1>
+                <div class="divider"></div>
+            </div>
+
+            <!-- Error message -->
+            <h2 class="error-title">No Autorizado</h2>
+
+            <!-- Description -->
+            <p class="error-description">
+                No tienes permisos para acceder a esta página. Por favor verifica tus credenciales o contacta a un
+                administrador.
+            </p>
+
+            <!-- Action button -->
+            <button class="back-button" onclick="goBack()">
+                Volver
+            </button>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-divider"></div>
+            <p class="footer-text">© 2024 Fitness Gym. Todos los derechos reservados.</p>
+        </div>
+    </div>
+
+    <script src="~/js/unauthorized.js"></script>
+</body>
+</html>

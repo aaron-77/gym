@@ -6,17 +6,51 @@ using Quartz;
 using BL.Utils;
 using API.Hubs;
 using API.Services;
+using API.Infraestructure.Auth;
+using DataAccess.EntityFramework;
 using Microsoft.AspNetCore.Identity;
+using DTO.Dtos;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 var builder = WebApplication.CreateBuilder(args);
 //builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
+var jwtSection = builder.Configuration.GetSection("JwtSettings");
+builder.Services.Configure<JwtSettings>(jwtSection);
 
+var jwtSettings = jwtSection.Get<JwtSettings>();
+var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+});
 
-/* builder.WebHost.ConfigureKestrel(options =>
+/* buException has occurred: CLR/System.InvalidOperationException
+An unhandled exception of type 'System.InvalidOperationException' occurred in Microsoft.Extensions.DependencyInjection.Abstractions.dll: 'The service collection cannot be modified because it is read-only.'
+   at Microsoft.Extensions.DependencyInjection.ServiceCollection.ThrowReadOnlyException()
+   at Microsoft.Extensions.DependencyInjection.ServiceCollection.System.Collections.Generic.ICollection<Microsoft.Extensions.DependencyInjection.ServiceDescriptor>.Add(ServiceDescriptor item)
+   at ilder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5274); // Habilitar HTTP en el puerto 5000
     // options.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // Deshabilitar HTTPS
 });
  */// Add services to the container.
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("originsPolicyOne", policy =>
@@ -61,6 +95,9 @@ builder.Services.AddScoped<EndPointsManager>();
 builder.Services.AddScoped<UserRoleService>();
 builder.Services.AddScoped<ReservacionesHub>();
 builder.Services.AddScoped<ServicioActualizacionesDeHorariosRealTime>();  
+builder.Services.AddScoped<JwtTokenGenerator>();
+builder.Services.AddScoped<AuthService>();
+
 builder.Services.AddQuartz(configuration => {
     configuration.UseMicrosoftDependencyInjectionJobFactory();
 
@@ -85,13 +122,13 @@ builder.Services.AddQuartzHostedService(option => option.WaitForJobsToComplete =
 
 builder.Services.AddQuartz(options => { options.UseMicrosoftDependencyInjectionJobFactory(); });
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbIdentityContext>()
+    .AddEntityFrameworkStores<FitnessCenterDbContext>()
     .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = $"{builder.Configuration["urls"]}/SignIn" ;
-    options.AccessDeniedPath = $"{builder.Configuration["urls"]}/SignIn";
+    options.LoginPath = $"/{builder.Configuration["urls"]}/SignIn" ;
+    options.AccessDeniedPath = $"/{builder.Configuration["urls"]}/SignIn";
 });
 var app = builder.Build();
 
@@ -104,7 +141,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("originsPolicyOne");
+app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapHub<ReservacionesHub>("/reservacionesHub");
 app.MapControllers();
 
