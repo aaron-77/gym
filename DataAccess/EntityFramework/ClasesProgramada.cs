@@ -7,12 +7,15 @@ public partial class ClasesProgramada
 {
     public int IdProgramacionClase { get; set; }
 
+    
+
     public int FkClase { get; set; }
 
     public DateTime FechaInicio { get; set; }
 
     public DateTime FechaFin { get; set; }
 
+    public string? NewFkEntrenador { get; set; }
     public int FkEntrenador { get; set; }
 
     public int CupoMaximo { get; set; }

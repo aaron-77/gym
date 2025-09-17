@@ -7,6 +7,8 @@ public partial class Cita
 {
     public int CitaId { get; set; }
 
+    public string? NewUserId {get;set;}
+    public string? NewEntrenadorId {get;set;}
     public int? UsuarioId { get; set; }
 
     public int? EntrenadorId { get; set; }

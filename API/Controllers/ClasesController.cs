@@ -16,6 +16,7 @@ using System.Data;
 using API.Services;
 using DataAccess.Infraestructure;
 using API.Hubs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -165,6 +166,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="activa">Filtro de estado: 1=activa, 0=inactiva</param>
         /// <returns>Lista de clases filtradas por estado</returns>
+        
         [HttpGet("obtenerClases")]
         public async Task<ActionResult<DTOResponse<List<DTOClaseSimple>>>> ObtenerClases(
             [FromQuery] bool activa = false
@@ -302,6 +304,7 @@ namespace API.Controllers
         /// <summary>
         /// Registra una nueva clase
         /// </summary>
+        [Authorize(Roles = "empleado")]
         [HttpPost("registrarClase")]
         public async Task<ActionResult<DTOResponse<int>>> RegistrarClase([FromBody] DTOClase modelo)
         {
@@ -385,6 +388,7 @@ namespace API.Controllers
         /// <summary>
         /// Registra una programación de clase
         /// </summary>
+        [Authorize(Roles = "empleado")]
         [HttpPost("registrarClaseProgramada")]
         public async Task<ActionResult<DTOResponse<int>>> RegistrarClaseProgramada(
             [FromBody] DTODatosClaseProgramada modelo
@@ -499,6 +503,7 @@ namespace API.Controllers
         /// <summary>
         /// Cancela clases programadas
         /// </summary>
+        [Authorize(Roles = "empleado")]
         [HttpPost("cancelarClasesProgramadas")]
         public async Task<ActionResult<DTOResponse<string>>> CancelarClasesProgramadas(
             [FromBody] List<DTOClaseCancelada> solicitudes
@@ -629,6 +634,7 @@ namespace API.Controllers
         /// <summary>
         /// Reagenda una clase
         /// </summary>
+        [Authorize(Roles = "empleado")]
         [HttpPost("reagendacionDeInscripcionAClase")]
         public async Task<ActionResult<DTOResponse<string>>> ReagendarClase([FromBody] DTOReagendacionDeInscripcion modelo)
         {
@@ -710,6 +716,7 @@ namespace API.Controllers
         /// Obtiene todos los estados de clases programadas
         /// </summary>
         /// <returns>Lista de estados de clases programadas</returns>
+        [Authorize(Roles = "empleado")]
         [HttpGet("obtenerEstadosDeClasesProgramdas")]
         public async Task<ActionResult<DTOResponse<List<DTOEstadoClaseProgramada>>>> ObtenerEstadosDeClasesProgramadas()
         {
@@ -752,6 +759,7 @@ namespace API.Controllers
         /// <summary>
         /// Obtiene las clases programadas por id de clase
         /// </summary>
+        [Authorize(Roles = "empleado")]
         [HttpGet("obtenerClasesProgramadasPorId")]
         public async Task<ActionResult<DTOResponse<List<DTOClaseProgramadaView>>>> obtenerClasesProgramadasPorId([FromQuery] int idClase)
         {
@@ -783,6 +791,7 @@ namespace API.Controllers
         /// <summary>
         /// Registra una inscripción a una clase programada
         /// </summary>
+        [Authorize(Roles = "empleado")]
         [HttpPost("inscribirAClase")]
         public async Task<ActionResult<DTOResponse<int>>> InscribirAClase([FromBody] DTOInscripcionAClase modelo)
         {

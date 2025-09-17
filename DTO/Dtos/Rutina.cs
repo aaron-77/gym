@@ -12,12 +12,12 @@ namespace DTO.Dtos
         public int? RutinaId { get; set; }
         [Required(ErrorMessage = "Ingresa el cliente")]
         
-        public int? UsuarioID { get; set; }
+        public string? UsuarioID { get; set; }
         [Required(ErrorMessage = "Ingresa el entrenador")]
-        public int EntrenadorID { get; set; }
+        public string? EntrenadorID { get; set; }
         [Required(ErrorMessage = "Ingresa la feccha")]
         public DateTime FechaCreacion { get; set; }
         [Required(ErrorMessage = "Ingresa las observaciones")]
-        public string Observaciones { get; set; }
+        public string? Observaciones { get; set; }
     }
 }

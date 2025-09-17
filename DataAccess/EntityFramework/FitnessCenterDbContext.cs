@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
@@ -109,6 +110,10 @@ public partial class FitnessCenterDbContext : IdentityDbContext<ApplicationUser>
     public virtual DbSet<VNivelesDeDificultad> VNivelesDeDificultads { get; set; }
 
     public virtual DbSet<VNivelesDeIntensidad> VNivelesDeIntensidads { get; set; }
+
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+    public virtual DbSet<AccessToken> AccessTokens { get; set; }
+
     // campos agregados manualmente
     public virtual DbSet<DTO.Dtos.Ejercicio> ejercicioSP { get; set; }
     
@@ -1139,6 +1144,108 @@ public partial class FitnessCenterDbContext : IdentityDbContext<ApplicationUser>
             entity.HasOne(d => d.Rol).WithMany(p => p.Usuarios)
                 .HasForeignKey(d => d.RolId)
                 .HasConstraintName("FK__Usuarios__RolID__3D5E1FD2");
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(e => e.RefreshTokenId);
+            entity.ToTable("RefreshTokens");
+
+            entity.Property(e => e.RefreshTokenId)
+                .HasColumnName("RefreshTokenId")
+                .HasDefaultValueSql("NEWID()");
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("UserId")
+                .IsRequired()
+                .HasMaxLength(450);
+
+            entity.Property(e => e.ClientId)
+                .HasColumnName("ClientId")
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.TokenHash)
+                .HasColumnName("TokenHash")
+                .IsRequired()
+                .HasMaxLength(256);
+
+            entity.Property(e => e.IssuedAt)
+                .HasColumnName("IssuedAt")
+                .HasDefaultValueSql("SYSUTCDATETIME()")
+                .IsRequired();
+
+            entity.Property(e => e.ExpiresAt)
+                .HasColumnName("ExpiresAt")
+                .IsRequired();
+
+            entity.Property(e => e.RevokedAt)
+                .HasColumnName("RevokedAt");
+
+            entity.Property(e => e.ReplacedByTokenId)
+                .HasColumnName("ReplacedByTokenId");
+
+            entity.Property(e => e.IpAddress)
+                .HasColumnName("IpAddress")
+                .HasMaxLength(50);
+
+            entity.Property(e => e.UserAgent)
+                .HasColumnName("UserAgent")
+                .HasMaxLength(250);
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_RefreshTokens_AspNetUsers");
+        });
+
+        modelBuilder.Entity<AccessToken>(entity =>
+        {
+            entity.HasKey(e => e.AccessTokenId);
+            entity.ToTable("AccessTokens");
+
+            entity.Property(e => e.AccessTokenId)
+                .HasColumnName("AccessTokenId")
+                .HasDefaultValueSql("NEWID()");
+            entity.Property(e => e.UserId)
+                .HasColumnName("UserId")
+                .IsRequired()
+                .HasMaxLength(450);
+
+            entity.Property(e => e.ClientId)
+                .HasColumnName("ClientId")
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(e => e.TokenHash)
+                .HasColumnName("TokenHash")
+                .IsRequired()
+                .HasMaxLength(256);
+
+            entity.Property(e => e.IssuedAt)
+                .HasColumnName("IssuedAt")
+                .HasDefaultValueSql("SYSUTCDATETIME()")
+                .IsRequired();
+
+            entity.Property(e => e.ExpiresAt)
+                .HasColumnName("ExpiresAt")
+                .IsRequired();
+
+            entity.Property(e => e.RevokedAt)
+                .HasColumnName("RevokedAt");
+
+            entity.Property(e => e.IpAddress)
+                .HasColumnName("IpAddress")
+                .HasMaxLength(50);
+
+            entity.Property(e => e.UserAgent)
+                .HasColumnName("UserAgent")
+                .HasMaxLength(250);
+
+            entity.HasOne(d => d.User)
+                .WithMany()
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_AccessTokens_AspNetUsers");
         });
 
         modelBuilder.Entity<VNivelesDeDificultad>(entity =>

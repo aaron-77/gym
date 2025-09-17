@@ -6,8 +6,8 @@ namespace DTO.Dtos
         
 
         [Required(ErrorMessage = "Ingresa tu nombre")]
-        public string NombreCompleto { get; set; }
-        /* [Required(ErrorMessage = "Ingresa tu apellido")] */
+        public string Nombre { get; set; }
+        [Required(ErrorMessage = "Ingresa tu apellido")]
         public string Apellido { get; set; }
 
         [Required(ErrorMessage = "Ingresa tu fecha de nacimiento")]
@@ -27,9 +27,11 @@ namespace DTO.Dtos
 
         [Required(ErrorMessage = "Ingresa el rol para el usuario")]
         public string Rol { get; set; } = "cliente"; // Por defecto, el rol es Cliente
-
+        [Required(ErrorMessage = "El usuario requiere un estado")]
+        public string Estado { get; set; } = "activo"; // Por defecto, el estado es activo
+        
         public NewUser(
-        string nombreCompleto,
+        string nombre,
         DateTime fechaDeNacimiento,
         string direccion,
         string numeroDeIdentificacion,
@@ -37,10 +39,11 @@ namespace DTO.Dtos
         string telefono,
         string apellido,
         string contrasena,
-        string rol = "cliente"  // Por defecto, el rol es Cliente
+        string rol = "cliente",
+        string estado = "activo"
         )
         {
-            NombreCompleto = nombreCompleto;
+            Nombre = nombre;
             FechaDeNacimiento = fechaDeNacimiento;
             Direccion = direccion;
             NumeroDeIdentificacion = numeroDeIdentificacion;
@@ -49,6 +52,7 @@ namespace DTO.Dtos
             Apellido = apellido;
             Contrasena = contrasena;
             Rol = rol;
+            Estado = estado;
         }
 
     }

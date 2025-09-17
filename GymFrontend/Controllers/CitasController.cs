@@ -15,22 +15,21 @@ namespace GymFrontend.Controllers
         }
         [HttpGet]
         [Route("registrarCita")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            
-            HttpResponseListadoQueryUsers respuestaClientes = managerUsers.obtenerUsuariosPorRol("cliente", "activo").Result;
-            ViewBag.clientes = respuestaClientes.data;
+            var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
+            ViewBag.clientes = respuestaClientes.payload;
             return View("RegistrarCita", new Cita());
 
         }
 
         [HttpPost]
         [Route("registrarCita")]
-        public IActionResult registrarCita(Cita cita)
+        public async Task<IActionResult> registrarCita(Cita cita)
         {
-            
-            HttpResponseListadoQueryUsers respuestaClientes = managerUsers.obtenerUsuariosPorRol("cliente", "activo").Result;
-            ViewBag.clientes = respuestaClientes.data;
+
+            var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
+            ViewBag.clientes = respuestaClientes.payload;
             cita.estado = "Agendada";
             if (!ModelState.IsValid)
             {
@@ -51,12 +50,12 @@ namespace GymFrontend.Controllers
 
         [HttpGet]
         [Route("modificarCita")]
-        public IActionResult modificarCita(CitaEdit cita)
+        public async Task<IActionResult> modificarCita(CitaEdit cita)
         {
-            
-            HttpResponseListadoQueryUsers respuestaClientes = managerUsers.obtenerUsuariosPorRol("cliente", "activo").Result;
-            ViewBag.clientes = respuestaClientes.data;
-            if (respuestaClientes.ok == false)
+
+            var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
+            ViewBag.clientes = respuestaClientes.payload;
+            if (respuestaClientes.success == false)
             {
             ViewBag.message = respuestaClientes.message;
             return View("ModificarCita", cita);
@@ -67,11 +66,11 @@ namespace GymFrontend.Controllers
 
         [HttpPost]
         [Route("modificarCita")]
-        public IActionResult modificarCitaPost(CitaEdit cita)
+        public async Task<IActionResult> modificarCitaPost(CitaEdit cita)
         {
-            
-            HttpResponseListadoQueryUsers respuestaClientes = managerUsers.obtenerUsuariosPorRol("cliente", "activo").Result;
-            ViewBag.clientes = respuestaClientes.data;
+
+            var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
+            ViewBag.clientes = respuestaClientes.payload;
             if (!ModelState.IsValid)
             {
                 return View("ModificarCita", cita);

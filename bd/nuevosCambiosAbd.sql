@@ -606,3 +606,230 @@ RETURN (
         ON pr.fkHoraLaboral = hl.idHora
     WHERE (pr.fechaReservada >= @fechaTentativa and pr.fechaReservada >= GETDATE())
 );
+
+-- Paso 1: Eliminar las claves foráneas existentes que referencian a la tabla Usuarios
+
+IF OBJECT_ID('FK__Citas__Entrenado__44FF419A', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.Citas DROP CONSTRAINT FK__Citas__Entrenado__44FF419A;
+IF OBJECT_ID('FK__Citas__UsuarioID__440B1D61', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.Citas DROP CONSTRAINT FK__Citas__UsuarioID__440B1D61;
+IF OBJECT_ID('FK__Clases__Instruct__5AEE82B9', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.Clases DROP CONSTRAINT FK__Clases__Instruct__5AEE82B9;
+IF OBJECT_ID('FK__Pagos__UsuarioID__6383C8BA', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.Pagos DROP CONSTRAINT FK__Pagos__UsuarioID__6383C8BA;
+IF OBJECT_ID('FK__Rutinas__Entrena__4AB81AF0', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.Rutinas DROP CONSTRAINT FK__Rutinas__Entrena__4AB81AF0;
+IF OBJECT_ID('FK__Rutinas__Usuario__49C3F6B7', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.Rutinas DROP CONSTRAINT FK__Rutinas__Usuario__49C3F6B7;
+IF OBJECT_ID('FK_ClasesProgramadas_Usuarios', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.clasesProgramadas DROP CONSTRAINT FK_ClasesProgramadas_Usuarios;
+IF OBJECT_ID('FK_InscripcionesDeClases_Cliente', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.inscripcionesDeClases DROP CONSTRAINT FK_InscripcionesDeClases_Cliente;
+IF OBJECT_ID('FK_UsuarioMedida', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.medidas DROP CONSTRAINT FK_UsuarioMedida;
+IF OBJECT_ID('FK_Metas_Usuarios', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.metas DROP CONSTRAINT FK_Metas_Usuarios;
+IF OBJECT_ID('FK__Registros__Usuar__6EF57B66', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.RegistrosEntrenamiento DROP CONSTRAINT FK__Registros__Usuar__6EF57B66;
+IF OBJECT_ID('fk_usuarios_horariosClasesProgramadas', 'F') IS NOT NULL
+    ALTER TABLE FitnessCenterDB.dbo.horariosDeClasesProgramadas DROP CONSTRAINT fk_usuarios_horariosClasesProgramadas;
+
+-- Paso 2: Agregar nuevas columnas en las tablas para referenciar a AspNetUsers.Id
+
+ALTER TABLE FitnessCenterDB.dbo.Citas
+ADD NewUserId nvarchar(450) NULL,
+    NewEntrenadorId nvarchar(450) NULL;
+
+ALTER TABLE FitnessCenterDB.dbo.Clases
+ADD NewInstructorId nvarchar(450) NULL;
+
+ALTER TABLE FitnessCenterDB.dbo.Rutinas
+ADD NewUserId nvarchar(450) NULL,
+    NewEntrenadorId nvarchar(450) NULL;
+
+ALTER TABLE FitnessCenterDB.dbo.Pagos
+ADD NewUserId nvarchar(450) NULL;
+
+ALTER TABLE FitnessCenterDB.dbo.clasesProgramadas
+ADD NewFkEntrenador nvarchar(450) NULL;
+
+ALTER TABLE FitnessCenterDB.dbo.inscripcionesDeClases
+ADD NewFkCliente nvarchar(450) NULL;
+
+ALTER TABLE FitnessCenterDB.dbo.medidas
+ADD NewFkUsuario nvarchar(450) NULL;
+
+ALTER TABLE FitnessCenterDB.dbo.metas
+ADD NewFkUsuario nvarchar(450) NULL;
+
+ALTER TABLE FitnessCenterDB.dbo.RegistrosEntrenamiento
+ADD NewUserId nvarchar(450) NULL;
+
+ALTER TABLE FitnessCenterDB.dbo.horariosDeClasesProgramadas
+ADD NewFkEntrenador nvarchar(450) NULL;
+
+-- Paso 3: Actualizar las nuevas columnas (ESTO REQUIERE TU LÓGICA DE MIGRACIÓN DE DATOS)
+-- Ejemplo: Asumiendo que tienes una forma de mapear UsuarioID a AspNetUsers.Id
+-- Por ejemplo, si los IDs de AspNetUsers se guardaron temporalmente en la tabla Usuarios
+
+UPDATE c
+SET c.NewUserId = au.Id
+FROM FitnessCenterDB.dbo.Citas c
+JOIN FitnessCenterDB.dbo.Usuarios u ON c.UsuarioID = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+UPDATE c
+SET c.NewEntrenadorId = au.Id
+FROM FitnessCenterDB.dbo.Citas c
+JOIN FitnessCenterDB.dbo.Usuarios u ON c.EntrenadorID = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+UPDATE cl
+SET cl.NewInstructorId = au.Id
+FROM FitnessCenterDB.dbo.Clases cl
+JOIN FitnessCenterDB.dbo.Usuarios u ON cl.InstructorID = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+UPDATE r
+SET r.NewUserId = au.Id
+FROM FitnessCenterDB.dbo.Rutinas r
+JOIN FitnessCenterDB.dbo.Usuarios u ON r.UsuarioID = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+UPDATE r
+SET r.NewEntrenadorId = au.Id
+FROM FitnessCenterDB.dbo.Rutinas r
+JOIN FitnessCenterDB.dbo.Usuarios u ON r.EntrenadorID = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+UPDATE p
+SET p.NewUserId = au.Id
+FROM FitnessCenterDB.dbo.Pagos p
+JOIN FitnessCenterDB.dbo.Usuarios u ON p.UsuarioID = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+UPDATE cp
+SET cp.NewFkEntrenador = au.Id
+FROM FitnessCenterDB.dbo.clasesProgramadas cp
+JOIN FitnessCenterDB.dbo.Usuarios u ON cp.fkEntrenador = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+UPDATE ic
+SET ic.NewFkCliente = au.Id
+FROM FitnessCenterDB.dbo.inscripcionesDeClases ic
+JOIN FitnessCenterDB.dbo.Usuarios u ON ic.fkCliente = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+UPDATE m
+SET m.NewFkUsuario = au.Id
+FROM FitnessCenterDB.dbo.medidas m
+JOIN FitnessCenterDB.dbo.Usuarios u ON m.fkUsuario = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+UPDATE met
+SET met.NewFkUsuario = au.Id
+FROM FitnessCenterDB.dbo.metas met
+JOIN FitnessCenterDB.dbo.Usuarios u ON met.fkUsuario = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+UPDATE re
+SET re.NewUserId = au.Id
+FROM FitnessCenterDB.dbo.RegistrosEntrenamiento re
+JOIN FitnessCenterDB.dbo.Usuarios u ON re.UsuarioID = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+UPDATE hcp
+SET hcp.NewFkEntrenador = au.Id
+FROM FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp
+JOIN FitnessCenterDB.dbo.Usuarios u ON hcp.fkEntrenador = u.UsuarioID
+JOIN FitnessCenterDB.dbo.AspNetUsers au ON u.Email = au.Email;
+
+-- Repetir para todas las tablas afectadas
+
+-- Paso 4: Agregar las nuevas claves foráneas a AspNetUsers.Id
+
+ALTER TABLE FitnessCenterDB.dbo.Citas
+ADD CONSTRAINT FK_Citas_AspNetUsers_NewUserId FOREIGN KEY (NewUserId) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+ALTER TABLE FitnessCenterDB.dbo.Citas
+ADD CONSTRAINT FK_Citas_AspNetUsers_NewEntrenadorId FOREIGN KEY (NewEntrenadorId) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+ALTER TABLE FitnessCenterDB.dbo.Clases
+ADD CONSTRAINT FK_Clases_AspNetUsers_NewInstructorId FOREIGN KEY (NewInstructorId) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+ALTER TABLE FitnessCenterDB.dbo.Rutinas
+ADD CONSTRAINT FK_Rutinas_AspNetUsers_NewUserId FOREIGN KEY (NewUserId) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+ALTER TABLE FitnessCenterDB.dbo.Rutinas
+ADD CONSTRAINT FK_Rutinas_AspNetUsers_NewEntrenadorId FOREIGN KEY (NewEntrenadorId) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+ALTER TABLE FitnessCenterDB.dbo.Pagos
+ADD CONSTRAINT FK_Pagos_AspNetUsers_NewUserId FOREIGN KEY (NewUserId) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+ALTER TABLE FitnessCenterDB.dbo.clasesProgramadas
+ADD CONSTRAINT FK_ClasesProgramadas_AspNetUsers_NewFkEntrenador FOREIGN KEY (NewFkEntrenador) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+ALTER TABLE FitnessCenterDB.dbo.inscripcionesDeClases
+ADD CONSTRAINT FK_InscripcionesDeClases_AspNetUsers_NewFkCliente FOREIGN KEY (NewFkCliente) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+ALTER TABLE FitnessCenterDB.dbo.medidas
+ADD CONSTRAINT FK_Medidas_AspNetUsers_NewFkUsuario FOREIGN KEY (NewFkUsuario) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+ALTER TABLE FitnessCenterDB.dbo.metas
+ADD CONSTRAINT FK_Metas_AspNetUsers_NewFkUsuario FOREIGN KEY (NewFkUsuario) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+ALTER TABLE FitnessCenterDB.dbo.RegistrosEntrenamiento
+ADD CONSTRAINT FK_RegistrosEntrenamiento_AspNetUsers_NewUserId FOREIGN KEY (NewUserId) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+ALTER TABLE FitnessCenterDB.dbo.horariosDeClasesProgramadas
+ADD CONSTRAINT FK_HorariosDeClasesProgramadas_AspNetUsers_NewFkEntrenador FOREIGN KEY (NewFkEntrenador) REFERENCES FitnessCenterDB.dbo.AspNetUsers(Id) ON DELETE NO ACTION;
+
+-- Paso 5: Eliminar las columnas antiguas de las tablas, sin eliminar los registros asociados.
+
+ALTER TABLE FitnessCenterDB.dbo.Citas
+DROP COLUMN UsuarioID, COLUMN EntrenadorID;
+
+ALTER TABLE FitnessCenterDB.dbo.Clases
+DROP COLUMN InstructorID;
+
+ALTER TABLE FitnessCenterDB.dbo.Rutinas
+DROP COLUMN UsuarioID, COLUMN EntrenadorID;
+
+ALTER TABLE FitnessCenterDB.dbo.Pagos
+DROP COLUMN UsuarioID;
+
+ALTER TABLE FitnessCenterDB.dbo.clasesProgramadas
+DROP COLUMN fkEntrenador;
+
+ALTER TABLE FitnessCenterDB.dbo.inscripcionesDeClases
+DROP COLUMN fkCliente;
+
+ALTER TABLE FitnessCenterDB.dbo.medidas
+DROP COLUMN fkUsuario;
+
+ALTER TABLE FitnessCenterDB.dbo.metas
+DROP COLUMN fkUsuario;
+
+ALTER TABLE FitnessCenterDB.dbo.RegistrosEntrenamiento
+DROP COLUMN UsuarioID;
+
+ALTER TABLE FitnessCenterDB.dbo.horariosDeClasesProgramadas
+DROP COLUMN fkEntrenador;
+
+-- Paso 6: Eliminar la tabla Usuarios si ya no se necesita
+-- DROP TABLE FitnessCenterDB.dbo.Usuarios;
+
+-- Paso 7: Renombrar las nuevas columnas para que coincidan con los nombres originales (opcional)
+
+EXEC sp_rename 'FitnessCenterDB.dbo.Citas.NewUserId', 'UserId', 'COLUMN';
+EXEC sp_rename 'FitnessCenterDB.dbo.Citas.NewEntrenadorId', 'EntrenadorId', 'COLUMN';
+EXEC sp_rename 'FitnessCenterDB.dbo.Clases.NewInstructorId', 'InstructorId', 'COLUMN';
+EXEC sp_rename 'FitnessCenterDB.dbo.Rutinas.NewUserId', 'UserId', 'COLUMN';
+EXEC sp_rename 'FitnessCenterDB.dbo.Rutinas.NewEntrenadorId', 'EntrenadorId', 'COLUMN';
+EXEC sp_rename 'FitnessCenterDB.dbo.Pagos.NewUserId', 'UserId', 'COLUMN';
+EXEC sp_rename 'FitnessCenterDB.dbo.clasesProgramadas.NewFkEntrenador', 'fkEntrenador', 'COLUMN';
+EXEC sp_rename 'FitnessCenterDB.dbo.inscripcionesDeClases.NewFkCliente', 'fkCliente', 'COLUMN';
+EXEC sp_rename 'FitnessCenterDB.dbo.medidas.NewFkUsuario', 'fkUsuario', 'COLUMN';
+EXEC sp_rename 'FitnessCenterDB.dbo.metas.NewFkUsuario', 'fkUsuario', 'COLUMN';
+EXEC sp_rename 'FitnessCenterDB.dbo.RegistrosEntrenamiento.NewUserId', 'UserId', 'COLUMN';
+EXEC sp_rename 'FitnessCenterDB.dbo.horariosDeClasesProgramadas.NewFkEntrenador', 'fkEntrenador', 'COLUMN'

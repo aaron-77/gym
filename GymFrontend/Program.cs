@@ -6,6 +6,8 @@ using DTO.Dtos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using DataAccess;
+;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,15 +22,21 @@ var localizationOptions = new RequestLocalizationOptions
 // Add services to the container.
 builder.Services.AddControllersWithViews();//.AddRazorRuntimeCompilation();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<HttpCustomClient>();
+builder.Services.AddScoped<AuthHeaderHandler>();
+builder.Services.AddHttpClient<HttpCustomClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["backendAddresses:nossl"]);
+}).AddHttpMessageHandler<AuthHeaderHandler>();
 builder.Services.AddScoped<EndPointsManager>();
 builder.Services.AddScoped<MedidasManager>();
 builder.Services.AddScoped<CitasManager>();
 builder.Services.AddScoped<EjerciciosManager>();
 builder.Services.AddScoped<RutinasManager>();
 builder.Services.AddScoped<UsersManager>();
+builder.Services.AddScoped<HorariosManager>(); // Eliminado
+ builder.Services.AddScoped<ClasesManager>(); // Eliminado
 builder.Services.AddScoped<JwtTokenGenerator>();
-//builder.Configuration.AddJsonFile("GymFrontend/appsettings.json", optional: false, reloadOnChange: false);
+builder.Configuration.AddJsonFile("GymFrontend/appsettings.json", optional: false, reloadOnChange: false);
 
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
 var pagesSection = builder.Configuration.GetSection("pages");
@@ -52,7 +60,7 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.Audience,
+        ValidAudience = jwtSettings.FrontAudiencie,
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 
@@ -70,7 +78,7 @@ builder.Services.AddAuthentication(options =>
         },
         OnChallenge = context =>
         {
-            context.HandleResponse();
+        
             context.Response.Redirect(LoginPath);
             return Task.CompletedTask;
         },
@@ -95,6 +103,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddRazorPages();
 
 
+builder.Services.AddDataAccess(); // Agregado
+builder.Services.AddBusinessLayer(); // Agregado
 
 var app = builder.Build();
 
@@ -102,7 +112,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.n
     app.UseHsts();
 }
 

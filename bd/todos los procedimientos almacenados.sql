@@ -59,18 +59,20 @@ RETURN
     SELECT 
         cp.IdProgramacionClase,
         c.NombreClase,
-        DATENAME(WEEKDAY, cp.fechaInicio) AS DiaDeLaSemana,
-        (SELECT CONVERT(VARCHAR(5), DATEADD(MINUTE, 0, cp.fechaInicio), 108)) as HoraInicio,
-        (SELECT CONVERT(VARCHAR(5), DATEADD(MINUTE,- c.tiempoDeDescansoEnMinutos, cp.fechaFin), 108)) as HoraFin,
-        e.Nombre + ' ' + e.Apellido AS NombreEntrenador
+        DATENAME(WEEKDAY, hcp.fechaDeLaClase) AS DiaDeLaSemana,
+        hl.horaInicio AS HoraInicio,
+        hl.horaFin AS HoraFin,
+        e.NombreCompleto + ' ' + e.Apellido AS NombreEntrenador
     FROM 
         ClasesProgramadas cp
         INNER JOIN Clases c ON cp.FkClase = c.claseId
-        INNER JOIN Usuarios e ON cp.FkEntrenador = e.UsuarioId
+        INNER JOIN FitnessCenterDB.dbo.AspNetUsers e ON cp.FkEntrenador = e.Id
+        INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
+        INNER JOIN FitnessCenterDB.dbo.horasLaborales hl ON hcp.fkHorarioLaboral = hl.idHora
     WHERE 
     	cp.fkClase  = @IdClase
     	AND
-        YEAR(cp.fechaInicio) = YEAR(GETDATE())
+        YEAR(hcp.fechaDeLaClase) = YEAR(GETDATE())
         AND cp.fkEstadoClaseProgramada  = 1--disponible
 );
 
@@ -1425,23 +1427,29 @@ CREATE PROCEDURE [dbo].[sp_obtenerEntrenadoresDisponibles]
 )
 AS
 BEGIN
-declare @rolEmpleadoId int;
-select @rolEmpleadoId = RolID  from Roles where NombreRol = 'empleado'; 
+declare @rolEmpleadoId nvarchar(450);
+select @rolEmpleadoId = Id  from FitnessCenterDB.dbo.AspNetRoles where Name = 'Entrenador'; 
 		select DISTINCT 
-		u.UsuarioID,
-		u.Nombre,
-		u.Apellido,
+		u.Id AS UsuarioID,
+		u.NombreCompleto AS Nombre,
+		u.Apellido AS Apellido,
 		u.Email,
-		u.Telefono,
-		u.NombreUsuario,
-		u.Contrasena,
-		u.FechaNacimiento,
-		u.FechaRegistro,
-		u.RolID,
+		u.PhoneNumber AS Telefono,
+		u.UserName AS NombreUsuario,
+		u.FechaDeNacimiento AS FechaNacimiento,
+		u.FechaDeRegistro AS FechaRegistro,
+		ar.Id AS RolID,
 		u.Estado 
-		from Usuarios as u
-		join Clases as c on c.InstructorID = u.UsuarioID  or NOT EXISTS(SELECT 1 FROM Clases c WHERE c.InstructorID = u.UsuarioID)
-		where u.RolID = @rolEmpleadoId and u.Estado = 'activo' and c.Horario <> @fechaReferencia ;
+		from FitnessCenterDB.dbo.AspNetUsers as u
+		INNER JOIN FitnessCenterDB.dbo.AspNetUserRoles aur ON u.Id = aur.UserId
+        INNER JOIN FitnessCenterDB.dbo.AspNetRoles ar ON aur.RoleId = ar.Id
+		where ar.Id = @rolEmpleadoId and u.Estado = 'Activo'
+		AND u.Id NOT IN (
+            SELECT cp.fkEntrenador
+            FROM FitnessCenterDB.dbo.clasesProgramadas cp
+            INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
+            WHERE hcp.fechaDeLaClase = CAST(@fechaReferencia AS DATE)
+        );
 END;
 
 CREATE   PROCEDURE dbo.sp_obtenerHorariosDisponibles
@@ -1950,18 +1958,20 @@ END;
 CREATE PROCEDURE [dbo].[sp_obtenerUsuariosConCitasAgendadas]
 AS
 BEGIN
-		select u.Nombre,
+		select u.NombreCompleto as Nombre,
 		u.Apellido,
 		u.Email,
-		u.Telefono,
-		u.NombreUsuario,
-		u.Contrasena,
-		u.FechaNacimiento,
-		u.FechaRegistro,
-		u.RolID,
+		u.PhoneNumber as Telefono,
+		u.UserName as NombreUsuario,
+		u.PasswordHash as Contrasena,
+		u.FechaDeNacimiento as FechaNacimiento,
+		u.FechaDeRegistro as FechaRegistro,
+		ar.Name as Rol,
 		u.Estado 
-		from Usuarios as u
-		join Citas as c on c.UsuarioID =  u.UsuarioID and c.Estado in ('agendada','Agendada')
+		from FitnessCenterDB.dbo.AspNetUsers as u
+		INNER JOIN FitnessCenterDB.dbo.AspNetUserRoles aur ON u.Id = aur.UserId
+        INNER JOIN FitnessCenterDB.dbo.AspNetRoles ar ON aur.RoleId = ar.Id
+		join FitnessCenterDB.dbo.Citas as c on c.UserId =  u.Id and c.Estado in ('agendada','Agendada')
 END;
 
 CREATE   PROCEDURE dbo.sp_preReservarHorario

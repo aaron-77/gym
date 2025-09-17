@@ -5,6 +5,10 @@ using DataAccess.Infraestructure;
 using Microsoft.Identity.Client;
 using DTO.Dtos;
 using BL.Utils;
+using Microsoft.AspNetCore.Http; // Added for IHttpContextAccessor
+using DataAccess.Identity;
+using Microsoft.Extensions.Options;
+
 namespace API.Services
 {
     public class AuthService
@@ -14,19 +18,28 @@ namespace API.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
+        private readonly IHttpContextAccessor _httpContextAccessor; // Inyectar IHttpContextAccessor
+        private readonly TokensService _tokensService; // Inyectar TokensService
+        private readonly JwtSettings _jwtSettings; // Inyectar JwtSettings para obtener ExpiryMinutes
 
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             JwtTokenGenerator jwtTokenGenerator,
-            RoleManager<IdentityRole> roleManager
+            RoleManager<IdentityRole> roleManager,
+            IHttpContextAccessor httpContextAccessor, // Añadir a la inyección de dependencias
+            TokensService tokensService, // Añadir a la inyección de dependencias
+            IOptions<JwtSettings> jwtOptions
         )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtTokenGenerator = jwtTokenGenerator;
             _roleManager = roleManager;
+            _httpContextAccessor = httpContextAccessor; // Asignar
+            _tokensService = tokensService; // Asignar
+            _jwtSettings = jwtOptions.Value; // Asignar
         }
         public async Task<DTOLoggedUser> AuthenticateUser(string username, string password)
         {
@@ -38,7 +51,22 @@ namespace API.Services
             if (!result.Succeeded)
                 return null;
             var roles = await _userManager.GetRolesAsync(user);
-            var token = _jwtTokenGenerator.GenerateToken(user, roles);
+            var accessToken = await _jwtTokenGenerator.GenerateAccessToken(user, roles);
+            var idToken = _jwtTokenGenerator.GenerateIdToken(user,roles);
+
+            // Obtener información del cliente para el refresh token
+            var httpContext = _httpContextAccessor.HttpContext;
+            var clientId = "gymwebapp-frontend"; // Puedes obtenerlo de la configuración o del request si es necesario
+            var ipAddress = httpContext?.Connection.RemoteIpAddress?.ToString();
+            var userAgent = httpContext?.Request.Headers["User-Agent"].ToString();
+
+            var refreshToken = await _jwtTokenGenerator.GenerateRefreshToken(user.Id, clientId);
+            
+            // Registrar Access Token e Id Token en la base de datos
+            var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
+            await _tokensService.RegisterAccessTokenAsync(accessToken, user.Id, clientId, expiresAt, ipAddress, userAgent);
+            await _tokensService.RegisterIdTokenAsync(idToken, user.Id, clientId, expiresAt, ipAddress, userAgent);
+
             return new DTOLoggedUser
             {
                 Id = user.Id,
@@ -48,8 +76,62 @@ namespace API.Services
                 Telefono = user.PhoneNumber,
                 NumeroDeIdentificacion = user.NumeroDeIdentificacion,
                 NombreCompleto = user.NombreCompleto,
-                Token = token
+                AccessToken = accessToken,
+                IdToken = idToken,
+                RefreshToken = refreshToken
             };
+        }
+
+        public async Task<DTOLoggedUser> RefreshAccessToken(string refreshTokenString)
+        {
+            var userId = await _jwtTokenGenerator.ValidateRefreshToken(refreshTokenString);
+            if (userId == null)
+            {
+                return null; // Refresh token inválido o expirado
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return null; // Usuario no encontrado
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var newAccessToken = await _jwtTokenGenerator.GenerateAccessToken(user, roles);
+            var newIdToken = _jwtTokenGenerator.GenerateIdToken(user,roles);
+
+            var httpContext = _httpContextAccessor.HttpContext;
+            var clientId = "gymwebapp-frontend"; 
+            var ipAddress = httpContext?.Connection.RemoteIpAddress?.ToString();
+            var userAgent = httpContext?.Request.Headers["User-Agent"].ToString();
+
+            var newRefreshToken = await _jwtTokenGenerator.GenerateRefreshToken(user.Id, clientId); // Generar un nuevo refresh token
+
+            await _jwtTokenGenerator.RevokeRefreshToken(refreshTokenString); // Revocar el refresh token antiguo
+
+            // Registrar los nuevos Access Token e Id Token en la base de datos
+            var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
+            await _tokensService.RegisterAccessTokenAsync(newAccessToken, user.Id, clientId, expiresAt, ipAddress, userAgent);
+            await _tokensService.RegisterIdTokenAsync(newIdToken, user.Id, clientId, expiresAt, ipAddress, userAgent);
+
+            return new DTOLoggedUser
+            {
+                Id = user.Id,
+                Direccion = user.Direccion,
+                Correo = user.Email,
+                FechaDeNacimiento = user.FechaDeNacimiento,
+                Telefono = user.PhoneNumber,
+                NumeroDeIdentificacion = user.NumeroDeIdentificacion,
+                NombreCompleto = user.NombreCompleto,
+                AccessToken = newAccessToken,
+                IdToken = newIdToken,
+                RefreshToken = newRefreshToken
+            };
+        }
+
+        public async Task RevokeRefreshToken(string refreshTokenString)
+        {
+            await _jwtTokenGenerator.RevokeRefreshToken(refreshTokenString);
         }
 
         public async Task<string> RegisterUser(NewUser newUser)
@@ -64,7 +146,7 @@ namespace API.Services
             if (!result.Succeeded)
                 return null;
             var roles = await _userManager.GetRolesAsync(user);
-            var token = _jwtTokenGenerator.GenerateToken(user, roles);
+            var token = await _jwtTokenGenerator.GenerateAccessToken(user, roles); // Usar GenerateAccessToken
             return token;
         }
         /// <summary>
@@ -85,8 +167,9 @@ namespace API.Services
                 var user = new ApplicationUser
                 {
                     UserName = model.Correo,
+                    Apellido = model.Apellido,
                     Email = model.Correo,
-                    NombreCompleto = model.NombreCompleto,
+                    NombreCompleto = model.Nombre,
                     PhoneNumber = model.Telefono,
                     EmailConfirmed = true,
                     Direccion = model.Direccion,
@@ -104,6 +187,7 @@ namespace API.Services
                     return new DTOCreatedUser
                     {
                         Id = user.Id,
+                        Apellido = user.Apellido,
                         NombreCompleto = user.NombreCompleto,
                         FechaDeNacimiento = model.FechaDeNacimiento,
                         Direccion = model.Direccion,
@@ -124,10 +208,6 @@ namespace API.Services
                 throw new InvalidOperationException($"Error al registrar usuario: {ex.Message}");
 
             }
-
-            // Crear el nuevo usuario
-
-
         }
 
         /// <summary>

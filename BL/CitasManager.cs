@@ -11,6 +11,7 @@ namespace BL
 {
     public class CitasManager
     {
+        
         private HttpCustomClient httpClient; 
         public CitasManager(HttpCustomClient _httpClient ){
             httpClient = _httpClient;
@@ -40,7 +41,7 @@ namespace BL
 
         public async Task<HttpResponseDuracionCitasMedicion> registrarDuracionCitasMedicion(DTO.Dtos.DuracionCitasMedicion duracion)
         {
-            HttpCustomClient httpClient = new HttpCustomClient();
+            
             JsonContent jsonCon = JsonContent.Create(duracion);
             string categoriasResponse = await httpClient.post("api/registrarDuracion", jsonCon);
             HttpResponseDuracionCitasMedicion usuario = JsonSerializer.Deserialize<HttpResponseDuracionCitasMedicion>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -64,7 +65,7 @@ namespace BL
 
         public async Task<HttpResponseCitaEdit> modificarCita(DTO.Dtos.CitaEdit cita)
         {
-            HttpCustomClient httpClient = new HttpCustomClient();
+            
             JsonContent jsonCon = JsonContent.Create(cita);
             string categoriasResponse = await httpClient.put("api/registrarCita", jsonCon);
             HttpResponseCitaEdit responseCita = JsonSerializer.Deserialize<HttpResponseCitaEdit>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -86,7 +87,6 @@ namespace BL
         }
         public async Task<HttpResponseListadoCitas> obtenerCitasAgendadas(int idUsuario)
         {
-            HttpCustomClient httpClient = new HttpCustomClient();
             
             string categoriasResponse = await httpClient.get("api/getCitasAgendadas?idUsuario="+ idUsuario);
             HttpResponseListadoCitas responseListadoCitas = JsonSerializer.Deserialize<HttpResponseListadoCitas>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -109,7 +109,7 @@ namespace BL
 
         public async Task<HttpResponseDuracionCitasMedicion> obtenerDuracionCitasMedicion()
         {
-            HttpCustomClient httpClient = new HttpCustomClient();
+            
 
             string categoriasResponse = await httpClient.get("api/getDuracionCitasMedicion");
             HttpResponseDuracionCitasMedicion responseListadoCitas = JsonSerializer.Deserialize<HttpResponseDuracionCitasMedicion>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });

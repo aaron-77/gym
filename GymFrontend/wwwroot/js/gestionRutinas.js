@@ -8,8 +8,8 @@ const handleSelectedAction = async (ev) => {
     const comboSelected = ev.currentTarget;
     enableElements(comboSelected.id);
     if (comboSelected.id == "inputCliente") {
-        clientId = parseInt(comboSelected.value);
-        await getRutinas();
+        clientId = comboSelected.value;
+        await getRutinas(clientId);
         fillCitasAgendadas();
         console.log(rutinas);
     }
@@ -54,26 +54,26 @@ const getClientes = async() => {
     }
     clients = jsonResponse.data;
 }
-const getRutinas = async () => {
-    if (clientId != null && clientId > 0) {
-        const response = await fetch("http://localhost:5274/api/consultarRutinas?UsuarioID=" + clientId);
+const getRutinas = async (clientId) => {
+    if (clientId != null) {
+        const response = await fetch("/obtenerRutinasDeCliente?UsuarioID=" + clientId); // MODIFICADO: Usar endpoint del frontend
         const jsonResponse = await response.json();
-        if (!jsonResponse.ok) {
+        if (!jsonResponse.success) {
             console.log(jsonResponse.message)
             return;
         }
-        rutinas = jsonResponse.data;
+        rutinas = jsonResponse.payload;
     }
 }
 const getEjercicios = async() => {
     if (rutinaId != null && rutinaId > 0) {
-        const response = await fetch("http://localhost:5274/api/consultarEjercicios");
+        const response = await fetch("/Ejercicios/obtenerEjercicios"); // MODIFICADO: Usar endpoint del frontend
         const jsonResponse = await response.json();
-        if (!jsonResponse.ok) {
+        if (!jsonResponse.success) {
             console.log(jsonResponse.message)
             return;
         }
-        ejercicios = jsonResponse.data;
+        ejercicios = jsonResponse.payload;
     }
 }
 function fillComboClients() {

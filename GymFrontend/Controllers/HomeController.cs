@@ -15,11 +15,13 @@ namespace GymFrontend.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _config;
+        private readonly HttpCustomClient client;
 
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration,HttpCustomClient httpClient)
         {
             _logger = logger;
             _config = configuration;
+            client = httpClient;
         }
 
         public IActionResult Index()
@@ -98,7 +100,6 @@ namespace GymFrontend.Controllers
 
         public async Task<IActionResult> DetalleDeClase(int idClase)
         {
-            var client = new HttpCustomClient();
             string endpointUrl = $"api/clases/detallesDeClase?idClase={idClase}";
             var responseString = await client.get(endpointUrl);
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };

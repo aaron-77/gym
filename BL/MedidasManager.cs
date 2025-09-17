@@ -39,15 +39,15 @@ namespace BL
             }
 
         }
-        public async Task<ResponseParametroDeMedicion> obtenerParametrosDeMedicion()
+        public async Task<DTOResponse<List<DTOParametroDeMedicion>>> obtenerParametrosDeMedicion()
         {
 
 
             try
             {
-                HttpCustomClient httpClient = new HttpCustomClient();
+                
                 string parametrosDeMedicionResponse = await httpClient.get("api/getParametrosDeMedicion");
-                ResponseParametroDeMedicion response = JsonSerializer.Deserialize<ResponseParametroDeMedicion>(parametrosDeMedicionResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                DTOResponse<List<DTOParametroDeMedicion>> response = JsonSerializer.Deserialize<DTOResponse<List<DTOParametroDeMedicion>>>(parametrosDeMedicionResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return response;
             }
             catch (ArgumentNullException ex)
@@ -67,7 +67,7 @@ namespace BL
         {
             try
             {
-                HttpCustomClient httpClient = new HttpCustomClient();
+                
                 string progresoResponse = await httpClient.get($"api/progresoDeUsuario?idUsuario={idUsuario}");
                 HttpResponseProgresoUsuario response = JsonSerializer.Deserialize<HttpResponseProgresoUsuario>(progresoResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return response;
@@ -89,7 +89,7 @@ namespace BL
         {
             try
             {
-                HttpCustomClient httpClient = new HttpCustomClient();
+                
                 string añosMedidasRegistradas = await httpClient.get($"api/obtenerAñosConActividadDelCliente?idCliente={idUsuario}");
                 HttpResponseAñosActivo response = JsonSerializer.Deserialize<HttpResponseAñosActivo>(añosMedidasRegistradas, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return response;

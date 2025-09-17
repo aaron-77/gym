@@ -8,6 +8,7 @@ namespace DTO.Dtos
     {
         public string Id { get; set; }
         public string NombreCompleto { get; set; }
+        public string Apellido { get; set; }
 
         public DateTime FechaDeNacimiento { get; set; }  // Usamos DateTime para representar una fecha
 

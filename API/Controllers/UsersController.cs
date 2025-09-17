@@ -14,40 +14,48 @@ using Microsoft.AspNetCore.Identity;
 using API.Infraestructure.Auth;
 using BL.Utils;
 using API.Services;
-
+using DataAccess.Identity;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 namespace API.Controllers
 {
     public class UsersController : Controller
     {
         public readonly IConfiguration configuration;
         public readonly IHttpContextAccessor _httpAccesor;
-        public readonly EndPointsManager _emanager;
+        
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
         private readonly AuthService _authService;
-        public UsersController(EndPointsManager emanager, SignInManager<ApplicationUser> signInManager,
+        private readonly JwtSettings _jwtSettings;
+        public UsersController(SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,
         JwtTokenGenerator jwtTokenGenerator,
-        AuthService authService
+        AuthService authService,
+        IOptions<JwtSettings> jwtOptions
         )
         {
-            _emanager = emanager;
+
             _signInManager = signInManager;
             _userManager = userManager;
             _jwtTokenGenerator = jwtTokenGenerator;
             _authService = authService;
+            _jwtSettings = jwtOptions.Value;
         }
         public IActionResult Index()
         {
             return View();
         }
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("api/obtenerUsuarios")]
         public async Task<IActionResult> getUsuarios()
         {
+            var jwt = Request.Cookies["AuthToken"];
             FitnessCenterDbContext db = new FitnessCenterDbContext();
-            DTO.Dtos.HttpResponseModelListadoUsers respuesta = new HttpResponseModelListadoUsers();
+            DTOResponse<List<ExistingUser>> respuesta = new DTOResponse<List<ExistingUser>>();
+
             List<ExistingUser> usuarios = await db.Usuarios.
                                               Select(
                                                     u => new ExistingUser()
@@ -57,10 +65,11 @@ namespace API.Controllers
                                                         Apellido = u.Apellido,
                                                         FechaDeNacimiento = u.FechaNacimiento
                                                     }).ToListAsync();
-            respuesta.data = usuarios;
+            respuesta.payload = usuarios;
             return Ok(respuesta);
         }
 
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("api/obtenerUsuariosPorRol")]
         public async Task<IActionResult> getUsuariosPorRol([FromQuery] string rol, [FromQuery] string estado = "activo")
@@ -68,7 +77,7 @@ namespace API.Controllers
             try
             {
                 FitnessCenterDbContext db = new FitnessCenterDbContext();
-                List<QueryUser> usuarios = await db.userSP.FromSqlInterpolated($@"EXEC dbo.sp_consultarUsuarios @tipoUsuario={rol},@estado={estado}").ToListAsync();
+                List<QueryUser> usuarios = await db.userSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_consultarUsuarios @tipoUsuario={rol},@estado={estado}").ToListAsync();
 
                 var respuesta = BL.Utils.ResponseManager.BuildResponse(
                     success: true,
@@ -94,46 +103,7 @@ namespace API.Controllers
             }
         }
 
-        /*
-        [HttpPost]
-        [Route("api/autenticar")]
-
-        public IActionResult RegistrarUsuario([FromBody] UserCredentials credenciales)
-        {
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
-            
-            if (credenciales == null)
-            {
-
-                return null;
-            }
-            HttpLoginResponse respuesta = new HttpLoginResponse();
-            Usuario dbUser = db.Usuarios.FirstOrDefault(u => u.Email == credenciales.correo
-                                                            &&
-                                                        u.Contrasena == credenciales.contrasena);
-            if (dbUser == null)
-            {
-F                respuesta.ok = false;
-                respuesta.data = null;
-                return BadRequest(respuesta);
-            }
-            Role matchedRole = db.Roles.FirstOrDefault(r => r.RolId == dbUser.RolId);
-
-            respuesta.ok = true;
-            respuesta.data = new NewUser(dbUser.Nombre, dbUser.FechaNacimiento, "no tiene direccion", "No tiene identificacion", dbUser.Email, dbUser.Telefono, " ");
-            if (matchedRole.NombreRol == "cliente")
-            {
-                respuesta.urlPageForUser = "https://localhost:5262/clientes";
-
-            }
-            if (matchedRole.NombreRol == "empleado")
-            {
-                respuesta.urlPageForUser = "https://localhost:5262/empleados";
-            }
-            return Ok(respuesta);
-
-        }*/
-
+        
 
         [HttpPost]
         [Route("api/RegistrarUsuario")]
@@ -156,17 +126,17 @@ F                respuesta.ok = false;
                     }
 
                 }
-               respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
-                    success: false,
-                    httpCode: 400,
-                    message: "Los datos proporcionados son inválidos",
-                    errors: respuesta.errors,
-                    payload: null
-                );
-                
+                respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
+                     success: false,
+                     httpCode: 400,
+                     message: "Los datos proporcionados son inválidos",
+                     errors: respuesta.errors,
+                     payload: null
+                 );
+
                 return BadRequest(respuesta);
             }
-     
+
             if (usuario == null)
             {
                 respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
@@ -181,7 +151,7 @@ F                respuesta.ok = false;
             try
             {
 
-                var registerResult = await _authService.RegisterUserWithRoleAsync(usuario,usuario.Rol);
+                var registerResult = await _authService.RegisterUserWithRoleAsync(usuario, usuario.Rol);
                 if (registerResult == null)
                 {
                     ResponseManager.BuildResponse<DTOCreatedUser>(
@@ -217,6 +187,7 @@ F                respuesta.ok = false;
         }
 
         [HttpPost]
+
         [Route("api/autenticar")]
         public async Task<IActionResult> AutenticarUsuario([FromBody] UserCredentials credenciales)
         {
@@ -234,16 +205,59 @@ F                respuesta.ok = false;
                 return Unauthorized(response);
             }
 
-             response = ResponseManager.BuildResponse<DTOLoggedUser>(
-                success: true,
-                httpCode: 200,
-                message: "Autenticación exitosa",
-                errors: null,
-                payload: loggedUser
-            );
+            response = ResponseManager.BuildResponse<DTOLoggedUser>(
+               success: true,
+               httpCode: 200,
+               message: "Autenticación exitosa",
+               errors: null,
+               payload: loggedUser
+           );
             // Devolver token
             return Ok(response);
-           
+
+        }
+
+        [Authorize(Roles = "empleado,cliente")]
+        [HttpPost]
+        [Route("api/refresh")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+        {
+            var refreshedUser = await _authService.RefreshAccessToken(request.RefreshToken);
+            if (refreshedUser == null)
+            {
+                return Unauthorized(ResponseManager.BuildResponse<DTOLoggedUser>(
+                    success: false,
+                    httpCode: 401,
+                    message: "Refresh token inválido o expirado",
+                    errors: null,
+                    payload: null
+                ));
+            }
+
+            var response = ResponseManager.BuildResponse<DTOLoggedUser>(
+                success: true,
+                httpCode: 200,
+                message: "Tokens refrescados exitosamente",
+                errors: null,
+                payload: refreshedUser
+            );
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "empleado,cliente")]
+        [HttpPost]
+        [Route("api/logout")]
+        public IActionResult Logout([FromBody] LogoutRequest request)
+        {
+            _authService.RevokeRefreshToken(request.RefreshToken);
+            var response = ResponseManager.BuildResponse<object>(
+                success: true,
+                httpCode: 200,
+                message: "Sesión cerrada exitosamente",
+                errors: null,
+                payload: null
+            );
+            return Ok(response);
         }
 
         [HttpPost]
@@ -285,7 +299,7 @@ F                respuesta.ok = false;
         {
             HttpLoginResponse response = new HttpLoginResponse();
             FitnessCenterDbContext db = new FitnessCenterDbContext();
-            string baseUrl = _emanager.getBaseUrl("frontend");
+            string baseUrl = _jwtSettings.BackendAudiencie;
             try
             {
 

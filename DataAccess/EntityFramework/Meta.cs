@@ -7,6 +7,8 @@ public partial class Meta
 {
     public int MetaId { get; set; }
 
+    public string? NewFkUsuario { get; set; }
+
     public int FkUsuario { get; set; }
 
     public int FkIntencion { get; set; }

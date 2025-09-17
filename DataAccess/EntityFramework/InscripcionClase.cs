@@ -7,8 +7,10 @@ public partial class InscripcionClase
 {
     public int InscripcionId { get; set; }
 
+
     public int? ClaseId { get; set; }
 
+    public string? NewFkCliente { get; set; }
     public int? UsuarioId { get; set; }
 
     public DateTime? FechaInscripcion { get; set; }

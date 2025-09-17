@@ -7,6 +7,7 @@ public partial class Medida
 {
     public int MedidaId { get; set; }
 
+    public string? NewFkUsuario { get; set; }
     public int FkUsuario { get; set; }
 
     public DateTime? FechaDeCreacion { get; set; }

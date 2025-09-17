@@ -88,18 +88,28 @@
                     <span>Inscripción a Clases</span>
                 </a>
             </li>
+            <li class="nav-item"></li>
+                
+                <a id="logoutLink" class="nav-link collapsed" href="#">
+                    <span>Crerrar Sesión</span>
+                </a>
+            </li>
             <!-- End Profile Page Nav -->
         </ul>
     </aside>
     <!-- End Sidebar-->
 
     <main id="main" class="main">
+        @using (Html.BeginForm("CerrarSesion", "Users", FormMethod.Post, new { id = "logoutForm" }))
+        {
+            <button type="submit" style="display:none;"></button>
+        }
         @RenderBody()
     </main>
     <script src="~/js/main.js"></script>
     <script src="~/lib/bootstrap2/bootstrap.bundle.min.js"></script>
     <script src="assets/vendor/quill/quill.js"></script>
-
+    <script src="~/js/Logout.js"></script>
 </body>
 @RenderSection("Scripts", required: false)
 @RenderSection("Styles", required: false)

@@ -1,10 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using BL;
+using DTO.Dtos;
+using System.Threading.Tasks;
+using System;
+using BL.Utils;
 
 namespace GymFrontend.Controllers
 {
+    [Route("[controller]")]
+    [ApiController]
     public class ClasesController : Controller
     {
+        private readonly ClasesManager _clasesManager;
+
+        public ClasesController(ClasesManager clasesManager)
+        {
+            _clasesManager = clasesManager;
+        }
+
         [HttpGet]
         [Route("registrarClase")]
         public IActionResult RegistroDeClases()
@@ -49,6 +63,78 @@ namespace GymFrontend.Controllers
         public IActionResult InscripcionAClases()
         {
             return View();
+        }
+
+        [HttpGet("obtenerClases")]
+        public async Task<IActionResult> ObtenerClases([FromQuery] bool? activa = null)
+        {
+            try
+            {
+                var result = await _clasesManager.ObtenerClases(activa);
+                if (result.success)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new DTOResponse<List<DTOClaseSimple>> { success = false, message = "Error interno del servidor al obtener clases.", errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } } });
+            }
+        }
+
+        [HttpGet("obtenerClasesProgramadasPorId")]
+        public async Task<IActionResult> ObtenerClasesProgramadasPorId([FromQuery] int? idClase = null)
+        {
+            try
+            {
+                var result = await _clasesManager.ObtenerClasesProgramadasPorId(idClase);
+                if (result.success)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500,ResponseManager.BuildResponse<DTOResponse<List<DTOClaseProgramadaView>>> (false,500 ,"Error interno del servidor al obtener clases programadas por ID.", new List<ErrorModel> { new ErrorModel { message = ex.Message } },null));
+            }
+        }
+
+        [HttpGet("obtenerEstadosDeClasesProgramdas")]
+        public async Task<IActionResult> ObtenerEstadosDeClasesProgramdas()
+        {
+            try
+            {
+                var result = await _clasesManager.ObtenerEstadosDeClasesProgramdas();
+                if (result.success)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new DTOResponse<List<DTOEstadoClaseProgramada>> { success = false, message = "Error interno del servidor al obtener estados de clases programadas.", errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } } });
+            }
+        }
+
+        [HttpPost("registrarClaseProgramada")]
+        public async Task<IActionResult> RegistrarClaseProgramada([FromBody] DTODatosClaseProgramada claseProgramadaRegistro)
+        {
+            try
+            {
+                var result = await _clasesManager.RegistrarClaseProgramada(claseProgramadaRegistro);
+                if (result.success)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new DTOResponse<string> { success = false, message = "Error interno del servidor al registrar clase programada.", errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } } });
+            }
         }
     }
 } 

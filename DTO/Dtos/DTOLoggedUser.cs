@@ -22,7 +22,9 @@ namespace DTO.Dtos
         public string Correo { get; set; }
 
         public string Telefono { get; set; }
-        public string Token { get; set; }
+        public string AccessToken { get; set; }
+        public string IdToken { get; set; }
+        public string RefreshToken { get; set; }
 
     }
 }

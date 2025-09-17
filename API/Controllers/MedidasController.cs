@@ -7,12 +7,14 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using EllipticCurve.Utils;
 using API.Services;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace API.Controllers
 {
     public class MedidasController : Controller
     {
+        [Authorize(Roles = "empleado")]
         [HttpPost]
         [Route("api/RegistrarMedida")]
         public IActionResult Index([FromBody] DTO.Dtos.DTOMedida medida)
@@ -76,30 +78,27 @@ namespace API.Controllers
         }
 
 
+        [Authorize(Roles = "empleado,cliente")]
         [HttpGet]
         [Route("api/getParametrosDeMedicion")]
         public async Task<IActionResult> getParametrosDeMedicion([FromQuery] int idUsuario)
         {
             FitnessCenterDbContext db = new FitnessCenterDbContext();
-            ResponseParametroDeMedicion respuesta = new ResponseParametroDeMedicion();
+            DTOResponse<List<DTOParametroDeMedicion>> respuesta = new DTOResponse<List<DTOParametroDeMedicion>>();
+
             try
             {
                 var listadoParametrosDeMedicion = await db.parametrosDeMedicionSP.FromSqlInterpolated($@"EXEC sp_obtenerParametrosDeMedicionConUnidad").ToListAsync();
-                respuesta.ok = true;
-                respuesta.message = "consulta exitosa";
-                respuesta.errors = null;
-                respuesta.data = listadoParametrosDeMedicion;
+                respuesta = ResponseManager.BuildResponse(true, 200, "consulta exitosa", null,listadoParametrosDeMedicion);
             }
             catch (Exception ex)
             {
-                respuesta.ok = false;
-                respuesta.message = "Error al consultar los parametros de medicion";
-                respuesta.errors = null;
-                respuesta.data = null;
+                respuesta = ResponseManager.BuildResponse<List<DTOParametroDeMedicion>>(false, 500, "Error al consultar los parametros de medicion", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
             }
             return Ok(respuesta);
         }
 
+        [Authorize(Roles = "cliente")]
         [HttpGet]
         [Route("api/progresoDeUsuario")]
         public async Task<IActionResult> getProgresoDelCliente([FromQuery] int idUsuario)
@@ -127,6 +126,7 @@ namespace API.Controllers
             return Ok(respuesta);
         }
 
+        [Authorize(Roles = "empleado,cliente")]
         [HttpGet]
         [Route("api/obtenerAñosConActividadDelCliente")]
         public async Task<IActionResult> getAñosActivo([FromQuery] int idCliente)
@@ -153,6 +153,7 @@ namespace API.Controllers
         }
 
 
+        [Authorize(Roles = "cliente,empleado")]
         [HttpGet("obtenerDetallesDeProgreso")]
         public async Task<ActionResult<List<DTOUltimaMedidaDeParametro>>> ObtenerDetallesDeProgreso(
     [FromQuery] int idCliente,
@@ -242,6 +243,7 @@ namespace API.Controllers
             return null;
         }
 
+        [Authorize(Roles = "empleado")]
         [HttpGet("api/obtenerEjerciciosYParametros")]
         public async Task<ActionResult<List<DTOEjerciciosYParametrosDelCliente>>> ObtenerDetallesDeProgreso
         ([FromQuery] int idCliente)

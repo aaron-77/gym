@@ -13,30 +13,55 @@ using DTO.Dtos;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using DataAccess.Identity;
+using API.Controllers;
+using DataAccess;
 var builder = WebApplication.CreateBuilder(args);
-//builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
+builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
 builder.Services.Configure<JwtSettings>(jwtSection);
 
 var jwtSettings = jwtSection.Get<JwtSettings>();
 var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<FitnessCenterDbContext>()
+    .AddDefaultTokenProviders();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+}).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme,options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        
+
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.Audience,
+        ValidAudience = jwtSettings.BackendAudiencie,
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
+    
+    /* options.Events = new JwtBearerEvents
+    {
+        
+        OnChallenge = context =>
+        {
+            context.HandleResponse();
+            //context.Response.Redirect(LoginPath);
+            return Task.CompletedTask;
+        },
+        OnForbidden = context =>
+        {
+            //context.Response.Redirect(AccessDeniedPath);
+            return Task.CompletedTask;
+        }
+
+    }; */
 });
 
 /* buException has occurred: CLR/System.InvalidOperationException
@@ -88,15 +113,19 @@ string smtpUsername = smtpSettings["Username"];
 string smtpPassword = smtpSettings["Password"];
 
 builder.Services.AddScoped(sp => new EmailManagerMailKit(smtpServer, smtpPort, smtpUsername, smtpPassword));
-builder.Services.AddScoped<HorariosService>(); 
-builder.Services.AddScoped<HttpCustomClient>(); 
-builder.Services.AddHttpContextAccessor(); 
-builder.Services.AddScoped<EndPointsManager>();
+builder.Services.AddHttpClient<HttpCustomClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["urls"]);
+}).AddHttpMessageHandler<AuthHeaderHandler>();
+builder.Services.AddScoped<HorariosService>();
+builder.Services.AddScoped<HttpCustomClient>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserRoleService>();
 builder.Services.AddScoped<ReservacionesHub>();
 builder.Services.AddScoped<ServicioActualizacionesDeHorariosRealTime>();  
 builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<TokensService>(); // Registrar TokensService
 
 builder.Services.AddQuartz(configuration => {
     configuration.UseMicrosoftDependencyInjectionJobFactory();
@@ -121,15 +150,14 @@ builder.Services.AddQuartz(configuration => {
 builder.Services.AddQuartzHostedService(option => option.WaitForJobsToComplete = true);
 
 builder.Services.AddQuartz(options => { options.UseMicrosoftDependencyInjectionJobFactory(); });
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<FitnessCenterDbContext>()
-    .AddDefaultTokenProviders();
 
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = $"/{builder.Configuration["urls"]}/SignIn" ;
-    options.AccessDeniedPath = $"/{builder.Configuration["urls"]}/SignIn";
-});
+
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddDataAccess(); // Agregado
+builder.Services.AddBusinessLayer(); // Agregado
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

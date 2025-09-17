@@ -2,6 +2,7 @@
 using BL.Utils;
 using DataAccess.EntityFramework;
 using DTO.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +11,7 @@ namespace API.Controllers
     public class CitasController : Controller
     {
         [HttpPost]
+        [Authorize(Roles = "empleado")]
         [Route("api/RegistrarCita")]
 
         public async Task<IActionResult> RegistrarCita([FromBody] DTO.Dtos.Cita cita)
@@ -69,6 +71,7 @@ namespace API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "empleado")]
         [Route("api/registrarDuracion")]
 
         public async Task<IActionResult> RegistrarDuracion([FromBody] DTO.Dtos.DuracionCitasMedicion duracion)
@@ -127,6 +130,7 @@ namespace API.Controllers
 
 
         [HttpPut]
+        [Authorize(Roles = "empleado")]
         [Route("api/RegistrarCita")]
 
         public async Task<IActionResult> ModificarCita([FromBody] DTO.Dtos.CitaEdit cita)
@@ -180,6 +184,7 @@ namespace API.Controllers
 
 
         [HttpGet]
+        [Authorize(Roles = "empleado")]
         [Route("api/getDuracionCita")]
 
         public async Task<IActionResult> getDuracionCita()
@@ -195,6 +200,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "empleado,cliente")]
         [Route("api/getCitasAgendadas")]
 
         public async Task<IActionResult> getCitasAgendadas([FromQuery] int idUsuario)
@@ -225,9 +231,9 @@ namespace API.Controllers
         }
 
 
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("api/getDuracionCitasMedicion")]
-
         public async Task<IActionResult> getDuracionCitasMedicion()
         {
             FitnessCenterDbContext db = new FitnessCenterDbContext();

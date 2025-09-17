@@ -22,118 +22,6 @@ namespace DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ApplicationUser", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Direccion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("FechaDeNacimiento")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NombreCompleto")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NumeroDeIdentificacion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "436e5759-b9d4-4166-a623-3d910b68c9be",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "6f6e19fb-db71-4c37-ab5b-be2eed4e90ad",
-                            Direccion = "Boulevard diamante #123 entre 5ta y 6ta de aleta norte",
-                            EmailConfirmed = false,
-                            FechaDeNacimiento = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            LockoutEnabled = false,
-                            NombreCompleto = "Marsel Dupon",
-                            NumeroDeIdentificacion = "BG-1234567890",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "16c10baa-ff8a-4481-b6f9-c1f968f3e69a",
-                            TwoFactorEnabled = false
-                        },
-                        new
-                        {
-                            Id = "7a2da2f8-9fe8-480c-adee-2eb8d18d9ab7",
-                            AccessFailedCount = 0,
-                            ConcurrencyStamp = "847f3aad-02eb-447c-8e2c-f72a1795e9db",
-                            Direccion = "Avenida arteaga #456  entre Fabricio gomez y benito juarez",
-                            EmailConfirmed = false,
-                            FechaDeNacimiento = new DateTime(1989, 2, 14, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            LockoutEnabled = false,
-                            NombreCompleto = "Matias Botero Rodriguez",
-                            NumeroDeIdentificacion = "BG-0987654321",
-                            PhoneNumberConfirmed = false,
-                            SecurityStamp = "826fa38b-f6f8-4962-9ebb-673a4372db6a",
-                            TwoFactorEnabled = false
-                        });
-                });
-
             modelBuilder.Entity("DTO.Dtos.Cita", b =>
                 {
                     b.Property<int>("Id")
@@ -672,6 +560,63 @@ namespace DataAccess.Migrations
                     b.ToTable("rutinaSP");
                 });
 
+            modelBuilder.Entity("DataAccess.EntityFramework.AccessToken", b =>
+                {
+                    b.Property<Guid>("AccessTokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("AccessTokenId")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("ClientId");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("ExpiresAt");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("IpAddress");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("IssuedAt")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("RevokedAt");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("TokenHash");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)")
+                        .HasColumnName("UserAgent");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("AccessTokenId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AccessTokens", (string)null);
+                });
+
             modelBuilder.Entity("DataAccess.EntityFramework.Año", b =>
                 {
                     b.Property<int>("IdAño")
@@ -776,6 +721,12 @@ namespace DataAccess.Migrations
                     b.Property<DateTime>("FechaHoraFin")
                         .HasColumnType("datetime");
 
+                    b.Property<string>("NewEntrenadorId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NewUserId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("TipoCita")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -835,6 +786,9 @@ namespace DataAccess.Migrations
                     b.Property<int?>("InstructorId")
                         .HasColumnType("int")
                         .HasColumnName("InstructorID");
+
+                    b.Property<string>("NewInstructorId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NombreClase")
                         .IsRequired()
@@ -906,6 +860,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fkEstadoClaseProgramada")
                         .HasComment("los estados seran: disponible,no disponible,cancelada");
+
+                    b.Property<string>("NewFkEntrenador")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdProgramacionClase")
                         .HasName("PK__clasesPr__712E87EE8D30E7B0");
@@ -1767,6 +1724,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fkUsuario");
 
+                    b.Property<string>("NewFkUsuario")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal?>("Valor")
                         .HasColumnType("decimal(10, 2)")
                         .HasColumnName("valor");
@@ -1833,6 +1793,9 @@ namespace DataAccess.Migrations
                     b.Property<int>("FkUsuario")
                         .HasColumnType("int")
                         .HasColumnName("fkUsuario");
+
+                    b.Property<string>("NewFkUsuario")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("ValorObjetivo")
                         .HasColumnType("decimal(10, 2)")
@@ -1966,6 +1929,9 @@ namespace DataAccess.Migrations
                     b.Property<decimal>("Monto")
                         .HasColumnType("decimal(10, 2)");
 
+                    b.Property<string>("NewUserId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("UsuarioId")
                         .HasColumnType("int")
                         .HasColumnName("UsuarioID");
@@ -2067,6 +2033,67 @@ namespace DataAccess.Migrations
                     b.ToTable("preReservasDeHorario", (string)null);
                 });
 
+            modelBuilder.Entity("DataAccess.EntityFramework.RefreshToken", b =>
+                {
+                    b.Property<Guid>("RefreshTokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("RefreshTokenId")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<string>("ClientId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("ClientId");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("ExpiresAt");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("IpAddress");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("IssuedAt")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<Guid?>("ReplacedByTokenId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("ReplacedByTokenId");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("RevokedAt");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)")
+                        .HasColumnName("TokenHash");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)")
+                        .HasColumnName("UserAgent");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("UserId");
+
+                    b.HasKey("RefreshTokenId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens", (string)null);
+                });
+
             modelBuilder.Entity("DataAccess.EntityFramework.RegistrosEntrenamiento", b =>
                 {
                     b.Property<int>("RegistroId")
@@ -2080,6 +2107,9 @@ namespace DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("NewUserId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("RutinaId")
                         .HasColumnType("int")
@@ -2144,6 +2174,12 @@ namespace DataAccess.Migrations
                     b.Property<int?>("FkTipoRutina")
                         .HasColumnType("int")
                         .HasColumnName("fkTipoRutina");
+
+                    b.Property<string>("NewEntrenadorId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NewUserId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Observaciones")
                         .HasMaxLength(255)
@@ -2410,6 +2446,102 @@ namespace DataAccess.Migrations
                     b.ToView("v_nivelesDeIntensidad", (string)null);
                 });
 
+            modelBuilder.Entity("DataAccess.Identity.ApplicationUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Apellido")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Direccion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("FechaDeNacimiento")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaDeRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("IdAntiguo")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NombreCompleto")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NumeroDeIdentificacion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -2555,6 +2687,18 @@ namespace DataAccess.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.AccessToken", b =>
+                {
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_AccessTokens_AspNetUsers");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.BeneficiosDeClase", b =>
@@ -2976,6 +3120,18 @@ namespace DataAccess.Migrations
                     b.Navigation("FkHorarioClaseProgramadaNavigation");
                 });
 
+            modelBuilder.Entity("DataAccess.EntityFramework.RefreshToken", b =>
+                {
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_RefreshTokens_AspNetUsers");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("DataAccess.EntityFramework.RegistrosEntrenamiento", b =>
                 {
                     b.HasOne("DataAccess.EntityFramework.Rutina", "Rutina")
@@ -3062,7 +3218,7 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("ApplicationUser", null)
+                    b.HasOne("DataAccess.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3071,7 +3227,7 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("ApplicationUser", null)
+                    b.HasOne("DataAccess.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3086,7 +3242,7 @@ namespace DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ApplicationUser", null)
+                    b.HasOne("DataAccess.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3095,7 +3251,7 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("ApplicationUser", null)
+                    b.HasOne("DataAccess.Identity.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

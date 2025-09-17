@@ -287,8 +287,8 @@ async function obtenerHorariosNuevos(fecha = null) {
         if (fecha) {  // solo agrega fecha si no es null o undefined
             params.fecha = fecha;
         }
-        const responseHorariosDisponibles = await realizarPeticionAPI('Horarios/obtenerHorariosDisponibles', undefined, params);
-        const responsePreReservas = await realizarPeticionAPI('Horarios/obtenerPreReservas', undefined, params);
+        const responseHorariosDisponibles = await realizarPeticionAPI('/Horarios/obtenerHorariosDisponibles', undefined, params);
+        const responsePreReservas = await realizarPeticionAPI('/Horarios/obtenerPreReservas', undefined, params);
         
         // Extraer los datos del payload si la respuesta tiene estructura DTOResponse
         const horariosDisponibles = responseHorariosDisponibles.payload || responseHorariosDisponibles;
@@ -495,7 +495,7 @@ async function obtenerEntrenadores() {
             rol: 'empleado',
             estado: 'activo'
         };
-        const response = await realizarPeticionAPI('obtenerUsuariosPorRol', undefined, params);
+        const response = await realizarPeticionAPI('/Users/obtenerUsuariosPorRol', undefined, params);
         return response.payload || [];
     } catch (error) {
         console.error('Error al obtener entrenadores:', error);
@@ -512,7 +512,7 @@ async function obtenerClases() {
         const params = {
             activa: true
         };
-        const response = await realizarPeticionAPI('clases/obtenerClases', undefined, params);
+        const response = await realizarPeticionAPI('/Clases/obtenerClases', undefined, params);
         return response.payload || [];
     } catch (error) {
         console.error('Error al obtener clases:', error);
@@ -526,7 +526,7 @@ async function obtenerClases() {
  */
 async function obtenerEstadosClasesProgramadas() {
     try {
-        const response = await realizarPeticionAPI('clases/obtenerEstadosDeClasesProgramdas');
+        const response = await realizarPeticionAPI('/Clases/obtenerEstadosDeClasesProgramdas');
         return response.payload || [];
     } catch (error) {
         console.error('Error al obtener estados de clases programadas:', error);
@@ -569,7 +569,7 @@ async function registrarClaseProgramada(event) {
         console.log('Datos a enviar:', datosClaseProgramada);
         
         // Realizar la petición POST al endpoint
-        const response = await realizarPeticionAPI('clases/registrarClaseProgramada', datosClaseProgramada);
+        const response = await realizarPeticionAPI('/Clases/registrarClaseProgramada', datosClaseProgramada);
         
         if (response.success) {
             showMessage(iconTypes.success,'Clase programada registrada exitosamente con ID: ');
@@ -915,7 +915,7 @@ async function registrarPreReservaDeHorario() {
     };
 
     try {
-        const response = await realizarPeticionAPI('Horarios/preReservarHorario', body, undefined, 'POST');
+        const response = await realizarPeticionAPI('/Horarios/preReservarHorario', body, undefined, 'POST');
         if (response.success) {
             alert('Pre-reserva registrada exitosamente.');
         } else {

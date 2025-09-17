@@ -5,13 +5,15 @@ using BL;
 using BL.Utils;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
+
 namespace GymFrontend.Controllers
 {
+    [ApiController]
     public class UsersController : Controller
     {
-
-
-
         private readonly IConfiguration config;
         private UsersManager manager;
         private MedidasManager medidasManager;
@@ -37,7 +39,7 @@ namespace GymFrontend.Controllers
 
         [HttpPost]
         [Route("signIn")]
-        public IActionResult executeSignIn(UserCredentials credenciales)
+        public async Task<IActionResult> executeSignIn([FromForm] UserCredentials credenciales)
         {
             var res = config["ConnectionStrings:DefaultConnection"];
             if (!ModelState.IsValid)
@@ -46,19 +48,25 @@ namespace GymFrontend.Controllers
             }
 
 
-            DTOResponse<DTOLoggedUser> respuesta = manager.login(credenciales).Result;
+            DTOResponse<DTOLoggedUser> respuesta = await manager.login(credenciales);
             if (respuesta.success == false)
             {
                 ViewBag.message = "Usuario y/o contraseña incorrectos";
                 return View("Login");
             }
 
-            var claims = _jwtTokenGenerator.ValidateToken(respuesta.payload.Token);
+            var claims = _jwtTokenGenerator.ValidateIdToken(respuesta.payload.IdToken);
             if (claims == null)
             {
                 return View("Login");
             }
-            Response.Cookies.Append("AuthToken", respuesta.payload.Token, new CookieOptions
+            Response.Cookies.Append("AuthToken", respuesta.payload.IdToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict
+            });
+            Response.Cookies.Append("AccessToken", respuesta.payload.AccessToken, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
@@ -77,6 +85,38 @@ namespace GymFrontend.Controllers
             return Redirect(clientePage);
         }
 
+        [Authorize(Roles = "empleado,cliente")]
+        [HttpPost]
+        [Route("CerrarSesion")]
+        public async Task<IActionResult> cerrarSesion()
+        {
+            if (Request.Cookies["AuthToken"] != null)
+            {
+                Response.Cookies.Delete("AuthToken"); // Elimina la cookie
+            }
+
+            return Redirect("signIn");
+
+        }
+
+        [HttpGet("obtenerUsuariosPorRol")]
+        public async Task<IActionResult> ObtenerUsuariosPorRol([FromQuery] string rol, [FromQuery] string estado)
+        {
+            try
+            {
+                var result = await manager.ObtenerUsuariosPorRol(rol, estado);
+                if (result.success)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ResponseManager.BuildResponse<DTOResponse<List<QueryUser>>>(false, 500, "Error interno del servidor al obtener usuarios por rol.", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null));
+            }
+        }
+
         [HttpGet]
         [Route("signUp")]
         public IActionResult crearCuenta()
@@ -86,16 +126,24 @@ namespace GymFrontend.Controllers
 
         [HttpPost]
         [Route("signUp")]
-        public IActionResult postCrearCuenta(User usuario)
+        public IActionResult postCrearCuenta([FromForm] User usuario)
         {
             if (!ModelState.IsValid)
             {
                 return View("CrearCuenta", usuario);
             }
+            try
+            {
+                ResponseHttp respuesta = manager.registrarUsuario(usuario).Result;
+                ViewBag.message = respuesta.message;
+                return View("CrearCuenta");
+            }
+            catch (Exception ex)
+            {
+                ViewBag.message = "Ocurrió un error al registrar el usuario: " + ex.Message;
+                return View("CrearCuenta", usuario);
+            }
 
-            ResponseHttp respuesta = manager.registrarUsuario(usuario).Result;
-            ViewBag.message = respuesta.message;
-            return View("CrearCuenta");
         }
         [Authorize(Roles = "cliente")]
         [HttpGet]
@@ -122,10 +170,11 @@ namespace GymFrontend.Controllers
         public async Task<IActionResult> dirigirACrearPaginaDeEmpelados()
         {
 
-            List<ExistingUser> usuarios = manager.obtenerUsuarios().Result.data;
-            ResponseParametroDeMedicion respuestaParametros = await medidasManager.obtenerParametrosDeMedicion();
-            List<DTOUnidadDeMedida> unidadDeMedida = ExtractDataManager.extractMeasurementUnitData(respuestaParametros.data);
-            List<DTOParametroDeMedicion> parametrosDeMedicion = respuestaParametros.data.DistinctBy(p => p.parametroMedicionId).ToList();
+            var respuestaUsuarios = await manager.obtenerUsuarios();
+            List<ExistingUser> usuarios = respuestaUsuarios.payload;
+            var respuestaParametros = await medidasManager.obtenerParametrosDeMedicion();
+            List<DTOUnidadDeMedida> unidadDeMedida = ExtractDataManager.extractMeasurementUnitData(respuestaParametros.payload);
+            List<DTOParametroDeMedicion> parametrosDeMedicion = respuestaParametros.payload.DistinctBy(p => p.parametroMedicionId).ToList();
             ViewBag.usuarios = usuarios;
             ViewBag.parametros = parametrosDeMedicion;
             ViewBag.unidades = unidadDeMedida;
@@ -156,12 +205,12 @@ namespace GymFrontend.Controllers
             return Redirect(response.urlPageForUser);
         }
 
-        
+
         [HttpGet]
         [Route("AccesoDenegado")]
-        public  async Task<IActionResult> dirigirAAccesoDenegado([FromQuery] int idCliente)
+        public async Task<IActionResult> dirigirAAccesoDenegado([FromQuery] int idCliente)
         {
-            
+
             return View("AccesoDenegado");
         }
     }

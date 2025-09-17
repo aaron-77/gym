@@ -23,9 +23,9 @@
             <form class="form" method="post" action="signUp">
                 <span id="validationSummary" class="validation-error">@ViewBag.message</span>
                 <div class="input-group">
-                    <label  for="username">Nombre completo</label>
-                    <input asp-for="@Model.NombreCompleto" type="text" name="nombreCompleto" id="username" placeholder="">
-                    <span asp-validation-for="@Model.NombreCompleto" class="validation-error"></span>
+                    <label  for="username">Nombre</label>
+                    <input asp-for="@Model.Nombre" type="text" name="nombre" id="username" placeholder="">
+                    <span asp-validation-for="@Model.Nombre" class="validation-error"></span>
                 </div>
                 <div class="input-group">
                     <label for="apellido">Apellido</label>

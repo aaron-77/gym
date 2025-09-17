@@ -4,6 +4,7 @@ using API.Services;
 using DTO.Dtos;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -20,6 +21,7 @@ namespace API.Controllers
             _servicioActualizaciones = servicioActualizaciones;
         }
 
+        [Authorize(Roles = "empleado")]
         [HttpGet("obtenerPreReservas")]
         public async Task<ActionResult<DTOResponse<List<DTOHorarioVisualizacion>>>> ConsultarHorariosPreReservados([FromQuery] DateTime? fecha = null)
         {
@@ -56,6 +58,7 @@ namespace API.Controllers
             }
         }
 
+        [Authorize(Roles = "empleado")]
         [HttpGet("obtenerHorariosDisponibles")]
         public async Task<ActionResult<DTOResponse<List<DTOHorarioVisualizacion>>>> obtenerHorariosDisponibles([FromQuery] DateTime? fecha = null)
         {
@@ -92,6 +95,7 @@ namespace API.Controllers
             }
         }
 
+        [Authorize(Roles = "empleado")]
         [HttpPost("preReservarHorario")]
         public async Task<ActionResult<DTOResponse<int>>> registrarPreReservaDeHorario([FromBody] DTOPreReservaDeHorario preReserva)
         {

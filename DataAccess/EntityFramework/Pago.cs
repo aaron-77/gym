@@ -7,6 +7,8 @@ public partial class Pago
 {
     public int PagoId { get; set; }
 
+    public string? NewUserId { get; set; }
+
     public int? UsuarioId { get; set; }
 
     public decimal Monto { get; set; }

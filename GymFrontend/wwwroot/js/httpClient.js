@@ -1,15 +1,15 @@
 // Cliente HTTP reutilizable para peticiones GET y POST
 /**
  * Realiza una petición HTTP al API
- * @param {string} endpointPath - Ruta del endpoint después de "/api" (ej: "Horarios/obtenerPreReservas")
+ * @param {string} endpointPath - Ruta del endpoint (ej: "/Horarios/obtenerPreReservas")
  * @param {Object} [body] - Objeto a enviar como body en una petición POST. Si no se proporciona, se hace GET.
  * @param {Object} [params] - Objeto con parámetros de query para GET.
  * @returns {Promise} Promise con la respuesta del API
  */
 async function realizarPeticionAPI(endpointPath, body, params) {
     try {
-        const baseUrl = 'http://localhost:5274';
-        let url = `${baseUrl}/api/${endpointPath}`;
+        const baseUrl = 'http://localhost:5062';
+        let url = `${baseUrl}${endpointPath}`;
         let options = {
             method: 'GET',
             headers: {

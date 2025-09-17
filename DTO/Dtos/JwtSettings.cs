@@ -3,7 +3,10 @@ namespace DTO.Dtos{
     {
         public string SecretKey { get; set; }
         public string Issuer { get; set; }
-        public string Audience { get; set; }
+        public string FrontAudiencie {get;set;}
+        public string BackendAudiencie {get;set;}
         public int ExpiryMinutes { get; set; }
+        public int RefreshTokenExpiryDays { get; set; }
+        
     }
 }

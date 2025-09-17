@@ -38,12 +38,12 @@ namespace BL
             }
 
         }
-        public async Task<HttpResponseAsignacion> asignarEjercicioARutina(DTO.Dtos.AsignacionDeEjercicio asignacion)
+        public async Task<DTOResponse<AsignacionDeEjercicio>> asignarEjercicioARutina(DTO.Dtos.AsignacionDeEjercicio asignacion)
         {
-            HttpCustomClient httpClient = new HttpCustomClient();
+            
             JsonContent jsonCon = JsonContent.Create(asignacion);
             string asignacionResponse = await httpClient.post("api/asignarEjercicio", jsonCon);
-            HttpResponseAsignacion usuario = JsonSerializer.Deserialize<HttpResponseAsignacion>(asignacionResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            DTOResponse<AsignacionDeEjercicio> usuario = JsonSerializer.Deserialize<DTOResponse<AsignacionDeEjercicio>>(asignacionResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             try
             {
                 return usuario;
@@ -61,12 +61,12 @@ namespace BL
 
         }
 
-        public async Task<HttpResponseListadoRutinas> obtenerRutinasDeUsuario(int UsuarioID)
+        public async Task<DTOResponse<Rutina>> obtenerRutinasDeUsuario(string UsuarioID)
         {
-            HttpCustomClient httpClient = new HttpCustomClient();
-            
-            string asignacionResponse = await httpClient.get("api/consultarRutinas?UsuarioID="+UsuarioID);
-            HttpResponseListadoRutinas rutinas = JsonSerializer.Deserialize<HttpResponseListadoRutinas>(asignacionResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+
+            string asignacionResponse = await httpClient.get("api/consultarRutinas");
+            DTOResponse<Rutina> rutinas = JsonSerializer.Deserialize<DTOResponse<Rutina>>(asignacionResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             try
             {
                 return rutinas;
@@ -83,5 +83,26 @@ namespace BL
             }
 
         }   
+
+        public async Task<DTOResponse<List<Rutina>>> obtenerRutinasDeCliente(string UsuarioID)
+        {
+            
+            try
+            {
+                string rutinasResponse = await httpClient.get($"api/consultarRutinas?UsuarioID={UsuarioID}");
+                DTOResponse<List<Rutina>> rutinas = JsonSerializer.Deserialize<DTOResponse<List<Rutina> >>(rutinasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return rutinas;
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
     }
 }

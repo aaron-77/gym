@@ -7,7 +7,11 @@ public partial class Rutina
 {
     public int RutinaId { get; set; }
 
+    public string? NewUserId { get; set; }
+
     public int? UsuarioId { get; set; }
+
+    public string? NewEntrenadorId { get; set; }
 
     public int? EntrenadorId { get; set; }
 

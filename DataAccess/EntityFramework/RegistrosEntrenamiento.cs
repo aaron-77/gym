@@ -7,6 +7,7 @@ public partial class RegistrosEntrenamiento
 {
     public int RegistroId { get; set; }
 
+    public string? NewUserId { get; set; }
     public int? UsuarioId { get; set; }
 
     public int? RutinaId { get; set; }

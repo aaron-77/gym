@@ -23,9 +23,9 @@ namespace GymFrontend.Controllers
         {
 
 
-            ResponseHttpListadoUsers respuesta = await usersManager.obtenerUsuarios();
-            
-            List<ExistingUser> usuarios = respuesta.data;
+            var respuesta = await usersManager.obtenerUsuarios();
+
+            List<ExistingUser> usuarios = respuesta.payload;
             ViewBag.usuarios = usuarios;
             if (!ModelState.IsValid)
             {   

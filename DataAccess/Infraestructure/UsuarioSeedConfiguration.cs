@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
+using DataAccess.Identity;
 namespace API.Infraestructure.Auth
 {
         public class UsuarioSeedConfiguration : IEntityTypeConfiguration<ApplicationUser>
