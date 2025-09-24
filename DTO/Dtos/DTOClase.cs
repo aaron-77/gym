@@ -8,7 +8,7 @@ namespace DTO.Dtos
             public int ClaseID { get; set; }
             [Required]
             public string NombreClase { get; set; }
-            public int? InstructorId { get; set; }
+            public string? InstructorId { get; set; }
             public int Cupo { get; set; }
             [Required]
             public string Descripcion { get; set; }

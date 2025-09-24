@@ -205,6 +205,8 @@ namespace GymFrontend.Controllers
             return Redirect(response.urlPageForUser);
         }
 
+        
+
 
         [HttpGet]
         [Route("AccesoDenegado")]

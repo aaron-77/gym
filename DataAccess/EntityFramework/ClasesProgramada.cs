@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
@@ -7,16 +8,7 @@ public partial class ClasesProgramada
 {
     public int IdProgramacionClase { get; set; }
 
-    
-
     public int FkClase { get; set; }
-
-    public DateTime FechaInicio { get; set; }
-
-    public DateTime FechaFin { get; set; }
-
-    public string? NewFkEntrenador { get; set; }
-    public int FkEntrenador { get; set; }
 
     public int CupoMaximo { get; set; }
 
@@ -29,9 +21,11 @@ public partial class ClasesProgramada
 
     public DateTime? FechaModificacion { get; set; }
 
+    public string? FkEntrenador { get; set; }
+
     public virtual Clase FkClaseNavigation { get; set; } = null!;
 
-    public virtual Usuario FkEntrenadorNavigation { get; set; } = null!;
+    public virtual ApplicationUser? FkEntrenadorNavigation { get; set; }
 
     public virtual EstadosClasesProgramada FkEstadoClaseProgramadaNavigation { get; set; } = null!;
 

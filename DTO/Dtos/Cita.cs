@@ -15,9 +15,9 @@ namespace DTO.Dtos
         [Required(ErrorMessage = "Selecciona la fecha de finalizacion")]
         public DateTime fechaFinCita { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Selecciona un cliente")]
-        public int fkCliente { get; set; }
+        public string fkCliente { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Selecciona un entrenador")]
-        public int fkEntrenador { get; set; }
+        public string fkEntrenador { get; set; }
         [Required(ErrorMessage = "Selecciona el tipo de cita")]
         public string tipoCita { get;set;  }
 

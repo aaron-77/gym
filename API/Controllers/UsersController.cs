@@ -1,70 +1,73 @@
-using DTO.Dtos;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using DataAccess.EntityFramework;
-using Twilio.Security;
-using Twilio.Clients;
+using API.Infraestructure.Auth;
+using API.Services;
 using BCrypt.Net;
-using Twilio;
-using Twilio.Rest.Verify.V2.Service;
 using BL;
 using BL.EnPointsLogic;
-using Microsoft.AspNetCore.Identity;
-using API.Infraestructure.Auth;
 using BL.Utils;
-using API.Services;
+using DataAccess.EntityFramework;
 using DataAccess.Identity;
-using Microsoft.Extensions.Options;
+using DTO.Dtos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Twilio;
+using Twilio.Clients;
+using Twilio.Rest.Verify.V2.Service;
+using Twilio.Security;
+
 namespace API.Controllers
 {
     public class UsersController : Controller
     {
         public readonly IConfiguration configuration;
         public readonly IHttpContextAccessor _httpAccesor;
-        
+
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
         private readonly AuthService _authService;
         private readonly JwtSettings _jwtSettings;
-        public UsersController(SignInManager<ApplicationUser> signInManager,
-        UserManager<ApplicationUser> userManager,
-        JwtTokenGenerator jwtTokenGenerator,
-        AuthService authService,
-        IOptions<JwtSettings> jwtOptions
+
+        public UsersController(
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            JwtTokenGenerator jwtTokenGenerator,
+            AuthService authService,
+            IOptions<JwtSettings> jwtOptions
         )
         {
-
             _signInManager = signInManager;
             _userManager = userManager;
             _jwtTokenGenerator = jwtTokenGenerator;
             _authService = authService;
             _jwtSettings = jwtOptions.Value;
         }
+
         public IActionResult Index()
         {
             return View();
         }
+
         [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("api/obtenerUsuarios")]
         public async Task<IActionResult> getUsuarios()
         {
             var jwt = Request.Cookies["AuthToken"];
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
             DTOResponse<List<ExistingUser>> respuesta = new DTOResponse<List<ExistingUser>>();
 
-            List<ExistingUser> usuarios = await db.Usuarios.
-                                              Select(
-                                                    u => new ExistingUser()
-                                                    {
-                                                        Id = u.UsuarioId,
-                                                        NombreCompleto = u.Nombre,
-                                                        Apellido = u.Apellido,
-                                                        FechaDeNacimiento = u.FechaNacimiento
-                                                    }).ToListAsync();
+            List<ExistingUser> usuarios = await _userManager.Users
+                .Select(u => new ExistingUser()
+                {
+                    Id = u.Id,
+                    NombreCompleto = u.NombreCompleto,
+                    Apellido = u.Apellido,
+                    FechaDeNacimiento = u.FechaDeNacimiento,
+                })
+                .ToListAsync();
             respuesta.payload = usuarios;
             return Ok(respuesta);
         }
@@ -72,12 +75,19 @@ namespace API.Controllers
         [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("api/obtenerUsuariosPorRol")]
-        public async Task<IActionResult> getUsuariosPorRol([FromQuery] string rol, [FromQuery] string estado = "activo")
+        public async Task<IActionResult> getUsuariosPorRol(
+            [FromQuery] string rol,
+            [FromQuery] string estado = "activo"
+        )
         {
             try
             {
                 FitnessCenterDbContext db = new FitnessCenterDbContext();
-                List<QueryUser> usuarios = await db.userSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_consultarUsuarios @tipoUsuario={rol},@estado={estado}").ToListAsync();
+                List<QueryUser> usuarios = await db
+                    .userSP.FromSqlInterpolated(
+                        $@"EXEC [FitnessCenterDB].[dbo].sp_consultarUsuarios @tipoUsuario={rol},@estado={estado}"
+                    )
+                    .ToListAsync();
 
                 var respuesta = BL.Utils.ResponseManager.BuildResponse(
                     success: true,
@@ -95,7 +105,10 @@ namespace API.Controllers
                     success: false,
                     httpCode: 500,
                     message: "Error al obtener usuarios",
-                    errors: new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } },
+                    errors: new List<ErrorModel>
+                    {
+                        new ErrorModel { message = ex.Message, propiedad = null },
+                    },
                     payload: (List<QueryUser>)null
                 );
 
@@ -103,36 +116,43 @@ namespace API.Controllers
             }
         }
 
-        
-
         [HttpPost]
         [Route("api/RegistrarUsuario")]
-
         public async Task<IActionResult> RegistrarUsuario([FromBody] NewUser usuario)
         {
             DTOResponse<DTOCreatedUser> respuesta = new DTOResponse<DTOCreatedUser>();
             if (!ModelState.IsValid)
             {
-                List<string> nombresCampos = new List<string>() { "nombre", "direccion", "correo", "contrasena", "identificacion", "fecha", "telefono" };
+                List<string> nombresCampos = new List<string>()
+                {
+                    "nombre",
+                    "direccion",
+                    "correo",
+                    "contrasena",
+                    "identificacion",
+                    "fecha",
+                    "telefono",
+                };
                 foreach (var item in ModelState.Values)
                 {
                     foreach (var item1 in item.Errors)
                     {
                         ErrorModel error = new ErrorModel();
-                        string nombreCampo = nombresCampos.Where(c => item1.ErrorMessage.Contains(c)).FirstOrDefault();
+                        string nombreCampo = nombresCampos
+                            .Where(c => item1.ErrorMessage.Contains(c))
+                            .FirstOrDefault();
                         error.propiedad = nombreCampo;
                         error.message = item1.ErrorMessage;
                         respuesta.errors.Add(error);
                     }
-
                 }
                 respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
-                     success: false,
-                     httpCode: 400,
-                     message: "Los datos proporcionados son inválidos",
-                     errors: respuesta.errors,
-                     payload: null
-                 );
+                    success: false,
+                    httpCode: 400,
+                    message: "Los datos proporcionados son inválidos",
+                    errors: respuesta.errors,
+                    payload: null
+                );
 
                 return BadRequest(respuesta);
             }
@@ -143,22 +163,38 @@ namespace API.Controllers
                     success: false,
                     httpCode: 400,
                     message: "No has proporcionado ningun dato",
-                    errors: new List<ErrorModel> { new ErrorModel { message = "no se han enviado datos para el registro", propiedad = "ninguna" } },
+                    errors: new List<ErrorModel>
+                    {
+                        new ErrorModel
+                        {
+                            message = "no se han enviado datos para el registro",
+                            propiedad = "ninguna",
+                        },
+                    },
                     payload: null
                 );
                 return BadRequest(respuesta);
             }
             try
             {
-
-                var registerResult = await _authService.RegisterUserWithRoleAsync(usuario, usuario.Rol);
+                var registerResult = await _authService.RegisterUserWithRoleAsync(
+                    usuario,
+                    usuario.Rol
+                );
                 if (registerResult == null)
                 {
                     ResponseManager.BuildResponse<DTOCreatedUser>(
                         success: false,
                         httpCode: 500,
                         message: "Hubo un problema al registrar el usuario",
-                        errors: new List<ErrorModel> { new ErrorModel { message = "Problema no identificado", propiedad = "No definida" } },
+                        errors: new List<ErrorModel>
+                        {
+                            new ErrorModel
+                            {
+                                message = "Problema no identificado",
+                                propiedad = "No definida",
+                            },
+                        },
                         payload: null
                     );
                     return StatusCode(500, respuesta);
@@ -170,29 +206,94 @@ namespace API.Controllers
                     errors: null,
                     payload: registerResult
                 );
-
             }
             catch (Exception ex)
             {
                 respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
-                        success: false,
-                        httpCode: 500,
-                        message: $"Error al registrar el usuario:{ex.Message}",
-                        errors: new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = "No definida" } },
-                        payload: null
-                    );
+                    success: false,
+                    httpCode: 500,
+                    message: $"Error al registrar el usuario:{ex.Message}",
+                    errors: new List<ErrorModel>
+                    {
+                        new ErrorModel { message = ex.Message, propiedad = "No definida" },
+                    },
+                    payload: null
+                );
                 return StatusCode(500, respuesta);
             }
             return Ok(respuesta);
         }
 
+        [Route("api/AgregarRolUsuario")]
         [HttpPost]
+        public async Task<IActionResult> AgregarRolUsuario([FromBody] DTOAgregarRol request)
+        {
+            DTOResponse<string> respuesta = new DTOResponse<string>();
 
+            if (!ModelState.IsValid)
+            {
+                // Manejo de errores de validación
+                var errores = ModelState
+                    .Values.SelectMany(v => v.Errors)
+                    .Select(e => new ErrorModel
+                    {
+                        message = e.ErrorMessage,
+                        propiedad = "No definida",
+                    })
+                    .ToList();
+
+                respuesta = ResponseManager.BuildResponse<string>(
+                    success: false,
+                    httpCode: 400,
+                    message: "Datos inválidos",
+                    errors: errores,
+                    payload: null
+                );
+
+                return BadRequest(respuesta);
+            }
+
+            try
+            {
+                await _authService.AddRoleToUserAsync(request.UserId, request.Role);
+
+                respuesta = ResponseManager.BuildResponse<string>(
+                    success: true,
+                    httpCode: 200,
+                    message: $"Rol '{request.Role}' asignado correctamente al usuario",
+                    errors: null,
+                    payload: null
+                );
+            }
+            catch (Exception ex)
+            {
+                respuesta = ResponseManager.BuildResponse<string>(
+                    success: false,
+                    httpCode: 500,
+                    message: $"Error al asignar rol: {ex.Message}",
+                    errors: new List<ErrorModel>
+                    {
+                        new ErrorModel { message = ex.Message, propiedad = "No definida" },
+                    },
+                    payload: null
+                );
+
+                return StatusCode(500, respuesta);
+            }
+
+            return Ok(respuesta);
+        }
+
+        
+
+        [HttpPost]
         [Route("api/autenticar")]
         public async Task<IActionResult> AutenticarUsuario([FromBody] UserCredentials credenciales)
         {
-
-            var loggedUser = await _authService.AuthenticateUser(credenciales.correo, credenciales.contrasena);
+            var loggedUser = await _authService.AuthenticateUser(
+                credenciales.correo,
+                credenciales.contrasena
+            );
             DTOResponse<DTOLoggedUser> response = ResponseManager.BuildResponse<DTOLoggedUser>(
                 success: false,
                 httpCode: 400,
@@ -206,15 +307,14 @@ namespace API.Controllers
             }
 
             response = ResponseManager.BuildResponse<DTOLoggedUser>(
-               success: true,
-               httpCode: 200,
-               message: "Autenticación exitosa",
-               errors: null,
-               payload: loggedUser
-           );
+                success: true,
+                httpCode: 200,
+                message: "Autenticación exitosa",
+                errors: null,
+                payload: loggedUser
+            );
             // Devolver token
             return Ok(response);
-
         }
 
         [Authorize(Roles = "empleado,cliente")]
@@ -225,13 +325,15 @@ namespace API.Controllers
             var refreshedUser = await _authService.RefreshAccessToken(request.RefreshToken);
             if (refreshedUser == null)
             {
-                return Unauthorized(ResponseManager.BuildResponse<DTOLoggedUser>(
-                    success: false,
-                    httpCode: 401,
-                    message: "Refresh token inválido o expirado",
-                    errors: null,
-                    payload: null
-                ));
+                return Unauthorized(
+                    ResponseManager.BuildResponse<DTOLoggedUser>(
+                        success: false,
+                        httpCode: 401,
+                        message: "Refresh token inválido o expirado",
+                        errors: null,
+                        payload: null
+                    )
+                );
             }
 
             var response = ResponseManager.BuildResponse<DTOLoggedUser>(
@@ -269,15 +371,18 @@ namespace API.Controllers
             try
             {
                 //AccountId,Token
-                TwilioClient.Init("AC9ecb12865c83eb291ab8a2c520fcee14", "cb8c1ceafb83b80649f064806617eab8");
-                var verificacion = await VerificationResource.
-                    CreateAsync(channel: "sms", to:
-                    canal.cel,
+                TwilioClient.Init(
+                    "AC9ecb12865c83eb291ab8a2c520fcee14",
+                    "cb8c1ceafb83b80649f064806617eab8"
+                );
+                var verificacion = await VerificationResource.CreateAsync(
+                    channel: "sms",
+                    to: canal.cel,
                     //serviceId
-                    pathServiceSid: "VA7cfeb5608d0f76ca2bd2960546149332");
+                    pathServiceSid: "VA7cfeb5608d0f76ca2bd2960546149332"
+                );
                 response.data.status = verificacion.Status;
                 response.data.channel = verificacion.Channel.ToString();
-
             }
             catch (Exception ex)
             {
@@ -287,54 +392,60 @@ namespace API.Controllers
                 response.data = null;
             }
 
-
             return Ok(response);
-
         }
-
 
         [HttpPost]
         [Route("api/verificarOTP")]
-        public async Task<IActionResult> verificarCodigoOTP([FromBody] OTPCodeVerification userVerification)
+        public async Task<IActionResult> verificarCodigoOTP(
+            [FromBody] OTPCodeVerification userVerification
+        )
         {
+
+            /*
             HttpLoginResponse response = new HttpLoginResponse();
             FitnessCenterDbContext db = new FitnessCenterDbContext();
             string baseUrl = _jwtSettings.BackendAudiencie;
             try
             {
-
-                TwilioClient.Init("AC9ecb12865c83eb291ab8a2c520fcee14", "cb8c1ceafb83b80649f064806617eab8");
-                var verificacion = await VerificationCheckResource.
-                    CreateAsync(
+                TwilioClient.Init(
+                    "AC9ecb12865c83eb291ab8a2c520fcee14",
+                    "cb8c1ceafb83b80649f064806617eab8"
+                );
+                var verificacion = await VerificationCheckResource.CreateAsync(
                     to: userVerification.cel,
                     code: userVerification.codigo,
-                    pathServiceSid: "VA7cfeb5608d0f76ca2bd2960546149332");
-
+                    pathServiceSid: "VA7cfeb5608d0f76ca2bd2960546149332"
+                );
 
                 if (verificacion.Status == "approved")
                 {
                     response.ok = true;
                     response.message = "validacion exitosa";
                     response.errors = null;
-                    var loggedUser = db.Usuarios.Include(u => u.Rol).Where(u => u.Telefono == userVerification.cel).FirstOrDefault();
+                    var loggedUser = db
+                        .AspNetUsers.Include(u => u.Roles)
+                        .Where(u => u.PhoneNumber == userVerification.cel)
+                        .FirstOrDefault();
 
-
-                    NewUser responseUser = new NewUser(loggedUser.Nombre,
-                                                       loggedUser.FechaNacimiento,
-                                                       "",
-                                                       "",
-                                                       loggedUser.Email,
-                                                       loggedUser.Telefono,
-                                                       loggedUser.Apellido,
-                                                       "");
+                    NewUser responseUser = new NewUser(
+                        loggedUser.NombreCompleto,
+                        loggedUser.FechaDeNacimiento,
+                        "",
+                        "",
+                        loggedUser.Email,
+                        loggedUser.PhoneNumber,
+                        loggedUser.Apellido,
+                        ""
+                    );
                     response.ok = true;
                     response.data = responseUser;
                     response.message = "Verificacion exitosa";
-                    if (loggedUser.Rol.NombreRol == "empleado")
+                    if (loggedUser.Roles.FirstOrDefault()?.Name == "empleado")
                     {
                         response.urlPageForUser = baseUrl + "/empleados";
                     }
-                    else if (loggedUser.Rol.NombreRol == "cliente")
+                    else if (loggedUser.Roles.FirstOrDefault()?.Name == "cliente")
                     {
                         response.urlPageForUser = baseUrl + "/clientes";
                     }
@@ -355,10 +466,9 @@ namespace API.Controllers
                 response.data = null;
             }
 
-
             return Ok(response);
-
+            */
+            return Ok();
         }
-
     }
 }

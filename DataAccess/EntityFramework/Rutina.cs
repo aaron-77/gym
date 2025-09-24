@@ -1,19 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
 public partial class Rutina
 {
     public int RutinaId { get; set; }
-
-    public string? NewUserId { get; set; }
-
-    public int? UsuarioId { get; set; }
-
-    public string? NewEntrenadorId { get; set; }
-
-    public int? EntrenadorId { get; set; }
 
     public DateTime? FechaCreacion { get; set; }
 
@@ -23,7 +16,11 @@ public partial class Rutina
 
     public int? FkTipoRutina { get; set; }
 
-    public virtual Usuario? Entrenador { get; set; }
+    public string? EntrenadorId { get; set; }
+
+    public string? UserId { get; set; }
+
+    public virtual ApplicationUser? Entrenador { get; set; }
 
     public virtual Clase? FkClaseNavigation { get; set; }
 
@@ -33,5 +30,5 @@ public partial class Rutina
 
     public virtual ICollection<RutinaEjercicio> RutinaEjercicios { get; set; } = new List<RutinaEjercicio>();
 
-    public virtual Usuario? Usuario { get; set; }
+    public virtual ApplicationUser? User { get; set; }
 }

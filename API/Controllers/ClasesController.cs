@@ -457,7 +457,7 @@ namespace API.Controllers
                 }
                 using (connection)
                 {
-                    
+
 
                     using (var command = new SqlCommand("dbo.sp_registrarClaseProgramada", connection))
                     {
@@ -471,12 +471,12 @@ namespace API.Controllers
                         await _servicioActualizaciones.enviarPreReservasActualizadas(modelo.idUsuarioQueReserva);
                         await _servicioActualizaciones.enviarClaseProgramadaRegistrada(idClaseProgramada);
                         return Ok(
-                            ResponseManager.BuildResponse(
+                            ResponseManager.BuildResponse<int?>(
                                 true,
                                 200,
                                 "Clase programada registrada correctamente",
                                 null,
-                                idClaseProgramada
+                                1   
                             )
                         );
                     }

@@ -129,7 +129,7 @@ namespace API.Controllers
         [Authorize(Roles = "empleado,cliente")]
         [HttpGet]
         [Route("api/obtenerAñosConActividadDelCliente")]
-        public async Task<IActionResult> getAñosActivo([FromQuery] int idCliente)
+        public async Task<IActionResult> getAñosActivo([FromQuery] string idCliente)
         {
             FitnessCenterDbContext db = new FitnessCenterDbContext();
             HttpResponseAñosActivo respuesta = new HttpResponseAñosActivo();

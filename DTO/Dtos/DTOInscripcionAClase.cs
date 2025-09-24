@@ -8,6 +8,6 @@ public class DTOInscripcionAClase
     public int IdProgramacionClase { get; set; }
 
     [Required(ErrorMessage = "El ID del cliente es requerido")]
-    public int IdCliente { get; set; }
+    public string IdCliente { get; set; }
 }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
@@ -7,15 +8,15 @@ public partial class InscripcionesDeClase
 {
     public int IdInscripcion { get; set; }
 
-    public int FkCliente { get; set; }
-
     public int FkProgramacionClase { get; set; }
 
     public DateTime? FechaDeInscripcion { get; set; }
 
     public int FkEstadoInscripcion { get; set; }
 
-    public virtual Usuario FkClienteNavigation { get; set; } = null!;
+    public string? FkCliente { get; set; }
+
+    public virtual ApplicationUser? FkClienteNavigation { get; set; }
 
     public virtual EstadosInscripcione FkEstadoInscripcionNavigation { get; set; } = null!;
 

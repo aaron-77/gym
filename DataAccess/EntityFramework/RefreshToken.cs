@@ -1,12 +1,11 @@
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DataAccess.Identity;
 
-namespace DataAccess.EntityFramework
+namespace DataAccess.EntityFramework;
+
+public class RefreshToken
 {
-    public class RefreshToken
-    {
         [Key]
         public Guid RefreshTokenId { get; set; }
 
@@ -38,5 +37,4 @@ namespace DataAccess.EntityFramework
 
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; }
-    }
-} 
+}

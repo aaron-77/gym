@@ -69,18 +69,33 @@ namespace BL
             }
         }
 
-        public async Task<DTOResponse<string>> RegistrarClaseProgramada(DTODatosClaseProgramada claseProgramadaRegistro)
+        public async Task<DTOResponse<int?>> RegistrarClaseProgramada(DTODatosClaseProgramada claseProgramadaRegistro)
         {
             try
             {
                 JsonContent jsonCon = JsonContent.Create(claseProgramadaRegistro);
                 string response = await _httpClient.post("api/clases/registrarClaseProgramada", jsonCon);
-                return JsonSerializer.Deserialize<DTOResponse<string>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<string> { success = false, message = "Error de deserialización o respuesta vacía." };
+                return JsonSerializer.Deserialize<DTOResponse<int?>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<int?> { success = false, message = "Error de deserialización o respuesta vacía." };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error en RegistrarClaseProgramada: {ex.Message}");
-                return new DTOResponse<string> { success = false, message = "Error al registrar clase programada." };
+                return new DTOResponse<int?> { success = false, message = "Error al registrar clase programada." };
+            }
+        }
+
+        public async Task<DTOResponse<int?>> InscribirAClase(DTOInscripcionAClase inscripcionAClase)
+        {
+            try
+            {
+                JsonContent jsonCon = JsonContent.Create(inscripcionAClase);
+                string response = await _httpClient.post("api/clases/inscribirAClase", jsonCon);
+                return JsonSerializer.Deserialize<DTOResponse<int?>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<int?> { success = false, message = "Error de deserialización o respuesta vacía." };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en InscribirAClase: {ex.Message}");
+                return new DTOResponse<int?> { success = false, message = "Error al hacer la inscripcion" };
             }
         }
     }

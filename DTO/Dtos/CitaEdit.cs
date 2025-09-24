@@ -4,14 +4,15 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DTO.CustomValidations;
 
 namespace DTO.Dtos
 {
     public class CitaEdit:BaseClass
     {
-        [Required(ErrorMessage = "Debes definir una fecha de inicio")]
+        [FechaMayorA(ErrorMessage = "Debes definir una fecha de inicio")]
         public DateTime fechaInicioCita { get; set; }
-        [Required(ErrorMessage = "Debes definir una fecha de finalización")]
+        [FechaMayorA(ErrorMessage = "Debes definir una fecha de finalización")]
         public DateTime fechaFinCita { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Tienes que seleccionar un entrenador")]
         public int fkEntrenador { get; set; }

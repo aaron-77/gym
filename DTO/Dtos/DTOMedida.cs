@@ -9,7 +9,7 @@ namespace DTO.Dtos
         public int? unidadDeMedidaId { get; set; }
        
         [Required(ErrorMessage = "Selecciona un usuario")]
-        public int fkUsuario { get; set; }
+        public string fkUsuario { get; set; }
         
         [Required(ErrorMessage = "Selecciona un parametro")]
         public int fkParametro { get; set; }

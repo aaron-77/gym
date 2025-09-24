@@ -124,7 +124,7 @@ async function obtenerClasesDisponibles() {
         const params = {};
         params.activa = true;
 
-        const response = await realizarPeticionAPI('clases/obtenerClases', undefined, params);
+        const response = await realizarPeticionAPI('/clases/obtenerClases', undefined, params);
         const clasesDisponibles = response.payload || response;
         console.log("CLASES DISPONIBLES CONSULTADAS:", clasesDisponibles);
         return clasesDisponibles
@@ -147,7 +147,7 @@ async function obtenerClasesProgramadas(idClase = null) {
         if (idClase) {
             params.idClase = idClase;
         }
-        const response = await realizarPeticionAPI('clases/obtenerClasesProgramadasPorId', undefined, params);
+        const response = await realizarPeticionAPI('/clases/obtenerClasesProgramadasPorId', undefined, params);
         const clasesProgramadas = response.payload || response;
 
         return clasesProgramadas
@@ -767,7 +767,7 @@ async function inscribirAClase(event) {
         const datosClaseProgramada = formDataToJson(formData);
         console.log('Datos a enviar:', datosClaseProgramada);
         // Realizar la petición POST al endpoint
-        const response = await realizarPeticionAPI('clases/inscribirAClase', datosClaseProgramada);
+        const response = await realizarPeticionAPI('/clases/inscripcionAClases', datosClaseProgramada);
 
         if (response.success) {
             showMessage(iconTypes.success,'Inscripción exitosa' );
@@ -813,7 +813,7 @@ async function obtenerClientes(rol, estado = "activo") {
             estado: estado
         };
 
-        const response = await realizarPeticionAPI('obtenerUsuariosPorRol', undefined, params);
+        const response = await realizarPeticionAPI('/obtenerUsuariosPorRol', undefined, params);
         const clientes = response.payload || response;
         console.log("CLIENTES CONSULTADOS:", clientes);
         return clientes;

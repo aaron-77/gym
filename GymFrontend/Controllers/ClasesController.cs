@@ -65,6 +65,27 @@ namespace GymFrontend.Controllers
             return View();
         }
 
+        [HttpPost]
+        [Route("inscripcionAClases")]
+        public async Task<IActionResult> InscribirAClase([FromBody] DTOInscripcionAClase inscripcionAClase)
+        {
+            try
+            {
+                var result = await _clasesManager.InscribirAClase(inscripcionAClase);
+                if (result.success)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new DTOResponse<int?> { success = false, message = "Error interno del servidor al inscribir a clase.", errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } } });
+            }
+        }
+
+        
+
         [HttpGet("obtenerClases")]
         public async Task<IActionResult> ObtenerClases([FromQuery] bool? activa = null)
         {

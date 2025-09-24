@@ -1,16 +1,16 @@
-using DTO.Dtos;
-using System.Security.Claims;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
-using DataAccess.EntityFramework;
+using System.Text;
 using System.Threading.Tasks;
+using DataAccess.EntityFramework;
 using DataAccess.Identity;
 using DataAccess.Repositories;
+using DTO.Dtos;
 using Microsoft.AspNetCore.Http;
-using System;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BL.Utils;
 
@@ -21,7 +21,12 @@ public class JwtTokenGenerator
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public JwtTokenGenerator(IOptions<JwtSettings> jwtOptions, IAccessTokenRepository accessTokenRepository, IRefreshTokenRepository refreshTokenRepository, IHttpContextAccessor httpContextAccessor)
+    public JwtTokenGenerator(
+        IOptions<JwtSettings> jwtOptions,
+        IAccessTokenRepository accessTokenRepository,
+        IRefreshTokenRepository refreshTokenRepository,
+        IHttpContextAccessor httpContextAccessor
+    )
     {
         _jwtSettings = jwtOptions.Value;
         _accessTokenRepository = accessTokenRepository;
@@ -36,7 +41,7 @@ public class JwtTokenGenerator
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id),
-                new(ClaimTypes.Name, user.UserName!)
+                new(ClaimTypes.Name, user.UserName!),
             };
 
             foreach (var role in roles)
@@ -64,8 +69,11 @@ public class JwtTokenGenerator
                 TokenHash = HashToken(new JwtSecurityTokenHandler().WriteToken(token)),
                 IssuedAt = DateTime.UtcNow,
                 ExpiresAt = expires,
-                IpAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                UserAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString()
+                IpAddress =
+                    _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                UserAgent = _httpContextAccessor
+                    .HttpContext?.Request.Headers["User-Agent"]
+                    .ToString(),
             };
 
             await _accessTokenRepository.AddAccessTokenAsync(accessToken);
@@ -79,7 +87,7 @@ public class JwtTokenGenerator
         }
     }
 
-    public string GenerateIdToken(ApplicationUser user,IList<string> roles)
+    public string GenerateIdToken(ApplicationUser user, IList<string> roles)
     {
         try
         {
@@ -129,8 +137,11 @@ public class JwtTokenGenerator
                 rng.GetBytes(randomNumber);
                 var token = Convert.ToBase64String(randomNumber);
 
-                var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
-                var userAgent = _httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString();
+                var ipAddress =
+                    _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+                var userAgent = _httpContextAccessor
+                    .HttpContext?.Request.Headers["User-Agent"]
+                    .ToString();
 
                 var refreshToken = new RefreshToken
                 {
@@ -141,7 +152,7 @@ public class JwtTokenGenerator
                     IssuedAt = DateTime.UtcNow,
                     ExpiresAt = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
                     IpAddress = ipAddress,
-                    UserAgent = userAgent
+                    UserAgent = userAgent,
                 };
 
                 await _refreshTokenRepository.AddRefreshTokenAsync(refreshToken);
@@ -161,9 +172,15 @@ public class JwtTokenGenerator
         try
         {
             var tokenHash = HashToken(refreshTokenString);
-            var refreshToken = await _refreshTokenRepository.GetRefreshTokenByTokenHashAsync(tokenHash);
+            var refreshToken = await _refreshTokenRepository.GetRefreshTokenByTokenHashAsync(
+                tokenHash
+            );
 
-            if (refreshToken == null || refreshToken.RevokedAt != null || refreshToken.ExpiresAt <= DateTime.UtcNow)
+            if (
+                refreshToken == null
+                || refreshToken.RevokedAt != null
+                || refreshToken.ExpiresAt <= DateTime.UtcNow
+            )
             {
                 return null; // Refresh token inválido, expirado o revocado
             }
@@ -181,7 +198,9 @@ public class JwtTokenGenerator
         try
         {
             var tokenHash = HashToken(refreshTokenString);
-            var refreshToken = await _refreshTokenRepository.GetRefreshTokenByTokenHashAsync(tokenHash);
+            var refreshToken = await _refreshTokenRepository.GetRefreshTokenByTokenHashAsync(
+                tokenHash
+            );
 
             if (refreshToken != null && refreshToken.RevokedAt == null)
             {
@@ -229,10 +248,14 @@ public class JwtTokenGenerator
                 ValidateAudience = true,
                 ValidAudience = _jwtSettings.BackendAudiencie,
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
             };
 
-            var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
+            var principal = tokenHandler.ValidateToken(
+                token,
+                validationParameters,
+                out var validatedToken
+            );
             var claims = principal.Claims.ToDictionary(c => c.Type, c => c.Value);
             return claims.Count > 0 ? claims : null;
         }
@@ -258,11 +281,23 @@ public class JwtTokenGenerator
                 ValidateAudience = true,
                 ValidAudience = _jwtSettings.FrontAudiencie,
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
             };
 
-            var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
-            var claims = principal.Claims.ToDictionary(c => c.Type, c => c.Value);
+            var principal = tokenHandler.ValidateToken(
+                token,
+                validationParameters,
+                out var validatedToken
+            );
+            var claims = principal
+                .Claims.GroupBy(c => c.Type)
+                .ToDictionary(
+                    g => g.Key,
+                    g =>
+                        g.Key == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+                            ? string.Join(",", g.Select(c => c.Value)) // 👈 concatena roles
+                            : g.First().Value // 👈 para otros claims solo el primero
+                );
             return claims.Count > 0 ? claims : null;
         }
         catch (Exception ex)
@@ -274,13 +309,22 @@ public class JwtTokenGenerator
 
     public IList<string> GetRoles(IDictionary<string, string> claims)
     {
-        return claims
-            .Where(c => c.Key == ClaimTypes.Role || c.Key == "role")
-            .Select(c => c.Value)
+        if (
+            !claims.TryGetValue(ClaimTypes.Role, out var rolesValue)
+            && !claims.TryGetValue("role", out rolesValue)
+        )
+        {
+            return new List<string>(); // No hay roles
+        }
+
+        // Separar por comas y eliminar espacios extra
+        return rolesValue
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(r => r.Trim())
             .ToList();
     }
 
-    public  string GetUserName(IDictionary<string, string> claims)
+    public string GetUserName(IDictionary<string, string> claims)
     {
         return claims.ContainsKey(ClaimTypes.Name) ? claims[ClaimTypes.Name] : null;
     }

@@ -55,18 +55,18 @@ namespace BL
             }
         }
 
-        public async Task<DTOResponse<string>> PreReservarHorario(DTOPreReservaDeHorario preReserva)
+        public async Task<DTOResponse<int>> PreReservarHorario(DTOPreReservaDeHorario preReserva)
         {
             try
             {
                 JsonContent jsonCon = JsonContent.Create(preReserva);
                 string response = await _httpClient.post("api/Horarios/preReservarHorario", jsonCon);
-                return JsonSerializer.Deserialize<DTOResponse<string>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<string> { success = false, message = "Error de deserialización o respuesta vacía." };
+                return JsonSerializer.Deserialize<DTOResponse<int>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<int> { success = false, message = "Error de deserialización o respuesta vacía." };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error en PreReservarHorario: {ex.Message}");
-                return new DTOResponse<string> { success = false, message = "Error al pre-reservar horario." };
+                return new DTOResponse<int> { success = false, message = "Error al pre-reservar horario." };
             }
         }
     }

@@ -299,9 +299,9 @@ export class Calendar {
           // disponibleDates es un arreglo de objetos con propiedad fecha tipo Date
           const estaDisponible = (this.disponibleDates || []).some(obj =>
             fechaGenerada > obj.fecha ||
-             fechaGenerada.valueOf() === obj.fecha.valueOf() ||
-              fechaGenerada.valueOf() == this.calendarCurrentDate.valueOf() ||
-              fechaGenerada.valueOf() > this.calendarCurrentDate.valueOf()
+            fechaGenerada.valueOf() === obj.fecha.valueOf() ||
+            fechaGenerada.valueOf() == this.calendarCurrentDate.valueOf() ||
+            fechaGenerada.valueOf() > this.calendarCurrentDate.valueOf()
           );
 
           // Si la fecha generada no está en disponibleDates, deshabilitar el botón y aplica la clase de fondo rojo

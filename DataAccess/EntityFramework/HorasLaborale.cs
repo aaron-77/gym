@@ -7,13 +7,15 @@ public partial class HorasLaborale
 {
     public int IdHora { get; set; }
 
-    public TimeSpan HoraInicio { get; set; }
+    public TimeOnly HoraInicio { get; set; }
 
-    public TimeSpan HoraFin { get; set; }
+    public TimeOnly HoraFin { get; set; }
 
     public DateTime? FechaCreacion { get; set; }
 
     public DateTime? FechaModificacion { get; set; }
 
-    public virtual ICollection<DiasDeLaSemanaHorasLaborale> DiasDeLaSemanaHorasLaborales { get; set; } = new List<DiasDeLaSemanaHorasLaborale>();
+    public virtual ICollection<HorariosDeClasesProgramada> HorariosDeClasesProgramada { get; set; } = new List<HorariosDeClasesProgramada>();
+
+    public virtual ICollection<PreReservasDeHorario> PreReservasDeHorarios { get; set; } = new List<PreReservasDeHorario>();
 }

@@ -224,7 +224,7 @@ export class ScheduleViewer {
     };
 
     try {
-      const response = await realizarPeticionAPI('Horarios/preReservarHorario', body, undefined, 'POST');
+      const response = await realizarPeticionAPI('/Horarios/preReservarHorario', body, undefined, 'POST');
       if (response.success) {
         // Se puede mostrar un mensaje si se desea
 

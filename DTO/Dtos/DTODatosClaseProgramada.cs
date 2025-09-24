@@ -10,8 +10,8 @@ namespace DTO.Dtos
         public int? fkClase { get; set; }
 
         [Required(ErrorMessage = "El entrenador es obligatorio")]
-        [Range(1, int.MaxValue, ErrorMessage = "El id del entrenador debe ser mayor a 1")]
-        public int fkEntrenador { get; set; }
+        
+        public string fkEntrenador { get; set; }
 
         [Required(ErrorMessage = "El cupo máximo es obligatorio")]
         [Range(1, int.MaxValue, ErrorMessage = "El cupo máximo debe ser mayor o igual a 1")]

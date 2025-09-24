@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
@@ -8,10 +9,6 @@ public partial class Clase
     public int ClaseId { get; set; }
 
     public string NombreClase { get; set; } = null!;
-
-    public string? NewInstructorId { get; set; }
-
-    public int? InstructorId { get; set; }
 
     public int Cupo { get; set; }
 
@@ -29,6 +26,8 @@ public partial class Clase
 
     public int? FkEstadoClase { get; set; }
 
+    public string? InstructorId { get; set; }
+
     public virtual ICollection<BeneficiosDeClase> BeneficiosDeClases { get; set; } = new List<BeneficiosDeClase>();
 
     public virtual ICollection<ClasesProgramada> ClasesProgramada { get; set; } = new List<ClasesProgramada>();
@@ -45,7 +44,7 @@ public partial class Clase
 
     public virtual ICollection<ImagesForClase> ImagesForClases { get; set; } = new List<ImagesForClase>();
 
-    public virtual Usuario? Instructor { get; set; }
+    public virtual ApplicationUser Instructor { get; set; }
 
     public virtual ICollection<Rutina> Rutinas { get; set; } = new List<Rutina>();
 }

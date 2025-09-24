@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
@@ -19,5 +20,5 @@ public partial class InscripcionClase
 
     public virtual Clase? Clase { get; set; }
 
-    public virtual Usuario? Usuario { get; set; }
+    public virtual ApplicationUser? Usuario { get; set; }
 }

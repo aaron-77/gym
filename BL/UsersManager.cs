@@ -130,12 +130,13 @@ namespace BL
             }
         }
 
-        public async Task<DTOResponse<List<QueryUser>>> ObtenerEntrenadoresDisponibles(string fechaReferencia)
+        public async Task<DTOResponse<List<QueryUser>>> ObtenerEntrenadoresDisponibles(DateTime fechaReferencia)
         {
-            string entrenadoresResponse = await httpClient.get($"api/obtenerEntrenadoresDisponibles?fechaReferencia={fechaReferencia}");
-            DTOResponse<List<QueryUser>> entrenadores = JsonSerializer.Deserialize<DTOResponse<List<QueryUser>>>(entrenadoresResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
             try
             {
+                string entrenadoresResponse = await httpClient.get($"api/obtenerEntrenadoresDisponibles?fechaReferencia={fechaReferencia}");
+            DTOResponse<List<QueryUser>> entrenadores = JsonSerializer.Deserialize<DTOResponse<List<QueryUser>>>(entrenadoresResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return entrenadores;
             }
             catch (ArgumentNullException ex)

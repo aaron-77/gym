@@ -52,7 +52,7 @@ namespace API.Services
                 return null;
             var roles = await _userManager.GetRolesAsync(user);
             var accessToken = await _jwtTokenGenerator.GenerateAccessToken(user, roles);
-            var idToken = _jwtTokenGenerator.GenerateIdToken(user,roles);
+            var idToken = _jwtTokenGenerator.GenerateIdToken(user, roles);
 
             // Obtener información del cliente para el refresh token
             var httpContext = _httpContextAccessor.HttpContext;
@@ -61,7 +61,7 @@ namespace API.Services
             var userAgent = httpContext?.Request.Headers["User-Agent"].ToString();
 
             var refreshToken = await _jwtTokenGenerator.GenerateRefreshToken(user.Id, clientId);
-            
+
             // Registrar Access Token e Id Token en la base de datos
             var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
             await _tokensService.RegisterAccessTokenAsync(accessToken, user.Id, clientId, expiresAt, ipAddress, userAgent);
@@ -70,7 +70,7 @@ namespace API.Services
             return new DTOLoggedUser
             {
                 Id = user.Id,
-                Direccion= user.Direccion,
+                Direccion = user.Direccion,
                 Correo = user.Email,
                 FechaDeNacimiento = user.FechaDeNacimiento,
                 Telefono = user.PhoneNumber,
@@ -98,10 +98,10 @@ namespace API.Services
 
             var roles = await _userManager.GetRolesAsync(user);
             var newAccessToken = await _jwtTokenGenerator.GenerateAccessToken(user, roles);
-            var newIdToken = _jwtTokenGenerator.GenerateIdToken(user,roles);
+            var newIdToken = _jwtTokenGenerator.GenerateIdToken(user, roles);
 
             var httpContext = _httpContextAccessor.HttpContext;
-            var clientId = "gymwebapp-frontend"; 
+            var clientId = "gymwebapp-frontend";
             var ipAddress = httpContext?.Connection.RemoteIpAddress?.ToString();
             var userAgent = httpContext?.Request.Headers["User-Agent"].ToString();
 
@@ -176,7 +176,7 @@ namespace API.Services
                     FechaDeNacimiento = model.FechaDeNacimiento,
                     NumeroDeIdentificacion = model.NumeroDeIdentificacion
 
-                     // Cambiar a true si no requieres confirmación por email
+                    // Cambiar a true si no requieres confirmación por email
                 };
 
                 // Crear usuario con contraseña
@@ -251,5 +251,41 @@ namespace API.Services
 
             return registerResult;
         }
+
+         public async Task AddRoleToUserAsync(string userId, string role)
+    {
+        try
+        {
+            // Buscar usuario por ID
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new InvalidOperationException("Usuario no encontrado");
+            }
+
+            // Verificar si el rol existe
+            if (!await _roleManager.RoleExistsAsync(role))
+            {
+                throw new InvalidOperationException($"El rol '{role}' no existe");
+            }
+
+            // Verificar si el usuario ya tiene el rol
+            if (await _userManager.IsInRoleAsync(user, role))
+            {
+                throw new InvalidOperationException($"El usuario ya tiene asignado el rol '{role}'");
+            }
+
+            // Asignar rol
+            var result = await _userManager.AddToRoleAsync(user, role);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException($"No se pudo asignar el rol: {string.Join(", ", result.Errors)}");
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error al agregar rol al usuario: {ex.Message}");
+        }
+    }
     }
 }

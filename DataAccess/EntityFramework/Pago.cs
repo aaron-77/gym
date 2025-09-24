@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
 public partial class Pago
 {
     public int PagoId { get; set; }
-
-    public string? NewUserId { get; set; }
-
-    public int? UsuarioId { get; set; }
 
     public decimal Monto { get; set; }
 
@@ -19,5 +16,7 @@ public partial class Pago
 
     public string Estado { get; set; } = null!;
 
-    public virtual Usuario? Usuario { get; set; }
+    public string? UserId { get; set; }
+
+    public virtual ApplicationUser? User { get; set; }
 }

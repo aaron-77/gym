@@ -1,13 +1,14 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DataAccess.Identity;
 
-namespace DataAccess.EntityFramework
+namespace DataAccess.EntityFramework;
+
+public partial class AccessToken
 {
-    public class AccessToken
-    {
-        [Key]
+     [Key]
         public Guid AccessTokenId { get; set; }
 
         [Required]
@@ -36,5 +37,4 @@ namespace DataAccess.EntityFramework
 
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; }
-    }
-} 
+}

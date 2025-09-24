@@ -42,7 +42,7 @@ Layout = "_LayoutSeccionAdministracion";
             <option value="">Seleccciona un cliente</option>
             @foreach (var cliente in listadoClientes)
             {
-                <option value="@cliente.UsuarioID">@cliente.Nombre @cliente.Apellido</option>
+                <option value="UsuarioID">@cliente.Nombre @cliente.Apellido</option>
             }
         </select>
 
@@ -54,17 +54,17 @@ Layout = "_LayoutSeccionAdministracion";
             <option value="">Seleccciona una cita</option>
 
         </select>
-        <span asp-validation-for="@Model.Id" class="validation-error"></span>
+        <span asp-validation-for="Id" class="validation-error"></span>
 
         <label for="inputFechaInicio" class="form-label">Fecha inicio</label>
         <input type="datetime-local" name="fechaInicioCita" class="form-control empleados-main-page-input desactivable"
             id="inputFechaInicio">
-        <span asp-validation-for="@Model.fechaInicioCita" class="validation-error"></span>
+        <span asp-validation-for="fechaInicioCita" class="validation-error"></span>
 
         <label for="inputFechaFin" class="form-label">Fecha fin</label>
         <input type="datetime-local" name="fechaFinCita" class="form-control empleados-main-page-input desactivable"
             id="inputFechaFin">
-        <span asp-validation-for="@Model.fechaFinCita" class="validation-error"></span>
+        <span asp-validation-for="fechaFinCita" class="validation-error"></span>
 
 
         <label for="inputEntrenador" class="form-label">Entrenador</label>
@@ -72,7 +72,7 @@ Layout = "_LayoutSeccionAdministracion";
             aria-label="Default select example">
             <option value="">Seleccciona un entrenador</option>
         </select>
-        <span asp-validation-for="@Model.fkEntrenador" class="validation-error"></span>
+        <span asp-validation-for="fkEntrenador" class="validation-error"></span>
 
         <label for="inputEstado" class="form-label">Estado</label>
         <select id="inputEstado" class="form-select empleados-main-page-input desactivable" name="estado"
@@ -80,7 +80,7 @@ Layout = "_LayoutSeccionAdministracion";
 
 
         </select>
-        <span asp-validation-for="@Model.estado" class="validation-error"></span>
+        <span asp-validation-for="estado" class="validation-error"></span>
 
 
         <button type="submit" class="btn btn-primary fix-margin">Modificar</button>

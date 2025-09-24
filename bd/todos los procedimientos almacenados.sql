@@ -2257,7 +2257,7 @@ BEGIN
 
         DECLARE @idClaseProgramada INT;
         DECLARE @fkClase INT, 
-                @fkEntrenador INT,
+                @fkEntrenador NVARCHAR(450),
                 @cupoMaximo INT, 
                 @fkEstadoClaseProgramada INT,
                 @fkHorarioLaboralString NVARCHAR(MAX),
@@ -2590,14 +2590,14 @@ BEGIN
 			SELECT
 				1
 			FROM
-				Clases c
-				join clasesProgramadas cp  
+				FitnessCenterDB.dbo.Clases c
+				join FitnessCenterDB.dbo.clasesProgramadas cp  
 								on cp.fkClase = c.ClaseID
 				join FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp 
 								on cp.idProgramacionClase = hcp.fkClaseProgramada
 								and hcp.fechaDeLaClase 	 =   @fecha
 								and hcp.fkHorarioLaboral in (select fkHoraLaboral from @fksHorasLaborales)
-				join estadosHorarioClaseProgramada ehcp 
+				join FitnessCenterDB.dbo.estadosHorarioClaseProgramada ehcp 
 								on ehcp.idEstadoHorarioClase = hcp.fkEstadoHorarioClase 
 								and ehcp.nombreEstadoHorario = 'activo'
 			)
@@ -2620,7 +2620,7 @@ BEGIN
     IF EXISTS (
         SELECT 1 
         FROM FitnessCenterDB.dbo.preReservasDeHorario pr
-        join horasLaborales hl 
+        join FitnessCenterDB.dbo.horasLaborales hl 
         	on pr.fkHoraLaboral in (select fkHoraLaboral from @fksHorasLaborales)
         where  pr.fechaReservada = @fechaReservada
         and GETDATE() 
@@ -2655,8 +2655,8 @@ RETURN
         ON cp.idProgramacionClase = hcp.fkClaseProgramada
     INNER JOIN FitnessCenterDB.dbo.horasLaborales hl 
         ON hcp.fkHorarioLaboral = hl.idHora
-    INNER JOIN FitnessCenterDB.dbo.Usuarios u 
-        ON cp.fkEntrenador = u.UsuarioID
+    INNER JOIN FitnessCenterDB.dbo.AspNetUsers u 
+        ON cp.fkEntrenador = u.Id
     WHERE cp.idProgramacionClase = @idProgramacionClase
         AND (select dbo.fn_cupoDisponibleClaseProgramada(cp.idProgramacionClase)) > 0
 );

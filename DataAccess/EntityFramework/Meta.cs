@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
 public partial class Meta
 {
     public int MetaId { get; set; }
-
-    public string? NewFkUsuario { get; set; }
-
-    public int FkUsuario { get; set; }
 
     public int FkIntencion { get; set; }
 
@@ -29,6 +26,8 @@ public partial class Meta
 
     public int FkNivelDeLogro { get; set; }
 
+    public string? FkUsuario { get; set; }
+
     public virtual Ejercicio? FkEjercicioNavigation { get; set; }
 
     public virtual Intencione FkIntencionNavigation { get; set; } = null!;
@@ -37,5 +36,5 @@ public partial class Meta
 
     public virtual ParametrosDeMedicion FkParametroNavigation { get; set; } = null!;
 
-    public virtual Usuario FkUsuarioNavigation { get; set; } = null!;
+    public virtual ApplicationUser? FkUsuarioNavigation { get; set; }
 }

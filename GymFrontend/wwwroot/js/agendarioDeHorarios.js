@@ -402,9 +402,6 @@ async function inicializarAgendador() {
         const indexDisponible = Array.from(comboboxEstados.options).findIndex(opt => opt.text.trim().toLowerCase() === 'disponible');
         comboboxEstados.selectedIndex = indexDisponible;
         
-            
-        
-        
     } catch (error) {
         console.error('Error al inicializar datos del API:', error);
     }
@@ -495,7 +492,7 @@ async function obtenerEntrenadores() {
             rol: 'empleado',
             estado: 'activo'
         };
-        const response = await realizarPeticionAPI('/Users/obtenerUsuariosPorRol', undefined, params);
+        const response = await realizarPeticionAPI('/obtenerUsuariosPorRol', undefined, params);
         return response.payload || [];
     } catch (error) {
         console.error('Error al obtener entrenadores:', error);
@@ -569,7 +566,7 @@ async function registrarClaseProgramada(event) {
         console.log('Datos a enviar:', datosClaseProgramada);
         
         // Realizar la petición POST al endpoint
-        const response = await realizarPeticionAPI('/Clases/registrarClaseProgramada', datosClaseProgramada);
+        const response = await realizarPeticionAPI('/clases/registrarClaseProgramada', datosClaseProgramada);
         
         if (response.success) {
             showMessage(iconTypes.success,'Clase programada registrada exitosamente con ID: ');

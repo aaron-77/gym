@@ -93,7 +93,7 @@ namespace API.Services
                     EXEC sp_preReservarHorario  @idUsuarioQueReserva={preReserva.idUsuarioQueReserva}, @fechaTentativa={fechaDateTime}, @idHoraLaboral={preReserva.idHoraLaboral}");
                 return idPreReserva;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

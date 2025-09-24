@@ -16,7 +16,7 @@ namespace API.Controllers
 
         public async Task<IActionResult> RegistrarCita([FromBody] DTO.Dtos.Cita cita)
         {
-            HttpResponseCita respuesta = new HttpResponseCita();
+            DTOResponse<DTO.Dtos.Cita> respuesta = new DTOResponse<DTO.Dtos.Cita>(); // MODIFICADO: Usar DTOResponse
             if (!ModelState.IsValid)
             {
                 List<string> nombresCampos = new List<string>() { "fechaInicioCita", "fechaFinCita", "fkCliente", "fkEntrenador", "tipoCita" };
@@ -33,7 +33,7 @@ namespace API.Controllers
 
                 }
                 ;
-                respuesta.ok = false;
+                respuesta.success = false; // MODIFICADO: Usar success
                 respuesta.message = "Error al registrar tu cita";
                 return BadRequest(respuesta);
             }
@@ -54,16 +54,16 @@ namespace API.Controllers
                 var message = emailManager.crearEmail("Fitness Gym", "aaronlarabonfil@gmail.com",usuarioDeLaCita.Nombre + usuarioDeLaCita.Apellido ,usuarioDeLaCita.Email, "Has Agendado una cita", "recuerda venir a tu cita el dia " + cita.fechaInicioCita.ToString());
                 emailManager.EnviarEmail(message);
 
-                respuesta.ok = true;
-                respuesta.data = cita;
+                respuesta.success = true; // MODIFICADO: Usar success
+                respuesta.payload = cita; // MODIFICADO: Usar payload
                 respuesta.errors = null;
                 respuesta.message = "Registro exitoso";
             }
             catch (Exception ex)
             {
-                respuesta.ok = false;
+                respuesta.success = false; // MODIFICADO: Usar success
                 respuesta.message = "no se pudo registrar tu cita";
-                respuesta.data = null;
+                respuesta.payload = null; // MODIFICADO: Usar payload
                 respuesta.errors.Add(new ErrorModel { message = ex.Message, propiedad = null });
                 return BadRequest(respuesta);
             }
@@ -76,7 +76,7 @@ namespace API.Controllers
 
         public async Task<IActionResult> RegistrarDuracion([FromBody] DTO.Dtos.DuracionCitasMedicion duracion)
         {
-            HttpResponseDuracionCitasMedicion respuesta = new HttpResponseDuracionCitasMedicion();
+            DTOResponse<DTO.Dtos.DuracionCitasMedicion> respuesta = new DTOResponse<DTO.Dtos.DuracionCitasMedicion>(); // MODIFICADO: Usar DTOResponse
             if (!ModelState.IsValid)
             {
                 List<string> nombresCampos = new List<string>() { "Duracion", "Frecuencia" };
@@ -93,7 +93,7 @@ namespace API.Controllers
 
                 }
                 ;
-                respuesta.ok = false;
+                respuesta.success = false; // MODIFICADO: Usar success
                 respuesta.message = "Error al registrar la duracion";
                 return BadRequest(respuesta);
             }
@@ -112,16 +112,16 @@ namespace API.Controllers
                     db.Add(duracionDB);
                 }
                 db.SaveChanges();
-                respuesta.ok = true;
-                respuesta.data = duracion;
+                respuesta.success = true; // MODIFICADO: Usar success
+                respuesta.payload = duracion; // MODIFICADO: Usar payload
                 respuesta.errors = null;
                 respuesta.message = "Registro exitoso";
             }
             catch (Exception ex)
             {
-                respuesta.ok = false;
+                respuesta.success = false; // MODIFICADO: Usar success
                 respuesta.message = "no se pudo registrar la duracion";
-                respuesta.data = null;
+                respuesta.payload = null; // MODIFICADO: Usar payload
                 respuesta.errors.Add(new ErrorModel { message = ex.Message, propiedad = null });
                 return BadRequest(respuesta);
             }
@@ -135,7 +135,7 @@ namespace API.Controllers
 
         public async Task<IActionResult> ModificarCita([FromBody] DTO.Dtos.CitaEdit cita)
         {
-            HttpResponseCitaEdit respuesta = new HttpResponseCitaEdit();
+            DTOResponse<DTO.Dtos.CitaEdit> respuesta = new DTOResponse<DTO.Dtos.CitaEdit>(); // MODIFICADO: Usar DTOResponse
             if (!ModelState.IsValid)
             {
                 List<string> nombresCampos = new List<string>() { "Id", "fechaInicioCita", "fechaFinCita", "fkCliente", "fkEntrenador" };
@@ -152,7 +152,7 @@ namespace API.Controllers
 
                 }
                 ;
-                respuesta.ok = false;
+                respuesta.success = false; // MODIFICADO: Usar success
                 respuesta.message = "Error al modificar tu cita";
                 return BadRequest(respuesta);
             }
@@ -166,16 +166,16 @@ namespace API.Controllers
                 @estado ={cita.estado},
                 @fechaHoraFin ={cita.fechaFinCita}
                 ");
-                respuesta.ok = true;
-                respuesta.data = cita;
+                respuesta.success = true; // MODIFICADO: Usar success
+                respuesta.payload = cita; // MODIFICADO: Usar payload
                 respuesta.errors = null;
                 respuesta.message = "Modificacion exitosa";
             }
             catch (Exception ex)
             {
-                respuesta.ok = false;
+                respuesta.success = false; // MODIFICADO: Usar success
                 respuesta.message = "no se pudo modificar tu cita";
-                respuesta.data = null;
+                respuesta.payload = null; // MODIFICADO: Usar payload
                 respuesta.errors.Add(new ErrorModel { message = ex.Message, propiedad = null });
                 return BadRequest(respuesta);
             }
@@ -190,12 +190,12 @@ namespace API.Controllers
         public async Task<IActionResult> getDuracionCita()
         {
             FitnessCenterDbContext db = new FitnessCenterDbContext();
-            HttpResponseInt responseDuracion = new HttpResponseInt();
+            DTOResponse<int> responseDuracion = new DTOResponse<int>(); // MODIFICADO: Usar DTOResponse<int>
             var result = await db.DuracionCitas.FirstOrDefaultAsync();
-            responseDuracion.ok = true;
+            responseDuracion.success = true; // MODIFICADO: Usar success
             responseDuracion.message = "consulta exitosa";
             responseDuracion.errors = null;
-            responseDuracion.data = result.Duracion;
+            responseDuracion.payload = result.Duracion; // MODIFICADO: Usar payload
             return Ok(responseDuracion);
         }
 
@@ -203,28 +203,28 @@ namespace API.Controllers
         [Authorize(Roles = "empleado,cliente")]
         [Route("api/getCitasAgendadas")]
 
-        public async Task<IActionResult> getCitasAgendadas([FromQuery] int idUsuario)
+        public async Task<IActionResult> getCitasAgendadas([FromQuery] string idUsuario) // MODIFICADO: idUsuario a string
         {
             FitnessCenterDbContext db = new FitnessCenterDbContext();
 
-            HttpResponseListadoCitas responseDuracion = new HttpResponseListadoCitas();
+            DTOResponse<List<DTO.Dtos.Cita>> responseDuracion = new DTOResponse<List<DTO.Dtos.Cita>>(); // MODIFICADO: Usar DTOResponse<List<Cita>>
             try
             {
 
                 var result = await db.citaSP.FromSqlInterpolated($@"EXEC sp_obtenerCitasAgendadasPorUsuario 
                 @idUsuario = {idUsuario}
                 ").ToListAsync();
-                responseDuracion.ok = true;
+                responseDuracion.success = true; // MODIFICADO: Usar success
                 responseDuracion.message = "consulta exitosa";
                 responseDuracion.errors = null;
-                responseDuracion.data = result;
+                responseDuracion.payload = result; // MODIFICADO: Usar payload
             }
             catch (Exception ex)
             {
-                responseDuracion.ok = false;
+                responseDuracion.success = false; // MODIFICADO: Usar success
                 responseDuracion.message = "Error al consultar las citas agendadas";
                 responseDuracion.errors.Add(new ErrorModel { message = ex.Message, propiedad = null });
-                responseDuracion.data = null;
+                responseDuracion.payload = null; // MODIFICADO: Usar payload
             }
 
             return Ok(responseDuracion);
@@ -237,7 +237,7 @@ namespace API.Controllers
         public async Task<IActionResult> getDuracionCitasMedicion()
         {
             FitnessCenterDbContext db = new FitnessCenterDbContext();
-            HttpResponseDuracionCitasMedicion responseDuracion = new HttpResponseDuracionCitasMedicion();
+            DTOResponse<DTO.Dtos.DuracionCitasMedicion> responseDuracion = new DTOResponse<DTO.Dtos.DuracionCitasMedicion>(); // MODIFICADO: Usar DTOResponse
             var result = await db.DuracionCitas.Select
                 (d => new DuracionCitasMedicion
                 {
@@ -245,17 +245,17 @@ namespace API.Controllers
                     duracion = d.Duracion,
                     frecuenciaNotificaciones = d.FrecuenciaNotificaciones
                 }).FirstOrDefaultAsync();
-            responseDuracion.ok = true;
+            responseDuracion.success = true; // MODIFICADO: Usar success
             responseDuracion.message = "consulta exitosa";
             responseDuracion.errors = null;
-            responseDuracion.data = result;
+            responseDuracion.payload = result; // MODIFICADO: Usar payload
 
             if (result == null)
             {
-                responseDuracion.ok = false;
+                responseDuracion.success = false; // MODIFICADO: Usar success
                 responseDuracion.message = "No hay configuracion de duracion registrada aun";
                 responseDuracion.errors = null;
-                responseDuracion.data = result;
+                responseDuracion.payload = result; // MODIFICADO: Usar payload
             }
 
             return Ok(responseDuracion);

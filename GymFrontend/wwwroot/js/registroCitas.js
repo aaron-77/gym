@@ -61,27 +61,27 @@ const disableElements = () => {
     }
 }
 const getDuracionCitas = async () => {
-    const response = await fetch("http://localhost:5274/api/getDuracionCita");
+    const response = await fetch("/getDuracionCita"); // MODIFICADO: Usar endpoint del frontend sin /api
     const jsonResponse = await response.json();
-    if (!jsonResponse.ok) {
+    if (!jsonResponse.success) { // MODIFICADO: Usar success
         console.log(jsonResponse.message);
         return;
     }
-    duracionCita = parseInt(jsonResponse.data);
+    duracionCita = parseInt(jsonResponse.payload); // MODIFICADO: Usar payload
 }
 const getEntrenaoresDisponibles = async () => {
     const fechaInicio = document.getElementById("inputFechaInicio").value;
-    const response = await fetch("http://localhost:5274/api/obtenerEntrenadoresDisponibles?fechaInicio=" + fechaInicio);
+    const response = await fetch("/obtenerEntrenadoresDisponibles?fechaReferencia=" + fechaInicio); // MODIFICADO: Usar endpoint del frontend sin /api
 
     const jsonResponse = await response.json();
-    if (!jsonResponse.ok) {
-        if (jsonResponse.data.length = 0) {
+    if (!jsonResponse.success) { // MODIFICADO: Usar success
+        if (jsonResponse.payload.length == 0) { // MODIFICADO: Usar payload
             alert("No hay entrenadores disponibles, elige otra fecha");
         }
         console.log(jsonResponse.message);
         return;
     }
-    entrenadores = jsonResponse.data;
+    entrenadores = jsonResponse.payload; // MODIFICADO: Usar payload
 }
 
 function fillComboEntrenadores() {
@@ -89,15 +89,42 @@ function fillComboEntrenadores() {
     select.innerHTML = "";
     let defalutoption = document.createElement('option');
     defalutoption.value = null;
-    defalutoption.text = "Selecciona un cliente";
+    defalutoption.text = "Selecciona un entrenador"; // MODIFICADO: Texto
     select.appendChild(defalutoption);
-    entrenadores.forEach(function (client) {
+    entrenadores.forEach(function (entrenador) { // MODIFICADO: client a entrenador
         let option = document.createElement('option');
-        option.value = client.usuarioID;
-        option.text = client.nombre + " " + client.apellido;
+        option.value = entrenador.usuarioID; // MODIFICADO: client.usuarioID a entrenador.usuarioID
+        option.text = entrenador.nombre + " " + entrenador.apellido; // MODIFICADO: client.nombre a entrenador.nombre
         select.appendChild(option);
     });
 }
+// ELIMINADO: Función para obtener clientes (ya se carga en la vista)
+// const getClientes = async() => {
+//     const response = await fetch("/api/obtenerClientes");
+//     const jsonResponse = await response.json();
+//     if (!jsonResponse.success) {
+//         console.log(jsonResponse.message);
+//         return;
+//     }
+//     clients = jsonResponse.payload;
+// }
+
+// ELIMINADO: Función para llenar el combo de clientes (ya se llena en la vista)
+// function fillComboClients() {
+//     var select = document.getElementById('inputCliente');
+//     select.innerHTML = "";
+//     let defalutoption = document.createElement('option');
+//     defalutoption.value = null;
+//     defalutoption.text = "Selecciona un cliente";
+//     select.appendChild(defalutoption);
+//     clients.forEach(function (client) {
+//         let option = document.createElement('option');
+//         option.value = client.usuarioID;
+//         option.text = client.nombre + " " + client.apellido;
+//         select.appendChild(option);
+//     });
+// }
+
 function fillCitasAgendadas() {
     let select = document.getElementById('inputRutina');
     select.innerHTML = "";
@@ -119,7 +146,7 @@ function fillComboEjercicios() {
     let defalutoption = document.createElement('option');
     defalutoption.value = null;
     defalutoption.text = "Selecciona un ejercicio";
-    select.appendChild(defalutoption);
+    select.appendChild(defalutoption);  
     ejercicios.forEach((ejericio) => {
         let option = document.createElement('option');
         option.value = ejericio.ejercicioID;
@@ -134,5 +161,8 @@ addEventListener("DOMContentLoaded", async () => {
     $inputTipoCita.addEventListener('change', handleSelectedAction);
     $fechaInicio.addEventListener('change', handleSelectedAction);
     
+    // ELIMINADO: Llamada y llenado de clientes (ya se carga en la vista)
+    // await getClientes(); 
+    // fillComboClients(); 
 
 })
