@@ -24,6 +24,7 @@ namespace DTO.Dtos
         public string Telefono { get; set; }
         public string AccessToken { get; set; }
         public string IdToken { get; set; }
+        public string expDateIdToken { get; set; }
         public string RefreshToken { get; set; }
 
     }

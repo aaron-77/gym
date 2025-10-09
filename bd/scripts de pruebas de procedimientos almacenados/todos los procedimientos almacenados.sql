@@ -662,7 +662,7 @@ RETURNS TABLE
 AS
 RETURN
 (
-    SELECT
+    SELECT 
         cp.idProgramacionClase AS idClaseProgramada,
         cp.fkClase,
         cp.cupoMaximo,
@@ -673,21 +673,19 @@ RETURN
         hl.horaFin,
         CONCAT(CONVERT(varchar(5), hl.horaInicio, 108), ' - ', CONVERT(varchar(5), hl.horaFin, 108)) AS labelHorario,
         cp.fkEntrenador,
-        -- MODIFICADO: Campo 'NombreCompleto' y 'Apellido' de 'AspNetUsers' en lugar de 'Nombre' y 'Apellido' de 'Usuarios'
         CONCAT(u.NombreCompleto, ' ', u.Apellido) AS nombreEntrenador
     FROM FitnessCenterDB.dbo.clasesProgramadas cp
-    INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp
+    INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp 
         ON cp.idProgramacionClase = hcp.fkClaseProgramada
-    INNER JOIN FitnessCenterDB.dbo.horasLaborales hl
+    INNER JOIN FitnessCenterDB.dbo.horasLaborales hl 
         ON hcp.fkHorarioLaboral = hl.idHora
-    INNER JOIN FitnessCenterDB.dbo.AspNetUsers u
-        -- MODIFICADO: Tabla 'AspNetUsers' y campo 'Id' en lugar de 'Usuarios' y 'UsuarioID'
+    INNER JOIN FitnessCenterDB.dbo.AspNetUsers u 
         ON cp.fkEntrenador = u.Id
     WHERE cp.idProgramacionClase = @idProgramacionClase
         AND (select dbo.fn_cupoDisponibleClaseProgramada(cp.idProgramacionClase)) > 0
 );
 
-CREATE       FUNCTION dbo.fn_obtenerClasesProgramadasPorIdClase(@idClase INT)
+CREATE         FUNCTION dbo.fn_obtenerClasesProgramadasPorIdClase(@idClase INT)
 RETURNS TABLE
 AS
 RETURN
@@ -701,7 +699,7 @@ RETURN
         hl.idHora,
         hl.horaInicio,
         hl.horaFin,
-        CONCAT(CONVERT(varchar(5), hl.horaInicio, 108), ' - ', CONVERT(varchar(5), hl.horaFin, 108)) AS labelHorario,
+        CONCAT(CONVERT(varchar(10), hl.horaInicio, 108), ' - ', CONVERT(varchar(10), hl.horaFin, 108)) AS labelHorario,
         cp.fkEntrenador,
         CONCAT(u.NombreCompleto, ' ', u.Apellido) AS nombreEntrenador
     FROM
@@ -1232,27 +1230,20 @@ BEGIN
 		select * from Ejercicios;
 END;
 
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	consulta todos los entrenadores con el estado asignado en el parametro
--- =============================================
-CREATE PROCEDURE [dbo].[sp_consultarRutinasDeUsuario]
-( 
-@usuarioID int
-)	
+CREATE   PROCEDURE [dbo].[sp_consultarRutinasDeUsuario]
+(
+    @usuarioID NVARCHAR(450) -- MODIFICADO: Tipo de dato de INT a NVARCHAR(450)
+)
 AS
 BEGIN
-		
-	select
-	RutinaID,
-	UsuarioID,
-	EntrenadorID,
-	FechaCreacion,
-	Observaciones
-	FROM Rutinas 
-	WHERE UsuarioID = @usuarioID;
-		
+    SELECT
+        RutinaID,
+        UserId as UsuarioID,       -- MODIFICADO: UsuarioID a UserId
+        EntrenadorId, -- MODIFICADO: EntrenadorID a EntrenadorId
+        FechaCreacion,
+        Observaciones
+    FROM FitnessCenterDB.dbo.Rutinas -- MODIFICADO: Añadido esquema
+    WHERE UserId = @usuarioID;      -- MODIFICADO: UsuarioID a UserId
 END;
 
 -- =============================================
@@ -1260,7 +1251,7 @@ END;
 -- Create date: <Create Date,,>
 -- Description:	consulta todos los clientes con el estado asignado en el parametro
 -- =============================================
-CREATE PROCEDURE [dbo].[sp_consultarUsuarios]
+CREATE     PROCEDURE [dbo].[sp_consultarUsuarios]
 (
 @tipoUsuario nvarchar(max),
 @estado nvarchar(50)
@@ -1268,17 +1259,18 @@ CREATE PROCEDURE [dbo].[sp_consultarUsuarios]
 AS
 BEGIN
 declare @rolId nvarchar(max);
-select @rolId = RolID   from Roles where NombreRol = @tipoUsuario;
+select @rolId = Id   from AspNetRoles where Name = @tipoUsuario;
 	select
-	UsuarioID,
-	Nombre,
+	Id as UsuarioID,
+	NombreCompleto as Nombre,
 	Apellido,
 	Email,
-	Telefono,
-	FechaNacimiento,
-	FechaRegistro
-	FROM Usuarios
-	WHERE Estado = @estado and RolID = @rolId;
+	PhoneNumber as Telefono,
+	FechaDeNacimiento as FechaNacimiento,
+	FechaDeRegistro as FechaRegistro 
+	FROM [FitnessCenterDB].[dbo].aspnetusers u
+	join AspNetUserRoles aur on aur.RoleId = @rolId  and u.Id = aur.UserId 
+	WHERE Estado = @estado
 		
 END;
 
@@ -1296,6 +1288,103 @@ BEGIN
 	select u.Email,c.FechaHora from aspnetusers u
 	join Citas c on c.UserID = u.Id and c.FechaHora > GETDATE() and DATEDIFF(DAY,@fechaActual,c.FechaHora) = 15 ;		
 END;
+
+CREATE PROCEDURE dbo.sp_creatediagram
+	(
+		@diagramname 	sysname,
+		@owner_id		int	= null, 	
+		@version 		int,
+		@definition 	varbinary(max)
+	)
+	WITH EXECUTE AS 'dbo'
+	AS
+	BEGIN
+		set nocount on
+	
+		declare @theId int
+		declare @retval int
+		declare @IsDbo	int
+		declare @userName sysname
+		if(@version is null or @diagramname is null)
+		begin
+			RAISERROR (N'E_INVALIDARG', 16, 1);
+			return -1
+		end
+	
+		execute as caller;
+		select @theId = DATABASE_PRINCIPAL_ID(); 
+		select @IsDbo = IS_MEMBER(N'db_owner');
+		revert; 
+		
+		if @owner_id is null
+		begin
+			select @owner_id = @theId;
+		end
+		else
+		begin
+			if @theId <> @owner_id
+			begin
+				if @IsDbo = 0
+				begin
+					RAISERROR (N'E_INVALIDARG', 16, 1);
+					return -1
+				end
+				select @theId = @owner_id
+			end
+		end
+		-- next 2 line only for test, will be removed after define name unique
+		if EXISTS(select diagram_id from dbo.sysdiagrams where principal_id = @theId and name = @diagramname)
+		begin
+			RAISERROR ('The name is already used.', 16, 1);
+			return -2
+		end
+	
+		insert into dbo.sysdiagrams(name, principal_id , version, definition)
+				VALUES(@diagramname, @theId, @version, @definition) ;
+		
+		select @retval = @@IDENTITY 
+		return @retval
+	END;
+
+CREATE PROCEDURE dbo.sp_dropdiagram
+	(
+		@diagramname 	sysname,
+		@owner_id	int	= null
+	)
+	WITH EXECUTE AS 'dbo'
+	AS
+	BEGIN
+		set nocount on
+		declare @theId 			int
+		declare @IsDbo 			int
+		
+		declare @UIDFound 		int
+		declare @DiagId			int
+	
+		if(@diagramname is null)
+		begin
+			RAISERROR ('Invalid value', 16, 1);
+			return -1
+		end
+	
+		EXECUTE AS CALLER;
+		select @theId = DATABASE_PRINCIPAL_ID();
+		select @IsDbo = IS_MEMBER(N'db_owner'); 
+		if(@owner_id is null)
+			select @owner_id = @theId;
+		REVERT; 
+		
+		select @DiagId = diagram_id, @UIDFound = principal_id from dbo.sysdiagrams where principal_id = @owner_id and name = @diagramname 
+		if(@DiagId IS NULL or (@IsDbo = 0 and @UIDFound <> @theId))
+		begin
+			RAISERROR ('Diagram does not exist or you do not have permission.', 16, 1)
+			return -3
+		end
+	
+		delete from dbo.sysdiagrams where diagram_id = @DiagId;
+	
+		return 0;
+	END;
 
 CREATE PROCEDURE [dbo].[sp_eliminarCita]
 ( 
@@ -1381,22 +1470,22 @@ END;
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE [dbo].[sp_obtenerCitasAgendadasPorUsuario]
+CREATE       PROCEDURE [dbo].[sp_obtenerCitasAgendadasPorUsuario]
 (
-	@idUsuario int
+    @idUsuario NVARCHAR(450) -- MODIFICADO: Tipo de dato de INT a NVARCHAR(450)
 )
 AS
 BEGIN
-		 
-		SELECT 
-		CitaID,
-		UsuarioID,
-		EntrenadorID,
-		FechaHora,
-		FechaHoraFin,
-		TipoCita,
-		Estado
-		from Citas  where UsuarioID = @idUsuario and Estado in ('agendada','Agendada') ;
+    SELECT
+        CitaID ,
+        UserId as UsuarioId,      
+        EntrenadorId , 
+        FechaHora ,
+        FechaHoraFin ,
+        TipoCita,
+        Estado
+    FROM FitnessCenterDB.dbo.Citas  -- MODIFICADO: Añadido esquema
+    WHERE UserId = @idUsuario AND Estado IN ('agendada','Agendada'); -- MODIFICADO: UsuarioID a UserId
 END;
 
 CREATE   PROCEDURE sp_obtenerEjerciciosPorUsuario
@@ -1447,35 +1536,41 @@ END;
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE   PROCEDURE [dbo].[sp_obtenerEntrenadoresDisponibles]
+CREATE           PROCEDURE [dbo].[sp_obtenerEntrenadoresDisponibles]
 (
-	@fechaReferencia datetime
+    @fechaReferencia datetime2
 )
 AS
 BEGIN
-declare @rolEmpleadoId nvarchar(450);
-select @rolEmpleadoId = Id  from FitnessCenterDB.dbo.AspNetRoles where Name = 'Entrenador'; 
-		select DISTINCT 
-		u.Id AS UsuarioID,
-		u.NombreCompleto AS Nombre,
-		u.Apellido AS Apellido,
-		u.Email,
-		u.PhoneNumber AS Telefono,
-		u.UserName AS NombreUsuario,
-		u.FechaDeNacimiento AS FechaNacimiento,
-		u.FechaDeRegistro AS FechaRegistro,
-		ar.Id AS RolID,
-		u.Estado 
-		from FitnessCenterDB.dbo.AspNetUsers as u
-		INNER JOIN FitnessCenterDB.dbo.AspNetUserRoles aur ON u.Id = aur.UserId
-        INNER JOIN FitnessCenterDB.dbo.AspNetRoles ar ON aur.RoleId = ar.Id
-		where ar.Id = @rolEmpleadoId and u.Estado = 'Activo'
-		AND u.Id NOT IN (
-            SELECT cp.fkEntrenador
-            FROM FitnessCenterDB.dbo.clasesProgramadas cp
-            INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
-            WHERE hcp.fechaDeLaClase = CAST(@fechaReferencia AS DATE)
-        );
+    -- MODIFICADO: Tipo de dato de @rolEmpleadoId a NVARCHAR(450) y obtención del Id de AspNetRoles
+    DECLARE @rolEmpleadoId nvarchar(450);
+    SELECT @rolEmpleadoId = Id FROM FitnessCenterDB.dbo.AspNetRoles WHERE Name = 'Empleado';
+
+    SELECT DISTINCT
+        -- MODIFICADO: Campos de AspNetUsers y AspNetRoles
+        u.Id AS UsuarioID,
+        u.NombreCompleto AS Nombre,
+        u.Apellido AS Apellido,
+        u.Email,
+        u.PhoneNumber AS Telefono,
+        u.UserName AS NombreUsuario,
+         u.FechaDeNacimiento as FechaNacimiento,
+        u.FechaDeRegistro as FechaRegistro,
+        ar.Id AS RolID,
+        u.Estado
+    FROM FitnessCenterDB.dbo.AspNetUsers AS u
+    -- NUEVO: Uniones con AspNetUserRoles y AspNetRoles
+    INNER JOIN FitnessCenterDB.dbo.AspNetUserRoles ur ON u.Id = ur.UserId
+    INNER JOIN FitnessCenterDB.dbo.AspNetRoles ar ON ur.RoleId = ar.Id
+    WHERE ar.Id = @rolEmpleadoId AND u.Estado = 'Activo'
+    -- MODIFICADO: Nueva lógica para filtrar entrenadores no disponibles por clases programadas
+    AND u.Id NOT IN (
+        SELECT cp.fkEntrenador
+        FROM FitnessCenterDB.dbo.clasesProgramadas cp
+        INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
+         WHERE 
+         CAST(hcp.fechaDeLaClase AS DATE) = CAST(@fechaReferencia AS DATE)
+    );
 END;
 
 CREATE   PROCEDURE dbo.sp_obtenerHorariosDisponibles
@@ -2272,7 +2367,7 @@ BEGIN
 						)
 END;
 
-CREATE   PROCEDURE dbo.sp_registrarClaseProgramada
+CREATE       PROCEDURE dbo.sp_registrarClaseProgramada
     @datos dbo.DatosClaseProgramada READONLY
 AS
 BEGIN
@@ -2283,7 +2378,7 @@ BEGIN
 
         DECLARE @idClaseProgramada INT;
         DECLARE @fkClase INT, 
-                @fkEntrenador INT,
+                @fkEntrenador NVARCHAR(450),
                 @cupoMaximo INT, 
                 @fkEstadoClaseProgramada INT,
                 @fkHorarioLaboralString NVARCHAR(MAX),
@@ -2402,10 +2497,10 @@ BEGIN
     END CATCH
 END;
 
-CREATE   PROCEDURE dbo.sp_registrarHorarioDeClaseProgramada
+CREATE     PROCEDURE dbo.sp_registrarHorarioDeClaseProgramada
     @fkClaseProgramada INT,
     @fkHorarioLaboral INT,
-    @fkEntrenador INT,
+    @fkEntrenador nvarchar(450),
     @fechaDeLaClase DATE
 AS
 BEGIN
@@ -2417,9 +2512,9 @@ BEGIN
     RETURN SCOPE_IDENTITY();
 END;
 
-CREATE     PROCEDURE dbo.sp_registrarInsrcipcionAClase
+CREATE       PROCEDURE dbo.sp_registrarInsrcipcionAClase
 (
-    @idCliente INT,
+    @idCliente nvarchar(450),
     @fkProgramacionClase INT
 )
 AS
@@ -2515,31 +2610,92 @@ END;
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE [dbo].[sp_registrarRutina]
-( 
-@usuarioID int,
-@entrenadorID int,
-@fechaCreacion datetime,
-@observaciones nvarchar(max)
-)	
+CREATE   PROCEDURE [dbo].[sp_registrarRutina]
+(
+    @usuarioID NVARCHAR(450),    -- MODIFICADO: Tipo de dato de INT a NVARCHAR(450)
+    @entrenadorID NVARCHAR(450), -- MODIFICADO: Tipo de dato de INT a NVARCHAR(450)
+    @fechaCreacion datetime,
+    @observaciones nvarchar(max)
+)
 AS
 BEGIN
-	
-	IF @fechaCreacion is null
-	begin
-		set @fechaCreacion = GETDATE();
-	end
-		insert into Rutinas(
-		UsuarioID,
-		EntrenadorID,
-		FechaCreacion,
-		Observaciones)
-		values(
-		@usuarioID,
-		@entrenadorID,
-		@fechaCreacion,
-		@observaciones)
+    IF @fechaCreacion IS NULL
+    BEGIN
+        SET @fechaCreacion = GETDATE();
+    END
+
+    INSERT INTO FitnessCenterDB.dbo.Rutinas(
+        UserId,       -- MODsp_consultarRutinasDeUsuarioIFICADO: UsuarioID a UserId
+        EntrenadorId, -- MODIFICADO: EntrenadorID a EntrenadorId
+        FechaCreacion,
+        Observaciones)
+    VALUES(
+        @usuarioID,
+        @entrenadorID,
+        @fechaCreacion,
+        @observaciones)
 END;
+
+CREATE PROCEDURE dbo.sp_renamediagram
+	(
+		@diagramname 		sysname,
+		@owner_id		int	= null,
+		@new_diagramname	sysname
+	
+	)
+	WITH EXECUTE AS 'dbo'
+	AS
+	BEGIN
+		set nocount on
+		declare @theId 			int
+		declare @IsDbo 			int
+		
+		declare @UIDFound 		int
+		declare @DiagId			int
+		declare @DiagIdTarg		int
+		declare @u_name			sysname
+		if((@diagramname is null) or (@new_diagramname is null))
+		begin
+			RAISERROR ('Invalid value', 16, 1);
+			return -1
+		end
+	
+		EXECUTE AS CALLER;
+		select @theId = DATABASE_PRINCIPAL_ID();
+		select @IsDbo = IS_MEMBER(N'db_owner'); 
+		if(@owner_id is null)
+			select @owner_id = @theId;
+		REVERT;
+	
+		select @u_name = USER_NAME(@owner_id)
+	
+		select @DiagId = diagram_id, @UIDFound = principal_id from dbo.sysdiagrams where principal_id = @owner_id and name = @diagramname 
+		if(@DiagId IS NULL or (@IsDbo = 0 and @UIDFound <> @theId))
+		begin
+			RAISERROR ('Diagram does not exist or you do not have permission.', 16, 1)
+			return -3
+		end
+	
+		-- if((@u_name is not null) and (@new_diagramname = @diagramname))	-- nothing will change
+		--	return 0;
+	
+		if(@u_name is null)
+			select @DiagIdTarg = diagram_id from dbo.sysdiagrams where principal_id = @theId and name = @new_diagramname
+		else
+			select @DiagIdTarg = diagram_id from dbo.sysdiagrams where principal_id = @owner_id and name = @new_diagramname
+	
+		if((@DiagIdTarg is not null) and  @DiagId <> @DiagIdTarg)
+		begin
+			RAISERROR ('The name is already used.', 16, 1);
+			return -2
+		end		
+	
+		if(@u_name is null)
+			update dbo.sysdiagrams set [name] = @new_diagramname, principal_id = @theId where diagram_id = @DiagId
+		else
+			update dbo.sysdiagrams set [name] = @new_diagramname where diagram_id = @DiagId
+		return 0
+	END;
 
 CREATE PROCEDURE dbo.sp_servicioLimpiarPreReservasCaducadas
 AS

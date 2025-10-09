@@ -555,10 +555,11 @@ async function registrarClaseProgramada(event) {
         for (let [key, value] of formData.entries()) {
             console.log(`${key}: ${value}`);
         }
-        
+
+        const idPrereserva = getFromLocalStorage("idPreReserva");
         // Agregar solo los campos adicionales requeridos
-        formData.append('idUsuarioQueReserva', '16');
-        formData.append('idPreservaDeHorario', null);
+        formData.append('idUsuarioQueReserva', 'jasjkskmamsasma');
+        formData.append('idPreservaDeHorario', idPrereserva);
         
         // Convertir FormData a objeto JSON usando la función importada
         const datosClaseProgramada = formDataToJson(formData);
@@ -878,54 +879,3 @@ function handleSelectedSchedule (event){
      }    
 }
 
-/**
- * Función para registrar una pre-reserva de horario
- */
-async function registrarPreReservaDeHorario() {
-    // Validar que haya un horario seleccionado
-    const inputFkHoraLaboral = document.getElementById('fkHoraLaboral');
-    const inputFecha = document.getElementById('fechaDeLaClase');
-
-    if (!inputFecha.value) {
-        inputFecha.reportValidity();
-        return;
-    }
-    
-    if (!inputFkHoraLaboral.value) {
-        inputFkHoraLaboral.reportValidity()
-        return;
-    }
-    
-    
-
-    // Obtener los datos pertinentes
-    const idClase = parseInt(inputClase.value);
-    const idUsuarioQueReserva = 16; // Aquí puedes cambiar por el usuario real si lo tienes
-    const fechaTentativa = inputFecha.value;
-    const idHoraLaboral = parseInt(inputFkHoraLaboral.value);
-
-    const body = {
-        idClase,
-        idUsuarioQueReserva,
-        fechaTentativa,
-        idHoraLaboral
-    };
-
-    try {
-        const response = await realizarPeticionAPI('/Horarios/preReservarHorario', body, undefined, 'POST');
-        if (response.success) {
-            alert('Pre-reserva registrada exitosamente.');
-        } else {
-            let errorMessage = 'Error al registrar la pre-reserva';
-            if (response.errors && response.errors.length > 0) {
-                errorMessage += ': ' + response.errors.map(e => e.message).join(', ');
-            } else if (response.message) {
-                errorMessage += ': ' + response.message;
-            }
-            alert(errorMessage);
-        }
-    } catch (error) {
-        console.error('Error al registrar pre-reserva:', error);
-        alert('Error al registrar la pre-reserva: ' + error.message);
-    }
-}

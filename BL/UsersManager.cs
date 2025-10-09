@@ -41,6 +41,30 @@ namespace BL
             }
         }
 
+        public async Task<DTOResponse<DTOLoggedUser>> updateIdAndAccessToken(RefreshTokenRequest refreshTokenRequest)
+        {
+            
+            JsonContent jsonCon = JsonContent.Create(refreshTokenRequest);
+            string updateIdAndAccessTokenRequest = await httpClient.post("api/refresh", jsonCon);
+            DTOResponse<DTOLoggedUser> usuario = null;
+
+            try
+            {
+                usuario = JsonSerializer.Deserialize<DTOResponse<DTOLoggedUser>>(updateIdAndAccessTokenRequest, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return usuario;
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
         public async Task<ResponseHttp> registrarUsuario(User newUser)
         {
             // Encriptar la contraseña antes de enviar la solicitud
@@ -54,7 +78,7 @@ namespace BL
                                                        newUser.Telefono,
                                                        newUser.Apellido,
                                                        newUser.Contrasena);
-            
+
             JsonContent jsonCon = JsonContent.Create(userForBody);
             string categoriasResponse = await httpClient.post("api/RegistrarUsuario", jsonCon);
             ResponseHttp usuario = JsonSerializer.Deserialize<ResponseHttp>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });

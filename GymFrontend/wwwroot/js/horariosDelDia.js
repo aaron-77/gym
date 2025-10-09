@@ -165,8 +165,8 @@ export class ScheduleViewer {
     const scheduleId = element.getAttribute("data-idhora")
     this.updateHiddenInput(scheduleId)
     // Ejecutar pre-reserva antes de continuar
-    const preReservaExitosa = await this.registrarPreReservaDeHorario();
-    if (!preReservaExitosa) {
+    const idPreReserva = await this.registrarPreReservaDeHorario();
+    if (idPreReserva <= 0) {
      showMessage(iconTypes.error, "Error al registrar la pre-reserva");
       return;
     }
@@ -175,7 +175,7 @@ export class ScheduleViewer {
       showMessage(iconTypes.error, "ID de horario no encontrado");
       return
     }
-    
+    saveToLocalStorage("idPreReserva", idPreReserva);
     // Remover selección anterior
     this.clearSelection()
 
@@ -213,7 +213,7 @@ export class ScheduleViewer {
 
     // Obtener los datos pertinentes
     
-    const idUsuarioQueReserva = 16; // Aquí puedes cambiar por el usuario real si lo tienes
+    const idUsuarioQueReserva = ''; // Aquí puedes cambiar por el usuario real si lo tienes
     const fechaTentativa = inputFecha.value;
     const idHoraLaboral = parseInt(inputFkHoraLaboral.value);
 
@@ -228,8 +228,8 @@ export class ScheduleViewer {
       if (response.success) {
         // Se puede mostrar un mensaje si se desea
 
-        // alert('Pre-reserva registrada exitosamente.');
-        return true;
+        //se retorna el id de la pre-reserva registrada
+        return response.payload;
       } else {
         let detailedError = 'Error al registrar la pre-reserva';
         if (response.errors && response.errors.length > 0) {
@@ -237,7 +237,7 @@ export class ScheduleViewer {
           console.log(detailedError)
         } 
         showMessage(iconTypes.error, "No se pudo reservar el horario, aun asi puedes intentar programar tu clase");
-        return false;
+        return 0;
       }
     } catch (error) {
       showMessage(iconTypes.error, "No se pudo reservar el horario, aun asi puedes intentar programar tu clase");

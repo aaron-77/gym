@@ -36,6 +36,7 @@ builder.Services.AddScoped<UsersManager>();
 builder.Services.AddScoped<HorariosManager>(); // Eliminado
  builder.Services.AddScoped<ClasesManager>(); // Eliminado
 builder.Services.AddScoped<JwtTokenGenerator>();
+builder.Services.AddScoped<CookieService>();
 builder.Configuration.AddJsonFile("GymFrontend/appsettings.json", optional: false, reloadOnChange: false);
 
 var jwtSection = builder.Configuration.GetSection("JwtSettings");

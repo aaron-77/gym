@@ -27,8 +27,7 @@ namespace DTO.Dtos
         public DateOnly? fechaDeLaClase { get; set; }
 
         [Required(ErrorMessage = "El usuario que reserva es obligatorio")]
-        [Range(1, int.MaxValue, ErrorMessage = "El id del usuario debe ser mayor o igual a 0")]
-        public int idUsuarioQueReserva { get; set; }
+        public string idUsuarioQueReserva { get; set; }
 
         [Required(ErrorMessage = "La hora laboral es obligatoria")]
         [Range(1, int.MaxValue, ErrorMessage = "El id de la hora laboral debe ser mayor o igual a 0")]

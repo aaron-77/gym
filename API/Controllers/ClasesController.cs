@@ -1,22 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using API.Hubs;
+using API.Services;
 using BL;
 using BL.Utils;
 using DataAccess.EntityFramework;
+using DataAccess.Infraestructure;
 using DTO.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
-using API.Services;
-using DataAccess.Infraestructure;
-using API.Hubs;
-using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -29,12 +29,21 @@ namespace API.Controllers
         private readonly UserRoleService _userRoleService;
         private readonly ServicioActualizacionesDeHorariosRealTime _servicioActualizaciones;
 
-        public ClasesController(FitnessCenterDbContext context, HttpCustomClient httpCustomClient, UserRoleService userRoleService, ServicioActualizacionesDeHorariosRealTime servicioActualizaciones)
+        private readonly ClasesService _clasesService;
+
+        public ClasesController(
+            FitnessCenterDbContext context,
+            HttpCustomClient httpCustomClient,
+            UserRoleService userRoleService,
+            ServicioActualizacionesDeHorariosRealTime servicioActualizaciones,
+            ClasesService clasesService
+        )
         {
             _context = context;
             _httpCustomClient = httpCustomClient;
             _userRoleService = userRoleService;
             _servicioActualizaciones = servicioActualizaciones;
+            _clasesService = clasesService;
         }
 
         /// <summary>
@@ -166,7 +175,7 @@ namespace API.Controllers
         /// </summary>
         /// <param name="activa">Filtro de estado: 1=activa, 0=inactiva</param>
         /// <returns>Lista de clases filtradas por estado</returns>
-        
+
         [HttpGet("obtenerClases")]
         public async Task<ActionResult<DTOResponse<List<DTOClaseSimple>>>> ObtenerClases(
             [FromQuery] bool activa = false
@@ -399,19 +408,17 @@ namespace API.Controllers
                 // Validar el modelo usando las validaciones de Data Annotations
                 if (!ModelState.IsValid)
                 {
-                    var errors = ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => new ErrorModel { propiedad = "NONE", message = e.ErrorMessage })
+                    var errors = ModelState
+                        .Values.SelectMany(v => v.Errors)
+                        .Select(e => new ErrorModel
+                        {
+                            propiedad = "NONE",
+                            message = e.ErrorMessage,
+                        })
                         .ToList();
 
                     return BadRequest(
-                        ResponseManager.BuildResponse<int>(
-                            false,
-                            400,
-                            "Datos inválidos",
-                            errors,
-                            0
-                        )
+                        ResponseManager.BuildResponse<int>(false, 400, "Datos inválidos", errors, 0)
                     );
                 }
 
@@ -426,7 +433,11 @@ namespace API.Controllers
                             "La clase especificada no existe",
                             new List<ErrorModel>
                             {
-                                new ErrorModel { propiedad = "fkClase", message = "Clase no encontrada" }
+                                new ErrorModel
+                                {
+                                    propiedad = "fkClase",
+                                    message = "Clase no encontrada",
+                                },
                             },
                             0
                         )
@@ -444,39 +455,66 @@ namespace API.Controllers
                             "El usuario especificado no tiene rol de empleado",
                             new List<ErrorModel>
                             {
-                                new ErrorModel { propiedad = "fkEntrenador", message = "El usuario debe tener rol de empleado" }
+                                new ErrorModel
+                                {
+                                    propiedad = "fkEntrenador",
+                                    message = "El usuario debe tener rol de empleado",
+                                },
                             },
                             0
                         )
                     );
                 }
 
-                var connection = (SqlConnection) _context.Database.GetDbConnection();
-                if (connection.State != ConnectionState.Open) { 
+                var connection = (SqlConnection)_context.Database.GetDbConnection();
+                if (connection.State != ConnectionState.Open)
+                {
                     await connection.OpenAsync();
                 }
                 using (connection)
                 {
-
-
-                    using (var command = new SqlCommand("dbo.sp_registrarClaseProgramada", connection))
+                    using (
+                        var command = new SqlCommand("dbo.sp_registrarClaseProgramada", connection)
+                    )
                     {
                         command.CommandType = CommandType.StoredProcedure;
 
-                        var datos = DataTableConverter
-                                    .ConvertToDataTable<DTODatosClaseProgramada>(modelo);
+                        var datos = DataTableConverter.ConvertToDataTable<DTODatosClaseProgramada>(
+                            modelo
+                        );
                         command.Parameters.AddWithValue("@datos", datos);
                         var idClaseProgramada = Convert.ToInt32(await command.ExecuteScalarAsync());
-                        await _servicioActualizaciones.enviarHorariosDisponiblesActualizados(modelo.idUsuarioQueReserva);
-                        await _servicioActualizaciones.enviarPreReservasActualizadas(modelo.idUsuarioQueReserva);
-                        await _servicioActualizaciones.enviarClaseProgramadaRegistrada(idClaseProgramada);
+
+                        await _servicioActualizaciones.enviarClaseProgramadaRegistrada(
+                            idClaseProgramada
+                        );
+
+                        if (modelo.idPreservaDeHorario.HasValue)
+                        {
+                            int preReservasEliminadas =
+                                await _clasesService.eliminarPreReservaDeClaseProgramada(
+                                    modelo.idPreservaDeHorario
+                                );
+                            if (preReservasEliminadas <= 0)
+                            {
+                                Console.WriteLine("NO SE PUDO ELIMINAR LA PRE-RESERVA ASOCIADA");
+                            }
+                        }
+
+                        await _servicioActualizaciones.enviarPreReservasActualizadas(
+                            modelo.idUsuarioQueReserva
+                        );
+                        await _servicioActualizaciones.enviarHorariosDisponiblesActualizados(
+                            modelo.idUsuarioQueReserva
+                        );
+
                         return Ok(
                             ResponseManager.BuildResponse<int?>(
                                 true,
                                 200,
                                 "Clase programada registrada correctamente",
                                 null,
-                                1   
+                                1
                             )
                         );
                     }
@@ -531,7 +569,6 @@ namespace API.Controllers
                         );
                     }
 
-
                     // Llamar al procedimiento almacenado para cancelar la clase programada
                     var parametros = new SqlParameter[]
                     {
@@ -542,12 +579,17 @@ namespace API.Controllers
                         new SqlParameter("@fechaParaCancelar", DateTime.Now), // O la fecha que desees usar
                         new SqlParameter("@idEntrenador", solicitud.claseCancelada.fkEntrenador),
                         new SqlParameter("@idClase", solicitud.claseCancelada.fkClase),
-                        new SqlParameter("@estadoDeOperaciones", SqlDbType.Int){Direction = ParameterDirection.Output}
+                        new SqlParameter("@estadoDeOperaciones", SqlDbType.Int)
+                        {
+                            Direction = ParameterDirection.Output,
+                        },
                     };
 
-                    var resultado = await _context.Database
-                    .ExecuteSqlRawAsync($"EXEC dbo.sp_procesoCompletoCancelarClasesProgramadas @idClaseProgramada, @fechaParaCancelar, @idEntrenador, @idClase, @estadoDeOperaciones OUTPUT", parametros);
-                    int exitoCancelacion = (int) parametros[parametros.Length -1 ].Value;
+                    var resultado = await _context.Database.ExecuteSqlRawAsync(
+                        $"EXEC dbo.sp_procesoCompletoCancelarClasesProgramadas @idClaseProgramada, @fechaParaCancelar, @idEntrenador, @idClase, @estadoDeOperaciones OUTPUT",
+                        parametros
+                    );
+                    int exitoCancelacion = (int)parametros[parametros.Length - 1].Value;
                     if (exitoCancelacion > 0) // Si la cancelación fue exitosa
                     {
                         // Enviar correo de confirmación
@@ -631,12 +673,15 @@ namespace API.Controllers
                 );
             }
         }
+
         /// <summary>
         /// Reagenda una clase
         /// </summary>
         [Authorize(Roles = "empleado")]
         [HttpPost("reagendacionDeInscripcionAClase")]
-        public async Task<ActionResult<DTOResponse<string>>> ReagendarClase([FromBody] DTOReagendacionDeInscripcion modelo)
+        public async Task<ActionResult<DTOResponse<string>>> ReagendarClase(
+            [FromBody] DTOReagendacionDeInscripcion modelo
+        )
         {
             try
             {
@@ -648,7 +693,14 @@ namespace API.Controllers
                             false,
                             400,
                             "Datos inválidos",
-                            ModelState.Values.SelectMany(v => v.Errors).Select(e => new ErrorModel { propiedad = "NONE", message = e.ErrorMessage }).ToList(),
+                            ModelState
+                                .Values.SelectMany(v => v.Errors)
+                                .Select(e => new ErrorModel
+                                {
+                                    propiedad = "NONE",
+                                    message = e.ErrorMessage,
+                                })
+                                .ToList(),
                             null
                         )
                     );
@@ -660,11 +712,17 @@ namespace API.Controllers
                     new SqlParameter("@idInscripcionCancelada", modelo.idInscripcionCancelada),
                     new SqlParameter("@idClaseProgramadaNueva", modelo.idClaseProgramadaNueva),
                     new SqlParameter("@idCliente", modelo.idCliente),
-                    new SqlParameter("@estadoOperacion", SqlDbType.Int) { Direction = ParameterDirection.Output }
+                    new SqlParameter("@estadoOperacion", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output,
+                    },
                 };
 
                 // Ejecutar el procedimiento almacenado
-                await _context.Database.ExecuteSqlRawAsync("EXEC dbo.sp_procesoCompletoReagendacionDeInscripcion @idInscripcionCancelada, @idClaseProgramadaNueva, @idCliente, @estadoOperacion OUTPUT", parametros);
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC dbo.sp_procesoCompletoReagendacionDeInscripcion @idInscripcionCancelada, @idClaseProgramadaNueva, @idCliente, @estadoOperacion OUTPUT",
+                    parametros
+                );
 
                 // Obtener el estado de operación
                 int estadoOperacion = (int)parametros.Last().Value;
@@ -718,14 +776,17 @@ namespace API.Controllers
         /// <returns>Lista de estados de clases programadas</returns>
         [Authorize(Roles = "empleado")]
         [HttpGet("obtenerEstadosDeClasesProgramdas")]
-        public async Task<ActionResult<DTOResponse<List<DTOEstadoClaseProgramada>>>> ObtenerEstadosDeClasesProgramadas()
+        public async Task<
+            ActionResult<DTOResponse<List<DTOEstadoClaseProgramada>>>
+        > ObtenerEstadosDeClasesProgramadas()
         {
             try
             {
                 // Ejecutar la función SQL para obtener los estados usando el DTO registrado
                 var estados = await _context
-                    .DtoEstadoClaseProgramada
-                    .FromSqlInterpolated($"SELECT * FROM dbo.fn_obtenerEstadosDeClasesProgramdas()")
+                    .DtoEstadoClaseProgramada.FromSqlInterpolated(
+                        $"SELECT * FROM dbo.fn_obtenerEstadosDeClasesProgramdas()"
+                    )
                     .ToListAsync();
 
                 return Ok(
@@ -761,30 +822,42 @@ namespace API.Controllers
         /// </summary>
         [Authorize(Roles = "empleado")]
         [HttpGet("obtenerClasesProgramadasPorId")]
-        public async Task<ActionResult<DTOResponse<List<DTOClaseProgramadaView>>>> obtenerClasesProgramadasPorId([FromQuery] int idClase)
+        public async Task<
+            ActionResult<DTOResponse<List<DTOClaseProgramadaView>>>
+        > obtenerClasesProgramadasPorId([FromQuery] int idClase)
         {
             try
             {
-                var resultado = await _context.DTOClasesProgramadaView
-                    .FromSqlInterpolated($"SELECT * FROM dbo.fn_obtenerClasesProgramadasPorIdClase({idClase})")
+                var resultado = await _context
+                    .DTOClasesProgramadaView.FromSqlInterpolated(
+                        $"SELECT * FROM dbo.fn_obtenerClasesProgramadasPorIdClase({idClase})"
+                    )
                     .ToListAsync();
-                return Ok(ResponseManager.BuildResponse(
-                    true,
-                    200,
-                    "Clases programadas obtenidas correctamente",
-                    null,
-                    resultado
-                ));
+                return Ok(
+                    ResponseManager.BuildResponse(
+                        true,
+                        200,
+                        "Clases programadas obtenidas correctamente",
+                        null,
+                        resultado
+                    )
+                );
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ResponseManager.BuildResponse<List<DTOClaseProgramadaView>>(
-                    false,
+                return StatusCode(
                     500,
-                    "Error al obtener las clases programadas",
-                    new List<ErrorModel> { new ErrorModel { propiedad = "NONE", message = ex.Message } },
-                    null
-                ));
+                    ResponseManager.BuildResponse<List<DTOClaseProgramadaView>>(
+                        false,
+                        500,
+                        "Error al obtener las clases programadas",
+                        new List<ErrorModel>
+                        {
+                            new ErrorModel { propiedad = "NONE", message = ex.Message },
+                        },
+                        null
+                    )
+                );
             }
         }
 
@@ -793,7 +866,9 @@ namespace API.Controllers
         /// </summary>
         [Authorize(Roles = "empleado")]
         [HttpPost("inscribirAClase")]
-        public async Task<ActionResult<DTOResponse<int>>> InscribirAClase([FromBody] DTOInscripcionAClase modelo)
+        public async Task<ActionResult<DTOResponse<int>>> InscribirAClase(
+            [FromBody] DTOInscripcionAClase modelo
+        )
         {
             try
             {
@@ -805,33 +880,59 @@ namespace API.Controllers
                             false,
                             400,
                             "Datos inválidos",
-                            ModelState.Values
-                                .SelectMany(v => v.Errors)
-                                .Select(e => new ErrorModel { propiedad = "NONE", message = e.ErrorMessage })
+                            ModelState
+                                .Values.SelectMany(v => v.Errors)
+                                .Select(e => new ErrorModel
+                                {
+                                    propiedad = "NONE",
+                                    message = e.ErrorMessage,
+                                })
                                 .ToList(),
                             0
                         )
                     );
                 }
 
-                var resultadoCupos = await DataAccess.Infraestructure.DatabaseExecutor.ExecuteStoredProcedureAsync(
-                    _context.Database.GetDbConnection(),
-                    "dbo.fn_cupoDisponibleClaseProgramada",
-                    new Dictionary<string, object>
-                    {
-                        { "idProgramacionClase",  new DatabaseParameter(modelo.IdProgramacionClase, ParameterDirection.Input, DbType.Int32) },
-                        { "cuposDisponibles",  new DatabaseParameter(null, ParameterDirection.ReturnValue, DbType.Int32) }
-                    }
-                );
+                var resultadoCupos =
+                    await DataAccess.Infraestructure.DatabaseExecutor.ExecuteStoredProcedureAsync(
+                        _context.Database.GetDbConnection(),
+                        "dbo.fn_cupoDisponibleClaseProgramada",
+                        new Dictionary<string, object>
+                        {
+                            {
+                                "idProgramacionClase",
+                                new DatabaseParameter(
+                                    modelo.IdProgramacionClase,
+                                    ParameterDirection.Input,
+                                    DbType.Int32
+                                )
+                            },
+                            {
+                                "cuposDisponibles",
+                                new DatabaseParameter(
+                                    null,
+                                    ParameterDirection.ReturnValue,
+                                    DbType.Int32
+                                )
+                            },
+                        }
+                    );
                 var cupoDisponible = (int)resultadoCupos.OutputParameters["cuposDisponibles"];
                 if (cupoDisponible <= 0)
-                { 
+                {
                     return BadRequest(
                         ResponseManager.BuildResponse<int>(
                             false,
                             400,
                             "No hay cupo disponible para la clase",
-                            new List<ErrorModel> { new ErrorModel { propiedad = "NONE", message = "No hay cupo disponible para la clase" } },
+                            new List<ErrorModel>
+                            {
+                                new ErrorModel
+                                {
+                                    propiedad = "NONE",
+                                    message = "No hay cupo disponible para la clase",
+                                },
+                            },
                             0
                         )
                     );
@@ -844,7 +945,9 @@ namespace API.Controllers
                 );
 
                 // Notificar actualización de cupos
-                await _servicioActualizaciones.enviarCuposActualizadosDeClaseProgramada(modelo.IdProgramacionClase);
+                await _servicioActualizaciones.enviarCuposActualizadosDeClaseProgramada(
+                    modelo.IdProgramacionClase
+                );
 
                 return Ok(
                     ResponseManager.BuildResponse(
@@ -872,6 +975,47 @@ namespace API.Controllers
                     )
                 );
             }
+        }
+
+        [Authorize(Roles = "empleado")]
+        [HttpPost("eliminarPrereservaDeClaseProgramada")]
+        public async Task<ActionResult<DTOResponse<string>>> EliminarPrereservaDeClaseProgramada(
+            [FromBody] int idPreReserva
+        )
+        {
+            int preReservasEliminadas = 0;
+            try
+            {
+                preReservasEliminadas = await _clasesService.eliminarPreReservaDeClaseProgramada(
+                    idPreReserva
+                );
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(
+                    500,
+                    ResponseManager.BuildResponse<string>(
+                        false,
+                        500,
+                        "Error al eliminar la pre-reserva",
+                        new List<ErrorModel>
+                        {
+                            new ErrorModel { propiedad = "NONE", message = ex.Message },
+                        },
+                        null
+                    )
+                );
+            }
+
+            return Ok(
+                ResponseManager.BuildResponse<int>(
+                    true,
+                    200,
+                    "Pre-reserva eliminada correctamente",
+                    null,
+                    preReservasEliminadas
+                )
+            );
         }
     }
 }

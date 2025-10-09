@@ -17,6 +17,7 @@ namespace GymFrontend.Controllers
             managerUsers = _managerUsers;
             citasManager = _citasManager;
         }
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("registrarCita")]
         public async Task<IActionResult> Index()
@@ -55,6 +56,8 @@ namespace GymFrontend.Controllers
         }
 
 
+
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("modificarCita")]
         public async Task<IActionResult> modificarCita()
@@ -96,6 +99,7 @@ namespace GymFrontend.Controllers
             return View("ModificarCita", cita);
         }
 
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("duracionCitasMedicionPage")]
         public async Task<IActionResult> renderVistaDuracion(DuracionCitasMedicion duracion) // MODIFICADO: async Task

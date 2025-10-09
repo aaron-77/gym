@@ -1,4 +1,6 @@
-function logout() {
+
+
+export function logout() {
     document.getElementById("logoutForm").submit();
 }
 

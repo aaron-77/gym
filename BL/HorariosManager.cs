@@ -36,7 +36,7 @@ namespace BL
             }
         }
 
-        public async Task<DTOResponse<List<DTOHorarioPreReservado>>> ObtenerPreReservas(string? fecha = null)
+        public async Task<DTOResponse<List<DTOHorarioVisualizacion>>> ObtenerPreReservas(string? fecha = null)
         {
             try
             {
@@ -46,12 +46,12 @@ namespace BL
                     endpoint += $"?fecha={fecha}";
                 }
                 string response = await _httpClient.get(endpoint);
-                return JsonSerializer.Deserialize<DTOResponse<List<DTOHorarioPreReservado>>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<List<DTOHorarioPreReservado>> { success = false, message = "Error de deserialización o respuesta vacía." };
+                return JsonSerializer.Deserialize<DTOResponse<List<DTOHorarioVisualizacion>>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<List<DTOHorarioVisualizacion>> { success = false, message = "Error de deserialización o respuesta vacía." };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error en ObtenerPreReservas: {ex.Message}");
-                return new DTOResponse<List<DTOHorarioPreReservado>> { success = false, message = "Error al obtener pre-reservas." };
+                return new DTOResponse<List<DTOHorarioVisualizacion>> { success = false, message = "Error al obtener pre-reservas." };
             }
         }
 

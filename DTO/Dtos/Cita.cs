@@ -12,12 +12,16 @@ namespace DTO.Dtos
 
         [Required(ErrorMessage = "Selecciona la fecha de incio")]
         public DateTime fechaInicioCita { get; set; }
+       
         [Required(ErrorMessage = "Selecciona la fecha de finalizacion")]
         public DateTime fechaFinCita { get; set; }
-        [Range(1, int.MaxValue, ErrorMessage = "Selecciona un cliente")]
+       
+        [Required(ErrorMessage = "Selecciona un cliente")]
         public string fkCliente { get; set; }
-        [Range(1, int.MaxValue, ErrorMessage = "Selecciona un entrenador")]
+       
+        [Required(ErrorMessage = "Selecciona un entrenador")]
         public string fkEntrenador { get; set; }
+       
         [Required(ErrorMessage = "Selecciona el tipo de cita")]
         public string tipoCita { get;set;  }
 

@@ -102,7 +102,7 @@ namespace API.Controllers
             try
             {
                 // Llamar al método del servicio que ejecuta el procedimiento almacenado
-                var resultado = await _horariosService.RegistrarPreReservaDeHorario(preReserva);
+                var idPreReservaCreada = await _horariosService.RegistrarPreReservaDeHorario(preReserva);
                 // Notificar al frontend vía SignalR
                 await _servicioActualizaciones.enviarPreReservasActualizadas(preReserva.idUsuarioQueReserva);
 
@@ -111,7 +111,7 @@ namespace API.Controllers
                     success = true,
                     httpCode = 200,
                     message = "Pre-reserva de horario registrada correctamente",
-                    payload = resultado
+                    payload = idPreReservaCreada
                 };
                 return Ok(response);
             }

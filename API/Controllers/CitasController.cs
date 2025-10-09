@@ -1,8 +1,10 @@
 ﻿using BL;
 using BL.Utils;
 using DataAccess.EntityFramework;
+using DataAccess.Identity;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,36 +12,46 @@ namespace API.Controllers
 {
     public class CitasController : Controller
     {
+
+
+        private readonly UserManager<ApplicationUser> _userManager;
+        public CitasController(UserManager<ApplicationUser> userManager)
+        {
+            _userManager = userManager;
+        }
+
         [HttpPost]
         [Authorize(Roles = "empleado")]
         [Route("api/RegistrarCita")]
 
         public async Task<IActionResult> RegistrarCita([FromBody] DTO.Dtos.Cita cita)
         {
-            DTOResponse<DTO.Dtos.Cita> respuesta = new DTOResponse<DTO.Dtos.Cita>(); // MODIFICADO: Usar DTOResponse
-            if (!ModelState.IsValid)
-            {
-                List<string> nombresCampos = new List<string>() { "fechaInicioCita", "fechaFinCita", "fkCliente", "fkEntrenador", "tipoCita" };
-                foreach (var item in ModelState.Values)
-                {
-                    foreach (var item1 in item.Errors)
-                    {
-                        ErrorModel error = new ErrorModel();
-                        string nombreCampo = nombresCampos.Where(c => item1.ErrorMessage.Contains(c)).FirstOrDefault();
-                        error.propiedad = nombreCampo;
-                        error.message = item1.ErrorMessage;
-                        respuesta.errors.Add(error);
-                    }
 
-                }
-                ;
-                respuesta.success = false; // MODIFICADO: Usar success
-                respuesta.message = "Error al registrar tu cita";
-                return BadRequest(respuesta);
-            }
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
+            DTOResponse<DTO.Dtos.Cita> respuesta ;
             try
             {
+                 respuesta = new DTOResponse<DTO.Dtos.Cita>(); // MODIFICADO: Usar DTOResponse
+                if (!ModelState.IsValid)
+                {
+                    List<string> nombresCampos = new List<string>() { "fechaInicioCita", "fechaFinCita", "fkCliente", "fkEntrenador", "tipoCita" };
+                    foreach (var item in ModelState.Values)
+                    {
+                        foreach (var item1 in item.Errors)
+                        {
+                            ErrorModel error = new ErrorModel();
+                            string nombreCampo = nombresCampos.Where(c => item1.ErrorMessage.Contains(c)).FirstOrDefault();
+                            error.propiedad = nombreCampo;
+                            error.message = item1.ErrorMessage;
+                            respuesta.errors.Add(error);
+                        }
+
+                    }
+                    ;
+                    respuesta.success = false; // MODIFICADO: Usar success
+                    respuesta.message = "Error al registrar tu cita";
+                    return BadRequest(respuesta);
+                }
+                FitnessCenterDbContext db = new FitnessCenterDbContext();
                 var result = await db.Database.ExecuteSqlInterpolatedAsync($@"EXEC sp_registrarCita 
                 @usuarioID = {cita.fkCliente},
                 @entrenadorID={cita.fkEntrenador},
@@ -48,10 +60,10 @@ namespace API.Controllers
                 @estado ={cita.estado},
                 @fechaHoraFin ={cita.fechaFinCita}
                 ");
-                var usuarioDeLaCita = db.Usuarios.Find(cita.fkCliente);
+                var usuarioDeLaCita = _userManager.Users.FirstOrDefault(u => u.Id == cita.fkCliente);
 
                 var emailManager = new EmailManagerMailKit("smtp.server.com", 587, "aaronlarabonfil@gmail.com", "kayxfchmpquogjgg");
-                var message = emailManager.crearEmail("Fitness Gym", "aaronlarabonfil@gmail.com",usuarioDeLaCita.Nombre + usuarioDeLaCita.Apellido ,usuarioDeLaCita.Email, "Has Agendado una cita", "recuerda venir a tu cita el dia " + cita.fechaInicioCita.ToString());
+                var message = emailManager.crearEmail("Fitness Gym", "aaronlarabonfil@gmail.com", usuarioDeLaCita.NombreCompleto + usuarioDeLaCita.Apellido, usuarioDeLaCita.Email, "Has Agendado una cita", "recuerda venir a tu cita el dia " + cita.fechaInicioCita.ToString());
                 emailManager.EnviarEmail(message);
 
                 respuesta.success = true; // MODIFICADO: Usar success
@@ -61,6 +73,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                respuesta = new DTOResponse<DTO.Dtos.Cita>();
                 respuesta.success = false; // MODIFICADO: Usar success
                 respuesta.message = "no se pudo registrar tu cita";
                 respuesta.payload = null; // MODIFICADO: Usar payload

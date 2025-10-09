@@ -126,6 +126,7 @@ builder.Services.AddScoped<ServicioActualizacionesDeHorariosRealTime>();
 builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<TokensService>(); // Registrar TokensService
+builder.Services.AddScoped<ClasesService>();
 
 builder.Services.AddQuartz(configuration => {
     configuration.UseMicrosoftDependencyInjectionJobFactory();

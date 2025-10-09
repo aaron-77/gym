@@ -26,6 +26,8 @@ namespace GymFrontend.Controllers
             ejerciciosManager = _ejerciciosManager;
             jwtTokenGenerator = _jwtTokenGenerator;
         }
+
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("gestionRutinas")]
         public async Task<IActionResult> Index()

@@ -331,7 +331,7 @@ namespace API.Controllers
                         httpCode: 401,
                         message: "Refresh token inválido o expirado",
                         errors: null,
-                        payload: null
+                        payload: refreshedUser
                     )
                 );
             }

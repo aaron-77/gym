@@ -21,7 +21,7 @@ namespace API.Services
             _horariosService = horariosService;
         }
 
-        public async Task enviarPreReservasActualizadas(int userId)
+        public async Task enviarPreReservasActualizadas(string userId)
         {
             try
             {
@@ -50,7 +50,7 @@ namespace API.Services
             }
         }
 
-        public async Task enviarHorariosDisponiblesActualizados(int userId)
+        public async Task enviarHorariosDisponiblesActualizados(string userId)
         {
             try
             {

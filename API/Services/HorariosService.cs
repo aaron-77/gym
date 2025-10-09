@@ -4,8 +4,10 @@ using DTO.Dtos;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 namespace API.Services
 {
@@ -88,14 +90,29 @@ namespace API.Services
             {
                 var fechaDateTime = preReserva.fechaTentativa.ToDateTime(TimeOnly.MinValue);
                 
-                // Ejecutar el procedimiento almacenado sp_preReservarHorario
-                var idPreReserva = await _context.Database.ExecuteSqlInterpolatedAsync($@"
-                    EXEC sp_preReservarHorario  @idUsuarioQueReserva={preReserva.idUsuarioQueReserva}, @fechaTentativa={fechaDateTime}, @idHoraLaboral={preReserva.idHoraLaboral}");
+                var parametros = new SqlParameter[]
+                {
+                    new SqlParameter("@idUsuarioQueReserva", preReserva.idUsuarioQueReserva),
+                    new SqlParameter("@fechaTentativa", fechaDateTime),
+                    new SqlParameter("@idHoraLaboral", preReserva.idHoraLaboral),
+                    new SqlParameter("@idPrereservaOut", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    }
+                };
+
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_preReservarHorario @idUsuarioQueReserva, @fechaTentativa, @idHoraLaboral, @idPrereservaOut OUTPUT",
+                    parametros
+                );
+
+                int idPreReserva = (int)parametros[parametros.Length - 1].Value;
+
                 return idPreReserva;
             }
             catch (Exception ex)
             {
-                throw;
+                return 0;        
             }
         }
 

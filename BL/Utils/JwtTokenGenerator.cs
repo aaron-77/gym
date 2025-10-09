@@ -108,8 +108,7 @@ public class JwtTokenGenerator
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes); // Mismo tiempo de expiración que el access token
-
+            var expires = DateTime.Now.AddMinutes(_jwtSettings.ExpiryMinutes); // Mismo tiempo de expiración que el access token
             var token = new JwtSecurityToken(
                 issuer: _jwtSettings.Issuer,
                 audience: _jwtSettings.FrontAudiencie,
@@ -191,6 +190,7 @@ public class JwtTokenGenerator
             // Considerar loggear la excepción aquí
             throw new ApplicationException("Error al validar el Refresh Token.", ex);
         }
+
     }
 
     public async Task RevokeRefreshToken(string refreshTokenString)
@@ -327,5 +327,31 @@ public class JwtTokenGenerator
     public string GetUserName(IDictionary<string, string> claims)
     {
         return claims.ContainsKey(ClaimTypes.Name) ? claims[ClaimTypes.Name] : null;
+    }
+    
+    
+    public static string? GetClaimValue(string token, string claimType)
+    {
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+
+            // Validar formato
+            if (!handler.CanReadToken(token))
+                throw new ArgumentException("El token proporcionado no tiene un formato JWT válido.");
+
+            // Leer el token sin validarlo (solo para extraer claims)
+            var jwtToken = handler.ReadJwtToken(token);
+
+            // Buscar el claim solicitado
+            var claim = jwtToken.Claims.FirstOrDefault(c => c.Type == claimType);
+
+            return claim?.Value; // Retorna null si no existe
+        }
+        catch (Exception ex)
+        {
+            // Aquí podrías registrar la excepción con tu logger
+            throw new ApplicationException($"Error al obtener el claim '{claimType}' del token.", ex);
+        }
     }
 }

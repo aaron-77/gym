@@ -99,7 +99,7 @@ namespace API.Services
             var roles = await _userManager.GetRolesAsync(user);
             var newAccessToken = await _jwtTokenGenerator.GenerateAccessToken(user, roles);
             var newIdToken = _jwtTokenGenerator.GenerateIdToken(user, roles);
-
+            var expdateIdToken = JwtTokenGenerator.GetClaimValue(newIdToken, "exp");
             var httpContext = _httpContextAccessor.HttpContext;
             var clientId = "gymwebapp-frontend";
             var ipAddress = httpContext?.Connection.RemoteIpAddress?.ToString();
@@ -125,6 +125,7 @@ namespace API.Services
                 NombreCompleto = user.NombreCompleto,
                 AccessToken = newAccessToken,
                 IdToken = newIdToken,
+                expDateIdToken = expdateIdToken,
                 RefreshToken = newRefreshToken
             };
         }

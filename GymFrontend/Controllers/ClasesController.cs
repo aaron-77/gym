@@ -5,11 +5,12 @@ using DTO.Dtos;
 using System.Threading.Tasks;
 using System;
 using BL.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GymFrontend.Controllers
 {
     [Route("[controller]")]
-    [ApiController]
+   [ApiController]
     public class ClasesController : Controller
     {
         private readonly ClasesManager _clasesManager;
@@ -51,6 +52,7 @@ namespace GymFrontend.Controllers
             return View();
         }
 
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("registroClasesProgramadas")]
         public IActionResult RegistroDeClasesProgramadas()
@@ -58,6 +60,7 @@ namespace GymFrontend.Controllers
             return View();
         }
 
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("inscripcionAClases")]
         public IActionResult InscripcionAClases()
@@ -141,11 +144,16 @@ namespace GymFrontend.Controllers
         }
 
         [HttpPost("registrarClaseProgramada")]
-        public async Task<IActionResult> RegistrarClaseProgramada([FromBody] DTODatosClaseProgramada claseProgramadaRegistro)
+        public async Task<IActionResult> RegistrarClaseProgramada([FromBody] DTOFrontDatosClaseProgramada claseProgramadaRegistro)
         {
             try
             {
-                var result = await _clasesManager.RegistrarClaseProgramada(claseProgramadaRegistro);
+
+                var token = Request.Cookies["AuthToken"];
+                var datosBackendClaseProgramada = ProcesadorDePropiedadesDeObjetos.MapProperties<DTOFrontDatosClaseProgramada, DTODatosClaseProgramada>(claseProgramadaRegistro);
+                var userId = JwtTokenGenerator.GetClaimValue(token, "sub");
+                datosBackendClaseProgramada.idUsuarioQueReserva = userId;  
+                var result = await _clasesManager.RegistrarClaseProgramada(datosBackendClaseProgramada);
                 if (result.success)
                 {
                     return Ok(result);
