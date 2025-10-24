@@ -11,7 +11,7 @@ namespace DTO.Dtos
     {
 
         [Range(1, int.MaxValue, ErrorMessage = "Selecciona un cliente")]
-        public int UsuarioID { get; set; }
+        public string UsuarioID { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "Selecciona una rutina")]
         public int RutinaId { get; set; }

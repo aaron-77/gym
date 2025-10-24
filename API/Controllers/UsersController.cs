@@ -30,13 +30,15 @@ namespace API.Controllers
         private readonly JwtTokenGenerator _jwtTokenGenerator;
         private readonly AuthService _authService;
         private readonly JwtSettings _jwtSettings;
+        private readonly FitnessCenterDbContext _db;
 
         public UsersController(
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             JwtTokenGenerator jwtTokenGenerator,
             AuthService authService,
-            IOptions<JwtSettings> jwtOptions
+            IOptions<JwtSettings> jwtOptions,
+            FitnessCenterDbContext db
         )
         {
             _signInManager = signInManager;
@@ -44,6 +46,7 @@ namespace API.Controllers
             _jwtTokenGenerator = jwtTokenGenerator;
             _authService = authService;
             _jwtSettings = jwtOptions.Value;
+            _db = db;
         }
 
         public IActionResult Index()
@@ -82,8 +85,7 @@ namespace API.Controllers
         {
             try
             {
-                FitnessCenterDbContext db = new FitnessCenterDbContext();
-                List<QueryUser> usuarios = await db
+                List<QueryUser> usuarios = await _db
                     .userSP.FromSqlInterpolated(
                         $@"EXEC [FitnessCenterDB].[dbo].sp_consultarUsuarios @tipoUsuario={rol},@estado={estado}"
                     )
@@ -404,7 +406,6 @@ namespace API.Controllers
 
             /*
             HttpLoginResponse response = new HttpLoginResponse();
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
             string baseUrl = _jwtSettings.BackendAudiencie;
             try
             {
@@ -423,7 +424,7 @@ namespace API.Controllers
                     response.ok = true;
                     response.message = "validacion exitosa";
                     response.errors = null;
-                    var loggedUser = db
+                    var loggedUser = _db
                         .AspNetUsers.Include(u => u.Roles)
                         .Where(u => u.PhoneNumber == userVerification.cel)
                         .FirstOrDefault();

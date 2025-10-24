@@ -8,6 +8,13 @@ namespace API.Controllers
 {
     public class EntrenadoresController : Controller
     {
+        private readonly FitnessCenterDbContext _db;
+
+        public EntrenadoresController(FitnessCenterDbContext db)
+        {
+            _db = db;
+        }
+
         [Authorize(Roles = "empleado,cliente")]
         [HttpGet]
         [Route("api/obtenerEntrenadoresDisponibles")]
@@ -17,9 +24,8 @@ namespace API.Controllers
 
             try
             {
-                FitnessCenterDbContext db = new FitnessCenterDbContext();
                 // HttpResponseListadoQueryUsers respuesta = new HttpResponseListadoQueryUsers(); // ELIMINADO
-                List<QueryUser> entrenadores = await db.userSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_obtenerEntrenadoresDisponibles @fechaReferencia={fechaInicio}").ToListAsync();
+                List<QueryUser> entrenadores = await _db.userSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_obtenerEntrenadoresDisponibles @fechaReferencia={fechaInicio}").ToListAsync();
                 
                 respuesta = BL.Utils.ResponseManager.BuildResponse(
                     success: true,

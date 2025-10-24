@@ -14,9 +14,19 @@ namespace API.Controllers
 {
     public class MedidasController : Controller
     {
+
+
+        private readonly FitnessCenterDbContext _db;
+        public MedidasController(FitnessCenterDbContext context)
+        {
+            _db = context;
+        }
+
         [Authorize(Roles = "empleado")]
         [HttpPost]
         [Route("api/RegistrarMedida")]
+
+        
         public IActionResult Index([FromBody] DTO.Dtos.DTOMedida medida)
         {
             HTTPResponseModelMedida respuesta = new HTTPResponseModelMedida();
@@ -41,7 +51,7 @@ namespace API.Controllers
                 return BadRequest(respuesta);
             }
 
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
+            
 
             if (medida == null)
             {
@@ -57,8 +67,8 @@ namespace API.Controllers
             };
             try
             {
-                db.Add(newUserDB);
-                db.SaveChanges();
+                _db.Add(newUserDB);
+                _db.SaveChanges();
                 respuesta.ok = true;
                 respuesta.data = medida;
                 respuesta.errors = null;
@@ -74,21 +84,21 @@ namespace API.Controllers
                 respuesta.errors.Add(error);
                 return BadRequest(respuesta);
             }
-            return Ok(respuesta);
-        }
+                return Ok(respuesta);
+            }
 
 
-        [Authorize(Roles = "empleado,cliente")]
-        [HttpGet]
-        [Route("api/getParametrosDeMedicion")]
-        public async Task<IActionResult> getParametrosDeMedicion([FromQuery] int idUsuario)
+            [Authorize(Roles = "empleado,cliente")]
+            [HttpGet]
+            [Route("api/getParametrosDeMedicion")]
+            public async Task<IActionResult> getParametrosDeMedicion([FromQuery] int idUsuario)
         {
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
+            
             DTOResponse<List<DTOParametroDeMedicion>> respuesta = new DTOResponse<List<DTOParametroDeMedicion>>();
 
             try
             {
-                var listadoParametrosDeMedicion = await db.parametrosDeMedicionSP.FromSqlInterpolated($@"EXEC sp_obtenerParametrosDeMedicionConUnidad").ToListAsync();
+                var listadoParametrosDeMedicion = await _db.parametrosDeMedicionSP.FromSqlInterpolated($@"EXEC sp_obtenerParametrosDeMedicionConUnidad").ToListAsync();
                 respuesta = ResponseManager.BuildResponse(true, 200, "consulta exitosa", null,listadoParametrosDeMedicion);
             }
             catch (Exception ex)
@@ -103,13 +113,13 @@ namespace API.Controllers
         [Route("api/progresoDeUsuario")]
         public async Task<IActionResult> getProgresoDelCliente([FromQuery] int idUsuario)
         {
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
+            
             HttpResponseProgresoUsuario respuesta = new HttpResponseProgresoUsuario();
             List<DTOItemProgreso> itemsProgreso = null;
             try
             {
-                var ultimasMedidas = await db.ultimasMedidasDeParametroSP.FromSqlInterpolated($@"EXEC sp_obtenerUltimasMedidasDelUsuario @idUsuario={idUsuario}").ToListAsync();
-                var ultimasMetas = await db.ultimasMetasDeParametroSP.FromSqlInterpolated($@"EXEC sp_obtenerMetasActualesDelClientePorParametro @idUsuario={idUsuario}").ToListAsync();
+                var ultimasMedidas = await _db.ultimasMedidasDeParametroSP.FromSqlInterpolated($@"EXEC sp_obtenerUltimasMedidasDelUsuario @idUsuario={idUsuario}").ToListAsync();
+                var ultimasMetas = await _db.ultimasMetasDeParametroSP.FromSqlInterpolated($@"EXEC sp_obtenerMetasActualesDelClientePorParametro @idUsuario={idUsuario}").ToListAsync();
                 itemsProgreso = ObjectAssembler.ensamblarItemsProgreso(ultimasMedidas, ultimasMetas);
                 respuesta.ok = true;
                 respuesta.message = "consulta exitosa";
@@ -131,12 +141,12 @@ namespace API.Controllers
         [Route("api/obtenerAñosConActividadDelCliente")]
         public async Task<IActionResult> getAñosActivo([FromQuery] string idCliente)
         {
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
+            
             HttpResponseAñosActivo respuesta = new HttpResponseAñosActivo();
             List<int> añosActivo = new List<int>();
             try
             {
-                añosActivo = await db.Medidas.Where(m => m.FkUsuario == idCliente).Select(m => m.FechaDeCreacion.Value.Year).Distinct().ToListAsync();
+                añosActivo = await _db.Medidas.Where(m => m.FkUsuario == idCliente).Select(m => m.FechaDeCreacion.Value.Year).Distinct().ToListAsync();
                 respuesta.ok = true;
                 respuesta.message = "consulta exitosa";
                 respuesta.errors = null;
@@ -172,7 +182,7 @@ namespace API.Controllers
             HTTPResponseDetallesDeProgreso finalResponse = new HTTPResponseDetallesDeProgreso();
             try
             {
-                FitnessCenterDbContext db = new FitnessCenterDbContext();
+            
                 DataTable mesesPorDefecto = new DataTable();       // Mes por defecto        
                 DataTable añosPorDefecto = new DataTable();        // Año por defecto          
                 DataTable datosDeMedida = new DataTable();          // Datos de medida
@@ -187,7 +197,7 @@ namespace API.Controllers
                 }
                 
                 // Crear la conexión ADO.NET
-                using var connection = (SqlConnection)db.Database.GetDbConnection();
+                using var connection = (SqlConnection)_db.Database.GetDbConnection();
                 if (connection.State == ConnectionState.Closed)
                 {
                     await connection.OpenAsync();
@@ -250,13 +260,13 @@ namespace API.Controllers
         {
             try
             {
-                FitnessCenterDbContext db = new FitnessCenterDbContext();
+                
                 HttpResponseEjerciciosYParametrosDelCliente responseForFrontend = new HttpResponseEjerciciosYParametrosDelCliente();
-                var existingClient = db.Usuarios.Find(idCliente);
+                var existingClient = _db.Usuarios.Find(idCliente);
                 if( existingClient == null){
                     return BadRequest("El cliente no existe");
                 }
-                var ejercicioYParametros = await db.ejerciciosYParametrosDelClienteSP.FromSqlInterpolated($@"EXEC sp_obtenerEjerciciosYParametrosDelCliente @idCliente={idCliente}").ToListAsync();
+                var ejercicioYParametros = await _db.ejerciciosYParametrosDelClienteSP.FromSqlInterpolated($@"EXEC sp_obtenerEjerciciosYParametrosDelCliente @idCliente={idCliente}").ToListAsync();
                 responseForFrontend.ok = true;
                 responseForFrontend.message = "Consulta exitosa";
                 responseForFrontend.errors = null;  

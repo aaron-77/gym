@@ -1,0 +1,12 @@
+CREATE TRIGGER TR_tiposDeRecurrenciaDeDiasFestivos_Update
+ON tiposDeRecurrenciaDeDiasFestivos
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    UPDATE t
+    SET fechaModificacion = GETDATE()
+    FROM tiposDeRecurrenciaDeDiasFestivos t
+    INNER JOIN inserted i ON t.idTipoDeRecurrenciaDeDiaFestivo = i.idTipoDeRecurrenciaDeDiaFestivo;
+END;

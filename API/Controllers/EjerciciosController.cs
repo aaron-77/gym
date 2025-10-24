@@ -12,21 +12,22 @@ namespace API.Controllers
     public class EjerciciosController : Controller
     {
         private JwtTokenGenerator jwtTokenGenerator;
-        public EjerciciosController(JwtTokenGenerator _jwtTokenGenerator)
+        private readonly FitnessCenterDbContext _db;
+
+        public EjerciciosController(JwtTokenGenerator _jwtTokenGenerator, FitnessCenterDbContext db)
         {
             jwtTokenGenerator = _jwtTokenGenerator;
+            _db = db;
         }
         [Authorize(Roles = "empleado,cliente")]
         [HttpGet]
         [Route("api/consultarEjercicios")]
         public async Task<IActionResult> obtenerEjercicios()
         {
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
-            
             var respuesta = new DTOResponse<List<DTO.Dtos.Ejercicio>>();
             try
             {
-                var ejercicios = await db.ejercicioSP.FromSqlInterpolated($@"EXEC sp_consultarEjercicios").ToListAsync();
+                var ejercicios = await _db.ejercicioSP.FromSqlInterpolated($@"EXEC sp_consultarEjercicios").ToListAsync();
                 respuesta = ResponseManager.BuildResponse(true, 200, "Consulta exitosa", null, ejercicios);
             }
             catch (Exception ex)

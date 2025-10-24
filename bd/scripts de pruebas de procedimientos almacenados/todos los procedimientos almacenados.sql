@@ -1,81 +1,12 @@
-CREATE   PROCEDURE dbo.InsertarClaseProgramada
-    @FkClase INT,
-    @fechaInicio DATETIME,
-    @fechaFin DATETIME,
-    @FkEntrenador INT,
-    @CupoMaximo INT,
-    @FkEstadoClaseProgramada INT = 1
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    INSERT INTO ClasesProgramadas (FkClase,fechaInicio, fechaFin, FkEntrenador, CupoMaximo, fkEstadoClaseProgramada)
-    VALUES (@FkClase, @fechaInicio, @fechaFin, @FkEntrenador,@CupoMaximo,@FkEstadoClaseProgramada);
-    
-    SELECT SCOPE_IDENTITY() AS IdProgramacionClase;
-END;
-
--- Function to retrieve the benefits of the class (from beneficios table)
-CREATE   FUNCTION dbo.ObtenerBeneficiosDeClase(@IdClase INT)
-RETURNS TABLE
-AS
-RETURN
-(
-    SELECT 
-        bc.beneficio,
-        descripcionBeneficio,
-        ifp.urlPublica
-    FROM 
-        BeneficiosDeClase bc
-        left join iconsForParameters ifp on bc.fkIcon = ifp.iconId 
-    WHERE 
-        bc.FkClase = @IdClase
-);
-
-CREATE   FUNCTION dbo.ObtenerCaracteristicasDeClase(@IdClase INT)
-RETURNS TABLE
-AS
-RETURN
-(
-    SELECT 
-        c.DuracionEnMinutos,
-        ni.NombreNivelDeIntensidad AS NivelDeIntensidad,
-        nd.NombreNivelDeDificultad AS NivelDeDificultad,
-        c.Descripcion AS DescripcionDeLaClase
-    FROM 
-        Clases c
-        INNER JOIN NivelesDeIntensidadDeClase ni ON c.FkIntensidad = ni.IdNivelDeIntensidad
-        INNER JOIN NivelesDeDificultadDeClase nd ON c.FkDificultad = nd.IdNivelDeDificultadDeClase
-    WHERE 
-        c.claseId = @IdClase
-);
-
-CREATE     FUNCTION dbo.ObtenerClasesProgramadas(@IdClase  int)
-RETURNS TABLE
-AS
-RETURN
-(
-	
-    SELECT 
-        cp.IdProgramacionClase,
-        c.NombreClase,
-        DATENAME(WEEKDAY, hcp.fechaDeLaClase) AS DiaDeLaSemana,
-        hl.horaInicio AS HoraInicio,
-        hl.horaFin AS HoraFin,
-        e.NombreCompleto + ' ' + e.Apellido AS NombreEntrenador
-    FROM 
-        ClasesProgramadas cp
-        INNER JOIN Clases c ON cp.FkClase = c.claseId
-        INNER JOIN FitnessCenterDB.dbo.AspNetUsers e ON cp.FkEntrenador = e.Id
-        INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
-        INNER JOIN FitnessCenterDB.dbo.horasLaborales hl ON hcp.fkHorarioLaboral = hl.idHora
-    WHERE 
-    	cp.fkClase  = @IdClase
-    	AND
-        YEAR(hcp.fechaDeLaClase) = YEAR(GETDATE())
-        AND cp.fkEstadoClaseProgramada  = 1--disponible
-);
-
+use FitnessCenterDB
+select * from Citas where estado = 'Agendada'
+exec sp_obtenerCitasAgendadasPorUsuario '44e25915-a3df-4bdb-8520-07dca77ecb69'
+select * from aspnetusers where id = '44e25915-a3df-4bdb-8520-07dca77ecb69'
+select * from citas where UserId = '44e25915-a3df-4bdb-8520-07dca77ecb69'
+select * from medidas
+select * from Rutinas
+select * from RutinaEjercicios
+select * from duracionCitas
 CREATE   FUNCTION dbo.ObtenerConsejosDeClase(@IdClase INT)
 RETURNS TABLE
 AS
@@ -98,7 +29,7 @@ RETURN
     WHERE 
         c.FkClase = @IdClase
 );
-
+GO
 CREATE   FUNCTION dbo.ObtenerDetalleDeClase(@IdClase INT)
     RETURNS TABLE
     AS
@@ -126,7 +57,7 @@ CREATE   FUNCTION dbo.ObtenerDetalleDeClase(@IdClase INT)
         WHERE 
             c.claseId = @IdClase
     );
-
+GO
 CREATE   FUNCTION dbo.ObtenerEjerciciosDeClase(@IdClase INT)
 RETURNS TABLE
 AS
@@ -146,7 +77,7 @@ RETURN
     WHERE 
         r.fkClase = @IdClase
 );
-
+GO
 CREATE   FUNCTION dbo.ObtenerEquipamientoRecomendado(@IdClase INT)
 RETURNS TABLE
 AS
@@ -167,7 +98,7 @@ RETURN
     WHERE 
         r.FkClase = @IdClase
 );
-
+GO
 CREATE   FUNCTION dbo.ObtenerEstructuraDeClase(@IdClase INT)
 RETURNS TABLE
 AS
@@ -188,7 +119,7 @@ RETURN
         ec.FkClase = @IdClase
     
 );
-
+GO
 CREATE PROCEDURE ObtenerParametrosDeMedicion
     @PageNumber INT,       
     @PageSize INT          
@@ -209,7 +140,7 @@ BEGIN
 
     SET NOCOUNT OFF;
 END;
-
+GO
 CREATE   FUNCTION dbo.VerificarDisponibilidadHorario
 (
     @fechaInicioClaseQueSeQuiereProgramar datetime,
@@ -239,7 +170,7 @@ BEGIN
     
     RETURN @Disponible;
 END;
-
+GO
 CREATE   PROCEDURE buscarClaseProgramadas
     @idClase INT = NULL,
     -- MODIFICADO: Tipo de dato de @idEntrenador de INT a NVARCHAR(450)
@@ -277,7 +208,7 @@ BEGIN
         (@idHoraLaboral IS NULL OR hcp.fkHorarioLaboral = @idHoraLaboral) AND
         (@fecha IS NULL OR hcp.fechaDeLaClase = @fecha);
 END;
-
+GO
 CREATE FUNCTION dbo.esDiaFestivo(@fechaAnalizada date)
 RETURNS INT
 AS 
@@ -297,7 +228,7 @@ BEGIN
 	RETURN @estaDiaFestivo;
     
 END;
-
+GO
 CREATE FUNCTION dbo.esDiaFestivoEstatico(@fechaAnalizada DATE)
 RETURNS INT
 AS 
@@ -318,7 +249,7 @@ BEGIN
 	RETURN @estaDiaFestivoEstatico;
     
 END;
-
+GO
 CREATE   FUNCTION dbo.fn_consultarHorariosPreReservados(@fechaTentativa DATE)
 RETURNS TABLE
 AS
@@ -342,7 +273,7 @@ and pr.fechaReservada >= DATEFROMPARTS(YEAR(GETDATE()),MONTH(GETDATE()),DAY(GETD
 and (GETDATE() BETWEEN pr.fechaInicioDeLaReserva AND pr.fechaDeExpiracionDeLaReserva)
  )   
 );
-
+GO
 CREATE FUNCTION dbo.fn_cupoDisponibleClaseProgramada
 (
     @idProgramacionClase INT
@@ -371,7 +302,7 @@ BEGIN
 
     RETURN @cupoDisponible;
 END;
-
+GO
 CREATE   FUNCTION dbo.fn_encontrarPreReservasCaducadas()
 RETURNS table
 AS 
@@ -381,7 +312,7 @@ return
 	from preReservasDeHorario 
 	where GETDATE() NOT BETWEEN fechaInicioDeLaReserva and fechaDeExpiracionDeLaReserva
 );
-
+GO
 CREATE FUNCTION dbo.fn_esDiaFestivoVariableVersionJoin (
     @fechaAnalizada DATE,                   -- Fecha a comprobar
     @diaDeFechaVariable INT,                -- Interpretación según los parámetros disponibles
@@ -547,7 +478,7 @@ BEGIN
     
     RETURN @resultado;
 END;
-
+GO
 CREATE   FUNCTION dbo.fn_esDiaFestivoVariableVersionNormal (
     @fechaAnalizada DATE
 )
@@ -575,7 +506,7 @@ BEGIN
     
     RETURN @esDiaFestivo;
 END;
-
+GO
 CREATE FUNCTION dbo.fn_estaDisponibleElHorario(
 	@fechaReservada date,
 	@fksHorasKaborales IdsHorasLaborales READONLY
@@ -604,7 +535,7 @@ BEGIN
 	   
     RETURN @estaDisponible;
 END;
-
+GO
 CREATE FUNCTION dbo.fn_estaVigenteLaPreReserva(@idPreReserva int)
 RETURNS BIT
 AS 
@@ -622,7 +553,7 @@ BEGIN
 	END
 	return @estaVigente;
 END;
-
+GO
 CREATE FUNCTION fn_inscripcionEstaVigente(@idInscripcion INT)
 RETURNS BIT
 AS
@@ -647,7 +578,7 @@ BEGIN
 
     RETURN @resultado; -- Devolver el resultado
 END;
-
+GO
 CREATE FUNCTION fn_obtenerClases()
 RETURNS TABLE
 AS
@@ -656,7 +587,7 @@ RETURN (
     FROM FitnessCenterDB.dbo.Clases
     where fkEstadoClase = (select idEstadoClase from v_estadoActivoClases)
 );
-
+GO
 CREATE   FUNCTION dbo.fn_obtenerClasesProgramadaPorIdProgramacionClase(@idProgramacionClase INT)
 RETURNS TABLE
 AS
@@ -684,7 +615,7 @@ RETURN
     WHERE cp.idProgramacionClase = @idProgramacionClase
         AND (select dbo.fn_cupoDisponibleClaseProgramada(cp.idProgramacionClase)) > 0
 );
-
+GO
 CREATE         FUNCTION dbo.fn_obtenerClasesProgramadasPorIdClase(@idClase INT)
 RETURNS TABLE
 AS
@@ -710,7 +641,7 @@ RETURN
     WHERE
         cp.fkClase = @idClase
 );
-
+GO
 CREATE   FUNCTION fn_obtenerEstadosDeClasesProgramdas()
 RETURNS TABLE
 AS
@@ -723,7 +654,7 @@ RETURN
         fechaModificacion
     FROM estadosClasesProgramadas
 );
-
+GO
 CREATE   FUNCTION dbo.fn_obtenerNombreTipoDeRecurrencia (
     @idTipoDeRecurrencia INT
 )
@@ -738,7 +669,7 @@ BEGIN
     
     RETURN @nombreTipoDeRecurrencia;
 END;
-
+GO
 CREATE   FUNCTION dbo.obtenerImagenesDeLaClase(@IdClase INT)
 RETURNS TABLE
 AS
@@ -752,7 +683,7 @@ FROM imagesForClases i
     WHERE 
         i.FkClase = @IdClase
 );
-
+GO
 CREATE PROCEDURE showtables
     @tableName NVARCHAR(128)
 AS
@@ -770,7 +701,7 @@ BEGIN
     FROM INFORMATION_SCHEMA.COLUMNS
     WHERE TABLE_NAME = @tableName;
 END;
-
+GO
 CREATE PROCEDURE sp_ObtenerEquipamientoRecomendadoClase
     @idClase INT
 AS
@@ -792,7 +723,7 @@ BEGIN
     WHERE 
         c.ClaseID = @idClase
 END;
-
+GO
 CREATE PROCEDURE sp_ObtenerEstructuraClase
     @idClase INT
 AS
@@ -812,7 +743,7 @@ BEGIN
     ORDER BY 
         es.numeroConsecutivoDelBloque
 END;
-
+GO
 CREATE PROCEDURE sp_ObtenerMedidasPorAñosEspecificos
     @idCliente INT,
     @idParametro INT,
@@ -924,7 +855,7 @@ BEGIN
 	
 	
 END;
-
+GO
 CREATE PROCEDURE sp_ObtenerMedidasPorMesesEspecificos
     @idCliente INT,
     @idParametro INT,
@@ -1014,7 +945,7 @@ BEGIN
      order by ro.fechaDeCreacion desc;	
 	end
 END;
-
+GO
 CREATE PROCEDURE [dbo].[sp_RegistrarError]
     @Procedimiento NVARCHAR(255),
     @Mensaje NVARCHAR(MAX),
@@ -1030,7 +961,7 @@ BEGIN
     INSERT INTO LogErrores (procedimiento, mensaje, severidad, estado, fecha, usuario, host, aplicacion)
     VALUES (@Procedimiento, @Mensaje, @Severidad, @Estado, GETDATE(), @Usuario, @Host, @Aplicacion);
 END;
-
+GO
 -- =============================================
 -- Author:		<Author,,Name>
 -- Create date: <Create Date,,>
@@ -1069,7 +1000,7 @@ BEGIN
 		@metaRepeticiones
 		)
 END;
-
+GO
 CREATE PROCEDURE dbo.sp_cancelarClasesProgramadas
     @idClaseProgramada int =null,
 	@fechaDeReferencia DATE = null,
@@ -1139,7 +1070,7 @@ BEGIN
 
     select * from @idsClasesCanceladas;
 END;
-
+GO
 CREATE PROCEDURE dbo.sp_cancelarInscripcionAClase
     @idInscripcion int = null
 AS
@@ -1179,7 +1110,7 @@ BEGIN
             @ErrorLine;
    END CATCH 
 END;
-
+GO
 CREATE PROCEDURE dbo.sp_cancelarInscripcionesDeClasesCanceladas(
     @idsClasesProgramadasCanceladas ListadoIdsGenericos READONLY
     )
@@ -1194,7 +1125,7 @@ BEGIN
     						   )
     WHERE fkProgramacionClase in (select * from @idsClasesProgramadasCanceladas);
 END;
-
+GO
 -- =============================================
 -- Author:		<Author,,Name>
 -- Create date: <Create Date,,>
@@ -1218,7 +1149,7 @@ BEGIN
 	WHERE Estado = @estado and RolID = 1;
 		
 END;
-
+GO
 -- =============================================
 -- Author:		<Author,,Name>
 -- Create date: <Create Date,,>
@@ -1229,7 +1160,7 @@ AS
 BEGIN
 		select * from Ejercicios;
 END;
-
+GO
 CREATE   PROCEDURE [dbo].[sp_consultarRutinasDeUsuario]
 (
     @usuarioID NVARCHAR(450) -- MODIFICADO: Tipo de dato de INT a NVARCHAR(450)
@@ -1245,7 +1176,7 @@ BEGIN
     FROM FitnessCenterDB.dbo.Rutinas -- MODIFICADO: Añadido esquema
     WHERE UserId = @usuarioID;      -- MODIFICADO: UsuarioID a UserId
 END;
-
+GO
 -- =============================================
 -- Author:		<Author,,Name>
 -- Create date: <Create Date,,>
@@ -1273,7 +1204,7 @@ select @rolId = Id   from AspNetRoles where Name = @tipoUsuario;
 	WHERE Estado = @estado
 		
 END;
-
+GO
 -- =============================================
 -- Author:		<Author,,Name>
 -- Create date: <Create Date,,>
@@ -1288,104 +1219,7 @@ BEGIN
 	select u.Email,c.FechaHora from aspnetusers u
 	join Citas c on c.UserID = u.Id and c.FechaHora > GETDATE() and DATEDIFF(DAY,@fechaActual,c.FechaHora) = 15 ;		
 END;
-
-CREATE PROCEDURE dbo.sp_creatediagram
-	(
-		@diagramname 	sysname,
-		@owner_id		int	= null, 	
-		@version 		int,
-		@definition 	varbinary(max)
-	)
-	WITH EXECUTE AS 'dbo'
-	AS
-	BEGIN
-		set nocount on
-	
-		declare @theId int
-		declare @retval int
-		declare @IsDbo	int
-		declare @userName sysname
-		if(@version is null or @diagramname is null)
-		begin
-			RAISERROR (N'E_INVALIDARG', 16, 1);
-			return -1
-		end
-	
-		execute as caller;
-		select @theId = DATABASE_PRINCIPAL_ID(); 
-		select @IsDbo = IS_MEMBER(N'db_owner');
-		revert; 
-		
-		if @owner_id is null
-		begin
-			select @owner_id = @theId;
-		end
-		else
-		begin
-			if @theId <> @owner_id
-			begin
-				if @IsDbo = 0
-				begin
-					RAISERROR (N'E_INVALIDARG', 16, 1);
-					return -1
-				end
-				select @theId = @owner_id
-			end
-		end
-		-- next 2 line only for test, will be removed after define name unique
-		if EXISTS(select diagram_id from dbo.sysdiagrams where principal_id = @theId and name = @diagramname)
-		begin
-			RAISERROR ('The name is already used.', 16, 1);
-			return -2
-		end
-	
-		insert into dbo.sysdiagrams(name, principal_id , version, definition)
-				VALUES(@diagramname, @theId, @version, @definition) ;
-		
-		select @retval = @@IDENTITY 
-		return @retval
-	END;
-
-CREATE PROCEDURE dbo.sp_dropdiagram
-	(
-		@diagramname 	sysname,
-		@owner_id	int	= null
-	)
-	WITH EXECUTE AS 'dbo'
-	AS
-	BEGIN
-		set nocount on
-		declare @theId 			int
-		declare @IsDbo 			int
-		
-		declare @UIDFound 		int
-		declare @DiagId			int
-	
-		if(@diagramname is null)
-		begin
-			RAISERROR ('Invalid value', 16, 1);
-			return -1
-		end
-	
-		EXECUTE AS CALLER;
-		select @theId = DATABASE_PRINCIPAL_ID();
-		select @IsDbo = IS_MEMBER(N'db_owner'); 
-		if(@owner_id is null)
-			select @owner_id = @theId;
-		REVERT; 
-		
-		select @DiagId = diagram_id, @UIDFound = principal_id from dbo.sysdiagrams where principal_id = @owner_id and name = @diagramname 
-		if(@DiagId IS NULL or (@IsDbo = 0 and @UIDFound <> @theId))
-		begin
-			RAISERROR ('Diagram does not exist or you do not have permission.', 16, 1)
-			return -3
-		end
-	
-		delete from dbo.sysdiagrams where diagram_id = @DiagId;
-	
-		return 0;
-	END;
-
+GO
 CREATE PROCEDURE [dbo].[sp_eliminarCita]
 ( 
 @citaId int	
@@ -1397,7 +1231,7 @@ AS
 BEGIN
 		delete from Citas where CitaID = @citaId;
 END;
-
+GO
 CREATE PROCEDURE dbo.sp_eliminarPreReservasCaducadas
     @idsPreReservasCaducadas dbo.ListadoIdsGenericos READONLY
 AS
@@ -1772,7 +1606,7 @@ BEGIN
     	  and DATEPART(MONTH,m.fechaDeCreacion) in (select * from @listadoDeMeses)
     	  order by m.fechaDeCreacion
 END;
-
+GO
 CREATE PROCEDURE sp_obtenerMedidasPorRangoDeMeses
     @idCliente INT,
     @idParametro INT,
@@ -1871,7 +1705,7 @@ BEGIN
 	
     
 END;
-
+GO
 CREATE PROCEDURE sp_obtenerMetaDeParametro
     @idUsuario INT,
     @idParametro INT,
@@ -1906,7 +1740,7 @@ BEGIN
         AND m.fechaDeInicioDeLaMeta <= @fechaDeReferencia
         AND m.fechaLimite >= @fechaDeReferencia;
 END;
-
+GO
 CREATE PROCEDURE dbo.sp_obtenerMetasActualesDelClientePorParametro
 ( 
 @idUsuario int
@@ -1948,7 +1782,7 @@ BEGIN
     WHERE ro.rn = 1;  
    
 END;
-
+GO
 CREATE PROCEDURE sp_obtenerMetasDeMedidas
     @idCliente INT,
     @idParametro INT,
@@ -2026,7 +1860,7 @@ BEGIN
     END CATCH;
 
 END;
-
+GO
 CREATE PROCEDURE sp_obtenerParametrosDeMedicionConUnidad
 AS
 BEGIN
@@ -2041,7 +1875,7 @@ BEGIN
     JOIN unidadesDeMedida um ON pum.fkUnidadDeMedida = um.unidadDeMedidaId
     ORDER BY pm.nombre;
 END;
-
+GO
 CREATE PROCEDURE dbo.sp_obtenerUltimasMedidasDelUsuario
 ( 
 @idUsuario int
@@ -2070,7 +1904,7 @@ BEGIN
     WHERE ro.rn = 1;  
    
 END;
-
+GO
 CREATE   PROCEDURE [dbo].[sp_obtenerUsuariosConCitasAgendadas]
 AS
 BEGIN
@@ -2094,11 +1928,12 @@ BEGIN
     -- MODIFICADO: Campo 'UserId' de 'Citas' en lugar de 'UsuarioID'
     ON c.UserId = u.Id AND c.Estado IN ('agendada','Agendada');
 END;
-
-CREATE   PROCEDURE dbo.sp_preReservarHorario
-    @idUsuarioQueReserva int,
+GO
+CREATE       PROCEDURE dbo.sp_preReservarHorario
+    @idUsuarioQueReserva nvarchar(450),
     @fechaTentativa date,
-    @idHoraLaboral int
+    @idHoraLaboral int,
+    @idPrereservaOut int OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -2139,7 +1974,7 @@ BEGIN
             
             COMMIT TRANSACTION;
             PRINT '6/9 preReserva registrada con éxito'; 
-            SELECT SCOPE_IDENTITY() AS IdPreReserva, 'Horario pre-reservado exitosamente' AS Mensaje;
+            SELECT @idPrereservaOut = SCOPE_IDENTITY() ;
         END
         ELSE
         BEGIN
@@ -2163,7 +1998,7 @@ BEGIN
         END
     END CATCH
 END;
-
+GO
 CREATE PROCEDURE dbo.sp_procesoCompletoCancelacionDeInscripcionAClase
     @idInscripcion INT
 AS
@@ -2208,7 +2043,7 @@ BEGIN
         THROW;
     END CATCH
 END;
-
+GO
 CREATE PROCEDURE dbo.sp_procesoCompletoCancelarClasesProgramadas
     @idClaseProgramada int = null,
 	@fechaParaCancelar date = null,
@@ -2271,7 +2106,7 @@ BEGIN
         THROW;
     END CATCH
 END;
-
+GO
 CREATE PROCEDURE dbo.sp_procesoCompletoReagendacionDeInscripcion
     @idInscripcionCancelada INT,
     @idClaseProgramadaNueva INT,
@@ -2330,16 +2165,16 @@ BEGIN
         THROW;
     END CATCH
 END;
-
+GO
 -- =============================================
 -- Author:		<Author,,Name>
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE [dbo].[sp_registrarCita]
+CREATE         PROCEDURE [dbo].[sp_registrarCita]
 ( 
-@usuarioID int,
-@entrenadorID int,
+@usuarioID nvarchar(450),
+@entrenadorID nvarchar(450),
 @fechaInicio datetime,
 @tipoCita nvarchar(50),
 @estado nvarchar(50),
@@ -2351,7 +2186,10 @@ CREATE PROCEDURE [dbo].[sp_registrarCita]
 	
 AS
 BEGIN
-		insert into Citas(UsuarioID,
+	BEGIN TRY
+		PRINT N'fecha inicio'+  CAST(@fechaInicio AS NVARCHAR(50));
+		PRINT N'fecha fin'+  CAST(@fechaHoraFin AS NVARCHAR(50));
+	insert into Citas(UserId,
 							 EntrenadorID,
 							 FechaHora,
 							 TipoCita,
@@ -2360,13 +2198,52 @@ BEGIN
 						values(
 							@usuarioID,
 							@entrenadorID,
-							FORMAT(@fechaInicio, 'yyyy-MM-dd HH:mm:ss'),
+							@fechaInicio,
 							@tipoCita,
 							@estado,
-							FORMAT(@fechaHoraFin, 'yyyy-MM-dd HH:mm:ss')
+							@fechaHoraFin
 						)
-END;
+	
+	END TRY
+	BEGIN CATCH
+		PRINT N'11/14 excepción capturada';
+        IF XACT_STATE() <> 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END
+    
+        DECLARE 
+        @ProcName NVARCHAR(128) = OBJECT_NAME(@@PROCID),
+        @ErrorNumber INT = ERROR_NUMBER(),
+        @ErrorSeverity INT = ERROR_SEVERITY(),
+        @ErrorState INT = ERROR_STATE(),
+        @LoginOriginal SYSNAME = ORIGINAL_LOGIN(),
+        @Host NVARCHAR(128) = HOST_NAME(),
+        @App  NVARCHAR(128) = APP_NAME(),
+        @ErrorMessage NVARCHAR(MAX) = ERROR_MESSAGE(),
+        @ErrorLine INT = ERROR_LINE(),
+        @CompleteMessage nvarchar(max) = '';
+        SET @CompleteMessage = @ErrorMessage + CAST(@ErrorLine AS NVARCHAR(10))+ N'  ' + CAST(@fechaInicio AS NVARCHAR(50)) + N' ' + CAST(@fechaHoraFin AS NVARCHAR(50));
 
+        PRINT N'12/14 registrando log de error';
+        EXEC sp_RegistrarError 
+            @ProcName,
+            @CompleteMessage,
+            @ErrorSeverity,
+            @ErrorState,
+            @LoginOriginal,
+            @Host,
+        	@App;
+
+        PRINT N'13/14 error registrado correctamente';
+
+        -- Opcional: volver a lanzar el error para que el cliente lo reciba
+        PRINT N'14/14 relanzando THROW'; 
+        THROW;
+	END CATCH
+		
+END;
+GO
 CREATE       PROCEDURE dbo.sp_registrarClaseProgramada
     @datos dbo.DatosClaseProgramada READONLY
 AS
@@ -2496,7 +2373,7 @@ BEGIN
         THROW;
     END CATCH
 END;
-
+GO
 CREATE     PROCEDURE dbo.sp_registrarHorarioDeClaseProgramada
     @fkClaseProgramada INT,
     @fkHorarioLaboral INT,
@@ -2511,7 +2388,7 @@ BEGIN
     
     RETURN SCOPE_IDENTITY();
 END;
-
+GO
 CREATE       PROCEDURE dbo.sp_registrarInsrcipcionAClase
 (
     @idCliente nvarchar(450),
@@ -2570,7 +2447,7 @@ BEGIN
         THROW;
     END CATCH
 END;
-
+GO
 -- =============================================
 -- Author:		Yesenia Esquivel
 -- Create date: <Create Date,,>
@@ -2604,7 +2481,7 @@ BEGIN
 							@genero
 						)
 END;
-
+GO
 -- =============================================
 -- Author:		<Author,,Name>
 -- Create date: <Create Date,,>
@@ -2635,68 +2512,7 @@ BEGIN
         @fechaCreacion,
         @observaciones)
 END;
-
-CREATE PROCEDURE dbo.sp_renamediagram
-	(
-		@diagramname 		sysname,
-		@owner_id		int	= null,
-		@new_diagramname	sysname
-	
-	)
-	WITH EXECUTE AS 'dbo'
-	AS
-	BEGIN
-		set nocount on
-		declare @theId 			int
-		declare @IsDbo 			int
-		
-		declare @UIDFound 		int
-		declare @DiagId			int
-		declare @DiagIdTarg		int
-		declare @u_name			sysname
-		if((@diagramname is null) or (@new_diagramname is null))
-		begin
-			RAISERROR ('Invalid value', 16, 1);
-			return -1
-		end
-	
-		EXECUTE AS CALLER;
-		select @theId = DATABASE_PRINCIPAL_ID();
-		select @IsDbo = IS_MEMBER(N'db_owner'); 
-		if(@owner_id is null)
-			select @owner_id = @theId;
-		REVERT;
-	
-		select @u_name = USER_NAME(@owner_id)
-	
-		select @DiagId = diagram_id, @UIDFound = principal_id from dbo.sysdiagrams where principal_id = @owner_id and name = @diagramname 
-		if(@DiagId IS NULL or (@IsDbo = 0 and @UIDFound <> @theId))
-		begin
-			RAISERROR ('Diagram does not exist or you do not have permission.', 16, 1)
-			return -3
-		end
-	
-		-- if((@u_name is not null) and (@new_diagramname = @diagramname))	-- nothing will change
-		--	return 0;
-	
-		if(@u_name is null)
-			select @DiagIdTarg = diagram_id from dbo.sysdiagrams where principal_id = @theId and name = @new_diagramname
-		else
-			select @DiagIdTarg = diagram_id from dbo.sysdiagrams where principal_id = @owner_id and name = @new_diagramname
-	
-		if((@DiagIdTarg is not null) and  @DiagId <> @DiagIdTarg)
-		begin
-			RAISERROR ('The name is already used.', 16, 1);
-			return -2
-		end		
-	
-		if(@u_name is null)
-			update dbo.sysdiagrams set [name] = @new_diagramname, principal_id = @theId where diagram_id = @DiagId
-		else
-			update dbo.sysdiagrams set [name] = @new_diagramname where diagram_id = @DiagId
-		return 0
-	END;
-
+GO
 CREATE PROCEDURE dbo.sp_servicioLimpiarPreReservasCaducadas
 AS
 BEGIN
@@ -2749,7 +2565,7 @@ BEGIN
         THROW;
     END CATCH
 END;
-
+GO
 CREATE PROCEDURE sp_transferirClaseDelCliente
     @idCliente INT,
     @fkProgramacionClase INT
@@ -2803,7 +2619,7 @@ BEGIN
         THROW;
     END CATCH
 END;
-
+GO
 CREATE function dbo.yaExisteClaseProgramada(
 @fecha date,
 @fksHorasLaborales IdsHorasLaborales READONLY)
@@ -2833,7 +2649,7 @@ BEGIN
 	END;
 return @yaExiste;
 END;
-
+GO
 CREATE function dbo.yaExistePreRegistroDeClase(
 @fechaReservada date,
 @fksHorasLaborales IdsHorasLaborales READONLY

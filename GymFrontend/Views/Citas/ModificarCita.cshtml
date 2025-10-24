@@ -42,7 +42,7 @@ Layout = "_LayoutSeccionAdministracion";
             <option value="">Seleccciona un cliente</option>
             @foreach (var cliente in listadoClientes)
             {
-                <option value="UsuarioID">@cliente.Nombre @cliente.Apellido</option>
+                <option value="@cliente.UsuarioID">@cliente.Nombre @cliente.Apellido</option>
             }
         </select>
 

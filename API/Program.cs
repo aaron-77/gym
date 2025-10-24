@@ -16,11 +16,21 @@ using Microsoft.IdentityModel.Tokens;
 using DataAccess.Identity;
 using API.Controllers;
 using DataAccess;
+using System.Runtime.InteropServices;
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
+builder.Configuration.AddJsonFile(
+    Path.Combine(AppContext.BaseDirectory, "appsettings.json"),
+    optional: false,
+    reloadOnChange: true
+);
+//builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
 builder.Services.Configure<JwtSettings>(jwtSection);
-
+var dbConnectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { 
+    dbConnectionString = builder.Configuration["ConnectionStrings:windowsConnection"];
+}
+    
 var jwtSettings = jwtSection.Get<JwtSettings>();
 var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
 
@@ -103,7 +113,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
 {
-    options.UseSqlServer("Server=localhost ;Authentication=SqlPassword;Integrated Security=False ;User Id=aaronlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False");
+    
+    options.UseSqlServer(dbConnectionString);
 });
 
 var smtpSettings = builder.Configuration.GetSection("SmtpSettings");

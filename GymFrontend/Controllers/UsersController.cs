@@ -215,7 +215,7 @@ namespace GymFrontend.Controllers
         {
             var respuestaUsuarios = await manager.obtenerUsuarios();
             List<ExistingUser> usuarios = respuestaUsuarios.payload;
-            var respuestaParametros = await medidasManager.obtenerParametrosDeMedicion();
+           var respuestaParametros = await medidasManager.obtenerParametrosDeMedicion();
             List<DTOUnidadDeMedida> unidadDeMedida = ExtractDataManager.extractMeasurementUnitData(
                 respuestaParametros.payload
             );

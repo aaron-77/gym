@@ -12,10 +12,12 @@ namespace API.Controllers
     public class RutinasController : Controller
     {
         private JwtTokenGenerator jwtTokenGenerator;
+        private readonly FitnessCenterDbContext _db;
 
-        public RutinasController(JwtTokenGenerator _jwtTokenGenerator)
+        public RutinasController(JwtTokenGenerator _jwtTokenGenerator, FitnessCenterDbContext db)
         {
             jwtTokenGenerator = _jwtTokenGenerator;
+            _db = db;
         }
         public IActionResult Index()
         {
@@ -29,11 +31,10 @@ namespace API.Controllers
 
         public async Task<IActionResult> RegistrarRutina([FromBody] DTO.Dtos.Rutina rutina)
         {
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
             HttpResponseRutina respuesta = new HttpResponseRutina();
             try
             {
-                var resultado = await db.Database.ExecuteSqlInterpolatedAsync($@"EXEC sp_registrarRutina 
+                var resultado = await _db.Database.ExecuteSqlInterpolatedAsync($@"EXEC sp_registrarRutina 
                 @usuarioID = {rutina.UsuarioID},
                 @entrenadorID={rutina.EntrenadorID},
                 @fechaCreacion={rutina.FechaCreacion},
@@ -59,11 +60,10 @@ namespace API.Controllers
 
         public async Task<IActionResult> asignarEjercicioARutina([FromBody] DTO.Dtos.AsignacionDeEjercicio asignacionDeEjercicio)
         {
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
             HttpResponseAsignacion respuesta = new HttpResponseAsignacion();
             try
             {
-                var resultado = await db.Database.
+                var resultado = await _db.Database.
                     ExecuteSqlInterpolatedAsync
                     ($@"EXEC sp_asignarEjercicio
                         @rutinaId={asignacionDeEjercicio.RutinaId},
@@ -95,11 +95,10 @@ namespace API.Controllers
         [Route("api/consultarRutinas")]
         public async Task<IActionResult> obtenerRutinasDeUusario([FromQuery] string UsuarioID = null)
         {
-            FitnessCenterDbContext db = new FitnessCenterDbContext();
              var respuesta = new DTOResponse<List<DTO.Dtos.Rutina>>();
             try
             {
-                var rutinasDelCliente = await db.rutinaSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_consultarRutinasDeUsuario @usuarioID={UsuarioID}").ToListAsync();
+                var rutinasDelCliente = await _db.rutinaSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_consultarRutinasDeUsuario @usuarioID={UsuarioID}").ToListAsync();
                 respuesta = ResponseManager.BuildResponse(true, 200, "Consulta exitosa", null,rutinasDelCliente);                
             }
             catch (Exception ex)

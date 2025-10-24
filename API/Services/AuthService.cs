@@ -43,43 +43,51 @@ namespace API.Services
         }
         public async Task<DTOLoggedUser> AuthenticateUser(string username, string password)
         {
-            var user = await _userManager.FindByNameAsync(username);
-            if (user == null)
+            try {
+                var user = await _userManager.FindByNameAsync(username);
+                if (user == null)
+                    return null;
+                // Validar contraseña
+                var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
+                if (!result.Succeeded)
+                    return null;
+                var roles = await _userManager.GetRolesAsync(user);
+                var accessToken = await _jwtTokenGenerator.GenerateAccessToken(user, roles);
+                var idToken = _jwtTokenGenerator.GenerateIdToken(user, roles);
+
+                // Obtener información del cliente para el refresh token
+                var httpContext = _httpContextAccessor.HttpContext;
+                var clientId = "gymwebapp-frontend"; // Puedes obtenerlo de la configuración o del request si es necesario
+                var ipAddress = httpContext?.Connection.RemoteIpAddress?.ToString();
+                var userAgent = httpContext?.Request.Headers["User-Agent"].ToString();
+
+                var refreshToken = await _jwtTokenGenerator.GenerateRefreshToken(user.Id, clientId);
+
+                // Registrar Access Token e Id Token en la base de datos
+                var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
+                await _tokensService.RegisterAccessTokenAsync(accessToken, user.Id, clientId, expiresAt, ipAddress, userAgent);
+                await _tokensService.RegisterIdTokenAsync(idToken, user.Id, clientId, expiresAt, ipAddress, userAgent);
+
+                return new DTOLoggedUser
+                {
+                    Id = user.Id,
+                    Direccion = user.Direccion,
+                    Correo = user.Email,
+                    FechaDeNacimiento = user.FechaDeNacimiento,
+                    Telefono = user.PhoneNumber,
+                    NumeroDeIdentificacion = user.NumeroDeIdentificacion,
+                    NombreCompleto = user.NombreCompleto,
+                    AccessToken = accessToken,
+                    IdToken = idToken,
+                    RefreshToken = refreshToken
+                };
+
+            } catch (Exception ex) {
+
                 return null;
-            // Validar contraseña
-            var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
-            if (!result.Succeeded)
-                return null;
-            var roles = await _userManager.GetRolesAsync(user);
-            var accessToken = await _jwtTokenGenerator.GenerateAccessToken(user, roles);
-            var idToken = _jwtTokenGenerator.GenerateIdToken(user, roles);
-
-            // Obtener información del cliente para el refresh token
-            var httpContext = _httpContextAccessor.HttpContext;
-            var clientId = "gymwebapp-frontend"; // Puedes obtenerlo de la configuración o del request si es necesario
-            var ipAddress = httpContext?.Connection.RemoteIpAddress?.ToString();
-            var userAgent = httpContext?.Request.Headers["User-Agent"].ToString();
-
-            var refreshToken = await _jwtTokenGenerator.GenerateRefreshToken(user.Id, clientId);
-
-            // Registrar Access Token e Id Token en la base de datos
-            var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
-            await _tokensService.RegisterAccessTokenAsync(accessToken, user.Id, clientId, expiresAt, ipAddress, userAgent);
-            await _tokensService.RegisterIdTokenAsync(idToken, user.Id, clientId, expiresAt, ipAddress, userAgent);
-
-            return new DTOLoggedUser
-            {
-                Id = user.Id,
-                Direccion = user.Direccion,
-                Correo = user.Email,
-                FechaDeNacimiento = user.FechaDeNacimiento,
-                Telefono = user.PhoneNumber,
-                NumeroDeIdentificacion = user.NumeroDeIdentificacion,
-                NombreCompleto = user.NombreCompleto,
-                AccessToken = accessToken,
-                IdToken = idToken,
-                RefreshToken = refreshToken
-            };
+            }
+            
+            
         }
 
         public async Task<DTOLoggedUser> RefreshAccessToken(string refreshTokenString)
