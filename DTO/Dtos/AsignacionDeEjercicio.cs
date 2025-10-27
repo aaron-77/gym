@@ -10,7 +10,8 @@ namespace DTO.Dtos
     public class AsignacionDeEjercicio
     {
 
-        [Range(1, int.MaxValue, ErrorMessage = "Selecciona un cliente")]
+
+        [Required(ErrorMessage = "Tienes que seleccionar un cliente")]
         public string UsuarioID { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "Selecciona una rutina")]

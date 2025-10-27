@@ -14,7 +14,7 @@ namespace DTO.Dtos
         public DateTime fechaInicioCita { get; set; }
         [FechaMayorA(ErrorMessage = "Debes definir una fecha de finalización")]
         public DateTime fechaFinCita { get; set; }
-        [Range(1, int.MaxValue, ErrorMessage = "Tienes que seleccionar un entrenador")]
+        [Required(ErrorMessage = "Tienes que seleccionar un entrenador")]
         public string fkEntrenador { get; set; }
         
         public string? tipoCita { get; set; }
