@@ -58,6 +58,8 @@ ul {
     padding: 0 1rem;
     margin-left: 0 !important; /* sobrescrita de container.scss */
     margin-right: 0 !important; /* sobrescrita de container.scss */
+    position:relative;
+    z-index:1;
 }
 
 /* Utility: center containers used inside sections */
