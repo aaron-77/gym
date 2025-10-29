@@ -51,13 +51,21 @@ ul {
     list-style: none;
 }
 
-.container {
+.container-landing {
     width: 100%;
     max-width: 1200px;
     margin: 0 0;
-    padding: 0 1rem;    
-    margin-left:0 !important;/* sobrescrita de container.scss */
-    margin-right:0 !important;/* sobrescrita de container.scss */
+    padding: 0 1rem;
+    margin-left: 0 !important; /* sobrescrita de container.scss */
+    margin-right: 0 !important; /* sobrescrita de container.scss */
+}
+
+/* Utility: center containers used inside sections */
+.section-center {
+    max-width: 1200px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 0 1rem;
 }
 
 .text-accent {
@@ -577,56 +585,6 @@ ul {
     margin-bottom: 2rem;
 }
 
-/* Footer */
-.footer {
-    background-color: var(--color-dark-200);
-    padding: 3rem 0 1.5rem;
-}
-
-.footer-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
-}
-
-.footer-text {
-    color: var(--color-gray-400);
-    margin-top: 1rem;
-}
-
-.footer-title {
-    font-size: 1.125rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-}
-
-.footer-links, .footer-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.footer-links a {
-    color: var(--color-gray-400);
-    transition: var(--transition);
-}
-
-.footer-links a:hover {
-    color: var(--color-primary);
-}
-
-.footer-info li {
-    color: var(--color-gray-400);
-}
-
-.footer-bottom {
-    text-align: center;
-    padding-top: 2rem;
-    border-top: 1px solid var(--color-dark-300);
-    color: var(--color-gray-300);
-}
-
 /* Media Queries */
 @media (min-width: 640px) {
     .hero-title {
@@ -663,10 +621,6 @@ ul {
     .plans-grid {
         grid-template-columns: repeat(3, 1fr);
     }
-    
-    .footer-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
 }
 
 @media (min-width: 1024px) {
@@ -690,9 +644,7 @@ ul {
         grid-template-columns: repeat(3, 1fr);
     }
     
-    .footer-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
+    
     
     .cta-title {
         font-size: 3rem;

@@ -6,11 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"]</title>
     <meta name="description" content="@ViewData["Description"]">
-    <link rel="stylesheet" href="~/css/landing-styles.css" type="text/css">
-    <link rel="stylesheet" href="~/css/custom-navbar.css" type="text/css">
+    
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
     @RenderSection("Styles", required: false)
+    <link rel="stylesheet" href="~/css/custom-navbar.css" type="text/css">
+    <link rel="stylesheet" href="~/css/estilosFooter.css" type="text/css">
 </head>
 
 <body class="@ViewData["BodyClass"]">
@@ -65,33 +66,33 @@
                 <div class="footer-col">
                     <h3 class="footer-title">Enlaces Rápidos</h3>
                     <ul class="footer-links">
-                        <li><a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="home">Inicio</a></li>
-                        <li><a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="about">Acerca de</a>
+                        <li><a class="foorter-link" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="home">Inicio</a></li>
+                        <li><a class="foorter-link" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="about">Acerca de</a>
                         </li>
-                        <li><a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="classes">Clases</a>
+                        <li><a class="foorter-link" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="classes">Clases</a>
                         </li>
-                        <li><a asp-area="" asp-controller="Home" asp-action="Index"
+                        <li><a class="foorter-link" asp-area="" asp-controller="Home" asp-action="Index"
                                 asp-fragment="trainers">Entrenadores</a></li>
-                        <li><a asp-area="" asp-controller="Home" asp-action="Index"
+                        <li><a class="foorter-link" asp-area="" asp-controller="Home" asp-action="Index"
                                 asp-fragment="testimonials">Testimonios</a></li>
-                        <li><a asp-area="" asp-controller="Users" asp-action="Index">Iniciar Sesión</a></li>
-                        <li><a asp-area="" asp-controller="Users" asp-action="crearCuenta">Registrarse</a></li>
+                        <li><a class="foorter-link" asp-area="" asp-controller="Users" asp-action="Index">Iniciar Sesión</a></li>
+                        <li><a class="foorter-link" asp-area="" asp-controller="Users" asp-action="crearCuenta">Registrarse</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h3 class="footer-title">Horarios</h3>
                     <ul class="footer-info">
-                        <li>Lunes - Viernes: 5am - 11pm</li>
-                        <li>Sábado: 7am - 9pm</li>
-                        <li>Domingo: 8am - 8pm</li>
+                        <li class="foorter-link">Lunes - Viernes: 5am - 11pm</li>
+                        <li class="foorter-link">Sábado: 7am - 9pm</li>
+                        <li class="foorter-link">Domingo: 8am - 8pm</li>
                     </ul>
                 </div>
                 <div class="footer-col">
                     <h3 class="footer-title">Contacto</h3>
                     <ul class="footer-info">
-                        <li>123 Fitness Street, Gym City</li>
-                        <li>info@gympower.com</li>
-                        <li>(555) 123-4567</li>
+                        <li class="foorter-link">123 Fitness Street, Gym City</li>
+                        <li class="foorter-link">info@gympower.com</li>
+                        <li class="foorter-link">(555) 123-4567</li>
                     </ul>
                 </div>
             </div>
@@ -102,7 +103,7 @@
     </footer>
 
     <script>
-        // Actualizar el año actual en el footer
+        // Actualizar el año currentYear en el footer
         document.getElementById('currentYear').textContent = new Date().getFullYear();
 
         // Menú móvil toggle

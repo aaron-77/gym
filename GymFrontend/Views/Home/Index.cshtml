@@ -8,35 +8,18 @@
 }
 
 @section Styles {
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/landing-styles.css" type="text/css">
+    
     <link rel="stylesheet"  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 }
 
-<!-- Navegación -->
-<div class="logo">
-    <img src="~/img/svgprincipallogo.svg" alt="Logo GymPower">
-    <span class="logo-text">GYM<span class="text-accent">POWER</span></span>
-</div>
-<div class="nav-links" id="navLinks">
-    <a href="#home" class="nav-link">Inicio</a>
-    <a href="#about" class="nav-link">Acerca de</a>
-    <a href="#classes" class="nav-link">Clases</a>
-    <a href="#trainers" class="nav-link">Entrenadores</a>
-    <a href="#testimonials" class="nav-link">Testimonios</a>
-    <a asp-area="" asp-controller="Users" asp-action="Index" class="nav-link">Iniciar Sesión</a>
-    <a asp-area="" asp-controller="Users" asp-action="crearCuenta" class="nav-link">Registrarse</a>
-</div>
-<button id="botonUneteAhora" class="btn btn-primary">Únete Ahora</button>
-<button class="mobile-menu-btn" id="mobileMenuBtn">
-    <span></span>
-    <span></span>
-    <span></span>
-</button>
 
 <!-- Sección Hero -->
 <section id="home" class="hero">
     <div class="hero-overlay"></div>
-    <div class="container">
+    <div class="container-landing">
         <div class="hero-content">
             <h1 class="hero-title">LIBERA TU <span class="text-accent">POTENCIAL</span></h1>
             <p class="hero-subtitle">Supera tus límites. Transforma tu cuerpo. Eleva tu mente.</p>
@@ -57,7 +40,7 @@
 
 <!-- Sección Acerca de -->
 <section id="about" class="about">
-    <div class="container">
+    <div class="container-landing section-center">
         <div class="about-grid">
             <div class="about-content">
                 <h2 class="section-title">ACERCA DE <span class="text-accent">GYMPOWER</span></h2>
@@ -115,7 +98,7 @@
 
 <!-- Sección Clases -->
 <section id="classes" class="classes">
-    <div class="container">
+    <div class="container-landing section-center">
         <div class="section-header">
             <h2 class="section-title">NUESTRAS <span class="text-accent">CLASES</span></h2>
             <p class="section-subtitle">
@@ -147,7 +130,7 @@
 
 <!-- Sección Entrenadores -->
 <section id="trainers" class="trainers">
-    <div class="container">
+    <div class="container-landing section-center">
         <div class="section-header">
             <h2 class="section-title">ENTRENADORES <span class="text-accent">EXPERTOS</span></h2>
             <p class="section-subtitle">
@@ -202,7 +185,7 @@
 
 <!-- Sección Testimonios -->
 <section id="testimonials" class="testimonials">
-    <div class="container">
+    <div class="container-landing section-center">
         <div class="section-header">
             <h2 class="section-title">HISTORIAS DE <span class="text-accent">ÉXITO</span></h2>
             <p class="section-subtitle">
@@ -253,7 +236,7 @@
 
 <!-- Sección Membresías -->
 <section id="membership" class="membership">
-    <div class="container">
+    <div class="container-landing section-center">
         <div class="section-header">
             <h2 class="section-title">PLANES DE <span class="text-accent">MEMBRESÍA</span></h2>
             <p class="section-subtitle">
@@ -364,7 +347,7 @@
 <!-- Sección CTA -->
 <section class="cta" >
     <div class="cta-overlay"></div>
-    <div class="container">
+    <div class="container-landing">
         <div class="cta-content">
             <h2 class="cta-title">COMIENZA TU VIAJE FITNESS <span class="text-accent">HOY</span></h2>
             <p class="cta-text">

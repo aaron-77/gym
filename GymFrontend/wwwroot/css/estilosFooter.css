@@ -1,0 +1,72 @@
+/* Footer styles extracted from landing-styles.css */
+/* Relies on CSS variables from landing-styles.css (:root) */
+
+.footer {
+  background-color: var(--color-dark-200);
+  padding: 3rem 0 1.5rem;
+}
+.foorter-link {
+    text-decoration:none;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.footer-col {
+  /* block-level column in footer */
+}
+
+.footer-text {
+  color: var(--color-gray-400);
+  margin-top: 1rem;
+}
+
+.footer-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.footer-links,
+.footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style:none
+}
+
+.footer-links a {
+  color: var(--color-gray-400);
+  transition: var(--transition);
+}
+
+.footer-links a:hover {
+  color: var(--color-primary);
+}
+
+.footer-info li {
+  color: var(--color-gray-400);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-dark-300);
+  color: var(--color-gray-300);
+}
+
+/* Footer-specific responsive rules */
+@media (min-width: 768px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .footer-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

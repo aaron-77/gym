@@ -88,9 +88,17 @@
 #botonUneteAhora {
     flex-shrink: 1;
     white-space: nowrap;
-    padding: 0.5rem 1.5rem;
+    padding: 0.75rem 1.5rem; /* match login button padding */
     min-width: 100px;
     margin-left: 1rem;
+}
+
+/* Ensure navbar buttons don't inherit full-width from page-specific CSS (e.g. login.css) */
+.navbar .btn-primary {
+    width: auto; /* override .btn-primary { width: 100% } in login.css */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-primary {
