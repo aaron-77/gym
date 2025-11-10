@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
@@ -7,17 +8,19 @@ public partial class Medida
 {
     public int MedidaId { get; set; }
 
-    public int FkUsuario { get; set; }
+    public DateTime? FechaDeCreacion { get; set; }
 
-    public decimal Peso { get; set; }
+    public int? FkParametro { get; set; }
 
-    public decimal Altura { get; set; }
+    public decimal? Valor { get; set; }
 
-    public decimal Imc { get; set; }
+    public int? FkEjercicio { get; set; }
 
-    public int Edad { get; set; }
+    public string? FkUsuario { get; set; }
 
-    public string? Genero { get; set; }
+    public virtual Ejercicio? FkEjercicioNavigation { get; set; }
 
-    public virtual Usuario FkUsuarioNavigation { get; set; } = null!;
+    public virtual ParametrosDeMedicion? FkParametroNavigation { get; set; }
+
+    public virtual ApplicationUser? FkUsuarioNavigation { get; set; }
 }

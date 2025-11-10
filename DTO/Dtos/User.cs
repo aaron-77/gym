@@ -6,7 +6,7 @@ namespace DTO.Dtos
     public class User:BaseClass
     {
         [Required(ErrorMessage = "Ingresa tu nombre")]
-        public string NombreCompleto { get; set; }
+        public string Nombre { get; set; }
         [Required(ErrorMessage = "Ingresa tu apellido")]
         public string Apellido { get; set; }
         [Required(ErrorMessage = "Ingresa tu fecha de nacimiento")]

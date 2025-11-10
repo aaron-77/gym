@@ -3,42 +3,151 @@ using BL.EnPointsLogic;
 using BL.BackGroundWork.Jobs;
 using Microsoft.EntityFrameworkCore;
 using Quartz;
-
+using BL.Utils;
+using API.Hubs;
+using API.Services;
+using API.Infraestructure.Auth;
+using DataAccess.EntityFramework;
+using Microsoft.AspNetCore.Identity;
+using DTO.Dtos;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using DataAccess.Identity;
+using API.Controllers;
+using DataAccess;
+using System.Runtime.InteropServices;
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+//builder.Configuration.AddJsonFile(
+//    Path.Combine(AppContext.BaseDirectory, "appsettings.Development.json"),
+//    optional: false,
+//    reloadOnChange: true
+//);
+//builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
+var jwtSection = builder.Configuration.GetSection("JwtSettings");
+builder.Services.Configure<JwtSettings>(jwtSection);
+var dbConnectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { 
+    dbConnectionString = builder.Configuration["ConnectionStrings:windowsConnection"];
+}
+    
+var jwtSettings = jwtSection.Get<JwtSettings>();
+var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
 
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<FitnessCenterDbContext>()
+    .AddDefaultTokenProviders();
 
-/* builder.WebHost.ConfigureKestrel(options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme,options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.BackendAudiencie,
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+    
+    /* options.Events = new JwtBearerEvents
+    {
+        
+        OnChallenge = context =>
+        {
+            context.HandleResponse();
+            //context.Response.Redirect(LoginPath);
+            return Task.CompletedTask;
+        },
+        OnForbidden = context =>
+        {
+            //context.Response.Redirect(AccessDeniedPath);
+            return Task.CompletedTask;
+        }
+
+    }; */
+});
+
+/* buException has occurred: CLR/System.InvalidOperationException
+An unhandled exception of type 'System.InvalidOperationException' occurred in Microsoft.Extensions.DependencyInjection.Abstractions.dll: 'The service collection cannot be modified because it is read-only.'
+   at Microsoft.Extensions.DependencyInjection.ServiceCollection.ThrowReadOnlyException()
+   at Microsoft.Extensions.DependencyInjection.ServiceCollection.System.Collections.Generic.ICollection<Microsoft.Extensions.DependencyInjection.ServiceDescriptor>.Add(ServiceDescriptor item)
+   at ilder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5274); // Habilitar HTTP en el puerto 5000
     // options.ListenAnyIP(5001, listenOptions => listenOptions.UseHttps()); // Deshabilitar HTTPS
 });
  */// Add services to the container.
+
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("originsPolicyOne", policy =>
     {
-        policy.AllowAnyOrigin() // Aquï¿½ puedes agregar los orï¿½genes permitidos
+        policy.WithOrigins("http://localhost:5062") 
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
+        
     });
 });
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+  options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+});
+ builder.Services.AddSignalR();
+ 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
 
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
 {
-    options.UseSqlServer("Server=localhost ;Authentication=SqlPassword;Integrated Security=False ;User Id=aaronlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False");
+    
+    options.UseSqlServer(dbConnectionString);
 });
-builder.Services.AddScoped<EmailManager>();
 
-builder.Services.AddHttpContextAccessor(); 
-builder.Services.AddScoped<EndPointsManager>(); 
+var smtpSettings = builder.Configuration.GetSection("SmtpSettings");
+string smtpServer = smtpSettings["Server"];
+int smtpPort = int.Parse(smtpSettings["Port"]);
+string smtpUsername = smtpSettings["Username"];
+string smtpPassword = smtpSettings["Password"];
+
+builder.Services.AddScoped(sp => new EmailManagerMailKit(smtpServer, smtpPort, smtpUsername, smtpPassword));
+
+
+bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
+
+// Escoge la URL del backend según el valor de UseSsl
+string baseApiUrl = builder.Configuration[
+    useSsl ? "EndPoints:api:ssl" : "EndPoints:api:nossl"
+] ?? "http://localhost:5274";
+
+builder.Services.AddHttpClient<HttpCustomClient>(client =>
+{
+    client.BaseAddress = new Uri(baseApiUrl);
+}).AddHttpMessageHandler<AuthHeaderHandler>();
+
+builder.Services.AddScoped<HorariosService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<UserRoleService>();
+builder.Services.AddScoped<ReservacionesHub>();
+builder.Services.AddScoped<ServicioActualizacionesDeHorariosRealTime>();  
+builder.Services.AddScoped<JwtTokenGenerator>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<TokensService>(); // Registrar TokensService
+builder.Services.AddScoped<ClasesService>();
+
 builder.Services.AddQuartz(configuration => {
     configuration.UseMicrosoftDependencyInjectionJobFactory();
 
@@ -64,6 +173,12 @@ builder.Services.AddQuartzHostedService(option => option.WaitForJobsToComplete =
 builder.Services.AddQuartz(options => { options.UseMicrosoftDependencyInjectionJobFactory(); });
 
 
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddDataAccess(); // Agregado
+builder.Services.AddBusinessLayer(); // Agregado
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -75,8 +190,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("originsPolicyOne");
+app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHub<ReservacionesHub>("/reservacionesHub");
 app.MapControllers();
 
 app.Run();

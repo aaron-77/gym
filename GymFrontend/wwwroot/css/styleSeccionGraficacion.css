@@ -1,0 +1,213 @@
+:root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color: #213547;
+    background-color: #f8f9fa;
+  }
+  
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+  }
+  
+  .container {
+    max-width: 1600px;
+    margin: 2rem auto;
+    padding: 0rem;
+  }
+  .add-flex-display{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  
+  .chart-container {
+    width: 100%;
+    display: flex;
+    flex-grow: 2;
+    flex-direction: column;
+    align-items: center;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    height: 400px;
+    transition: height 0.3s ease-in-out;
+  }
+  .form-slide {
+    transition: transform 0.3s ease-in-out;
+    transform: translateY(0);
+    width: 100%;
+  }
+
+  .form-slide.hidden {
+    transform: translateY(-100%);
+  }
+
+  .toggle-form-btn {
+    position: absolute;
+    width: 30%;
+    top: 50%;
+    right: -40px;
+    transform: translateY(-50%);
+    z-index: 1000;
+    padding: 10px;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .toggle-form-btn:hover {
+    background-color: #0b5ed7;
+  }
+
+  .toggle-form-btn i {
+    transition: transform 0.3s;
+  }
+
+  .form-slide.hidden .toggle-form-btn i {
+    transform: rotate(180deg);
+  }
+  .canvas-chart{
+    width: 100%;
+  
+  }
+  .conDetalleGroup{
+    align-self: flex-start;
+  }
+  .form-container {
+    
+    flex-grow: 1;
+    background-color: white;
+    padding: 1rem 2rem 2rem 2rem; 
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .chart-form{
+    display: flex;
+    flex-direction: column;
+  }
+  .subSeccion{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .form-group {
+    margin-bottom: 0.7rem;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  select, input[type="date"] {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: white;
+  }
+  
+  select:focus, input[type="date"]:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .checkbox-group label {
+    margin-bottom: 0;
+  }
+  
+  .date-range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  
+  .months-container {
+    margin-top: 0rem;
+  }
+  
+  .months-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    /* gap: 1rem; */
+    /* margin-top: 0.5rem; */
+  }
+  
+  .month-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .month-checkbox label {
+    margin: 0;
+    font-weight: normal;
+    cursor: pointer;
+  }
+
+  .years-container{
+    display: flex;
+    flex-direction: column;
+  }
+  .years-grid{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .year-checkbox{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .slideable-container {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    width: 100%;
+  }
+
+  .slideable-container.hidden {
+    width: 0;
+    overflow: hidden;
+  }
+
+  .chart-container {
+    width: 100%;
+    transition: width 0.3s ease-in-out;
+  }
+
+  .chart-container.expanded {
+    width: 100%;
+  }
+
+  

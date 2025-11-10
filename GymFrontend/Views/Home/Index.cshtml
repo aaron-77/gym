@@ -1,10 +1,380 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+@model List<DTO.Dtos.DTOClasePreview>
+
+@{
+    ViewData["Title"] = "GymPower - Libera tu Potencial";
+    ViewData["Description"] = "Transforma tu cuerpo y mente en GymPower, la experiencia fitness definitiva.";
+    ViewData["BodyClass"] = "landing-page";
+    Layout = "_NavbarLayout";
 }
-<!DOCTYPE html>
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps w
-            ith ASP.NET Core</a>.</p>
-</div>
+
+@section Styles {
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/landing-styles.css" type="text/css">
+    
+    <link rel="stylesheet"  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+}
+
+
+<!-- Sección Hero -->
+<section id="home" class="hero">
+    <div class="hero-overlay"></div>
+    <div class="container-landing">
+        <div class="hero-content">
+            <h1 class="hero-title">LIBERA TU <span class="text-accent">POTENCIAL</span></h1>
+            <p class="hero-subtitle">Supera tus límites. Transforma tu cuerpo. Eleva tu mente.</p>
+            <div class="hero-buttons">
+                <button id="botonComienzaHoy" href="#membership" class="btn btn-primary">
+                    Comienza Hoy
+                    <img src="~/img/svgarrow.svg" alt="Flecha">
+                </button>
+                <button class="btn btn-outline">
+                    Aprende Más
+                    <img src="~/img/svgarrow.svg" alt="Flecha">
+                </button>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección Acerca de -->
+<section id="about" class="about">
+    <div class="container-landing section-center">
+        <div class="about-grid">
+            <div class="about-content">
+                <h2 class="section-title">ACERCA DE <span class="text-accent">GYMPOWER</span></h2>
+                <p class="section-text">
+                    En GymPower, creemos en superar límites y romper barreras. Nuestras instalaciones de última generación están diseñadas para inspirarte y motivarte a alcanzar tus objetivos fitness.
+                </p>
+                <p class="section-text">
+                    Con entrenadores expertos, equipos de vanguardia y una comunidad de apoyo, te proporcionamos todo lo que necesitas para transformar tu cuerpo y mente.
+                </p>
+                <div class="features-grid">
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <img src="~/img/equiposvg.svg" alt="Icono Equipo">
+                        </div>
+                        <div>
+                            <h3 class="feature-title">Equipo Premium</h3>
+                            <p class="feature-text">Tecnología fitness más reciente</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <img src="~/img/svgtrainer.svg" alt="Icono Entrenador">
+                        </div>
+                         <div>
+                            <h3 class="feature-title">Entrenadores Expertos</h3>
+                            <p class="feature-text">Guía profesional</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <img src="~/img/svgplanes.svg" alt="Icono Planes">
+                        </div>
+                        <div>
+                            <h3 class="feature-title">Planes Personalizados</h3>
+                            <p class="feature-text">Diseñados para ti</p>
+                        </div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">
+                            <img src="~/img/svgacceso24.svg" alt="Icono Acceso">
+                        </div>
+                        <div>
+                            <h3 class="feature-title">Acceso 24/7</h3>
+                            <p class="feature-text">Entrena en tu horario</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="about-image">
+                <img src="~/img/about1.jpg" alt="Interior del gimnasio">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección Clases -->
+<section id="classes" class="classes">
+    <div class="container-landing section-center">
+        <div class="section-header">
+            <h2 class="section-title">NUESTRAS <span class="text-accent">CLASES</span></h2>
+            <p class="section-subtitle">
+                Desafíate a ti mismo con nuestra diversa gama de clases de alta intensidad diseñadas para superar tus límites y lograr resultados máximos.
+            </p>
+        </div>
+        
+        <div class="classes-grid">
+            @* Esta sección generará dinámicamente los cards con el modelo DTOClasePreview *@
+            @foreach (var clase in Model)
+            {
+                <div class="class-card">
+                    <div class="class-image">
+                        <img src="@clase.urlImage" alt="@clase.nombreClase">
+                    </div>
+                    <div class="class-content">
+                        <h3 class="class-title">@clase.nombreClase</h3>
+                        <p class="class-description">@clase.descripcionCortaClase</p>
+                        <a asp-controller="Home" asp-action="DetalleDeClase" asp-route-idClase="@clase.idClase" class="class-btn">
+                            Aprende Más 
+                            <img src="~/img/svgredarrow.svg" alt="Flecha roja">
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Sección Entrenadores -->
+<section id="trainers" class="trainers">
+    <div class="container-landing section-center">
+        <div class="section-header">
+            <h2 class="section-title">ENTRENADORES <span class="text-accent">EXPERTOS</span></h2>
+            <p class="section-subtitle">
+                Nuestros entrenadores certificados están dedicados a ayudarte a alcanzar tus objetivos de fitness con orientación y motivación personalizadas.
+            </p>
+        </div>
+        
+        <div class="trainers-grid">
+            <div class="trainer-card">
+                <div class="trainer-image">
+                    <img src="~/img/tariner1croped.jpeg" alt="Alex Rodriguez">
+                    <div class="trainer-overlay">
+                        <button class="btn btn-primary">Ver Perfil</button>
+                    </div>
+                </div>
+                <h3 class="trainer-name">Alex Rodriguez</h3>
+                <p class="trainer-specialty">Fuerza y Acondicionamiento</p>
+            </div>
+            <div class="trainer-card">
+                <div class="trainer-image">
+                    <img src="~/img/trainer2croped.jpeg" alt="Sarah Johnson">
+                    <div class="trainer-overlay">
+                        <button class="btn btn-primary">Ver Perfil</button>
+                    </div>
+                </div>
+                <h3 class="trainer-name">Sarah Johnson</h3>
+                <p class="trainer-specialty">HIIT y Entrenamiento Funcional</p>
+            </div>
+            <div class="trainer-card">
+                <div class="trainer-image">
+                    <img src="~/img/trainer3-2croped.jpeg" alt="Mike Williams">
+                    <div class="trainer-overlay">
+                        <button class="btn btn-primary">Ver Perfil</button>
+                    </div>
+                </div>
+                <h3 class="trainer-name">Mike Williams</h3>
+                <p class="trainer-specialty">Culturismo y Nutrición</p>
+            </div>
+            <div class="trainer-card">
+                <div class="trainer-image">
+                    <img src="~/img/trainer4.jpg" alt="Emma Davis">
+                    <div class="trainer-overlay">
+                        <button class="btn btn-primary">Ver Perfil</button>
+                    </div>
+                </div>
+                <h3 class="trainer-name">Emma Davis</h3>
+                <p class="trainer-specialty">CrossFit y Boxeo</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección Testimonios -->
+<section id="testimonials" class="testimonials">
+    <div class="container-landing section-center">
+        <div class="section-header">
+            <h2 class="section-title">HISTORIAS DE <span class="text-accent">ÉXITO</span></h2>
+            <p class="section-subtitle">
+                Escucha a nuestros miembros que han transformado sus vidas a través de la dedicación y el apoyo de nuestra comunidad GymPower.
+            </p>
+        </div>
+        
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="testimonial-header">
+                    <div class="testimonial-image">
+                        <img src="~/img/testimonial2.jpeg" alt="David K.">
+                    </div>
+                    <div>
+                        <h3 class="testimonial-name">David K.</h3>
+                        <p class="testimonial-role">Miembro por 2 años</p>
+                    </div>
+                </div>
+                <p class="testimonial-quote">"GymPower transformó completamente mi enfoque hacia el fitness. Los entrenadores me empujaron más allá de lo que pensé que era posible, y nunca he estado más fuerte."</p>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-header">
+                    <div class="testimonial-image">
+                        <img src="~/img/testimonial1.jpeg" alt="Jennifer L.">
+                    </div>
+                    <div>
+                        <h3 class="testimonial-name">Jennifer L.</h3>
+                        <p class="testimonial-role">Miembro por 1 año</p>
+                    </div>
+                </div>
+                <p class="testimonial-quote">"La comunidad en GymPower es increíble. Todos son solidarios y motivadores. He perdido 30 libras y he ganado una confianza que nunca pensé que era posible."</p>
+            </div>
+            <div class="testimonial-card">
+                <div class="testimonial-header">
+                    <div class="testimonial-image">
+                        <img src="~/img/testimonial3.jpeg" alt="Marcus T.">
+                    </div>
+                    <div>
+                        <h3 class="testimonial-name">Marcus T.</h3>
+                        <p class="testimonial-role">Miembro por 3 años</p>
+                    </div>
+                </div>
+                <p class="testimonial-quote">"Como ex atleta, necesitaba un gimnasio que pudiera igualar mi intensidad. GymPower lo logra con entrenamientos desafiantes y orientación experta cada vez."</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección Membresías -->
+<section id="membership" class="membership">
+    <div class="container-landing section-center">
+        <div class="section-header">
+            <h2 class="section-title">PLANES DE <span class="text-accent">MEMBRESÍA</span></h2>
+            <p class="section-subtitle">
+                Elige la membresía que se adapte a tu estilo de vida y objetivos de fitness. Todos los planes incluyen acceso a nuestras instalaciones de última generación.
+            </p>
+        </div>
+        
+        <div class="plans-grid">
+            <div class="plan-card">
+                <h3 class="plan-name">Básico</h3>
+                <div class="plan-price">
+                    <span class="price">$49</span>
+                    <span class="period">/mes</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        Acceso a las instalaciones del gimnasio
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        Evaluación física básica
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        2 clases grupales por semana
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        Acceso a vestuarios
+                    </li>
+                </ul>
+                <button class="btn btn-primary btn-full">Elegir Plan</button>
+            </div>
+            <div class="plan-card plan-popular">
+                <div class="popular-badge">MÁS POPULAR</div>
+                <h3 class="plan-name">Premium</h3>
+                <div class="plan-price">
+                    <span class="price">$79</span>
+                    <span class="period">/mes</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <img src="~/img/lightbulbwhite.svg" alt="" srcset="">
+                        Acceso ilimitado al gimnasio
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulbwhite.svg" alt="" srcset="">
+                        Evaluación física integral
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulbwhite.svg" alt="" srcset="">
+                        Clases grupales ilimitadas
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulbwhite.svg" alt="" srcset="">
+                        1 sesión de entrenamiento personal/mes
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulbwhite.svg" alt="" srcset="">
+                        Consulta de nutrición
+                    </li>
+                </ul>
+                <button class="btn btn-white btn-full">Elegir Plan</button>
+            </div>
+            <div class="plan-card">
+                <h3 class="plan-name">Élite</h3>
+                <div class="plan-price">
+                    <span class="price">$129</span>
+                    <span class="period">/mes</span>
+                </div>
+                <ul class="plan-features">
+                    <li>
+                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        Acceso ilimitado al gimnasio 24/7
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        Evaluación física avanzada
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        Clases grupales ilimitadas
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        4 sesiones de entrenamiento personal/mes
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        Plan de nutrición
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        Acceso a la zona de recuperación
+                    </li>
+                    <li>
+                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        Pases para invitados
+                    </li>
+                </ul>
+                <button class="btn btn-primary btn-full">Elegir Plan</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección CTA -->
+<section class="cta" >
+    <div class="cta-overlay"></div>
+    <div class="container-landing">
+        <div class="cta-content">
+            <h2 class="cta-title">COMIENZA TU VIAJE FITNESS <span class="text-accent">HOY</span></h2>
+            <p class="cta-text">
+                Únete a nuestra comunidad de individuos motivados y transforma tu cuerpo y mente. El primer paso es tuyo.
+            </p>
+            <button href="#membership" class="btn btn-primary btn-lg">Comienza Ahora</button>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        // Scroll to membership section when clicking the "Únete Ahora" button
+        document.getElementById('botonUneteAhora').addEventListener('click', function() {
+            document.getElementById('membership').scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Scroll to membership section when clicking the "Comienza Hoy" button
+        document.getElementById('botonComienzaHoy').addEventListener('click', function() {
+            document.getElementById('membership').scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // Scroll to membership section when clicking any CTA button with href="#membership"
+        document.querySelectorAll('button[href="#membership"]').forEach(function(button) {
+            button.addEventListener('click', function() {
+                document.getElementById('membership').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+}

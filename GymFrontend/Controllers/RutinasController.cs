@@ -1,5 +1,9 @@
-﻿using BL;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using BL;
+using BL.Utils;
 using DTO.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,55 +14,70 @@ namespace GymFrontend.Controllers
         private UsersManager manager;
         private RutinasManager rutinasManager;
         private EjerciciosManager ejerciciosManager;
+        private JwtTokenGenerator jwtTokenGenerator;
 
         public RutinasController(UsersManager _manager,
                                 RutinasManager _rutinasManager,
-                                EjerciciosManager _ejerciciosManager  )
+                                EjerciciosManager _ejerciciosManager,
+                                JwtTokenGenerator _jwtTokenGenerator)
         {
             manager = _manager;
             rutinasManager = _rutinasManager;
             ejerciciosManager = _ejerciciosManager;
+            jwtTokenGenerator = _jwtTokenGenerator;
         }
+
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("gestionRutinas")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             string pageToRender = "GestionRutinas";
-           
-            
-            HttpResponseListadoQueryUsers respuestaClientes = manager.obtenerUsuariosPorRol("cliente", "activo").Result;
-            HttpResponseListadoQueryUsers respuestaEntrenadores = manager.obtenerUsuariosPorRol("empleado", "activo").Result;
-            ViewBag.clientes = respuestaClientes.data;
-            ViewBag.entrenadores = respuestaEntrenadores.data;
-            return View("GestionRutinas", new   Rutina());
-            
+
+
+            var respuestaClientes = await manager.ObtenerUsuariosPorRol("cliente", "activo");
+            var respuestaEntrenadores = await manager.ObtenerUsuariosPorRol("empleado", "activo");
+            ViewBag.clientes = respuestaClientes.payload;
+            ViewBag.entrenadores = respuestaEntrenadores.payload;
+            return View("GestionRutinas", new Rutina());
+
         }
+
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("asignarEjercicios")]
-        public IActionResult asignarEjercicios([FromQuery] int UsuarioId)
+        public async Task<IActionResult> asignarEjercicios([FromQuery] string usuarioID = null)
         {
-            
-            HttpResponseListadoQueryUsers respuestaClientes = manager.obtenerUsuariosPorRol("cliente", "activo").Result; ;
-            ViewBag.clientes = respuestaClientes.data;
-            if (UsuarioId > 0) {
-                HttpResponseListadoRutinas respuestaRutinas = rutinasManager.obtenerRutinasDeUsuario(UsuarioId).Result;
-                HttpResponseListadoEjercicios respuestaEjercicios = ejerciciosManager.obtenerEjercicios().Result;
-                ViewBag.rutinas = respuestaRutinas.data;
-                ViewBag.ejercicios = respuestaEjercicios.data;
+
+
+            /*var token = Request.Cookies["AuthToken"];
+            var claims = jwtTokenGenerator.ValidateIdToken(token);
+            var UsuarioId = claims.FirstOrDefault(c => 
+                     c.Key == ClaimTypes.NameIdentifier || c.Key == JwtRegisteredClaimNames.Sub
+            ).Value;
+            */
+            var respuestaClientes = await manager.ObtenerUsuariosPorRol("cliente", "activo");
+            ViewBag.clientes = respuestaClientes.payload;
+            if (!string.IsNullOrEmpty(usuarioID)) {
+                var respuestaRutinas = await rutinasManager.obtenerRutinasDeUsuario(usuarioID);
+                var respuestaEjercicios = await ejerciciosManager.obtenerEjercicios();
+                ViewBag.rutinas = respuestaRutinas.payload;
+                ViewBag.ejercicios = respuestaEjercicios.payload;
             }
             return View("AsignacionEjercicios");
         }
            
     [HttpPost]
         [Route("gestionRutinas")]
-        public IActionResult gestionarRutinas(Rutina rutina)
+        public async Task<IActionResult> gestionarRutinas(Rutina rutina)
         {
             rutina.FechaCreacion = DateTime.Now;
-            
-            HttpResponseListadoQueryUsers respuestaClientes = manager.obtenerUsuariosPorRol("cliente", "activo").Result;
-            HttpResponseListadoQueryUsers respuestaEntrenadores = manager.obtenerUsuariosPorRol("empleado", "activo").Result;
-            ViewBag.clientes = respuestaClientes.data;
-            ViewBag.entrenadores = respuestaEntrenadores.data;
+
+            var respuestaClientes = await manager.ObtenerUsuariosPorRol("cliente", "activo");
+            var respuestaEntrenadores = await manager.ObtenerUsuariosPorRol("empleado", "activo");
+            ViewBag.clientes 
+= respuestaClientes.payload;
+            ViewBag.entrenadores = respuestaEntrenadores.payload;
             if (!ModelState.IsValid)
             {
                 return View("GestionRutinas", rutina);
@@ -78,24 +97,38 @@ namespace GymFrontend.Controllers
 
         [HttpPost]
         [Route("asignarEjercicios")]
-        public IActionResult asignarRutina(AsignacionDeEjercicio asignacion)
+        public async Task<IActionResult> asignarRutina(AsignacionDeEjercicio asignacion)
         {
-            
-            HttpResponseListadoQueryUsers respuestaClientes = manager.obtenerUsuariosPorRol("cliente", "activo").Result;
-            ViewBag.clientes = respuestaClientes.data;
+
+            var respuestaClientes = await manager.ObtenerUsuariosPorRol("cliente", "activo");
+            ViewBag.clientes = respuestaClientes.payload;
             if (!ModelState.IsValid)
             {
                 return View("AsignacionEjercicios", asignacion);
             }
-            
-            HttpResponseAsignacion respuesta = rutinasManager.asignarEjercicioARutina(asignacion).Result;
-            if (respuesta.ok == false)
+
+            var respuesta = await rutinasManager.asignarEjercicioARutina(asignacion);
+            if (respuesta.success == false)
             {
                 ViewBag.message = respuesta.message;
                 return View("AsignacionEjercicios",asignacion);
             }
             ViewBag.message = respuesta.message;
             return View("AsignacionEjercicios",asignacion);
+        }
+
+        // NUEVO: Endpoint para obtener rutinas de cliente
+        [Authorize(Roles = "empleado")]
+        [HttpGet]
+        [Route("obtenerRutinasDeCliente")]
+        public async Task<IActionResult> obtenerRutinasDeCliente([FromQuery] string UsuarioID)
+        {
+            var respuesta = await rutinasManager.obtenerRutinasDeCliente(UsuarioID);
+            if (respuesta.success)
+            {
+                return Ok(respuesta);
+            }
+            return BadRequest(respuesta);
         }
     }
 }

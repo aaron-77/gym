@@ -1,0 +1,13 @@
+@model DTO.Dtos.DTOConsejoDeClase
+
+<ul class="tips-list">
+    @foreach (var consejo in Model.consejos)
+    {
+        <li class="tips-item">
+            <div class="tips-icon">
+                <img src="../img/check.svg" alt="Check" class="icon">
+            </div>
+            <span>@consejo</span>
+        </li>
+    }
+</ul>

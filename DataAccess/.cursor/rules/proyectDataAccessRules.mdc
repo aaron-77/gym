@@ -1,0 +1,9 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Estructura del Proyecto
+
+
+- **EntityFramework/**: Contiene todo el código de base de datos relacionado con EntityFramework,incluido el contexto de base de datos

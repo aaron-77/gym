@@ -1,87 +1,96 @@
 ﻿using BL;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization; // Añadido para [Authorize]
+using System.Security.Claims; // Añadido para Claims
 
 namespace GymFrontend.Controllers
 {
     public class CitasController : Controller
     {
+
         private UsersManager managerUsers;
         private CitasManager citasManager;
 
-        public CitasController(UsersManager _managerUsers,CitasManager _citasManager ){
+        public CitasController(UsersManager _managerUsers, CitasManager _citasManager)
+        {
             managerUsers = _managerUsers;
             citasManager = _citasManager;
         }
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("registrarCita")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            
-            HttpResponseListadoQueryUsers respuestaClientes = managerUsers.obtenerUsuariosPorRol("cliente", "activo").Result;
-            ViewBag.clientes = respuestaClientes.data;
+            var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
+            ViewBag.clientes = respuestaClientes.payload;
+            // NUEVO: Obtener entrenadores disponibles al cargar la página de registro de cita
+            //var respuestaEntrenadores = await managerUsers.ObtenerUsuariosPorRol("empleado", "activo");
+            //ViewBag.entrenadores = respuestaEntrenadores.payload;
             return View("RegistrarCita", new Cita());
 
         }
 
         [HttpPost]
         [Route("registrarCita")]
-        public IActionResult registrarCita(Cita cita)
+        public async Task<IActionResult> registrarCita(Cita cita)
         {
-            
-            HttpResponseListadoQueryUsers respuestaClientes = managerUsers.obtenerUsuariosPorRol("cliente", "activo").Result;
-            ViewBag.clientes = respuestaClientes.data;
+
+            var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
+            ViewBag.clientes = respuestaClientes.payload;
             cita.estado = "Agendada";
             if (!ModelState.IsValid)
             {
                 return View("RegistrarCita", cita);
             }
-            
-            
-            HttpResponseCita respuesta = citasManager.registrarCita(cita).Result;
-                        if (respuesta.ok == false)
+
+
+            DTOResponse<Cita> respuesta = await citasManager.registrarCita(cita); // MODIFICADO: Usar DTOResponse y await
+            if (respuesta.success == false) // MODIFICADO: Usar success
             {
                 ViewBag.message = respuesta.message;
-                return View("RegistrarCita",cita);
+                return View("RegistrarCita", cita);
             }
             ViewBag.message = respuesta.message;
-            return View("RegistrarCita",cita);
+            return View("RegistrarCita", cita);
         }
 
 
+
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("modificarCita")]
-        public IActionResult modificarCita(CitaEdit cita)
+        public async Task<IActionResult> modificarCita()
         {
-            
-            HttpResponseListadoQueryUsers respuestaClientes = managerUsers.obtenerUsuariosPorRol("cliente", "activo").Result;
-            ViewBag.clientes = respuestaClientes.data;
-            if (respuestaClientes.ok == false)
+
+            var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
+            ViewBag.clientes = respuestaClientes.payload;
+            ViewBag.message = "";
+            if (respuestaClientes.success == false)
             {
                 ViewBag.message = respuestaClientes.message;
-                return View("ModificarCita", cita);
             }
-            ViewBag.message = "";
-            return View("ModificarCita", new CitaEdit());
+            
+            return View("ModificarCita");
         }
 
         [HttpPost]
         [Route("modificarCita")]
-        public IActionResult modificarCitaPost(CitaEdit cita)
+        public async Task<IActionResult> modificarCitaPost(CitaEdit cita)
         {
-            
-            HttpResponseListadoQueryUsers respuestaClientes = managerUsers.obtenerUsuariosPorRol("cliente", "activo").Result;
-            ViewBag.clientes = respuestaClientes.data;
+
+            var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
+            ViewBag.clientes = respuestaClientes.payload;
             if (!ModelState.IsValid)
             {
                 return View("ModificarCita", cita);
             }
 
-            
-            
-            var respuestaCita = citasManager.modificarCita(cita).Result;
-            
-            if (respuestaCita.ok == false)
+
+
+            var respuestaCita = await citasManager.modificarCita(cita); // MODIFICADO: Usar await
+
+            if (respuestaCita.success == false) // MODIFICADO: Usar success
             {
                 ViewBag.message = respuestaClientes.message;
                 return View("ModificarCita", cita);
@@ -90,33 +99,35 @@ namespace GymFrontend.Controllers
             return View("ModificarCita", cita);
         }
 
+        [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("duracionCitasMedicionPage")]
-        public IActionResult renderVistaDuracion(DuracionCitasMedicion duracion)
+        public async Task<IActionResult> renderVistaDuracion(DuracionCitasMedicion duracion) // MODIFICADO: async Task
         {
-            
-            HttpResponseDuracionCitasMedicion response = citasManager.obtenerDuracionCitasMedicion().Result;
-            DuracionCitasMedicion duracionExistente = response.data;
+
+            DTOResponse<DuracionCitasMedicion> response = await citasManager.obtenerDuracionCitasMedicion(); // MODIFICADO: Usar DTOResponse y await
+            DuracionCitasMedicion duracionExistente = response.payload; // MODIFICADO: Usar payload
             ViewBag.duracion = duracionExistente;
-            if (duracionExistente == null) {
+            if (duracionExistente == null)
+            {
                 ViewBag.message = "No tienes configuracion de duracion de citas de medicion aun, registra una ";
                 return View("DuracionCitasMedicion", new DuracionCitasMedicion());
             }
-           
+
             ViewBag.message = "";
-            return View("DuracionCitasMedicion", new DuracionCitasMedicion() {Id= duracionExistente.Id,duracion=duracionExistente.duracion,frecuenciaNotificaciones = duracionExistente.frecuenciaNotificaciones });
+            return View("DuracionCitasMedicion", new DuracionCitasMedicion() { Id = duracionExistente.Id, duracion = duracionExistente.duracion, frecuenciaNotificaciones = duracionExistente.frecuenciaNotificaciones });
         }
 
 
         [HttpPost]
         [Route("duracionCitasMedicionPage")]
-        public IActionResult gestionarDuracionCitasMedicion(DuracionCitasMedicion duracionParam)
+        public async Task<IActionResult> gestionarDuracionCitasMedicion(DuracionCitasMedicion duracionParam) // MODIFICADO: async Task
         {
-            
-            HttpResponseDuracionCitasMedicion responsePost = citasManager.registrarDuracionCitasMedicion(duracionParam).Result;
-            HttpResponseDuracionCitasMedicion response = citasManager.obtenerDuracionCitasMedicion().Result;
-            DuracionCitasMedicion duracionExistente = response.data;
-                ViewBag.duracion = duracionExistente;
+
+            DTOResponse<DuracionCitasMedicion> responsePost = await citasManager.registrarDuracionCitasMedicion(duracionParam); // MODIFICADO: Usar DTOResponse y await
+            DTOResponse<DuracionCitasMedicion> response = await citasManager.obtenerDuracionCitasMedicion(); // MODIFICADO: Usar DTOResponse y await
+            DuracionCitasMedicion duracionExistente = response.payload; // MODIFICADO: Usar payload
+            ViewBag.duracion = duracionExistente;
             if (duracionExistente == null)
             {
                 ViewBag.message = "No tienes configuracion de duracion de citas de medicion aun, registra una ";
@@ -128,5 +139,45 @@ namespace GymFrontend.Controllers
             ViewBag.message = responsePost.message;
             return View("DuracionCitasMedicion", duracionParam);
         }
+
+        // NUEVO: Endpoint para obtener la duración de la cita (int)
+        [HttpGet]
+        [Route("getDuracionCita")] // MODIFICADO: Quitar prefijo "api/"
+        public async Task<IActionResult> GetDuracionCita()
+        {
+            var respuesta = await citasManager.obtenerDuracionCita();
+            if (respuesta.success)
+            {
+                return Ok(respuesta);
+            }
+            return BadRequest(respuesta);
+        }
+
+        // NUEVO: Endpoint para obtener entrenadores disponibles
+        [HttpGet]
+        [Route("obtenerEntrenadoresDisponibles")] // MODIFICADO: Quitar prefijo "api/"
+        public async Task<IActionResult> ObtenerEntrenadoresDisponibles([FromQuery] DateTime fechaReferencia)
+        {
+            var respuesta = await managerUsers.ObtenerEntrenadoresDisponibles(fechaReferencia);
+            if (respuesta.success)
+            {
+                return Ok(respuesta);
+            }
+            return BadRequest(respuesta);
+        }
+
+        [HttpGet]
+        [Route("obtenerCitasAgendadasDelCliente")] // MODIFICADO: Quitar prefijo "api/"
+        public async Task<IActionResult> ObtenerCitasAgendadasDelCliente([FromQuery] string idUsuario)
+        {
+            var respuesta = await citasManager.obtenerCitasAgendadas(idUsuario);
+            if (respuesta.success)
+            {
+                return Ok(respuesta);
+            }
+            return BadRequest(respuesta);
+        }
+
+        
     }
 }

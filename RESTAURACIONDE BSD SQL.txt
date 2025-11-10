@@ -1,0 +1,188 @@
+USE FitnessCenterDB;
+GO
+
+-- ... (todo el contenido ya tiene la sentencia GO correctamente ubicada después de cada procedimiento y función) ...
+
+CREATE PROCEDURE dbo.sp_eliminarPreReservasCaducadas
+    @idsPreReservasCaducadas dbo.ListadoIdsGenericos READONLY
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Eliminar las pre reservas de horario con los IDs contenidos en idsPreReservasCaducadas
+    DELETE FROM FitnessCenterDB.dbo.preReservasDeHorario
+    WHERE idPreReserva IN (SELECT id FROM @idsPreReservasCaducadas);
+END;
+GO
+
+CREATE PROCEDURE dbo.sp_esElMismoTipoDeClase
+(
+    @idInscripcionCancelada INT,
+    @idClaseProgramadaNueva INT
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @idClaseInscripcion INT;
+    DECLARE @idClaseNueva INT;
+
+    -- Obtener el idClase de la inscripción cancelada
+    SELECT @idClaseInscripcion = c.fkClase
+    FROM FitnessCenterDB.dbo.inscripcionesDeClases i
+    JOIN FitnessCenterDB.dbo.clasesProgramadas c ON i.fkProgramacionClase = c.idProgramacionClase
+    WHERE i.idInscripcion = @idInscripcionCancelada;
+
+    -- Obtener el idClase de la nueva clase programada
+    SELECT @idClaseNueva = fkClase
+    FROM FitnessCenterDB.dbo.clasesProgramadas
+    WHERE idProgramacionClase = @idClaseProgramadaNueva;
+
+    -- Comparar los idClase
+    IF @idClaseInscripcion = @idClaseNueva
+    BEGIN
+        RETURN; -- Si son iguales, simplemente retorna
+    END
+    ELSE
+    BEGIN
+        -- Lanzar excepción si no son iguales
+        RAISERROR('Estás intentando reagendar una clase diferente a la original.', 16, 1);
+    END
+END;
+GO
+
+CREATE PROCEDURE [dbo].[sp_modificarCita]
+(
+@citaId int,
+@entrenadorID int,
+@fechaInicio datetime,
+@estado nvarchar(50),
+@fechaHoraFin datetime
+	
+)
+	-- Add the parameters for the stored procedure here	
+AS
+BEGIN
+
+	update Citas set 
+	EntrenadorID= @entrenadorID,
+	FechaHora=@fechaInicio,
+	FechaHoraFin=@fechaHoraFin,
+	Estado=@estado
+	where CitaID = @citaId
+END;
+GO
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE       PROCEDURE [dbo].[sp_obtenerCitasAgendadasPorUsuario]
+(
+    @idUsuario NVARCHAR(450) -- MODIFICADO: Tipo de dato de INT a NVARCHAR(450)
+)
+AS
+BEGIN
+    SELECT
+        CitaID ,
+        UserId as UsuarioId,      
+        EntrenadorId , 
+        FechaHora ,
+        FechaHoraFin ,
+        TipoCita,
+        Estado
+    FROM FitnessCenterDB.dbo.Citas  -- MODIFICADO: Añadido esquema
+    WHERE UserId = @idUsuario AND Estado IN ('agendada','Agendada'); -- MODIFICADO: UsuarioID a UserId
+END;
+GO
+
+CREATE   PROCEDURE sp_obtenerEjerciciosPorUsuario
+    @UsuarioID nvarchar(450)
+AS
+BEGIN
+    SELECT DISTINCT 
+        E.*
+    FROM 
+        aspnetusers U
+    INNER JOIN 
+        Rutinas R ON U.Id= R.UserId
+    INNER JOIN 
+        RutinaEjercicios RE ON R.RutinaID = RE.RutinaID
+    INNER JOIN 
+        Ejercicios E ON RE.EjercicioID = E.EjercicioID
+    WHERE 
+        U.Id = @UsuarioID
+    ORDER BY 
+        E.EjercicioId
+END;
+GO
+
+CREATE PROCEDURE dbo.sp_obtenerEjerciciosYParametrosDelCliente
+@idCliente int
+AS
+BEGIN
+	with ejercicios_del_usuario as(
+		select distinct e.EjercicioID ,e.NombreEjercicio,pdm.parametroMedicionId,pdm.nombre as nombreParametro
+		from medidas m 
+		left join ejercicios_parametrosDeMedicion epdm  on epdm.fkEjercicio  = m.fkEjercicio 
+		join Ejercicios e on e.EjercicioID  = epdm.fkEjercicio 
+		join parametrosDeMedicion pdm ON epdm.fkParametro  = pdm.parametroMedicionId 
+		where m.fkUsuario = @idCliente
+	),
+	parametros_del_usuario as (
+		select distinct null as EjercicioId,null as NombreEjercicio,pdm.parametroMedicionId,pdm.nombre as nombreParametro
+		from medidas m 
+		join parametrosDeMedicion pdm on pdm.parametroMedicionId = m.fkParametro
+		where m.fkUsuario = @idCliente and m.fkEjercicio is null
+	)
+	select * from ejercicios_del_usuario
+	union all
+	select * from parametros_del_usuario
+END;
+GO
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE           PROCEDURE [dbo].[sp_obtenerEntrenadoresDisponibles]
+(
+    @fechaReferencia datetime2
+)
+AS
+BEGIN
+    -- MODIFICADO: Tipo de dato de @rolEmpleadoId a NVARCHAR(450) y obtención del Id de AspNetRoles
+    DECLARE @rolEmpleadoId nvarchar(450);
+    SELECT @rolEmpleadoId = Id FROM FitnessCenterDB.dbo.AspNetRoles WHERE Name = 'Empleado';
+
+    SELECT DISTINCT
+        -- MODIFICADO: Campos de AspNetUsers y AspNetRoles
+        u.Id AS UsuarioID,
+        u.NombreCompleto AS Nombre,
+        u.Apellido AS Apellido,
+        u.Email,
+        u.PhoneNumber AS Telefono,
+        u.UserName AS NombreUsuario,
+         u.FechaDeNacimiento as FechaNacimiento,
+        u.FechaDeRegistro as FechaRegistro,
+        ar.Id AS RolID,
+        u.Estado
+    FROM FitnessCenterDB.dbo.AspNetUsers AS u
+    -- NUEVO: Uniones con AspNetUserRoles y AspNetRoles
+    INNER JOIN FitnessCenterDB.dbo.AspNetUserRoles ur ON u.Id = ur.UserId
+    INNER JOIN FitnessCenterDB.dbo.AspNetRoles ar ON ur.RoleId = ar.Id
+    WHERE ar.Id = @rolEmpleadoId AND u.Estado = 'Activo'
+    -- MODIFICADO: Nueva lógica para filtrar entrenadores no disponibles por clases programadas
+    AND u.Id NOT IN (
+        SELECT cp.fkEntrenador
+        FROM FitnessCenterDB.dbo.clasesProgramadas cp
+        INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
+         WHERE 
+         CAST(hcp.fechaDeLaClase AS DATE) = CAST(@fechaReferencia AS DATE)
+    );
+END;
+GO
+
+-- ... (el resto del archivo ya tiene la sentencia GO correctamente ubicada) ...

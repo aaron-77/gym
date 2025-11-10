@@ -1,7 +1,19 @@
-﻿@model DTO.Dtos.User
+@model DTO.Dtos.User
 @{
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "GymPower - Crear Cuenta";
+    ViewData["Description"] = "Crea tu cuenta en GymPower y comienza tu viaje fitness.";
+    ViewData["BodyClass"] = "create-account-page";
+    Layout = "_NavbarLayout";
 }
+
+@section Styles {
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/login.css" type="text/css">
+    <link rel="stylesheet" href="~/css/crearCuenta.css" type="text/css">
+    <link rel="stylesheet" href="~/css/custom-navbar.css" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+}
+
 <div id="creteUserRootWrapper" class="create-user-root-wrapper">
     <div id="bgImageContainer" class="bg-split-image-container">
     </div>
@@ -11,9 +23,9 @@
             <form class="form" method="post" action="signUp">
                 <span id="validationSummary" class="validation-error">@ViewBag.message</span>
                 <div class="input-group">
-                    <label  for="username">Nombre completo</label>
-                    <input asp-for="@Model.NombreCompleto" type="text" name="nombreCompleto" id="username" placeholder="">
-                    <span asp-validation-for="@Model.NombreCompleto" class="validation-error"></span>
+                    <label  for="username">Nombre</label>
+                    <input asp-for="@Model.Nombre" type="text" name="nombre" id="username" placeholder="">
+                    <span asp-validation-for="@Model.Nombre" class="validation-error"></span>
                 </div>
                 <div class="input-group">
                     <label for="apellido">Apellido</label>
@@ -70,3 +82,7 @@
     </div>
 
 </div>
+
+@section Scripts {
+    
+}

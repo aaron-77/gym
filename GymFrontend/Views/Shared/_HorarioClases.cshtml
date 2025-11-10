@@ -1,0 +1,17 @@
+@model List<DTO.Dtos.ClaseProgramada>
+
+<div class="schedule-table">
+    <div class="schedule-header schedule-row">
+        <div class="schedule-cell">Día</div>
+        <div class="schedule-cell">Horario</div>
+        <div class="schedule-cell">Instructor</div>
+    </div>
+    @foreach (var horario in Model)
+    {
+        <div class="schedule-row">
+            <div class="schedule-cell">@horario.DiaDeLaSemana</div>
+            <div class="schedule-cell">@horario.HoraInicio - @horario.HoraFin</div>
+            <div class="schedule-cell">@horario.NombreEntrenador</div>
+        </div>
+    }
+</div>

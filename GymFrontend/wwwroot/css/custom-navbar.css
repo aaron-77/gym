@@ -1,0 +1,224 @@
+/* Custom Navbar Styles */
+:root {
+    --color-primary: #e11d48;
+    --color-primary-dark: #be123c;
+    --color-primary-light: #f43f5e;
+    --color-dark: #000000;
+    --color-dark-100: #09090b;
+    --color-dark-200: #18181b;
+    --color-dark-300: #27272a;
+    --color-gray-100: #3f3f46;
+    --color-gray-200: #52525b;
+    --color-gray-300: #71717a;
+    --color-gray-400: #a1a1aa;
+    --color-light: #ffffff;
+    --color-light-100: #f4f4f5;
+    --color-light-200: #e4e4e7;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --border-radius: 0.375rem;
+    --transition: all 0.3s ease;
+}
+
+/* Navigation */
+.navbar {
+    position: fixed;
+    display:flex;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    background-color: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--color-dark-300);
+    padding: 0.75rem 0;
+    justify-content: center;/* sobre estrita de navbar scss */
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    flex-wrap: nowrap;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+    min-width: 120px;
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--color-light);
+}
+
+.text-accent {
+    color: var(--color-primary);
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: var(--transition);
+    color: var(--color-light);
+    text-decoration: none;
+    padding: 0.5rem 0;
+    white-space: nowrap;
+}
+
+.nav-link:hover {
+    color: var(--color-primary);
+}
+
+#botonUneteAhora {
+    flex-shrink: 1;
+    white-space: nowrap;
+    padding: 0.75rem 1.5rem; /* match login button padding */
+    min-width: 100px;
+    margin-left: 1rem;
+}
+
+/* Ensure navbar buttons don't inherit full-width from page-specific CSS (e.g. login.css) */
+.navbar .btn-primary {
+    width: auto; /* override .btn-primary { width: 100% } in login.css */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-light);
+    border-radius: var(--border-radius);
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+    transform: scale(1.05);
+}
+
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 21px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 10;
+    margin-left: 1rem;
+}
+
+.mobile-menu-btn span {
+    width: 100%;
+    height: 3px;
+    background-color: var(--color-light);
+    transition: var(--transition);
+}
+
+.mobile-menu-btn.active span:nth-child(1) {
+    transform: translateY(9px) rotate(45deg);
+}
+
+.mobile-menu-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-btn.active span:nth-child(3) {
+    transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 1200px) {
+    .nav-links {
+        gap: 1rem;
+    }
+    
+    #botonUneteAhora {
+        padding: 0.5rem 1rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .navbar .container {
+        padding: 0 1rem;
+    }
+    
+    .nav-links {
+        gap: 0.75rem;
+    }
+    
+    #botonUneteAhora {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 900px) {
+    .nav-links {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        padding: 1rem 0;
+        flex-direction: column;
+        align-items: center;
+        transform: translateY(-100%);
+        opacity: 0;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        visibility: hidden;
+    }
+    
+    .nav-links.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .mobile-menu-btn {
+        display: flex;
+    }
+}
+
+@media (max-width: 640px) {
+    #botonUneteAhora {
+        display: none;
+    }
+    
+    .logo {
+        min-width: 100px;
+    }
+    
+    .logo-text {
+        font-size: 1.25rem;
+    }
+}
+.fix-margin-button-uneteAhora {
+    margin-top: 0;
+}

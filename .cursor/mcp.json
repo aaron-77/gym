@@ -1,0 +1,14 @@
+{
+    "mcpServers": {
+      "sqlserver": {
+        "command": "/home/aaron/archivosl/general/estudio/mcp/mcprichardhan/executemcpsqlserver.sh",
+        "args": [],
+        "env": {
+          "MSSQL_SERVER": "localhost",
+          "MSSQL_USER": "aaronlogin",
+          "MSSQL_PASSWORD": "Terrabreak13",
+          "MSSQL_DATABASE": "FitnessCenterDB"
+        }
+      }
+    }
+}

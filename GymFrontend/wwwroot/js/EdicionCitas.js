@@ -33,7 +33,7 @@ const handleSelectedAction = async (ev) => {
         //asignar clienteID
         //get Citas
         //fillCitasAgendadas
-        clientId = parseInt(comboSelected.value);
+        clientId = comboSelected.value;
         await getCitasAgendadas();
         fillCitasAgendadas();
     }
@@ -100,27 +100,27 @@ const disableElements = () => {
     }
 }
 const getCitasAgendadas = async () => {
-    const response = await fetch("https://localhost:5264/api/getCitasAgendadas?idUsuario=" + clientId);
+    const response = await fetch("/obtenerCitasAgendadasDelCliente?idUsuario=" + clientId);
     const jsonResponse = await response.json();
-    if (!jsonResponse.ok) {
+    if (!jsonResponse.success) {
         console.log(jsonResponse.message);
         return;
     }
-    citas = jsonResponse.data;
+    citas = jsonResponse.payload;
 }
 const getEntrenadoresDisponibles = async () => {
     const fechaInicio = document.getElementById("inputFechaInicio").value;
-    const response = await fetch("https://localhost:5264/api/obtenerEntrenadoresDisponibles?fechaInicio=" + fechaInicio);
+    const response = await fetch("/obtenerEntrenadoresDisponibles?fechaInicio=" + fechaInicio);
 
     const jsonResponse = await response.json();
-    if (!jsonResponse.ok) {
-        if (jsonResponse.data.length = 0) {
+    if (!jsonResponse.success) {
+        if (jsonResponse.payload.length == 0) {
             alert("No hay entrenadores disponibles, elige otra fecha");
         }
         console.log(jsonResponse.message);
         return;
     }
-    entrenadores = jsonResponse.data;
+    entrenadores = jsonResponse.payload;
 }
 
 function fillComboEntrenadores() {
@@ -164,7 +164,7 @@ function fillEstados() {
     });
 }
 const getDuracionCitas = async () => {
-    const response = await fetch("https://localhost:5264/api/getDuracionCita");
+    const response = await fetch("http://localhost:5274/api/getDuracionCita");
     const jsonResponse = await response.json();
     if (!jsonResponse.ok) {
         console.log(jsonResponse.message);

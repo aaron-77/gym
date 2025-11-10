@@ -1,0 +1,13 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Estructura del Proyecto
+
+El proyecto está organizado en las siguientes carpetas:
+
+- **Controllers/**: Contiene los controladores con los endpoints de api bakend
+- **BackGroundWork/**: contiene clases .cs con funcionalidad que se ejecutara en segundo plano,por lo regular ejecutada por medio de quartz
+- **Hubs/**: contiene clases .cs con los hubs de signalR y toda la funcionalidad relativa a tiempo real y signalR
+- **Services/**: contiene clases .cs con funcionalidad que accede a bd y que se puede reutilizar desde distintos puntos del api, ya sea endpoints en coltrollers o desde metodos de hubs

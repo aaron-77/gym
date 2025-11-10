@@ -13,22 +13,44 @@ namespace BL
 {
     public class UsersManager
     {
-        private HttpCustomClient httpClient; 
+        private readonly HttpCustomClient httpClient;
         public UsersManager(HttpCustomClient _httpClient ){
-            httpClient = null;
             httpClient = _httpClient;
         }
-        public async Task<HttpLoginResponse> login(UserCredentials credenciales)
+        public async Task<DTOResponse<DTOLoggedUser>> login(UserCredentials credenciales)
         {
             
             JsonContent jsonCon = JsonContent.Create(credenciales);
             string categoriasResponse = await httpClient.post("api/autenticar", jsonCon);
-            HttpLoginResponse usuario = null; 
-            
+            DTOResponse<DTOLoggedUser> usuario = null;
 
             try
             {
-                usuario = JsonSerializer.Deserialize<HttpLoginResponse>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                usuario = JsonSerializer.Deserialize<DTOResponse<DTOLoggedUser>>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return usuario;
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<DTOResponse<DTOLoggedUser>> updateIdAndAccessToken(RefreshTokenRequest refreshTokenRequest)
+        {
+            
+            JsonContent jsonCon = JsonContent.Create(refreshTokenRequest);
+            string updateIdAndAccessTokenRequest = await httpClient.post("api/refresh", jsonCon);
+            DTOResponse<DTOLoggedUser> usuario = null;
+
+            try
+            {
+                usuario = JsonSerializer.Deserialize<DTOResponse<DTOLoggedUser>>(updateIdAndAccessTokenRequest, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return usuario;
             }
             catch (ArgumentNullException ex)
@@ -48,7 +70,7 @@ namespace BL
             // Encriptar la contraseña antes de enviar la solicitud
             newUser.Contrasena = HashPassword(newUser.Contrasena);
             newUser.ContrasenaConfirmacion = newUser.Contrasena; // Asegurarse de que la confirmación de la contraseña coincida
-            NewUser userForBody = new NewUser(newUser.NombreCompleto,
+            NewUser userForBody = new NewUser(newUser.Nombre,
                                                        newUser.FechaDeNacimiento,
                                                        newUser.Direccion,
                                                        newUser.NumeroDeIdentificacion,
@@ -56,7 +78,7 @@ namespace BL
                                                        newUser.Telefono,
                                                        newUser.Apellido,
                                                        newUser.Contrasena);
-            HttpCustomClient httpClient = new HttpCustomClient();
+
             JsonContent jsonCon = JsonContent.Create(userForBody);
             string categoriasResponse = await httpClient.post("api/RegistrarUsuario", jsonCon);
             ResponseHttp usuario = JsonSerializer.Deserialize<ResponseHttp>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -87,15 +109,16 @@ namespace BL
         {
             return BCrypt.Net.BCrypt.Verify(enteredPassword, hashedPassword);
         }
-        public async Task<ResponseHttpListadoUsers> obtenerUsuarios()
+        public async Task<DTOResponse<List<ExistingUser>>> obtenerUsuarios()
         {
 
-            HttpCustomClient httpClient = new HttpCustomClient();
-
-            string categoriasResponse = await httpClient.get("api/obtenerUsuarios");
-            ResponseHttpListadoUsers respuestaHttp = JsonSerializer.Deserialize<ResponseHttpListadoUsers>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            
+            
+            
             try
             {
+                string response = await httpClient.get("api/obtenerUsuarios");
+                DTOResponse<List<ExistingUser>> respuestaHttp = JsonSerializer.Deserialize<DTOResponse<List<ExistingUser>>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return respuestaHttp;
             }
             catch (ArgumentNullException ex)
@@ -111,16 +134,34 @@ namespace BL
 
         }
 
-        public async Task<HttpResponseListadoQueryUsers> obtenerUsuariosPorRol(string rol, string estado)
+        public async Task<DTOResponse<List<QueryUser>>> ObtenerUsuariosPorRol(string rol, string estado)
         {
-
-            HttpCustomClient httpClient = new HttpCustomClient();
-
-            string categoriasResponse = await httpClient.get($"api/obtenerUsuariosPorRol?rol={rol}&estado={estado}");
-            HttpResponseListadoQueryUsers respuestaHttp = JsonSerializer.Deserialize<HttpResponseListadoQueryUsers>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             try
             {
-                return respuestaHttp;
+                string endpoint = $"api/obtenerUsuariosPorRol?rol={rol}&estado={estado}";
+                string response = await httpClient.get(endpoint);
+                return JsonSerializer.Deserialize<DTOResponse<List<QueryUser>>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<List<QueryUser>> { success = false, message = "Error de deserialización o respuesta vacía." };
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine($"Error en ObtenerUsuariosPorRol: {ex.Message}");
+                return new DTOResponse<List<QueryUser>> { success = false, message = "Error de deserialización o respuesta vacía." };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en ObtenerUsuariosPorRol: {ex.Message}");
+                return new DTOResponse<List<QueryUser>> { success = false, message = "Error al obtener usuarios por rol." };
+            }
+        }
+
+        public async Task<DTOResponse<List<QueryUser>>> ObtenerEntrenadoresDisponibles(DateTime fechaReferencia)
+        {
+            
+            try
+            {
+                string entrenadoresResponse = await httpClient.get($"api/obtenerEntrenadoresDisponibles?fechaReferencia={fechaReferencia}");
+            DTOResponse<List<QueryUser>> entrenadores = JsonSerializer.Deserialize<DTOResponse<List<QueryUser>>>(entrenadoresResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return entrenadores;
             }
             catch (ArgumentNullException ex)
             {
@@ -132,12 +173,11 @@ namespace BL
                 Console.WriteLine(ex.Message);
                 return null;
             }
-
         }
 
         public async Task<HttpResponseGenerateOTP> obtenerCodigoOTP(CanalDeEnvioOTP canalDeEnvio)
         {
-            HttpCustomClient httpClient = new HttpCustomClient();
+            
             JsonContent jsonCon = JsonContent.Create(canalDeEnvio);
             string categoriasResponse = await httpClient.post("api/getOTPCode", jsonCon);
             HttpResponseGenerateOTP responseOTPGeneration = JsonSerializer.Deserialize<HttpResponseGenerateOTP>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -159,7 +199,7 @@ namespace BL
 
         public async Task<HttpLoginResponse> validarCodigoOTP(OTPCodeVerification verificacion)
         {   
-            HttpCustomClient httpClient = new HttpCustomClient();
+            
             JsonContent jsonCon = JsonContent.Create(verificacion);
             string categoriasResponse = await httpClient.post("api/verificarOTP", jsonCon);
             HttpLoginResponse finalLoginResponse = JsonSerializer.Deserialize<HttpLoginResponse>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });

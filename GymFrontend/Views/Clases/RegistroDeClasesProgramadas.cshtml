@@ -1,0 +1,119 @@
+@{
+    ViewData["Title"] = "Registro de Clases Programadas";
+    Layout = "_LayoutSeccionAdministracion";
+}
+
+<div class="pagetitle">
+    <h1>Registro de Clases Programadas</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+            <li class="breadcrumb-item active">Registro de Clases Programadas</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section layout-registro-clases-programadas">
+    
+    <form id="claseProgramadaForm" class="administrative-form needs-validation" novalidate>
+        <div class="accordion" id="accordionAgendador">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapseAgendador" aria-expanded="true" aria-controls="collapseAgendador">
+                    Selecciona un horario
+                </button>
+            </h2>
+            <div id="collapseAgendador" class="accordion-collapse collapse show" data-bs-parent="#accordionAgendador">
+                <div class="accordion-body fix-padding-accordion-body">
+                    @Html.Partial("_AgendadorDeHorarios",true)
+                </div>
+            </div>
+        </div>
+    </div>
+        <label id="labelHorarioSeleccionado" class="label-horario-seleccionado mt-3 mb-3" style="display:block; font-weight:bold; color:#012970;">Horario seleccionado:ninguno</label>
+        
+        <!-- Campo oculto para la fecha -->
+        
+        <div class="invalid-feedback">
+            Por favor selecciona una fecha en el calendario.
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="inputClase" class="form-label">Clase</label>
+                    <select id="inputClase" class="form-select" name="fkClase" required>
+                        <option value="">Selecciona una clase</option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Por favor selecciona una clase.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="inputEntrenador" class="form-label">Entrenador</label>
+                    <select id="inputEntrenador" class="form-select" name="fkEntrenador" required>
+                        <option value="">Selecciona un entrenador</option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Por favor selecciona un entrenador.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="inputCupoMaximo" class="form-label">Cupo Máximo</label>
+                    <input type="number" id="inputCupoMaximo" class="form-control" name="cupoMaximo" min="1" required>
+                    <div class="invalid-feedback">
+                        Por favor ingresa un cupo máximo válido (mínimo 1).
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="inputEstadoActividad" class="form-label">Estado de Actividad</label>
+                    <select id="inputEstadoActividad" class="form-select" name="fkEstadoClaseProgramada" required>
+                        <option value="">Selecciona un estado</option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Por favor selecciona un estado de actividad.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-primary">Registrar</button>
+            </div>
+        </div>
+    </form>
+</section>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/calendarioStyles.css" />
+    <link rel="stylesheet" href="~/css/horariosDelDia.css" />
+    <link rel="stylesheet" href="~/css/registroClasesProgramadas.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+}
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+    <script  src="~/js/LocalStorageManager.js"></script>
+    <script type="module" src="~/js/messageManager.mjs"></script>
+    <script type="module" src="~/js/httpClient.js"></script>
+    <script type="module" src="~/js/calendario.js"></script>
+    <script type="module" src="~/js/horariosDelDia.js"></script>
+    <script type="module" src="~/js/agendarioDeHorarios.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+    
+
+    
+}

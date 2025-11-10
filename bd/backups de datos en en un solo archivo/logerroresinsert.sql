@@ -1,0 +1,146 @@
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_obtenerMetasDeMedidas',N'Error de conversión al convertir el valor varchar ''ninguno'' al tipo de datos int.',16,1,'2025-03-18 15:58:37.84',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 16:02:33.82',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 4 Ejercicio: 4 mes 3 año 2025',1,3,'2025-03-18 16:03:23.193',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 16:07:40.867',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 16:07:46.327',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 4 Ejercicio: 4 mes 3 año 2025',1,3,'2025-03-18 16:09:07.31',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 16:18:46.88',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 4 Ejercicio: 4 mes 3 año 2025',1,3,'2025-03-18 16:18:56.583',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio: 4 mes 3 año 2025',1,3,'2025-03-18 16:20:52.19',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 2 Ejercicio: 4 mes 3 año 2025',1,3,'2025-03-18 16:21:02.58',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 3 Ejercicio: 4 mes 3 año 2025',1,3,'2025-03-18 16:21:08.537',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 4 Ejercicio: 4 mes 3 año 2025',1,3,'2025-03-18 16:21:13.983',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio: 4 mes 3 año 2025',1,3,'2025-03-18 16:23:45.79',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 2 Ejercicio: 4 mes 3 año 2025',1,3,'2025-03-18 16:23:57.343',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio: 4 mes 3 año 2025',1,3,'2025-03-18 16:25:07.91',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio: 4 mes 3 año 2025',1,3,'2025-03-18 16:34:21.663',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 16:34:39.34',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 3 año 2025',1,3,'2025-03-18 16:35:10.237',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 2 Ejercicio:  mes 3 año 2025',1,3,'2025-03-18 16:35:27.027',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 3 Ejercicio:  mes 3 año 2025',1,3,'2025-03-18 16:36:23.54',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 16:52:36.603',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 16:54:42.61',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:00:18.803',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:01:57.253',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:03:08.86',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:04:01.23',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:09:54.36',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:11:24.157',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:12:49.943',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:17:32.873',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:20:54.317',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:21:35.713',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:21:59.2',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:22:08.307',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:22:47.177',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:23:19.363',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:30:24.127',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:31:45.71',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:39:57.643',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-18 17:41:16.23',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-24 20:45:26.013',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-24 20:53:39.61',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-24 21:04:46.28',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-24 21:05:21.737',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-24 21:07:45.69',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-03-24 21:28:39.513',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 09:58:57.407',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 10:46:08.23',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 10:47:31.78',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:00:22.11',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:01:05.733',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:05:29.763',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:05:46.927',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:06:16.79',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:10:44.903',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:10:58.38',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:11:19.6',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:14:12.323',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:21:15.87',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:21:43.607',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 11:40:41.073',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 12:13:23.1',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 12:18:58.823',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 12:19:22.9',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 12:24:31.013',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 13:25:29.503',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 13:26:29.477',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 13:41:33.28',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 4 año 2025',1,3,'2025-04-03 13:41:38.27',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 4 año 2025',1,3,'2025-04-03 13:41:44.113',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 4 año 2025',1,3,'2025-04-03 13:41:59.477',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 13:42:08.987',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2025',1,3,'2025-04-03 13:42:19.597',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 13:43:19.45',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 13:44:19.183',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 14:10:33.76',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 14:10:39.657',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 14:10:43.06',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMedidasDelUsuarioPorTiempo',N'mensaje de prueba',1,1,'2025-04-03 17:15:56.27',NULL,NULL,NULL),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 17:42:10.62',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 17:42:25.16',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 17:51:18.82',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 18:23:53.847',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMedidasDelUsuarioPorTiempo',N'idCliente: 16, idParametro: 1, idEjercicio: NULL, Espaciado Temporal: individual, Tipo de Búsqueda: año, Meses: 7, Años: 2024,2025, Fecha de Inicio: NULL, Fecha Fin: NULL, Con Detalles: 1',1,1,'2025-04-03 18:24:03.913',NULL,NULL,NULL),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 18:24:09.393',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMedidasDelUsuarioPorTiempo',N'idCliente: 16, idParametro: 1, idEjercicio: NULL, Espaciado Temporal: individual, Tipo de Búsqueda: año, Meses: 7, Años: 2024,2025, Fecha de Inicio: NULL, Fecha Fin: NULL, Con Detalles: 1',1,1,'2025-04-03 19:00:20.79',NULL,NULL,NULL),
+	 (N'sp_obtenerMedidasDelUsuarioPorTiempo',N'idCliente: 16, idParametro: 1, idEjercicio: NULL, años2024,2025,Con Detalles: 1',1,1,'2025-04-03 19:00:20.89',NULL,NULL,NULL),
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 19:00:24.523',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_obtenerMedidasDelUsuarioPorTiempo',N'idCliente: 16, idParametro: 1, idEjercicio: NULL, Espaciado Temporal: individual, Tipo de Búsqueda: año, Meses: 7, Años: 2024,2025, Fecha de Inicio: NULL, Fecha Fin: NULL, Con Detalles: 1',1,1,'2025-04-03 19:04:26.61',NULL,NULL,NULL),
+	 (N'sp_obtenerMedidasDelUsuarioPOrAñosEspecificos',N'idCliente: 16, idParametro: 1, idEjercicio: NULL, años2024,2025,Con Detalles: 1',1,1,'2025-04-03 19:04:26.697',NULL,NULL,NULL');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_obtenerMetasDeMedidas',N'idCliente 16 Parametro: 1 Ejercicio:  mes 7 año 2024',1,3,'2025-04-03 19:04:26.707',N'aaronlogin',N'localhost',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_registrarClaseProgramada',N'547',16,0,'2025-05-06 21:41:41.603',N'Instrucción INSERT en conflicto con la restricción FOREIGN KEY ''FK_ClasesProgramadas_Clase''. El conf',N'27',NULL),
+	 (N'sp_registrarClaseProgramada',N'547',16,0,'2025-05-06 21:44:14.18',N'Instrucción INSERT en conflicto con la restricción FOREIGN KEY ''FK_ClasesProgramadas_Clase''. El conf',N'27',NULL),
+	 (N'sp_registrarClaseProgramada',N'313',16,2,'2025-05-19 17:01:15.543',N'Se proporcionó un número insuficiente de argumentos para el procedimiento o la función dbo.yaExisteP',N'59',NULL),
+	 (N'sp_registrarClaseProgramada',N'4121',16,1,'2025-05-19 17:04:46.89',N'No se encuentra la columna ''dbo'' o la función definida por el usuario o agregado ''dbo.esFiaFestivo'';',N'59',NULL),
+	 (N'sp_registrarClaseProgramada',N'4121',16,1,'2025-05-19 17:05:21.51',N'No se encuentra la columna ''dbo'' o la función definida por el usuario o agregado ''dbo.esFiaFestivo'';',N'59',NULL),
+	 (N'sp_registrarClaseProgramada',N'4121',16,1,'2025-05-19 17:05:33.323',N'No se encuentra la columna ''dbo'' o la función definida por el usuario o agregado ''dbo.esFiaFestivo'';',N'59',NULL),
+	 (N'sp_registrarClaseProgramada',N'515',16,2,'2025-05-20 11:18:26.917',N'No se puede insertar el valor NULL en la columna ''fkEntrenador'', tabla ''FitnessCenterDB.dbo.horarios',N'8',NULL),
+	 (N'sp_registrarClaseProgramada',N'515',16,2,'2025-05-20 11:25:41.603',N'No se puede insertar el valor NULL en la columna ''fkEntrenador'', tabla ''FitnessCenterDB.dbo.horarios',N'8',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-02 11:12:51.42',N'1/5 No hay clases por cancelar en ese fecha',N'16',NULL);
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-02 11:14:41.99',N'1/5 No hay clases por cancelar en ese fecha',N'16',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-02 18:44:28.51',N'1/5 No hay clases por cancelar en ese fecha',N'19',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-02 18:45:44.933',N'1/5 No hay clases por cancelar en ese fecha',N'19',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-02 18:59:12.753',N'1/5 No hay clases por cancelar en ese fecha',N'19',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-03 12:21:08.073',N'1/5 No hay clases por cancelar en esa fecha',N'19',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-03 12:30:13.023',N'1/5 No hay clases por cancelar en esa fecha',N'19',NULL),
+	 (N'sp_cancelarInscripcionAClase',N'51000',16,1,'2025-06-03 14:14:44.5',N'no existe una insrcipcion con ese id',N'23',NULL),
+	 (N'sp_cancelarInscripcionAClase',N'51000',16,1,'2025-06-03 14:14:47.463',N'no existe una insrcipcion con ese id',N'23',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-04 11:47:37.21',N'1/5 No hay clases por cancelar en esa fecha',N'20',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-04 11:51:40.27',N'1/5 No hay clases por cancelar en esa fecha',N'20',NULL');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-04 11:54:13.197',N'1/5 No hay clases por cancelar en esa fecha',N'20',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-04 12:05:14.1',N'1/5 No hay clases por cancelar en esa fecha',N'20',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-04 12:05:58.37',N'1/5 No hay clases por cancelar en esa fecha',N'20',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-04 12:06:11.91',N'1/5 No hay clases por cancelar en esa fecha',N'20',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-04 12:07:41.69',N'1/5 No hay clases por cancelar en esa fecha',N'20',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-04 12:21:28.743',N'1/5 No hay clases por cancelar en esa fecha',N'20',NULL),
+	 (N'sp_registrarClaseProgramada',N'547',16,0,'2025-06-11 14:17:04.263',N'Instrucción INSERT en conflicto con la restricción FOREIGN KEY ''FK_horasLborales_horariosClasesProgr',N'9',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-11 15:46:44.26',N'1/5 No hay clases por cancelar en esa fecha',N'21',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-11 15:46:55.983',N'1/5 No hay clases por cancelar en esa fecha',N'21',NULL),
+	 (N'sp_procesoCompletoCancelarClasesProgramadas',N'51000',16,1,'2025-06-11 15:53:53.767',N'No se encontraron clases activas para cancelar',N'60',NULL');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_procesoCompletoCancelacionDeInscripcionAClase',N'51000',16,1,'2025-06-12 11:51:49.477',N'Esa inscripción no puede ser cancelada, posiblemente ya fue cancelada o es un id equivocado.',N'11',NULL),
+	 (N'sp_procesoCompletoReagendacionDeInscripcion',N'51000',16,1,'2025-06-12 12:37:32.07',N'Esa inscripción no puede ser cancelada, posiblemente ya fue cancelada o es un id equivocado.',N'11',NULL),
+	 (N'sp_procesoCompletoReagendacionDeInscripcion',N'50000',16,1,'2025-06-12 13:37:33.003',N'Estás intentando reagendar una clase diferente a la original.',N'32',NULL),
+	 (N'sp_procesoCompletoReagendacionDeInscripcion',N'51000',16,1,'2025-06-12 13:52:52.933',N'Esa inscripción no puede ser cancelada, posiblemente ya fue cancelada o es un id equivocado.',N'11',NULL),
+	 (N'sp_procesoCompletoReagendacionDeInscripcion',N'51000',16,1,'2025-06-12 14:48:06.39',N'Esa inscripción no puede ser cancelada, posiblemente ya fue cancelada o es un id equivocado.',N'11',NULL),
+	 (N'sp_procesoCompletoReagendacionDeInscripcion',N'51000',16,1,'2025-06-12 14:49:24.13',N'Esa inscripción no puede ser cancelada, posiblemente ya fue cancelada o es un id equivocado.',N'11',NULL),
+	 (N'sp_procesoCompletoReagendacionDeInscripcion',N'50000',16,1,'2025-06-12 14:53:37.333',N'Estás intentando reagendar una clase diferente a la original.',N'32',NULL),
+	 (N'sp_procesoCompletoReagendacionDeInscripcion',N'50000',16,1,'2025-06-12 14:54:00.233',N'Estás intentando reagendar una clase diferente a la original.',N'32',NULL),
+	 (N'sp_registrarInsrcipcionAClase',N'50000',16,1,'2025-07-30 15:25:07.633',N'Ya no hay cupos disponibles para esa clase',N'18',NULL),
+	 (N'sp_registrarCita',N'242',16,3,'2025-09-30 15:44:15.507',N'La conversión del tipo de datos nvarchar en datetime produjo un valor fuera de intervalo.',N'22',NULL');
+INSERT INTO FitnessCenterDB.dbo.LogErrores (procedimiento,mensaje,severidad,estado,fecha,usuario,host,aplicacion) VALUES
+	 (N'sp_registrarCita',N'La conversión del tipo de datos nvarchar en datetime produjo un valor fuera de intervalo.22',16,3,'2025-09-30 16:32:15.34',N'aaronlogin',N'fedora',N'Core Microsoft SqlClient Data Provider'),
+	 (N'sp_registrarCita',N'La conversión del tipo de datos nvarchar en datetime produjo un valor fuera de intervalo.24  Sep 30 2025  4:46PM Sep 30 2025  5:46PM',16,3,'2025-09-30 16:46:58.277',N'aaronlogin',N'fedora',N'Core Microsoft SqlClient Data Provider');

@@ -9,7 +9,7 @@ namespace DTO.Dtos
 {
     public class ExistingUser
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         [Required(ErrorMessage = "Ingresa tu nombre")]
         public string NombreCompleto { get; set; }
         [Required(ErrorMessage = "Ingresa tu apellido")]
@@ -31,7 +31,7 @@ namespace DTO.Dtos
         public string Contrasena { get; set; }
 
         public ExistingUser(
-        int id,
+        string id,
         string nombreCompleto,
         DateTime fechaDeNacimiento,
         string direccion,

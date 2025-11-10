@@ -14,15 +14,15 @@ namespace BL
         public EjerciciosManager(HttpCustomClient _httpClient ){
             httpClient = _httpClient;
         }
-        public async Task<HttpResponseListadoEjercicios> obtenerEjercicios()
+        public async Task<DTOResponse<List<Ejercicio>>> obtenerEjercicios()
         {
             
 
-            string asignacionResponse = await httpClient.get("api/consultarEjercicios");
-            HttpResponseListadoEjercicios rutinas = JsonSerializer.Deserialize<HttpResponseListadoEjercicios>(asignacionResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            string ejerciciosResponse = await httpClient.get("api/consultarEjercicios");
+            DTOResponse<List<Ejercicio>> ejercicios = JsonSerializer.Deserialize<DTOResponse<List<Ejercicio>>>(ejerciciosResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             try
             {
-                return rutinas;
+                return ejercicios;
             }
             catch (ArgumentNullException ex)
             {
@@ -35,6 +35,27 @@ namespace BL
                 return null;
             }
 
+        }
+
+        // NUEVO: Método para obtener ejercicios de un cliente específico
+        public async Task<DTOResponse<Ejercicio>> obtenerEjerciciosDeCliente()
+        {
+            string ejerciciosResponse = await httpClient.get($"api/consultarEjercicios");
+            DTOResponse<Ejercicio> ejercicios = JsonSerializer.Deserialize<DTOResponse<Ejercicio>>(ejerciciosResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            try
+            {
+                return ejercicios;
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
     }
 }

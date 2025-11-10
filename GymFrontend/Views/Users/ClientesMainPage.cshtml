@@ -1,10 +1,10 @@
 @using DTO.Dtos;
-@model DTO.Dtos.MedidaCorporal;
+@model IEnumerable<DTO.Dtos.DTOItemProgreso>;
 @*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
-    Layout = null;
+Layout = "layoutSeccionClientes";
 
     var listadoUsuarios = ViewBag.usuarios as List<ExistingUser>;
     if (listadoUsuarios == null)
@@ -12,178 +12,98 @@
         listadoUsuarios = new List<ExistingUser>();
     }
 }
-<!DOCTYPE html>
-<html lang="en">
-    
-<head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-    <title>Medidas - FitnessGym</title>
-    <meta content="" name="description">
-    <meta content="" name="keywords">
+@section Styles {
+    <link rel="stylesheet" href="~/css/progreso-element.css" type="text/css">
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/global.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/GymFrontend.styles.css" asp-append-version="true" />
-    
-    <!-- Favicons -->
-    <link href="assets/img/favicon.png" rel="icon">
+}
+<div id="containerSeccionProgreso">
+    @foreach (var progresoItem in Model)
+    {
 
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.gstatic.com" rel="preconnect">
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+        <div id="rowProgreso" class="row progress-row" data-fkCliente="@progresoItem.medida.fkUsuario" 
+        data-fkParametro="@progresoItem.medida.fkParametro" 
+        data-fkejercicio="@progresoItem.medida.fkEjercicio" 
+        data-fechaCreacion="@progresoItem.medida.fechaDeCreacion">
+            @if (progresoItem.medida.fkEjercicio != null)
+            {
+                <div class="col">
 
-    <!-- Vendor CSS Files -->
-    <link href="~/lib/bootstrap-icons2/bootstrap-icons.css" rel="stylesheet">
-    
-    <!--
-    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-    <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-    <link href="assets/vendor/quill/quill.snow.css" rel="stylesheet">
-    <link href="assets/vendor/quill/quill.bubble.css" rel="stylesheet">
-    <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
-    <link href="assets/vendor/simple-datatables/style.css" rel="stylesheet">
-    -->
+        @Html.Partial("_ProgresoElement", new ProgresoElement
+       {
+           datoPrincipal = progresoItem.medida.urlIconoEjercicio,
+           datoSecundario = progresoItem.medida.nombreEjercicio,
+           titulo = "Ejercicio",
+           unidadDeMedida = null,
+           tipoDeElemento = DTO.Enums.TipoDeElemento.Ejercicio
+       })
 
-    <!-- Template Main CSS File -->
-    <link href="~/css/styleNavBar.css" rel="stylesheet">
+                </div>
+            }
 
-    
-</head>
-
-<body>
-
-    <!-- ======= Header ======= -->
-    <header id="header" class="header fixed-top d-flex align-items-center">
-
-        <div class="d-flex align-items-center justify-content-between">
-            <a href="index.html" class="logo d-flex align-items-center">
-                <img src="assets/img/logo.png" alt="">
-                <span class="d-none d-lg-block">Fitness Gym</span>
-            </a>
-            <i class="bi bi-list toggle-sidebar-btn"></i>
-        </div><!-- End Logo -->
+            <div class="col">
+                @Html.Partial("_ProgresoElement", new ProgresoElement
+       {
+           datoPrincipal = progresoItem.medida.urlIconoParametro,
+           datoSecundario = progresoItem.medida.nombreParametro,
+           titulo = "Parametro",
+           unidadDeMedida = null,
+           tipoDeElemento = DTO.Enums.TipoDeElemento.Parametro
+       })
 
 
-        <nav class="header-nav ms-auto">
-            <ul class="d-flex align-items-center">
+            </div>
+            <div class="col">
 
-                <li class="nav-item d-block d-lg-none">
-                    <a class="nav-link nav-icon search-bar-toggle " href="#">
-                        <i class="bi bi-search"></i>
-                    </a>
-                </li><!-- End Search Icon-->
+                @Html.Partial("_ProgresoElement", new ProgresoElement
+       {
+           datoPrincipal = progresoItem.medida.valor.ToString(),
+           datoSecundario = progresoItem.medida.fechaDeCreacion.ToString(),
+           titulo = "Ultimo Registro",
+           unidadDeMedida = progresoItem.medida.nombreUnidadDeMedida,
+           tipoDeElemento = DTO.Enums.TipoDeElemento.Medida
+       })
 
-               
+            </div>
+            <div class="col">
+                @Html.Partial("_ProgresoElement", new ProgresoElement
+       {
+           datoPrincipal = progresoItem.medida.valor.ToString(),
+           datoSecundario = progresoItem.medida.fechaDeCreacion.ToString(),
+           titulo = "Meta",
+           unidadDeMedida = progresoItem.medida.nombreUnidadDeMedida,
+           tipoDeElemento = DTO.Enums.TipoDeElemento.Meta
+       })
 
-            </ul>
-        </nav><!-- End Icons Navigation -->
+            </div>
+            <div class="col">
 
-    </header><!-- End Header -->
-    <!-- ======= Sidebar ======= -->
-    <aside id="sidebar" class="sidebar">
-
-        <ul class="sidebar-nav" id="sidebar-nav">
-
-
-
-            <li class="nav-heading">Pages</li>
-
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="#">
-                    
-                    <span>Medidas</span>
-                    
-                </a>
-                <a class="nav-link collapsed" href="https://localhost:5264/clientes">
-
-                    <span>Progreso</span>
-
-                </a>
-				<a class="nav-link collapsed" href="https://localhost:5264/clientes">
-
-                    <span>Matricula</span>
-
-                </a>
-                
-            </li><!-- End Profile Page Nav -->
-
-        </ul>
-
-    </aside><!-- End Sidebar-->
-    <!-- ======= Footer ======= -->
-    <main id="main" class="main">
-
-    <div class="pagetitle">
-      <h1>Medidas</h1>
-      
-    </div><!-- End Page Title -->
-
-    <section class="section medidas-section">
-            <form id="formCitaMedicion" class="formulario" action="registrar" method="post">
-
-                <label for="inputPeso" class="form-label">Cliente</label>
-                <select class="form-select empleados-main-page-input" name="fkUsuario" aria-label="Default select example">
-                    <option class="fix-fontColor-option" selected>selecciona un cliente </option>
-                    @foreach (var user in listadoUsuarios)
-                    {
-                        <option value="@user.Id" class="fix-fontColor-option">@user.NombreCompleto @user.Apellido</option>
-                    }
-                </select>
-                <span asp-validation-for="@Model.fkUsuario" class="validation-error"></span>
-
-                <label for="inputPeso" class="form-label">Peso(kilogramos)</label>
-                <input type="text" name="peso" class="form-control empleados-main-page-input" id="inputPeso">
-                <span asp-validation-for="@Model.peso" class="validation-error"></span>
+                @Html.Partial("_ProgresoElement", new ProgresoElement
+       {
+           datoPrincipal = "/content/view-details-svgrepo-com.svg",
+           datoSecundario = progresoItem.medida.fechaDeCreacion.ToString(),
+           titulo = "Detalles",
+           unidadDeMedida = null,
+           tipoDeElemento = DTO.Enums.TipoDeElemento.Detalle,
+           idHtmlElement = "detailsButton" + progresoItem.medida.medidaId
+       })
 
 
-                <label for="inputAltura" class="form-label">Altura(metros)</label>
-                <input type="text" name="altura" class="form-control empleados-main-page-input" id="inputAltura">
-                <span asp-validation-for="@Model.altura" class="validation-error"></span>
+            </div>
+        </div>
+    }
 
+</div>
 
-                <label for="inputPorcentajeGrasa" class="form-label">IMC</label>
-                <input type="text" name="imc" class="form-control empleados-main-page-input" id="inputPorcentajeGrasa">
-                <span asp-validation-for="@Model.imc" class="validation-error"></span>
-
-
-                <label for="inputEdad" class="form-label">Edad</label>
-                <input type="text" name="edad" class="form-control empleados-main-page-input" id="inputEdad">
-                <span asp-validation-for="@Model.edad" class="validation-error"></span>
-
-
-                <label for="inputGenero" class="form-label">Genero</label>
-                <select id="inputGenero" class="form-select empleados-main-page-input" name="genero" aria-label="Default select example">
-                    <option selected>Genero</option>
-                    <option value="masculino">Masculino</option>
-                    <option value="femenino">Femenino</option>
-                </select>
-                <span asp-validation-for="@Model.genero" class="validation-error"></span>
-
-                <button type="submit" class="btn btn-primary fix-margin">Submit</button>
-            </form>
-        </section>
-
-  </main><!-- End #main -->
-
-
+@section Scripts {
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/quill/quill.js"></script>
+<script src="assets/vendor/tinymce/tinymce.min.js"></script>
     
 
-    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<!-- Template Main JS File -->
+<script src="~/js/main.js"></script>
+<script src="~/js/empleados.js" asp-append-version="true"></script>
 
-    <!-- Vendor JS Files -->
-        
-    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/vendor/quill/quill.js"></script>
-    <script src="assets/vendor/tinymce/tinymce.min.js"></script>
-    -->
-    <!-- Template Main JS File -->
-    <script src="~/js/main.js"></script>
-    <script src="~/js/empleados.js" asp-append-version="true"></script>
-
-</body>
-
-</html>
+}

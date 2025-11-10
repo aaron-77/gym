@@ -1,0 +1,35 @@
+@model bool?
+@{
+    var mostrarCheckboxPreReservas = Model ?? false;
+}
+
+<div class="schedule-viewer" id="scheduleViewer">
+    <div class="schedule-viewer__controls">
+        @if (mostrarCheckboxPreReservas)
+        {
+            <div class="form-check">
+                <input type="checkbox" id="ocultarPreReservados" class="form-check-input" name="ocultarPreReservados" formnovalidate>
+                <label for="ocultarPreReservados" class="form-check-label">Ocultar pre reservados</label>
+            </div>
+        }
+    </div>
+    <div class="schedule-viewer__header">
+        <h3 class="schedule-viewer__title" id="scheduleDate">
+            Selecciona una fecha
+        </h3>
+    </div>
+    
+    <div class="schedule-viewer__content">
+        <div class="schedule-viewer__grid" id="scheduleGrid">
+            <!-- Los horarios se generarán dinámicamente -->
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <input type="number" id="fkHoraLaboral" class="form-control visually-hidden" name="fkHoraLaboral" value="" required/>
+        <div class="invalid-feedback text-center">
+            selecciona un horario
+        </div>
+    </div>
+</div>
+

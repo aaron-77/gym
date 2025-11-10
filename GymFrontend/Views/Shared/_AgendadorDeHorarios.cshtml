@@ -1,0 +1,6 @@
+@model bool?
+@{
+    var mostrarCheckboxPreReservas = Model ?? false;
+}
+@Html.Partial("_Calendario")
+@Html.Partial("_HorariosDelDia",mostrarCheckboxPreReservas) 
