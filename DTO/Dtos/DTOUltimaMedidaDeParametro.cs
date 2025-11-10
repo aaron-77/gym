@@ -13,6 +13,6 @@ namespace DTO.Dtos
         public string? nombreEjercicio { get; set; }
         public string? urlIconoParametro { get; set; }
         public string? urlIconoEjercicio { get; set; }
-        public int fkUsuario { get; set; }
+        public string fkUsuario { get; set; }
     }
 }

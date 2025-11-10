@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="~/css/global.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/GymFrontend.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
     <!-- Favicons -->
     <link href="assets/img/favicon.png" rel="icon">
     <!-- Google Fonts -->
@@ -22,7 +23,8 @@
     <link href="~/lib/bootstrap-icons2/bootstrap-icons.css" rel="stylesheet">
     <!-- Template Main CSS File -->
     <link href="~/css/styleNavBar.css" rel="stylesheet">
-    <link rel="stylesheet" href="/css/stylesProgressSection.css">
+    @* <link rel="stylesheet" href="/css/stylesProgressSection.css"> *@
+    @RenderSection("Styles", required: false)
 
 </head>
 
@@ -61,7 +63,7 @@
             <li class="nav-heading">Pages</li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="/clientes">
+                <a class="nav-link collapsed" href="/clientes?idUser=@Model[0].medida.fkUsuario">
                     <span>Tu Progreso</span>
                 </a>
             </li>
@@ -92,7 +94,8 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/main.js"></script>
-    <script src="/js/seccionProgreso.js"></script>
+    <script src="~/js/LocalStorageManager.js"></script>
+    <script type="module" src="/js/seccionProgreso.js"></script>
     <script type="module" src="/js/sessionValidator.js"></script>
     <script src="~/js/Logout.js"></script>
     

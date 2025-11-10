@@ -202,44 +202,70 @@ function setSelectedParameter(idParametro) {
 
 async function fetchEjerciciosYParametrosDelCliente(idCliente) {
   try {
-    let serverResponse = await fetch(`http://localhost:5274/api/obtenerEjerciciosYParametros?idCliente=${idCliente}`);
+    let serverResponse = await fetch(`/obtenerEjerciciosYParametrosDelCliente?idCliente=${idCliente}`);
     const jsonServerResponse = await serverResponse.json();
-    if (!jsonServerResponse.ok) {
-      throw new Error('Error al consutar los ejercicios y parametros del cliente');
+    if (!jsonServerResponse.success) {
+      throw new Error('Error al consultar los ejercicios y parametros del cliente: ' + (jsonServerResponse.message || ''));
     }
-    ejerciciosYParametrosDelCliente = jsonServerResponse.data;
+    ejerciciosYParametrosDelCliente = jsonServerResponse.payload;
     resetExercisesData();
     resetParametersData();
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 }
-async function fetchProgressDetails() {
-  try {
-    let mesDeMedida = getMonthOfCustomDate(fechaCreacionMedida);
-    let añoDeMedida = getYearOfCustomDate(fechaCreacionMedida);
+
+function añadirMesYAñoActualesAfiltros() {
+    
+    const fecha = new Date();
+    let mesDeMedida = getMonthOfCustomDate(fecha);
+    let añoDeMedida = getYearOfCustomDate(fecha);
     addMonth(mesDeMedida);
     addYear(añoDeMedida);
-    const queryParams = assembleQueryParams("idCliente", idCliente,
-      "idParametro", idParametro,
-      "idEjercicio", idEjercicio,
-      "espaciadoTemporal", espaciadoTemporal,
-      "tipoDeBusqueda", tipoDeBusqueda,
-      "fechaDeInicio", fechaDeInicio,
-      "fechaFin", fechaFin,
-      "conDetalle", conDetalle,
-      "mesesDeFiltro", selectedMonths,
-      "añosDeFiltro", selectedYears).toString();
-    const response = await fetch(`http://localhost:5274/obtenerDetallesDeProgreso?${queryParams}`);
-    //const response = await fetch(`http://localhost:5274/obtenerDetallesDeProgreso?idCliente=${idCliente}&idParametro=${idParametro}&idEjercicio=${idEjercicio}&espaciadoTemporal=${espaciadoTemporal}&tipoDeBusqueda=${tipoDeBusqueda}&fechaDeInicio=${fechaDeInicio}&fechaFin=${fechaFin}&conDetalle=${conDetalle}&mesesDeFiltro=${monthsJsonArray}&añosDeFiltro=${yearsJsonArray}`);
-    if (!response.ok) {
-      throw new Error('Error al consutar los detalles de progreso');
+}
+async function fetchProgressDetails() {
+    try {
+        if (!fechaCreacionMedida || isNaN(fechaCreacionMedida.getTime())) {
+            añadirMesYAñoActualesAfiltros();
+        }
+        const queryParams = assembleQueryParams(
+            "idCliente",
+            idCliente,
+            "idParametro",
+            idParametro,
+            "idEjercicio",
+            idEjercicio,
+            "espaciadoTemporal",
+            espaciadoTemporal,
+            "tipoDeBusqueda",
+            tipoDeBusqueda,
+            "fechaDeInicio",
+            fechaDeInicio,
+            "fechaFin",
+            fechaFin,
+            "conDetalle",
+            conDetalle,
+            "mesesDeFiltro",
+            selectedMonths,
+            "añosDeFiltro",
+            selectedYears
+        ).toString();
+
+        const response = await fetch(`/obtenerDetallesDeProgreso?${queryParams}`);
+        if (!response.ok) {
+            throw new Error('Error al consultar los detalles de progreso');
+        }
+        const data = await response.json();
+        // adapt to DTOResponse payload structure
+        if (!data.success) {
+            throw new Error(data.message || 'Error en la respuesta del servidor');
+        }
+        // Normalize to previous shape expected by the UI: { data: <payload> }
+        return { data: data.payload };
+    } catch (error) {
+        console.error('There has been a problem with your fetch operation:', error);
+        return { data: { medidas: [], metasDeMedida: [] } };
     }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('There has been a problem with your fetch operation:', error);
-  }
 }
 
 export function makeMesageText(...texts) {
@@ -478,18 +504,17 @@ let selectedYears = [];
 function initializeChart(chartType) {
   registerPluginsForChart()
   const ctx = document.getElementById('myChart');
-  let valoresMedidas = dataForCharts.data.medidas.map((medida, index) => { return medida.valor });
-  let labelsForXAxisValues = dataForCharts.data.medidas.map((medida, index) => { return makeDataLabelXAxis(medida.fechaDeCreacion, index + 1) })
-  let datasetTitle = makeMesageText("Tus mediciones de ", dataForCharts.data.medidas[0].nombreParametro);
-  const dataSets = makeDatasetsForChart([datasetTitle], valoresMedidas);
-  const options = makeConfigForChart();
+  //let valoresMedidas = dataForCharts.data.medidas.map((medida, index) => { return medida.valor });
+  //let labelsForXAxisValues = dataForCharts.data.medidas.map((medida, index) => { return makeDataLabelXAxis(medida.fechaDeCreacion, index + 1) })
+  //let datasetTitle = makeMesageText("Tus mediciones de ", dataForCharts.data.medidas[0].nombreParametro);
+  //const dataSets = makeDatasetsForChart([datasetTitle], valoresMedidas);
+  //const options = makeConfigForChart();
   myChart = new Chart(ctx, {
     type: chartType,
     data: {
-      labels: labelsForXAxisValues,
-      datasets: dataSets
-    },
-    options: options
+      labels: [],
+      datasets: []
+    }
   });
 
 }
@@ -761,7 +786,6 @@ function toggleRequiredAttributeToElement(isRequired, ...elements) {
       element.required = false;
     }
   }
-
 }
 
 function configureInputsAfterAutomaticDisplayData(...$inputs) {
@@ -932,7 +956,9 @@ $submitButton.addEventListener("click", async (ev) => {
   $button.disabled = false;
   if(dataForCharts.data.medidas.length >= 1){
     toggleChartOrErrorMessage(dataForCharts.data.medidas);
+    displayDataToInputs();
     updateChart();
+
   }else{
     toggleChartOrErrorMessage(dataForCharts.data.medidas);
   }
@@ -947,11 +973,13 @@ attachMutationObserver(mutationObserverDateInputs, ...$rangeDateElements)
 attachMutationObserver(mutationObserverGeneralInputs, $parametros, $espaciadoTemporal, $tipoDeBusqueda);
 getQueryParams();
 configureObsevers();
+initializeChart('line');
 await fetchEjerciciosYParametrosDelCliente(idCliente);
 dataForCharts = await fetchProgressDetails()
 populateSelect($ejercicios, ejerciciosDelCliente, 'ejercicioId', 'nombreEjercicio');
 populateSelect($parametros, parametrosDelCliente, 'parametroMedicionId', 'nombreParametro');
-displayDataToInputs();
+checkSelectedMonths();
+checkSelectedYears();
 configureInputsAfterAutomaticDisplayData($parametros, $espaciadoTemporal, $tipoDeBusqueda);
 console.log(dataForCharts)
 // Initialize chart or show error message
@@ -988,6 +1016,12 @@ function toggleForm(){
   });
   bsCollapse.hide();
 }
+
+
+
+
+
+
 
 
 

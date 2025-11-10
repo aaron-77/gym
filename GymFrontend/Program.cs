@@ -11,22 +11,22 @@ using DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
-/* var defaultCulture = new CultureInfo("es-MX");
-var localizationOptions = new RequestLocalizationOptions
-{
-    DefaultRequestCulture = new RequestCulture(defaultCulture),
-    SupportedCultures = new List<CultureInfo> { defaultCulture },
-    SupportedUICultures = new List<CultureInfo> { defaultCulture }
-}; */
-
-// Add services to the container.
 builder.Services.AddControllersWithViews();//.AddRazorRuntimeCompilation();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthHeaderHandler>();
+bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
+
+// Escoge la URL del backend según el valor de UseSsl
+string baseApiUrl = builder.Configuration[
+    useSsl ? "EndPoints:frontend:ssl" : "EndPoints:frontend:nossl"
+] ?? "http://localhost:5062";
+
+
 builder.Services.AddHttpClient<HttpCustomClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["backendAddresses:nossl"]);
+    client.BaseAddress = new Uri(baseApiUrl);
 }).AddHttpMessageHandler<AuthHeaderHandler>();
+
 builder.Services.AddScoped<EndPointsManager>();
 builder.Services.AddScoped<MedidasManager>();
 builder.Services.AddScoped<CitasManager>();
@@ -37,7 +37,7 @@ builder.Services.AddScoped<HorariosManager>(); // Eliminado
  builder.Services.AddScoped<ClasesManager>(); // Eliminado
 builder.Services.AddScoped<JwtTokenGenerator>();
 builder.Services.AddScoped<CookieService>();
-//builder.Configuration.AddJsonFile("GymFrontend/appsettings.json", optional: false, reloadOnChange: false);
+
 
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
 var pagesSection = builder.Configuration.GetSection("pages");
@@ -106,6 +106,25 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddDataAccess(); // Agregado
 builder.Services.AddBusinessLayer(); // Agregado
+
+
+
+if (builder.Environment.IsDevelopment()) {
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.ListenLocalhost(5062); // puerto HTTP opcional
+        options.ListenLocalhost(7700, listenOptions =>
+        {
+            listenOptions.UseHttps();
+        });
+    });
+} else if (builder.Environment.IsProduction()) {
+
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.ListenLocalhost(5062); // puerto HTTP opcional
+   });
+}
 
 var app = builder.Build();
 

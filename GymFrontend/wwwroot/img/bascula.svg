@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" role="img" aria-labelledby="title desc">
+  <title id="title">Icono de báscula para representar peso corporal</title>
+  <desc id="desc">Báscula blanca con dial azul y aguja gris, diseño simple y legible.</desc>
+
+  <!-- Cuerpo de la báscula -->
+  <rect x="6" y="8" width="36" height="32" rx="6" ry="6" fill="white" stroke="#ccc" stroke-width="2"/>
+
+  <!-- Zona del dial -->
+  <path d="M16 8 Q24 0 32 8 Z" fill="#007BFF" stroke="#005FCC" stroke-width="1.5"/>
+
+  <!-- Aguja -->
+  <line x1="24" y1="8" x2="24" y2="3" stroke="#888" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Detalle del centro del dial -->
+  <circle cx="24" cy="8" r="1.5" fill="#888"/>
+
+  <!-- Indicadores del dial -->
+  <path d="M20 8.2 l-1.8 -1.2 M28 8.2 l1.8 -1.2" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+
+</svg>

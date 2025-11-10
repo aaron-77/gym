@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Identity;
 using API.Infraestructure.Auth;
 using DataAccess.Infraestructure;
@@ -295,6 +294,37 @@ namespace API.Services
         {
             throw new InvalidOperationException($"Error al agregar rol al usuario: {ex.Message}");
         }
+    }
+
+    /// <summary>
+    /// Cambia la contraseña de un usuario identificado por email. Usa token de reseteo si el usuario ya tiene contraseña.
+    /// </summary>
+    public async Task<IdentityResult> cambiarPassword(DTO.Dtos.UserPassEdit model)
+    {
+        if (model == null)
+            throw new ArgumentNullException(nameof(model));
+
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+        {
+            return IdentityResult.Failed(new IdentityError { Description = "Usuario no encontrado" });
+        }
+
+        var hasPassword = await _userManager.HasPasswordAsync(user);
+
+        IdentityResult result;
+            if (hasPassword)
+            {
+                // Generar token y resetear la contraseña
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                result = await _userManager.ResetPasswordAsync(user, token, model.NewPassword);
+            }
+            else {
+                result = IdentityResult.Failed(new IdentityError { Description = "El usuario no tiene password registrado" });
+            }
+
+
+                return result;
     }
     }
 }

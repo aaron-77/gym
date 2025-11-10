@@ -13,6 +13,10 @@ Layout = "layoutSeccionClientes";
     }
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/progreso-element.css" type="text/css">
+
+}
 <div id="containerSeccionProgreso">
     @foreach (var progresoItem in Model)
     {
@@ -96,6 +100,7 @@ Layout = "layoutSeccionClientes";
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/vendor/quill/quill.js"></script>
 <script src="assets/vendor/tinymce/tinymce.min.js"></script>
+    
 
 <!-- Template Main JS File -->
 <script src="~/js/main.js"></script>

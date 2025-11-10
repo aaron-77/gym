@@ -471,5 +471,62 @@ namespace API.Controllers
             */
             return Ok();
         }
+
+        [HttpPost]
+        [Route("api/cambiarPassword")]
+        public async Task<IActionResult> CambiarPassword([FromBody] DTO.Dtos.UserPassEdit model)
+        {
+            var respuesta = new DTOResponse<string>();
+
+            if (!ModelState.IsValid)
+            {
+                respuesta = ResponseManager.BuildResponse<string>(
+                    success: false,
+                    httpCode: 400,
+                    message: "Datos inválidos",
+                    errors: ModelState.Values.SelectMany(v => v.Errors).Select(e => new ErrorModel { message = e.ErrorMessage, propiedad = null }).ToList(),
+                    payload: null
+                );
+                return BadRequest(respuesta);
+            }
+
+            try
+            {
+                var result = await _authService.cambiarPassword(model);
+
+                if (!result.Succeeded)
+                {
+                    respuesta = ResponseManager.BuildResponse<string>(
+                        success: false,
+                        httpCode: 400,
+                        message: "No se pudo cambiar la contraseña",
+                        errors: result.Errors.Select(e => new ErrorModel { message = e.Description, propiedad = null }).ToList(),
+                        payload: null
+                    );
+                    return BadRequest(respuesta);
+                }
+
+                respuesta = ResponseManager.BuildResponse<string>(
+                    success: true,
+                    httpCode: 200,
+                    message: "Contraseña cambiada exitosamente",
+                    errors: null,
+                    payload: null
+                );
+
+                return Ok(respuesta);
+            }
+            catch (Exception ex)
+            {
+                respuesta = ResponseManager.BuildResponse<string>(
+                    success: false,
+                    httpCode: 500,
+                    message: "Error al cambiar la contraseña",
+                    errors: new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } },
+                    payload: null
+                );
+                return StatusCode(500, respuesta);
+            }
+        }
     }
 }

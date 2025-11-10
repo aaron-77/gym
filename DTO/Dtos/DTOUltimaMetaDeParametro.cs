@@ -12,6 +12,6 @@ namespace DTO.Dtos
         public DateTime fechaLimite { get; set; }
         public int? fkEjercicio { get; set; }
         public int fkParametro { get; set; }
-        public int fkUsuario { get; set; }
+        public string fkUsuario { get; set; }
     }
 }

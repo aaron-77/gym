@@ -1,20 +1,3 @@
-CREATE   PROCEDURE dbo.InsertarClaseProgramada
-    @FkClase INT,
-    @fechaInicio DATETIME,
-    @fechaFin DATETIME,
-    @FkEntrenador INT,
-    @CupoMaximo INT,
-    @FkEstadoClaseProgramada INT = 1
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    INSERT INTO ClasesProgramadas (FkClase,fechaInicio, fechaFin, FkEntrenador, CupoMaximo, fkEstadoClaseProgramada)
-    VALUES (@FkClase, @fechaInicio, @fechaFin, @FkEntrenador,@CupoMaximo,@FkEstadoClaseProgramada);
-    
-    SELECT SCOPE_IDENTITY() AS IdProgramacionClase;
-END;
-
 -- Function to retrieve the benefits of the class (from beneficios table)
 CREATE   FUNCTION dbo.ObtenerBeneficiosDeClase(@IdClase INT)
 RETURNS TABLE
@@ -50,7 +33,7 @@ RETURN
         c.claseId = @IdClase
 );
 
-CREATE   FUNCTION dbo.ObtenerClasesProgramadas(@IdClase  int)
+CREATE     FUNCTION dbo.ObtenerClasesProgramadas(@IdClase  int)
 RETURNS TABLE
 AS
 RETURN
@@ -240,44 +223,42 @@ BEGIN
     RETURN @Disponible;
 END;
 
--- bd/buscarClaseProgramadas.sql
-
-CREATE PROCEDURE buscarClaseProgramadas
+CREATE   PROCEDURE buscarClaseProgramadas
     @idClase INT = NULL,
-    @idEntrenador INT = NULL,
+    -- MODIFICADO: Tipo de dato de @idEntrenador de INT a NVARCHAR(450)
+    @idEntrenador NVARCHAR(450) = NULL,
     @idHoraLaboral INT = NULL,
     @fecha DATE = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT 
+    SELECT
         cp.idProgramacionClase,
         c.NombreClase AS nombreDeLaClase,
-        CONCAT(u.Nombre, ' ', u.Apellido) AS nombreCompletoDelEntrenador,
+        -- MODIFICADO: Campo 'NombreCompleto' y 'Apellido' de 'AspNetUsers' en lugar de 'Nombre' y 'Apellido' de 'Usuarios'
+        CONCAT(u.NombreCompleto, ' ', u.Apellido) AS nombreCompletoDelEntrenador,
         hcp.fechaDeLaClase,
         h.horaInicio,
         h.horaFin
-    FROM 
+    FROM
         FitnessCenterDB.dbo.clasesProgramadas cp
-    INNER JOIN 
+    INNER JOIN
         FitnessCenterDB.dbo.Clases c ON cp.fkClase = c.ClaseID
-    INNER JOIN 
-        FitnessCenterDB.dbo.Usuarios u ON cp.fkEntrenador = u.UsuarioID
-    INNER JOIN 
+    INNER JOIN
+        FitnessCenterDB.dbo.AspNetUsers u
+        -- MODIFICADO: Tabla 'AspNetUsers' y campo 'Id' en lugar de 'Usuarios' y 'UsuarioID'
+        ON cp.fkEntrenador = u.Id
+    INNER JOIN
         FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
-    INNER JOIN 
+    INNER JOIN
         FitnessCenterDB.dbo.horasLaborales h ON hcp.fkHorarioLaboral = h.idHora
-    WHERE 
+    WHERE
         (@idClase IS NULL OR cp.fkClase = @idClase) AND
+        -- MODIFICADO: Campo 'Id' de 'AspNetUsers' en lugar de 'UsuarioID' de 'Usuarios'
         (@idEntrenador IS NULL OR cp.fkEntrenador = @idEntrenador) AND
         (@idHoraLaboral IS NULL OR hcp.fkHorarioLaboral = @idHoraLaboral) AND
-        (@fecha IS NULL OR hcp.fechaDeLaClase 
-        = @fecha)and
-  		cp.fkEstadoClaseProgramada = 
-  		(select idEstadoClaseProgramada 
-  			from v_idEstadoDisponibleClasesProgramadas
-  		);
+        (@fecha IS NULL OR hcp.fechaDeLaClase = @fecha);
 END;
 
 CREATE FUNCTION dbo.esDiaFestivo(@fechaAnalizada date)
@@ -659,7 +640,33 @@ RETURN (
     where fkEstadoClase = (select idEstadoClase from v_estadoActivoClases)
 );
 
-CREATE   FUNCTION dbo.fn_obtenerClasesProgramadasPorIdClase(@idClase INT)
+CREATE   FUNCTION dbo.fn_obtenerClasesProgramadaPorIdProgramacionClase(@idProgramacionClase INT)
+RETURNS TABLE
+AS
+RETURN
+(
+    SELECT 
+        cp.idProgramacionClase AS idClaseProgramada,
+        cp.fkClase,
+        cp.cupoMaximo,
+        (SELECT dbo.fn_cupoDisponibleClaseProgramada(cp.idProgramacionClase)) as cupoDisponible,
+        hcp.fechaDeLaClase,
+        hl.idHora,
+        hl.horaInicio,
+        hl.horaFin,
+        CONCAT(u.NombreCompleto, ' ', u.Apellido) AS nombreEntrenador
+    FROM FitnessCenterDB.dbo.clasesProgramadas cp
+    INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp 
+        ON cp.idProgramacionClase = hcp.fkClaseProgramada
+    INNER JOIN FitnessCenterDB.dbo.horasLaborales hl 
+        ON hcp.fkHorarioLaboral = hl.idHora
+    INNER JOIN FitnessCenterDB.dbo.AspNetUsers u 
+        ON cp.fkEntrenador = u.Id
+    WHERE cp.idProgramacionClase = @idProgramacionClase
+        AND (select dbo.fn_cupoDisponibleClaseProgramada(cp.idProgramacionClase)) > 0
+);
+
+CREATE         FUNCTION dbo.fn_obtenerClasesProgramadasPorIdClase(@idClase INT)
 RETURNS TABLE
 AS
 RETURN
@@ -673,18 +680,14 @@ RETURN
         hl.idHora,
         hl.horaInicio,
         hl.horaFin,
-        CONCAT(CONVERT(varchar(5), hl.horaInicio, 108), ' - ', CONVERT(varchar(5), hl.horaFin, 108)) AS labelHorario,
-        cp.fkEntrenador,
-        CONCAT(u.Nombre, ' ', u.Apellido) AS nombreEntrenador
+        CONCAT(u.NombreCompleto, ' ', u.Apellido) AS nombreEntrenador
     FROM
         FitnessCenterDB.dbo.clasesProgramadas cp
         INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
         INNER JOIN FitnessCenterDB.dbo.horasLaborales hl ON hcp.fkHorarioLaboral = hl.idHora
-        INNER JOIN FitnessCenterDB.dbo.Usuarios u ON cp.fkEntrenador = u.UsuarioID
+        INNER JOIN FitnessCenterDB.dbo.AspNetUsers u ON cp.fkEntrenador = u.Id
     WHERE
         cp.fkClase = @idClase
-        and
-        (select dbo.fn_cupoDisponibleClaseProgramada(cp.idProgramacionClase) ) > 0
 );
 
 CREATE   FUNCTION fn_obtenerEstadosDeClasesProgramdas()
@@ -864,7 +867,7 @@ BEGIN
             								ORDER BY fechaDeCreacion DESC
             					) AS rn
         FROM medidas m
-        	where m.fkUsuario =@idCliente
+        	where CAST(fkUsuario AS NVARCHAR(450)) = @idCliente
         	AND m.fkParametro = @idParametro
         	AND MONTH(m.fechaDeCreacion) in  (select mesOAño from @listadoMeses)
         	AND YEAR(m.fechaDeCreacion) in (select mesOAño from @años)
@@ -901,7 +904,7 @@ BEGIN
 	
 END;
 
-CREATE PROCEDURE sp_ObtenerMedidasPorMesesEspecificos
+CREATE PROCEDURE sp_obtenerMedidasPorMesesEspecificos
     @idCliente INT,
     @idParametro INT,
     @idEjercicio INT,
@@ -956,7 +959,7 @@ BEGIN
             								ORDER BY fechaDeCreacion DESC
             					) AS rn
         FROM medidas m
-        	where m.fkUsuario =@idCliente
+        	where CAST(fkUsuario AS NVARCHAR(450)) = @idCliente
         	AND m.fkParametro = @idParametro
         	AND MONTH(m.fechaDeCreacion) in  (select mesOAño from @listadoDeMeses)
         	AND YEAR(m.fechaDeCreacion) in (select mesOAño from @años)
@@ -981,689 +984,49 @@ BEGIN
     INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
     LEFT JOIN ejercicios e ON ro.fkEjercicio = e.ejercicioId 
     WHERE 
-      ro.fkUsuario = @idCliente
-      AND ro.rn =1
-      AND pm.parametroMedicionId = @idParametro
-      AND ((@idEjercicio IS NULL AND ro.fkEjercicio IS NULL) OR (@idEjercicio IS NOT NULL AND ro.fkEjercicio = @idEjercicio))
+      ro.rn =1
+      AND (@idEjercicio IS NULL OR ro.fkEjercicio = @idEjercicio)
       AND MONTH(ro.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoDeMeses)
       AND YEAR(ro.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
      order by ro.fechaDeCreacion desc;	
 	end
 END;
 
-CREATE PROCEDURE [dbo].[sp_RegistrarError]
-    @Procedimiento NVARCHAR(255),
-    @Mensaje NVARCHAR(MAX),
-    @Severidad INT,
-    @Estado INT,
-    @Usuario NVARCHAR(100) = null, -- Obtiene el usuario actual por defecto
-    @Host NVARCHAR(100) = null, -- Obtiene el nombre del host por defecto
-    @Aplicacion NVARCHAR(255) = null -- Obtiene el nombre de la aplicación por defecto
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    INSERT INTO LogErrores (procedimiento, mensaje, severidad, estado, fecha, usuario, host, aplicacion)
-    VALUES (@Procedimiento, @Mensaje, @Severidad, @Estado, GETDATE(), @Usuario, @Host, @Aplicacion);
-END;
-
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-CREATE PROCEDURE [dbo].[sp_asignarEjercicio]
-( 
-@rutinaID int,
-@ejercicioID int,
-@sets int,
-@repeticiones int,
-@peso decimal,
-@tiempo int,
-@metaRepeticiones int
-)	
-AS
-BEGIN
-	
-	
-		insert into RutinaEjercicios(
-		RutinaID,
-		EjercicioID,
-		Sets,
-		Repeticiones,
-		Peso,
-		Tiempo,
-		MetaRepeticiones
-		)
-		values(
-		@rutinaID,
-		@ejercicioID,
-		@sets,
-		@repeticiones,
-		@peso,
-		@tiempo,
-		@metaRepeticiones
-		)
-END;
-
-CREATE PROCEDURE dbo.sp_cancelarClasesProgramadas
-    @idClaseProgramada int =null,
-	@fechaDeReferencia DATE = null,
-    @idEntrenador int = null,
-    @idClase int = null
-AS
-BEGIN
-    SET NOCOUNT ON;
-    declare @idsClasesCanceladas ListadoIdsGenericos; 
-   -- Si la fechaDeReferencia es NULL, se establece como la fecha actual
-    
-   --si no se da ua fecha se toma como referencia la fecha actual
-   if @fechaDeReferencia is null
-   begin
-   	 set  @fechaDeReferencia = GETDATE();
-   end
-   
-   IF @idClaseProgramada is not null
-   BEGIN
-   		insert into @idsClasesCanceladas(id)
-   		select idProgramacionClase 
-   		from clasesProgramadas cp 
-		WHERE cp.fkEstadoClaseProgramada =  (select idEstadoClaseProgramada 
-		  								from v_idEstadoDisponibleClasesProgramadas)
-		and cp.idProgramacionClase = @idClaseProgramada
-   END
-   ELSE
-   	BEGIN
-   		IF @fechadeReferencia = GETDATE() and @idEntrenador is null and @idClase is null
-		    BEGIN
-			    PRINT 'FECHA POR DEFECTO';
-		    	insert into @idsClasesCanceladas
-		    	select idProgramacionClase  
-		   		from clasesProgramadas cp	
-		   		join horariosDeClasesProgramadas hdcp on cp.idProgramacionClase = hdcp.fkClaseProgramada 
-		  		where hdcp.fechaDeLaClase  >= @fechaDeReferencia 
-		  			and cp.fkEstadoClaseProgramada = (select idEstadoClaseProgramada 
-		  								from v_idEstadoDisponibleClasesProgramadas)
-		    END
-		    ELSE 
-		    BEGIN
-			    PRINT 'FECHA CUSTOM'+CAST(@fechaDeReferencia as  nvarchar(20));
-		    	insert into @idsClasesCanceladas
-		    	select idProgramacionClase  
-		   		from clasesProgramadas cp	
-		   		join horariosDeClasesProgramadas 
-		   		hdcp on cp.idProgramacionClase = hdcp.fkClaseProgramada 
-		  		where 
-		  		((@fechaDeReferencia is null 
-		  		or hdcp.fechaDeLaClase  = @fechaDeReferencia)
-		  			and (@idEntrenador is null or cp.fkEntrenador  = @idEntrenador)
-		  			and (@idClase is null or cp.fkClase  = @idClase))
-		  			and cp.fkEstadoClaseProgramada = (select idEstadoClaseProgramada 
-		  								from v_idEstadoDisponibleClasesProgramadas)
-		    END
-   	END
-   
-   	if not exists (select 1 from @idsClasesCanceladas)
-   	begin
-   		THROW 51000, 'No se encontraron clases activas para cancelar', 1;
-   	end
-   	
-    --Actualizar el estado de las clases programadas a 'Cancelada' para la fecha especificada
-    UPDATE FitnessCenterDB.dbo.clasesProgramadas
-    SET fkEstadoClaseProgramada = (SELECT idEstadoClaseProgramada FROM FitnessCenterDB.dbo.estadosClasesProgramadas WHERE nombresEstado = 'cancelada')
-    WHERE idProgramacionClase in (select * from @idsClasesCanceladas);
-
-    select * from @idsClasesCanceladas;
-END;
-
-CREATE PROCEDURE dbo.sp_cancelarInscripcionAClase
-    @idInscripcion int = null
-AS
-BEGIN
-    SET NOCOUNT ON;
-   BEGIN TRY 
-   		if @idInscripcion is null
-		begin
-		  THROW 51000, '1/5 debe suministrarse una insrcipcion para cancelar', 1;
-		end
-	  
-	   update inscripcionesDeClases 
-	   set fkEstadoInscripcion = (SELECT idEstadoInscripcion FROM v_idEstadoCanceladoInscripcionAClase) -- Comparar directamente con la vista
-	   where idInscripcion = @idInscripcion
-	   if @@ROWCOUNT = 0
-	   BEGIN 
-	   	THROW 51000, 'no existe una insrcipcion con ese id', 1;
-	   END
-	   
-   END TRY
-   BEGIN CATCH
-        DECLARE 
-        @ProcName NVARCHAR(128) = OBJECT_NAME(@@PROCID),
-        @ErrorNumber INT = ERROR_NUMBER(),
-        @ErrorSeverity INT = ERROR_SEVERITY(),
-        @ErrorState INT = ERROR_STATE(),
-        @ErrorMessage NVARCHAR(MAX) = ERROR_MESSAGE(),
-        @ErrorLine INT = ERROR_LINE(); 
-
-        PRINT N'3/5 registrando log de error';
-        EXEC sp_RegistrarError 
-            @ProcName,
-            @ErrorNumber,
-            @ErrorSeverity,
-            @ErrorState,
-            @ErrorMessage,
-            @ErrorLine;
-   END CATCH 
-END;
-
-CREATE PROCEDURE dbo.sp_cancelarInscripcionesDeClasesCanceladas(
-    @idsClasesProgramadasCanceladas ListadoIdsGenericos READONLY
-    )
-AS
-BEGIN
-    SET NOCOUNT ON;
-    -- Actualizar el estado de las clases programadas a 'Cancelada' para la fecha especificada
-    UPDATE FitnessCenterDB.dbo.inscripcionesDeClases 
-    SET fkEstadoInscripcion = (SELECT top 1 idEstadoInscripcion 
-    							FROM FitnessCenterDB.dbo.estadosInscripciones ei 
-    							WHERE ei.nombreEstadoInscripcion = 'cancelada'
-    						   )
-    WHERE fkProgramacionClase in (select * from @idsClasesProgramadasCanceladas);
-END;
-
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	consulta todos los clientes con el estado asignado en el parametro
--- =============================================
-CREATE PROCEDURE [dbo].[sp_consultarClientes]
-( 
-@estado nvarchar(50)
-)	
-AS
-BEGIN
-	select
-	Nombre,
-	Apellido,
-	Email,
-	Telefono,
-	Contrasena,
-	FechaNacimiento,
-	FechaRegistro
-	FROM Usuarios 
-	WHERE Estado = @estado and RolID = 1;
-		
-END;
-
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-CREATE PROCEDURE [dbo].[sp_consultarEjercicios]
-AS
-BEGIN
-		select * from Ejercicios;
-END;
-
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	consulta todos los entrenadores con el estado asignado en el parametro
--- =============================================
-CREATE PROCEDURE [dbo].[sp_consultarRutinasDeUsuario]
-( 
-@usuarioID int
-)	
-AS
-BEGIN
-		
-	select
-	RutinaID,
-	UsuarioID,
-	EntrenadorID,
-	FechaCreacion,
-	Observaciones
-	FROM Rutinas 
-	WHERE UsuarioID = @usuarioID;
-		
-END;
-
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	consulta todos los clientes con el estado asignado en el parametro
--- =============================================
-CREATE PROCEDURE [dbo].[sp_consultarUsuarios]
-(
-@tipoUsuario nvarchar(max),
-@estado nvarchar(50)
-)	
-AS
-BEGIN
-declare @rolId nvarchar(max);
-select @rolId = RolID   from Roles where NombreRol = @tipoUsuario;
-	select
-	UsuarioID,
-	Nombre,
-	Apellido,
-	Email,
-	Telefono,
-	FechaNacimiento,
-	FechaRegistro
-	FROM Usuarios
-	WHERE Estado = @estado and RolID = @rolId;
-		
-END;
-
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	consulta todos los clientes con el estado asignado en el parametro
--- =============================================
-CREATE PROCEDURE [dbo].[sp_consultarUsuariosProximosAcita]
-	
-AS
-BEGIN
-	declare @fechaActual datetime;
-	set @fechaActual = GETDATE();
-	select u.Email,c.FechaHora from Usuarios u
-	join Citas c on c.UsuarioID = u.UsuarioID and c.FechaHora > GETDATE() and DATEDIFF(DAY,@fechaActual,c.FechaHora) = 15 ;		
-END;
-
-CREATE PROCEDURE [dbo].[sp_eliminarCita]
-( 
-@citaId int	
-)
-	-- Add the parameters for the stored procedure here
-	
-	
-AS
-BEGIN
-		delete from Citas where CitaID = @citaId;
-END;
-
-CREATE PROCEDURE dbo.sp_eliminarPreReservasCaducadas
-    @idsPreReservasCaducadas dbo.ListadoIdsGenericos READONLY
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    -- Eliminar las pre reservas de horario con los IDs contenidos en idsPreReservasCaducadas
-    DELETE FROM FitnessCenterDB.dbo.preReservasDeHorario
-    WHERE idPreReserva IN (SELECT id FROM @idsPreReservasCaducadas);
-END;
-
-CREATE PROCEDURE dbo.sp_esElMismoTipoDeClase
-(
-    @idInscripcionCancelada INT,
-    @idClaseProgramadaNueva INT
-)
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    DECLARE @idClaseInscripcion INT;
-    DECLARE @idClaseNueva INT;
-
-    -- Obtener el idClase de la inscripción cancelada
-    SELECT @idClaseInscripcion = c.fkClase
-    FROM FitnessCenterDB.dbo.inscripcionesDeClases i
-    JOIN FitnessCenterDB.dbo.clasesProgramadas c ON i.fkProgramacionClase = c.idProgramacionClase
-    WHERE i.idInscripcion = @idInscripcionCancelada;
-
-    -- Obtener el idClase de la nueva clase programada
-    SELECT @idClaseNueva = fkClase
-    FROM FitnessCenterDB.dbo.clasesProgramadas
-    WHERE idProgramacionClase = @idClaseProgramadaNueva;
-
-    -- Comparar los idClase
-    IF @idClaseInscripcion = @idClaseNueva
-    BEGIN
-        RETURN; -- Si son iguales, simplemente retorna
-    END
-    ELSE
-    BEGIN
-        -- Lanzar excepción si no son iguales
-        RAISERROR('Estás intentando reagendar una clase diferente a la original.', 16, 1);
-    END
-END;
-
-CREATE PROCEDURE [dbo].[sp_modificarCita]
-(
-@citaId int,
-@entrenadorID int,
-@fechaInicio datetime,
-@estado nvarchar(50),
-@fechaHoraFin datetime
-	
-)
-	-- Add the parameters for the stored procedure here	
-AS
-BEGIN
-
-	update Citas set 
-	EntrenadorID= @entrenadorID,
-	FechaHora=@fechaInicio,
-	FechaHoraFin=@fechaHoraFin,
-	Estado=@estado
-	where CitaID = @citaId
-END;
-
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-CREATE PROCEDURE [dbo].[sp_obtenerCitasAgendadasPorUsuario]
-(
-	@idUsuario int
-)
-AS
-BEGIN
-		 
-		SELECT 
-		CitaID,
-		UsuarioID,
-		EntrenadorID,
-		FechaHora,
-		FechaHoraFin,
-		TipoCita,
-		Estado
-		from Citas  where UsuarioID = @idUsuario and Estado in ('agendada','Agendada') ;
-END;
-
-CREATE PROCEDURE sp_obtenerEjerciciosPorUsuario
-    @UsuarioID INT
-AS
-BEGIN
-    SELECT DISTINCT 
-        E.*
-    FROM 
-        Usuarios U
-    INNER JOIN 
-        Rutinas R ON U.UsuarioID = R.UsuarioID
-    INNER JOIN 
-        RutinaEjercicios RE ON R.RutinaID = RE.RutinaID
-    INNER JOIN 
-        Ejercicios E ON RE.EjercicioID = E.EjercicioID
-    WHERE 
-        U.UsuarioID = @UsuarioID
-    ORDER BY 
-        E.EjercicioId
-END;
-
-CREATE PROCEDURE dbo.sp_obtenerEjerciciosYParametrosDelCliente
-@idCliente int
-AS
-BEGIN
-	with ejercicios_del_usuario as(
-		select distinct e.EjercicioID ,e.NombreEjercicio,pdm.parametroMedicionId,pdm.nombre as nombreParametro
-		from medidas m 
-		left join ejercicios_parametrosDeMedicion epdm  on epdm.fkEjercicio  = m.fkEjercicio 
-		join Ejercicios e on e.EjercicioID  = epdm.fkEjercicio 
-		join parametrosDeMedicion pdm ON epdm.fkParametro  = pdm.parametroMedicionId 
-		where m.fkUsuario = @idCliente
-	),
-	parametros_del_usuario as (
-		select distinct null as EjercicioId,null as NombreEjercicio,pdm.parametroMedicionId,pdm.nombre as nombreParametro
-		from medidas m 
-		join parametrosDeMedicion pdm on pdm.parametroMedicionId = m.fkParametro
-		where m.fkUsuario = @idCliente and m.fkEjercicio is null
-	)
-	select * from ejercicios_del_usuario
-	union all
-	select * from parametros_del_usuario
-END;
-
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-CREATE PROCEDURE [dbo].[sp_obtenerEntrenadoresDisponibles]
-(
-	@fechaReferencia datetime
-)
-AS
-BEGIN
-declare @rolEmpleadoId nvarchar(450);
-select @rolEmpleadoId = Id  from FitnessCenterDB.dbo.AspNetRoles where Name = 'Entrenador'; 
-		select DISTINCT 
-		u.Id AS UsuarioID,
-		u.NombreCompleto AS Nombre,
-		u.Apellido AS Apellido,
-		u.Email,
-		u.PhoneNumber AS Telefono,
-		u.UserName AS NombreUsuario,
-		u.FechaDeNacimiento AS FechaNacimiento,
-		u.FechaDeRegistro AS FechaRegistro,
-		ar.Id AS RolID,
-		u.Estado 
-		from FitnessCenterDB.dbo.AspNetUsers as u
-		INNER JOIN FitnessCenterDB.dbo.AspNetUserRoles aur ON u.Id = aur.UserId
-        INNER JOIN FitnessCenterDB.dbo.AspNetRoles ar ON aur.RoleId = ar.Id
-		where ar.Id = @rolEmpleadoId and u.Estado = 'Activo'
-		AND u.Id NOT IN (
-            SELECT cp.fkEntrenador
-            FROM FitnessCenterDB.dbo.clasesProgramadas cp
-            INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
-            WHERE hcp.fechaDeLaClase = CAST(@fechaReferencia AS DATE)
-        );
-END;
-
-CREATE   PROCEDURE dbo.sp_obtenerHorariosDisponibles
-    @Fecha DATE = NULL
-AS
-BEGIN
-    SET NOCOUNT ON;
-    
-    -- Si no se proporciona fecha, usar la fecha actual
-    SET @Fecha = ISNULL(@Fecha, GETDATE());
-    print 'fecha del parametro '+ cast(@Fecha as nvarchar(50));
-   print 'rango de fechas considerado  '+' 0 '+ 
-   cast(DATEDIFF(DAY,DATEFROMPARTS(YEAR(@Fecha), MONTH(@Fecha), 1),EOMONTH(@Fecha)) as nvarchar(100));
-    -- Generar todas las fechas del mes
-    WITH FechasDelMes AS (
-        SELECT
-            DATEADD(DAY, n.number, DATEFROMPARTS(
-                YEAR(@Fecha),
-                MONTH(@Fecha),
-                1)
-            ) AS Fecha
-        FROM
-            master.dbo.spt_values n
-        WHERE
-            n.type = 'P'
-            AND n.number BETWEEN 0 
-            AND DATEDIFF(DAY,
-                DATEFROMPARTS(YEAR(@Fecha), MONTH(@Fecha), 1),
-                EOMONTH(@Fecha
-             )
-            )
-    )
-    SELECT
-        DATENAME(dw, f.Fecha) AS DiaDeLaSemana,
-        f.Fecha AS FechaDisponible,
-        hl.horaInicio,
-        hl.horaFin,
-        hl.idHora,
-        CASE WHEN DATENAME(dw, f.Fecha) IN ('Sábado', 'Domingo') THEN 'Fin de Semana' ELSE 'Día Laboral' END AS TipoDeDia
-    FROM
-        FechasDelMes f
-    CROSS JOIN dbo.horasLaborales hl
-    -- Excluir las horas que están en horarios de clases programadas para esa fecha
-    LEFT JOIN dbo.horariosDeClasesProgramadas hcp ON
-        hl.idHora = hcp.fkHorarioLaboral AND
-        f.Fecha = hcp.fechaDeLaClase
-    -- Excluir las horas que están pre-reservadas para esa fecha
-    LEFT JOIN dbo.preReservasDeHorario pr ON
-        hl.idHora = pr.fkHoraLaboral AND
-        f.Fecha = pr.fechaReservada AND
-        GETDATE() BETWEEN pr.fechaInicioDeLaReserva AND pr.fechaDeExpiracionDeLaReserva
-    -- Excluir los días festivos y descansos fijos
-    LEFT JOIN dbo.diasFestivosYDescansos dfd ON
-        f.Fecha = dfd.fechaFestivaODescanso
-    LEFT JOIN dbo.estadosDeActividadLaboral eal ON
-        dfd.fkEstadoActividadLaboral = eal.idEstadoActividadLaboral
-    -- Verificación para días festivos variables usando la función fn_esDiaFestivoVariable
-    LEFT JOIN dbo.diasFestivosVariables dfv ON
-        dbo.fn_esDiaFestivoVariableVersionJoin(f.Fecha, dfv.deQueDia, dfv.deQueSemana, dfv.deQueMes, dfv.fkTipoDeRecurrenciaDelFestivo) = 1
-    LEFT JOIN dbo.estadosDeActividadLaboral eal2 ON
-        dfv.fkEstadoActividadLaboral = eal2.idEstadoActividadLaboral
-    WHERE
-        -- No existe en horariosDeClasesProgramadas
-        hcp.idHorarioDeClaseProgramada IS NULL
-        -- No existe en preReservasDeHorario vigentes
-        AND pr.idPreReserva IS NULL
-        -- No es día festivo o de descanso fijo con estado "no se labora"
-        AND (dfd.idDiaFestivo IS NULL OR eal.nombreEstadoActividadLaboral <> 'no se labora')
-        -- No es día festivo variable con estado "no se labora"
-        AND (dfv.idDiaFestivoVariable IS NULL OR eal2.nombreEstadoActividadLaboral <> 'no se labora')
-        -- La fecha no es anterior a la fecha actual
-        AND f.Fecha >= CAST(GETDATE() AS DATE)
-    ORDER BY
-        f.Fecha,
-        hl.horaInicio;
-END;
-
---obtiene los parametros de las medidas de los cliente de los ejercicio que ya realizo el cliente, 
--- no se devuelve ningun nombre de parametro de ejercicios que el cliente no ha hecho
-CREATE PROCEDURE [dbo].[sp_obtenerMedidasDeUsuario]
-( 
-@idUsuario int
-)	
-AS
-BEGIN
-	select parametroMedicionId,nombre as nombreParametro 
-	from parametrosDeMedicion pdm 
-	where parametroMedicionId 
-		in(select DISTINCT fkParametro from medidas where fkUsuario = @idUsuario );
-END;
-
-CREATE PROCEDURE sp_obtenerMedidasDelUsuarioPorTiempo
+CREATE PROCEDURE sp_ObtenerMedidasPorAñosEspecificos
     @idCliente INT,
     @idParametro INT,
-    @idEjercicio INT = NULL,
-    @espaciadoTemporal NVARCHAR(30),
-    @tipoDeBusqueda NVARCHAR(10),
-    @meses UnidadDeTiempo readonly,
-    @años UnidadDeTiempo readonly, -- Tabla de enteros para meses o años
-    @fechaDeInicio DATETIME = NULL,
-    @fechaFin DATETIME = NULL,
+    @idEjercicio INT,
+    @años UnidadDeTiempo readonly,
     @conDetalles int
 AS
 BEGIN
-     SET NOCOUNT ON;
-    
-declare @parametrosConcatenados nvarchar(max);
+	declare @listadoMeses UnidadDeTiempo;
+	insert into @listadoMeses values
+	(1),(2),(3),(4),(5),
+	(6),(7),(8),(9),(10),
+	(11),(12);
+
+	declare @parametrosConcatenados nvarchar(max);  
    SET @parametrosConcatenados = CONCAT(
         'idCliente: ', @idCliente, ', ',
-        'idParametro: ', @idParametro ,', ',
+        'idParametro: ', @idParametro, ', ',
         'idEjercicio: ', COALESCE(CAST(@idEjercicio AS NVARCHAR), 'NULL'), ', ',
-        'Espaciado Temporal: ', @espaciadoTemporal, ', ',
-        'Tipo de Búsqueda: ', @tipoDeBusqueda, ', ',
-        'Meses: ', (SELECT STRING_AGG(CAST(mesOAño AS NVARCHAR), ',') FROM @meses), ', ',
-        'Años: ', (SELECT STRING_AGG(CAST(mesOAño AS NVARCHAR), ',') FROM @años), ', ',
-        'Fecha de Inicio: ', COALESCE(CAST(@fechaDeInicio AS NVARCHAR), 'NULL'), ', ',
-        'Fecha Fin: ', COALESCE(CAST(@fechaFin AS NVARCHAR), 'NULL'), ', ',
+       	'años',(SELECT STRING_AGG(CAST(mesOAño AS NVARCHAR), ',') FROM @años),',',
         'Con Detalles: ', @conDetalles
     );
 	-- Verificar si @espaciadoTemporal es 'rango'
-    exec sp_RegistrarError @Procedimiento = 'sp_obtenerMedidasDelUsuarioPorTiempo',
+    exec sp_RegistrarError @Procedimiento = 'sp_obtenerMedidasDelUsuarioPOrAñosEspecificos',
     @Mensaje = @parametrosConcatenados ,
     @Severidad = 1,
     @Estado = 1,
     @Usuario  = null, -- Obtiene el usuario actual por defecto
     @Host  = null, -- Obtiene el nombre del host por defecto
     @Aplicacion = null;
-	IF @espaciadoTemporal = 'rango'
-    BEGIN
-        -- Llamar a sp_obtenerMedidasPorRangoDeMeses
-        EXEC sp_obtenerMedidasPorRangoDeMeses 
-            @idCliente = @idCliente,
-            @idParametro = @idParametro,
-            @idEjercicio = @idEjercicio,
-            @fechaInicial = @fechaDeInicio,
-            @fechaFinal = @fechaFin,
-            @conDetalles = @conDetalles
-           ;
-    END
-    ELSE
-	BEGIN
-		-- Se verifica si @espaciadoTemporal es 'individual' y @tipoDeBusqueda es 'MES'
-		    IF @espaciadoTemporal = 'individual' AND @tipoDeBusqueda = 'MES'
-		    BEGIN
-		        -- Llamar a sp_ObtenerMedidasPorMesesEspecificos
-		        EXEC sp_ObtenerMedidasPorMesesEspecificos 
-		            @idCliente = @idCliente,
-		            @idParametro = @idParametro,
-		            @idEjercicio = @idEjercicio,
-		            @años =@años,
-		            @listadoDeMeses = @meses,
-		            @conDetalles = @conDetalles;	
-		    END
-		    ELSE
-			    BEGIN
-			   		 -- Se verifica si @espaciadoTemporal es 'individual' y @tipoDeBusqueda es 'AÑO'
-				    IF @espaciadoTemporal = 'individual' AND @tipoDeBusqueda = 'AÑO'
-					    BEGIN
-					        -- Llamar a sp_ObtenerMedidasPorAñosEspecificos
-					        EXEC sp_ObtenerMedidasPorAñosEspecificos 
-					            @idCliente = @idCliente,
-					            @idParametro = @idParametro,
-					            @idEjercicio = @idEjercicio,
-					            @años = @años,
-					            @conDetalles = @conDetalles;
-					    END 	
-			    END
-	END
-END;
-
-CREATE PROCEDURE sp_obtenerMedidasPorMesIndividual
-    @idUsuario INT,
-    @idParametro INT,
-    @idEjercicio INT = NULL,
-    @listadoDeMeses UnidadDeTiempo readonly
-AS
-BEGIN
-    SELECT 
-    m.medidaId,
-    pm.parametroMedicionId as fkParametro ,
-    pm.nombre as nombreParametro,
-    m.valor,
-    m.fechaDeCreacion,
-    udm.unidadDeMedidaId,
-    udm.nombre  as nombreUnidadDeMedida,
-    m.fkEjercicio,
-    e.NombreEjercicio,
-    (select iconsf.urlPublica from iconsForParameters iconsf where iconsf.iconId = pm.fkIcon) as urlIconoParametro ,
-    (select iconsf.urlPublica from iconsForParameters iconsf where iconsf.iconId = e.fkIcon) as urlIconoEjercicio,
-    m.fkUsuario 
-    FROM medidas as m
-    join parametrosDeMedicion pm on pm.parametroMedicionId = m.fkParametro 
-    join parametros_unidadesDeMedida pum on pum.fkParametroDeMedicion = pm.parametroMedicionId
-    join unidadesDeMedida udm on pum.fkUnidadDeMedida  = udm.unidadDeMedidaId
-    left join Ejercicios e  on e.EjercicioID  = m.fkEjercicio
-    WHERE     m.fkUsuario  = @idUsuario 
-    	  and m.fkParametro  = @idParametro
-    	  and (@idEjercicio IS NULL OR m.fkEjercicio = @idEjercicio)
-    	  and DATEPART(MONTH,m.fechaDeCreacion) in (select * from @listadoDeMeses)
-    	  order by m.fechaDeCreacion
-END;
-
-CREATE PROCEDURE sp_obtenerMedidasPorRangoDeMeses
-    @idCliente INT,
-    @idParametro INT,
-    @idEjercicio INT,
-    @fechaInicial DATETIME,
-    @fechaFinal DATETIME,
-    @conDetalles int
-AS
-BEGIN
+	-- si la cosulta requiere informacion detallada,es decir todas la medidas encontradas dentro de las fechas establecidas
 	IF @conDetalles = 1
-	BEGIN
-		SELECT 
+	begin
+		-- Consulta principal
+    SELECT 
         m.medidaId,
         pm.parametroMedicionId AS fkParametro,
         pm.nombre AS nombreParametro,
@@ -1673,49 +1036,43 @@ BEGIN
         udm.nombre AS nombreUnidadDeMedida,
         m.fkEjercicio,
         e.nombreEjercicio,
-        (SELECT iconsf.urlPublica 
-         FROM iconsForParameters iconsf 
-         WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
-        (SELECT iconsf.urlPublica 
-         FROM iconsForParameters iconsf 
-         WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
         m.fkUsuario
     FROM medidas m
-    INNER JOIN parametrosDeMedicion pm 
-        ON m.fkParametro = pm.parametroMedicionId
-    INNER JOIN parametros_unidadesDeMedida pudm  
-    	ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion
-    INNER JOIN unidadesDeMedida udm 
-        ON pudm.fkUnidadDeMedida = udm.unidadDeMedidaId
-    LEFT JOIN ejercicios e 
-        ON m.fkEjercicio = e.ejercicioId
-    WHERE 
-      m.fkUsuario = @idCliente
+    INNER JOIN parametrosDeMedicion pm ON m.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON m.fkEjercicio = e.ejercicioId 
+    WHERE m.fkUsuario = @idCliente
       AND pm.parametroMedicionId = @idParametro
-      AND (@idEjercicio IS NULL OR m.fkEjercicio = @idEjercicio)
-      AND m.fechaDeCreacion BETWEEN @fechaInicial AND @fechaFinal;	
-	END
+      AND (m.fkEjercicio = @idEjercicio or m.fkEjercicio is null )
+      AND MONTH(m.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(m.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by m.fechaDeCreacion ;
+	end
 	ELSE
-	BEGIN
+	begin
+		-- si solo se requieren las ulimas medidas(informacion resumida)
 		;WITH RegistrosOrdenadosPorFechaMasRecientePorParametro AS (
-		        SELECT 
-		            medidaId,
-		        	fkUsuario,
-		            fechaDeCreacion,
-		            fkParametro,
-		            valor,
-		            fkEjercicio,
-		            ROW_NUMBER() OVER (PARTITION BY fkParametro , 
-		            								YEAR(m.fechaDeCreacion), 
-		                							MONTH(m.fechaDeCreacion) 
-		            								ORDER BY fechaDeCreacion DESC
-		            					) AS rn
-		        FROM medidas m
-		        	where fkUsuario =@idCliente
-		        	AND m.fkParametro = @idParametro
-		      		AND m.fechaDeCreacion BETWEEN @fechaInicial AND @fechaFinal
-		 )
-		 
+        SELECT 
+            medidaId,
+        	fkUsuario,
+            fechaDeCreacion,
+            fkParametro,
+            valor,
+            fkEjercicio,
+            ROW_NUMBER() OVER (PARTITION BY fkParametro , 
+            								YEAR(m.fechaDeCreacion)
+            								ORDER BY fechaDeCreacion DESC
+            					) AS rn
+        FROM medidas m
+        	where CAST(fkUsuario AS NVARCHAR(450)) = @idCliente
+        	AND m.fkParametro = @idParametro
+        	AND MONTH(m.fechaDeCreacion) in  (select mesOAño from @listadoMeses)
+        	AND YEAR(m.fechaDeCreacion) in (select mesOAño from @años)
+    	)
+    	
 		 SELECT 
         ro.medidaId,
         pm.parametroMedicionId AS fkParametro,
@@ -1726,29 +1083,793 @@ BEGIN
         udm.nombre AS nombreUnidadDeMedida,
         ro.fkEjercicio,
         e.nombreEjercicio,
-        (SELECT iconsf.urlPublica 
-         FROM iconsForParameters iconsf 
-         WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
-        (SELECT iconsf.urlPublica 
-         FROM iconsForParameters iconsf 
-         WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
         ro.fkUsuario
     FROM RegistrosOrdenadosPorFechaMasRecientePorParametro ro
-    INNER JOIN parametrosDeMedicion pm 
-        ON ro.fkParametro = pm.parametroMedicionId
-    INNER JOIN parametros_unidadesDeMedida pudm  
-    	ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion
-    INNER JOIN unidadesDeMedida udm 
-        ON pudm.fkUnidadDeMedida = udm.unidadDeMedidaId
-    LEFT JOIN ejercicios e 
-        ON ro.fkEjercicio = e.ejercicioId
+    INNER JOIN parametrosDeMedicion pm ON ro.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON ro.fkEjercicio = e.ejercicioId 
     WHERE 
-      ro.rn =1
+      ro.rn = 1
       AND (@idEjercicio IS NULL OR ro.fkEjercicio = @idEjercicio)
-	END
+      AND MONTH(ro.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(ro.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by ro.fechaDeCreacion desc;	
+	end
 	
 	
-    
+END;
+
+CREATE PROCEDURE sp_obtenerMedidasPorAñosEspecificos
+    @idCliente INT,
+    @idParametro INT,
+    @idEjercicio INT,
+    @años UnidadDeTiempo readonly,
+    @conDetalles int
+AS
+BEGIN
+	declare @listadoMeses UnidadDeTiempo;
+	insert into @listadoMeses values
+	(1),(2),(3),(4),(5),
+	(6),(7),(8),(9),(10),
+	(11),(12);
+
+	declare @parametrosConcatenados nvarchar(max);  
+   SET @parametrosConcatenados = CONCAT(
+        'idCliente: ', @idCliente, ', ',
+        'idParametro: ', @idParametro, ', ',
+        'idEjercicio: ', COALESCE(CAST(@idEjercicio AS NVARCHAR), 'NULL'), ', ',
+       	'años',(SELECT STRING_AGG(CAST(mesOAño AS NVARCHAR), ',') FROM @años),',',
+        'Con Detalles: ', @conDetalles
+    );
+	-- Verificar si @espaciadoTemporal es 'rango'
+    exec sp_RegistrarError @Procedimiento = 'sp_obtenerMedidasDelUsuarioPOrAñosEspecificos',
+    @Mensaje = @parametrosConcatenados ,
+    @Severidad = 1,
+    @Estado = 1,
+    @Usuario  = null, -- Obtiene el usuario actual por defecto
+    @Host  = null, -- Obtiene el nombre del host por defecto
+    @Aplicacion = null;
+	-- si la cosulta requiere informacion detallada,es decir todas la medidas encontradas dentro de las fechas establecidas
+	IF @conDetalles = 1
+	begin
+		-- Consulta principal
+    SELECT 
+        m.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        m.valor,
+        m.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        m.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        m.fkUsuario
+    FROM medidas m
+    INNER JOIN parametrosDeMedicion pm ON m.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON m.fkEjercicio = e.ejercicioId 
+    WHERE m.fkUsuario = @idCliente
+      AND pm.parametroMedicionId = @idParametro
+      AND (m.fkEjercicio = @idEjercicio or m.fkEjercicio is null )
+      AND MONTH(m.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(m.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by m.fechaDeCreacion ;
+	end
+	ELSE
+	begin
+		-- si solo se requieren las ulimas medidas(informacion resumida)
+		;WITH RegistrosOrdenadosPorFechaMasRecientePorParametro AS (
+        SELECT 
+            medidaId,
+        	fkUsuario,
+            fechaDeCreacion,
+            fkParametro,
+            valor,
+            fkEjercicio,
+            ROW_NUMBER() OVER (PARTITION BY fkParametro , 
+            								YEAR(m.fechaDeCreacion)
+            								ORDER BY fechaDeCreacion DESC
+            					) AS rn
+        FROM medidas m
+        	where CAST(fkUsuario AS NVARCHAR(450)) = @idCliente
+        	AND m.fkParametro = @idParametro
+        	AND MONTH(m.fechaDeCreacion) in  (select mesOAño from @listadoMeses)
+        	AND YEAR(m.fechaDeCreacion) in (select mesOAño from @años)
+    	)
+    	
+		 SELECT 
+        ro.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        ro.valor,
+        ro.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        ro.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        ro.fkUsuario
+    FROM RegistrosOrdenadosPorFechaMasRecientePorParametro ro
+    INNER JOIN parametrosDeMedicion pm ON ro.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON ro.fkEjercicio = e.ejercicioId 
+    WHERE 
+      ro.rn = 1
+      AND (@idEjercicio IS NULL OR ro.fkEjercicio = @idEjercicio)
+      AND MONTH(ro.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(ro.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by ro.fechaDeCreacion desc;	
+	end
+	
+	
+END;
+
+CREATE PROCEDURE sp_obtenerMedidasPorAñosEspecificos
+    @idCliente INT,
+    @idParametro INT,
+    @idEjercicio INT,
+    @años UnidadDeTiempo readonly,
+    @conDetalles int
+AS
+BEGIN
+	declare @listadoMeses UnidadDeTiempo;
+	insert into @listadoMeses values
+	(1),(2),(3),(4),(5),
+	(6),(7),(8),(9),(10),
+	(11),(12);
+
+	declare @parametrosConcatenados nvarchar(max);  
+   SET @parametrosConcatenados = CONCAT(
+        'idCliente: ', @idCliente, ', ',
+        'idParametro: ', @idParametro, ', ',
+        'idEjercicio: ', COALESCE(CAST(@idEjercicio AS NVARCHAR), 'NULL'), ', ',
+       	'años',(SELECT STRING_AGG(CAST(mesOAño AS NVARCHAR), ',') FROM @años),',',
+        'Con Detalles: ', @conDetalles
+    );
+	-- Verificar si @espaciadoTemporal es 'rango'
+    exec sp_RegistrarError @Procedimiento = 'sp_obtenerMedidasDelUsuarioPOrAñosEspecificos',
+    @Mensaje = @parametrosConcatenados ,
+    @Severidad = 1,
+    @Estado = 1,
+    @Usuario  = null, -- Obtiene el usuario actual por defecto
+    @Host  = null, -- Obtiene el nombre del host por defecto
+    @Aplicacion = null;
+	-- si la cosulta requiere informacion detallada,es decir todas la medidas encontradas dentro de las fechas establecidas
+	IF @conDetalles = 1
+	begin
+		-- Consulta principal
+    SELECT 
+        m.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        m.valor,
+        m.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        m.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        m.fkUsuario
+    FROM medidas m
+    INNER JOIN parametrosDeMedicion pm ON m.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON m.fkEjercicio = e.ejercicioId 
+    WHERE m.fkUsuario = @idCliente
+      AND pm.parametroMedicionId = @idParametro
+      AND (m.fkEjercicio = @idEjercicio or m.fkEjercicio is null )
+      AND MONTH(m.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(m.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by m.fechaDeCreacion ;
+	end
+	ELSE
+	begin
+		-- si solo se requieren las ulimas medidas(informacion resumida)
+		;WITH RegistrosOrdenadosPorFechaMasRecientePorParametro AS (
+        SELECT 
+            medidaId,
+        	fkUsuario,
+            fechaDeCreacion,
+            fkParametro,
+            valor,
+            fkEjercicio,
+            ROW_NUMBER() OVER (PARTITION BY fkParametro , 
+            								YEAR(m.fechaDeCreacion)
+            								ORDER BY fechaDeCreacion DESC
+            					) AS rn
+        FROM medidas m
+        	where CAST(fkUsuario AS NVARCHAR(450)) = @idCliente
+        	AND m.fkParametro = @idParametro
+        	AND MONTH(m.fechaDeCreacion) in  (select mesOAño from @listadoMeses)
+        	AND YEAR(m.fechaDeCreacion) in (select mesOAño from @años)
+    	)
+    	
+		 SELECT 
+        ro.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        ro.valor,
+        ro.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        ro.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        ro.fkUsuario
+    FROM RegistrosOrdenadosPorFechaMasRecientePorParametro ro
+    INNER JOIN parametrosDeMedicion pm ON ro.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON ro.fkEjercicio = e.ejercicioId 
+    WHERE 
+      ro.rn = 1
+      AND (@idEjercicio IS NULL OR ro.fkEjercicio = @idEjercicio)
+      AND MONTH(ro.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(ro.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by ro.fechaDeCreacion desc;	
+	end
+	
+	
+END;
+
+CREATE PROCEDURE sp_obtenerMedidasPorAñosEspecificos
+    @idCliente INT,
+    @idParametro INT,
+    @idEjercicio INT,
+    @años UnidadDeTiempo readonly,
+    @conDetalles int
+AS
+BEGIN
+	declare @listadoMeses UnidadDeTiempo;
+	insert into @listadoMeses values
+	(1),(2),(3),(4),(5),
+	(6),(7),(8),(9),(10),
+	(11),(12);
+
+	declare @parametrosConcatenados nvarchar(max);  
+   SET @parametrosConcatenados = CONCAT(
+        'idCliente: ', @idCliente, ', ',
+        'idParametro: ', @idParametro, ', ',
+        'idEjercicio: ', COALESCE(CAST(@idEjercicio AS NVARCHAR), 'NULL'), ', ',
+       	'años',(SELECT STRING_AGG(CAST(mesOAño AS NVARCHAR), ',') FROM @años),',',
+        'Con Detalles: ', @conDetalles
+    );
+	-- Verificar si @espaciadoTemporal es 'rango'
+    exec sp_RegistrarError @Procedimiento = 'sp_obtenerMedidasDelUsuarioPOrAñosEspecificos',
+    @Mensaje = @parametrosConcatenados ,
+    @Severidad = 1,
+    @Estado = 1,
+    @Usuario  = null, -- Obtiene el usuario actual por defecto
+    @Host  = null, -- Obtiene el nombre del host por defecto
+    @Aplicacion = null;
+	-- si la cosulta requiere informacion detallada,es decir todas la medidas encontradas dentro de las fechas establecidas
+	IF @conDetalles = 1
+	begin
+		-- Consulta principal
+    SELECT 
+        m.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        m.valor,
+        m.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        m.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        m.fkUsuario
+    FROM medidas m
+    INNER JOIN parametrosDeMedicion pm ON m.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON m.fkEjercicio = e.ejercicioId 
+    WHERE m.fkUsuario = @idCliente
+      AND pm.parametroMedicionId = @idParametro
+      AND (m.fkEjercicio = @idEjercicio or m.fkEjercicio is null )
+      AND MONTH(m.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(m.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by m.fechaDeCreacion ;
+	end
+	ELSE
+	begin
+		-- si solo se requieren las ulimas medidas(informacion resumida)
+		;WITH RegistrosOrdenadosPorFechaMasRecientePorParametro AS (
+        SELECT 
+            medidaId,
+        	fkUsuario,
+            fechaDeCreacion,
+            fkParametro,
+            valor,
+            fkEjercicio,
+            ROW_NUMBER() OVER (PARTITION BY fkParametro , 
+            								YEAR(m.fechaDeCreacion)
+            								ORDER BY fechaDeCreacion DESC
+            					) AS rn
+        FROM medidas m
+        	where CAST(fkUsuario AS NVARCHAR(450)) = @idCliente
+        	AND m.fkParametro = @idParametro
+        	AND MONTH(m.fechaDeCreacion) in  (select mesOAño from @listadoMeses)
+        	AND YEAR(m.fechaDeCreacion) in (select mesOAño from @años)
+    	)
+    	
+		 SELECT 
+        ro.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        ro.valor,
+        ro.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        ro.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        ro.fkUsuario
+    FROM RegistrosOrdenadosPorFechaMasRecientePorParametro ro
+    INNER JOIN parametrosDeMedicion pm ON ro.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON ro.fkEjercicio = e.ejercicioId 
+    WHERE 
+      ro.rn = 1
+      AND (@idEjercicio IS NULL OR ro.fkEjercicio = @idEjercicio)
+      AND MONTH(ro.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(ro.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by ro.fechaDeCreacion desc;	
+	end
+	
+	
+END;
+
+CREATE PROCEDURE sp_obtenerMedidasPorAñosEspecificos
+    @idCliente INT,
+    @idParametro INT,
+    @idEjercicio INT,
+    @años UnidadDeTiempo readonly,
+    @conDetalles int
+AS
+BEGIN
+	declare @listadoMeses UnidadDeTiempo;
+	insert into @listadoMeses values
+	(1),(2),(3),(4),(5),
+	(6),(7),(8),(9),(10),
+	(11),(12);
+
+	declare @parametrosConcatenados nvarchar(max);  
+   SET @parametrosConcatenados = CONCAT(
+        'idCliente: ', @idCliente, ', ',
+        'idParametro: ', @idParametro, ', ',
+        'idEjercicio: ', COALESCE(CAST(@idEjercicio AS NVARCHAR), 'NULL'), ', ',
+       	'años',(SELECT STRING_AGG(CAST(mesOAño AS NVARCHAR), ',') FROM @años),',',
+        'Con Detalles: ', @conDetalles
+    );
+	-- Verificar si @espaciadoTemporal es 'rango'
+    exec sp_RegistrarError @Procedimiento = 'sp_obtenerMedidasDelUsuarioPOrAñosEspecificos',
+    @Mensaje = @parametrosConcatenados ,
+    @Severidad = 1,
+    @Estado = 1,
+    @Usuario  = null, -- Obtiene el usuario actual por defecto
+    @Host  = null, -- Obtiene el nombre del host por defecto
+    @Aplicacion = null;
+	-- si la cosulta requiere informacion detallada,es decir todas la medidas encontradas dentro de las fechas establecidas
+	IF @conDetalles = 1
+	begin
+		-- Consulta principal
+    SELECT 
+        m.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        m.valor,
+        m.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        m.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        m.fkUsuario
+    FROM medidas m
+    INNER JOIN parametrosDeMedicion pm ON m.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON m.fkEjercicio = e.ejercicioId 
+    WHERE m.fkUsuario = @idCliente
+      AND pm.parametroMedicionId = @idParametro
+      AND (m.fkEjercicio = @idEjercicio or m.fkEjercicio is null )
+      AND MONTH(m.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(m.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by m.fechaDeCreacion ;
+	end
+	ELSE
+	begin
+		-- si solo se requieren las ulimas medidas(informacion resumida)
+		;WITH RegistrosOrdenadosPorFechaMasRecientePorParametro AS (
+        SELECT 
+            medidaId,
+        	fkUsuario,
+            fechaDeCreacion,
+            fkParametro,
+            valor,
+            fkEjercicio,
+            ROW_NUMBER() OVER (PARTITION BY fkParametro , 
+            								YEAR(m.fechaDeCreacion)
+            								ORDER BY fechaDeCreacion DESC
+            					) AS rn
+        FROM medidas m
+        	where CAST(fkUsuario AS NVARCHAR(450)) = @idCliente
+        	AND m.fkParametro = @idParametro
+        	AND MONTH(m.fechaDeCreacion) in  (select mesOAño from @listadoMeses)
+        	AND YEAR(m.fechaDeCreacion) in (select mesOAño from @años)
+    	)
+    	
+		 SELECT 
+        ro.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        ro.valor,
+        ro.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        ro.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        ro.fkUsuario
+    FROM RegistrosOrdenadosPorFechaMasRecientePorParametro ro
+    INNER JOIN parametrosDeMedicion pm ON ro.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON ro.fkEjercicio = e.ejercicioId 
+    WHERE 
+      ro.rn = 1
+      AND (@idEjercicio IS NULL OR ro.fkEjercicio = @idEjercicio)
+      AND MONTH(ro.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(ro.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by ro.fechaDeCreacion desc;	
+	end
+	
+	
+END;
+
+CREATE PROCEDURE sp_obtenerMedidasPorAñosEspecificos
+    @idCliente INT,
+    @idParametro INT,
+    @idEjercicio INT,
+    @años UnidadDeTiempo readonly,
+    @conDetalles int
+AS
+BEGIN
+	declare @listadoMeses UnidadDeTiempo;
+	insert into @listadoMeses values
+	(1),(2),(3),(4),(5),
+	(6),(7),(8),(9),(10),
+	(11),(12);
+
+	declare @parametrosConcatenados nvarchar(max);  
+   SET @parametrosConcatenados = CONCAT(
+        'idCliente: ', @idCliente, ', ',
+        'idParametro: ', @idParametro, ', ',
+        'idEjercicio: ', COALESCE(CAST(@idEjercicio AS NVARCHAR), 'NULL'), ', ',
+       	'años',(SELECT STRING_AGG(CAST(mesOAño AS NVARCHAR), ',') FROM @años),',',
+        'Con Detalles: ', @conDetalles
+    );
+	-- Verificar si @espaciadoTemporal es 'rango'
+    exec sp_RegistrarError @Procedimiento = 'sp_obtenerMedidasDelUsuarioPOrAñosEspecificos',
+    @Mensaje = @parametrosConcatenados ,
+    @Severidad = 1,
+    @Estado = 1,
+    @Usuario  = null, -- Obtiene el usuario actual por defecto
+    @Host  = null, -- Obtiene el nombre del host por defecto
+    @Aplicacion = null;
+	-- si la cosulta requiere informacion detallada,es decir todas la medidas encontradas dentro de las fechas establecidas
+	IF @conDetalles = 1
+	begin
+		-- Consulta principal
+    SELECT 
+        m.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        m.valor,
+        m.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        m.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        m.fkUsuario
+    FROM medidas m
+    INNER JOIN parametrosDeMedicion pm ON m.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON m.fkEjercicio = e.ejercicioId 
+    WHERE m.fkUsuario = @idCliente
+      AND pm.parametroMedicionId = @idParametro
+      AND (m.fkEjercicio = @idEjercicio or m.fkEjercicio is null )
+      AND MONTH(m.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(m.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by m.fechaDeCreacion ;
+	end
+	ELSE
+	begin
+		-- si solo se requieren las ulimas medidas(informacion resumida)
+		;WITH RegistrosOrdenadosPorFechaMasRecientePorParametro AS (
+        SELECT 
+            medidaId,
+        	fkUsuario,
+            fechaDeCreacion,
+            fkParametro,
+            valor,
+            fkEjercicio,
+            ROW_NUMBER() OVER (PARTITION BY fkParametro , 
+            								YEAR(m.fechaDeCreacion)
+            								ORDER BY fechaDeCreacion DESC
+            					) AS rn
+        FROM medidas m
+        	where CAST(fkUsuario AS NVARCHAR(450)) = @idCliente
+        	AND m.fkParametro = @idParametro
+        	AND MONTH(m.fechaDeCreacion) in  (select mesOAño from @listadoMeses)
+        	AND YEAR(m.fechaDeCreacion) in (select mesOAño from @años)
+    	)
+    	
+		 SELECT 
+        ro.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        ro.valor,
+        ro.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        ro.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        ro.fkUsuario
+    FROM RegistrosOrdenadosPorFechaMasRecientePorParametro ro
+    INNER JOIN parametrosDeMedicion pm ON ro.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON ro.fkEjercicio = e.ejercicioId 
+    WHERE 
+      ro.rn = 1
+      AND (@idEjercicio IS NULL OR ro.fkEjercicio = @idEjercicio)
+      AND MONTH(ro.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(ro.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by ro.fechaDeCreacion desc;	
+	end
+	
+	
+END;
+
+CREATE PROCEDURE sp_obtenerMedidasPorAñosEspecificos
+    @idCliente INT,
+    @idParametro INT,
+    @idEjercicio INT,
+    @años UnidadDeTiempo readonly,
+    @conDetalles int
+AS
+BEGIN
+	declare @listadoMeses UnidadDeTiempo;
+	insert into @listadoMeses values
+	(1),(2),(3),(4),(5),
+	(6),(7),(8),(9),(10),
+	(11),(12);
+
+	declare @parametrosConcatenados nvarchar(max);  
+   SET @parametrosConcatenados = CONCAT(
+        'idCliente: ', @idCliente, ', ',
+        'idParametro: ', @idParametro, ', ',
+        'idEjercicio: ', COALESCE(CAST(@idEjercicio AS NVARCHAR), 'NULL'), ', ',
+       	'años',(SELECT STRING_AGG(CAST(mesOAño AS NVARCHAR), ',') FROM @años),',',
+        'Con Detalles: ', @conDetalles
+    );
+	-- Verificar si @espaciadoTemporal es 'rango'
+    exec sp_RegistrarError @Procedimiento = 'sp_obtenerMedidasDelUsuarioPOrAñosEspecificos',
+    @Mensaje = @parametrosConcatenados ,
+    @Severidad = 1,
+    @Estado = 1,
+    @Usuario  = null, -- Obtiene el usuario actual por defecto
+    @Host  = null, -- Obtiene el nombre del host por defecto
+    @Aplicacion = null;
+	-- si la cosulta requiere informacion detallada,es decir todas la medidas encontradas dentro de las fechas establecidas
+	IF @conDetalles = 1
+	begin
+		-- Consulta principal
+    SELECT 
+        m.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        m.valor,
+        m.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        m.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        m.fkUsuario
+    FROM medidas m
+    INNER JOIN parametrosDeMedicion pm ON m.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON m.fkEjercicio = e.ejercicioId 
+    WHERE m.fkUsuario = @idCliente
+      AND pm.parametroMedicionId = @idParametro
+      AND (m.fkEjercicio = @idEjercicio or m.fkEjercicio is null )
+      AND MONTH(m.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(m.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by m.fechaDeCreacion ;
+	end
+	ELSE
+	begin
+		-- si solo se requieren las ulimas medidas(informacion resumida)
+		;WITH RegistrosOrdenadosPorFechaMasRecientePorParametro AS (
+        SELECT 
+            medidaId,
+        	fkUsuario,
+            fechaDeCreacion,
+            fkParametro,
+            valor,
+            fkEjercicio,
+            ROW_NUMBER() OVER (PARTITION BY fkParametro , 
+            								YEAR(m.fechaDeCreacion)
+            								ORDER BY fechaDeCreacion DESC
+            					) AS rn
+        FROM medidas m
+        	where CAST(fkUsuario AS NVARCHAR(450)) = @idCliente
+        	AND m.fkParametro = @idParametro
+        	AND MONTH(m.fechaDeCreacion) in  (select mesOAño from @listadoMeses)
+        	AND YEAR(m.fechaDeCreacion) in (select mesOAño from @años)
+    	)
+    	
+		 SELECT 
+        ro.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        ro.valor,
+        ro.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        ro.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        ro.fkUsuario
+    FROM RegistrosOrdenadosPorFechaMasRecientePorParametro ro
+    INNER JOIN parametrosDeMedicion pm ON ro.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON ro.fkEjercicio = e.ejercicioId 
+    WHERE 
+      ro.rn = 1
+      AND (@idEjercicio IS NULL OR ro.fkEjercicio = @idEjercicio)
+      AND MONTH(ro.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(ro.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by ro.fechaDeCreacion desc;	
+	end
+	
+	
+END;
+
+CREATE PROCEDURE sp_obtenerMedidasPorAñosEspecificos
+    @idCliente INT,
+    @idParametro INT,
+    @idEjercicio INT,
+    @años UnidadDeTiempo readonly,
+    @conDetalles int
+AS
+BEGIN
+	declare @listadoMeses UnidadDeTiempo;
+	insert into @listadoMeses values
+	(1),(2),(3),(4),(5),
+	(6),(7),(8),(9),(10),
+	(11),(12);
+
+	declare @parametrosConcatenados nvarchar(max);  
+   SET @parametrosConcatenados = CONCAT(
+        'idCliente: ', @idCliente, ', ',
+        'idParametro: ', @idParametro, ', ',
+        'idEjercicio: ', COALESCE(CAST(@idEjercicio AS NVARCHAR), 'NULL'), ', ',
+       	'años',(SELECT STRING_AGG(CAST(mesOAño AS NVARCHAR), ',') FROM @años),',',
+        'Con Detalles: ', @conDetalles
+    );
+	-- Verificar si @espaciadoTemporal es 'rango'
+    exec sp_RegistrarError @Procedimiento = 'sp_obtenerMedidasDelUsuarioPOrAñosEspecificos',
+    @Mensaje = @parametrosConcatenados ,
+    @Severidad = 1,
+    @Estado = 1,
+    @Usuario  = null, -- Obtiene el usuario actual por defecto
+    @Host  = null, -- Obtiene el nombre del host por defecto
+    @Aplicacion = null;
+	-- si la cosulta requiere informacion detallada,es decir todas la medidas encontradas dentro de las fechas establecidas
+	IF @conDetalles = 1
+	begin
+		-- Consulta principal
+    SELECT 
+        m.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        m.valor,
+        m.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        m.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        m.fkUsuario
+    FROM medidas m
+    INNER JOIN parametrosDeMedicion pm ON m.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON m.fkEjercicio = e.ejercicioId 
+    WHERE m.fkUsuario = @idCliente
+      AND pm.parametroMedicionId = @idParametro
+      AND (m.fkEjercicio = @idEjercicio or m.fkEjercicio is null )
+      AND MONTH(m.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(m.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by m.fechaDeCreacion ;
+	end
+	ELSE
+	begin
+		-- si solo se requieren las ulimas medidas(informacion resumida)
+		;WITH RegistrosOrdenadosPorFechaMasRecientePorParametro AS (
+        SELECT 
+            medidaId,
+        	fkUsuario,
+            fechaDeCreacion,
+            fkParametro,
+            valor,
+            fkEjercicio,
+            ROW_NUMBER() OVER (PARTITION BY fkParametro , 
+            								YEAR(m.fechaDeCreacion)
+            								ORDER BY fechaDeCreacion DESC
+            					) AS rn
+        FROM medidas m
+        	where CAST(fkUsuario AS NVARCHAR(450)) = @idCliente
+        	AND m.fkParametro = @idParametro
+        	AND MONTH(m.fechaDeCreacion) in  (select mesOAño from @listadoMeses)
+        	AND YEAR(m.fechaDeCreacion) in (select mesOAño from @años)
+    	)
+    	
+		 SELECT 
+        ro.medidaId,
+        pm.parametroMedicionId AS fkParametro,
+        pm.nombre AS nombreParametro,
+        ro.valor,
+        ro.fechaDeCreacion,
+        udm.unidadDeMedidaId,
+        udm.nombre AS nombreUnidadDeMedida,
+        ro.fkEjercicio,
+        e.nombreEjercicio,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = pm.fkIcon) AS urlIconoParametro,
+        (SELECT iconsf.urlPublica FROM iconsForParameters iconsf WHERE iconsf.iconId = e.fkIcon) AS urlIconoEjercicio,
+        ro.fkUsuario
+    FROM RegistrosOrdenadosPorFechaMasRecientePorParametro ro
+    INNER JOIN parametrosDeMedicion pm ON ro.fkParametro = pm.parametroMedicionId
+    INNER JOIN parametros_unidadesDeMedida pudm  ON  pm.parametroMedicionId = pudm.fkParametroDeMedicion 
+    INNER JOIN unidadesDeMedida udm ON udm.unidadDeMedidaId  = pudm.fkUnidadDeMedida 
+    LEFT JOIN ejercicios e ON ro.fkEjercicio = e.ejercicioId 
+    WHERE 
+      ro.rn = 1
+      AND (@idEjercicio IS NULL OR ro.fkEjercicio = @idEjercicio)
+      AND MONTH(ro.fechaDeCreacion) IN (SELECT mesOAño FROM @listadoMeses)
+      AND YEAR(ro.fechaDeCreacion) in (SELECT mesOAño FROM @años)	
+     order by ro.fechaDeCreacion desc;	
+	end
+	
+	
 END;
 
 CREATE PROCEDURE sp_obtenerMetaDeParametro
@@ -1839,69 +1960,57 @@ BEGIN
 
     
     BEGIN TRY
-    declare @mesExtracted int,@añoExtracted int;
-   select @mesExtracted = mes,@añoExtracted = año from @datosDeMedida; 
-	INSERT INTO LogErrores (procedimiento, mensaje, severidad, estado)
-        VALUES ('sp_obtenerMetasDeMedidas', 
-        concat(
-        'idCliente ',
-        @idCliente,
-       	' Parametro: ',
-      	@idParametro,
-     	' Ejercicio: ',
-    	@idEjercicio,
-   		' mes ',
-  		@mesExtracted,
-  		' año ',
-  		@añoExtracted
-  		)
-  		,
-  		1
- 		,
- 		3
-		);
+        -- Declarar variables locales
+        DECLARE @mesExtracted INT, @añoExtracted INT;
 
-    -- Selección de los datos requeridos
-    SELECT 
-        distinct m.metaId,
-        i.nombre AS intencion,
-        pm.nombre AS nombreParametro,
-        e.NombreEjercicio AS nombreEjercicio,
-        m.valorObjetivo,
-        nl.nombre AS nombreNivelDeLogro,
-        m.fechaDeInicioDeLaMeta ,
-        m.fechaLimite,
-        m.fkEjercicio,
-        m.fkParametro,
-        m.fkUsuario
-    FROM metas m
-    LEFT JOIN intenciones i ON m.fkIntencion = i.intencionId
-    INNER JOIN parametrosDeMedicion pm ON m.fkParametro = pm.parametroMedicionId 
-    LEFT JOIN ejercicios e ON m.fkEjercicio = e.EjercicioID 
-    INNER JOIN nivelesDeLogro nl ON m.fkNivelDeLogro = nl.idNivelDeLogro 
-    --INNER JOIN medidas md ON pm.parametroMedicionId = md.fkParametro 
-    INNER JOIN @datosDeMedida dm ON MONTH(m.fechaDeInicioDeLaMeta) = dm.mes AND YEAR(m.fechaDeInicioDeLaMeta) = dm.año
-    WHERE m.fkUsuario = @idCliente
-      AND m.fkParametro = @idParametro
-      AND (m.fkEjercicio = @idEjercicio OR @idEjercicio IS NULL);
-  END TRY
-  BEGIN CATCH
-        -- Capturar información del error
-        DECLARE @ErrorMessage NVARCHAR(4000);
-        DECLARE @ErrorSeverity INT;
-        DECLARE @ErrorState INT;
+        -- Asignar valores a las variables desde el parámetro de entrada
+        SELECT @mesExtracted = mes, @añoExtracted = año FROM @datosDeMedida; 
 
+        -- Seleccionar las metas correspondientes
         SELECT 
-            @ErrorMessage = ERROR_MESSAGE(),
-            @ErrorSeverity = ERROR_SEVERITY(),
-            @ErrorState = ERROR_STATE();
+            DISTINCT m.metaId,
+            i.nombre AS intencion,
+            pm.nombre AS nombreParametro,
+            e.NombreEjercicio AS nombreEjercicio,
+            m.valorObjetivo,
+            nl.nombre AS nombreNivelDeLogro,
+            m.fechaDeInicioDeLaMeta ,
+            m.fechaLimite,
+            m.fkEjercicio,
+            m.fkParametro,
+            m.fkUsuario
+        FROM metas m
+        LEFT JOIN intenciones i ON m.fkIntencion = i.intencionId
+        INNER JOIN parametrosDeMedicion pm ON m.fkParametro = pm.parametroMedicionId 
+        LEFT JOIN ejercicios e ON m.fkEjercicio = e.EjercicioID 
+        INNER JOIN nivelesDeLogro nl ON m.fkNivelDeLogro = nl.idNivelDeLogro 
+        INNER JOIN @datosDeMedida dm ON MONTH(m.fechaDeInicioDeLaMeta) = dm.mes AND YEAR(m.fechaDeInicioDeLaMeta) = dm.año
+        WHERE m.fkUsuario = @idCliente
+          AND m.fkParametro = @idParametro
+          AND (m.fkEjercicio = @idEjercicio OR @idEjercicio IS NULL);
+    END TRY
+    BEGIN CATCH
+        -- Manejo de errores
+        DECLARE 
+            @ProcName NVARCHAR(128) = OBJECT_NAME(@@PROCID),
+            @ErrorNumber INT = ERROR_NUMBER(),
+            @ErrorSeverity INT = ERROR_SEVERITY(),
+            @ErrorState INT = ERROR_STATE(),
+            @ErrorMessage NVARCHAR(MAX) = ERROR_MESSAGE(),
+            @ErrorLine INT = ERROR_LINE(); 
 
-        -- Registrar el error en una tabla de logs (opcional)
-        INSERT INTO LogErrores (procedimiento, mensaje, severidad, estado)
-        VALUES ('sp_obtenerMetasDeMedidas', @ErrorMessage, @ErrorSeverity, @ErrorState);
+        -- Registrar el error
+        EXEC sp_RegistrarError 
+            @ProcName,
+            @ErrorMessage,
+            @ErrorSeverity,
+            @ErrorState,
+            NULL, -- Usuario
+            NULL, -- Host
+            NULL; -- Aplicación
 
         -- Relanzar el error para que sea visible en la aplicación
-        RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState);
+        THROW;
     END CATCH;
 
 END;
@@ -1921,9 +2030,9 @@ BEGIN
     ORDER BY pm.nombre;
 END;
 
-CREATE PROCEDURE dbo.sp_obtenerUltimasMedidasDelUsuario
+CREATE   PROCEDURE dbo.sp_obtenerUltimasMedidasDelUsuario
 ( 
-@idUsuario int
+@idUsuario nvarchar(450)
 )
 AS 
 BEGIN
@@ -1937,7 +2046,7 @@ BEGIN
             fkEjercicio,
             ROW_NUMBER() OVER (PARTITION BY fkParametro ORDER BY fechaDeCreacion DESC) AS rn
         FROM medidas
-        	where fkUsuario =@idUsuario
+        	where CAST(fkUsuario AS NVARCHAR(450)) = @idUsuario
     )
     SELECT ro.medidaId,pm.parametroMedicionId as fkParametro ,pm.nombre as nombreParametro,ro.valor,ro.fechaDeCreacion,udm.unidadDeMedidaId,
     udm.nombre  as nombreUnidadDeMedida,ro.fkEjercicio,e.NombreEjercicio,(select iconsf.urlPublica from iconsForParameters iconsf where iconsf.iconId = pm.fkIcon) as urlIconoParametro ,(select iconsf.urlPublica from iconsForParameters iconsf where iconsf.iconId = e.fkIcon) as urlIconoEjercicio,ro.fkUsuario 
@@ -1950,34 +2059,35 @@ BEGIN
    
 END;
 
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-CREATE PROCEDURE [dbo].[sp_obtenerUsuariosConCitasAgendadas]
+CREATE   PROCEDURE [dbo].[sp_obtenerUsuariosConCitasAgendadas]
 AS
 BEGIN
-		select u.NombreCompleto as Nombre,
-		u.Apellido,
-		u.Email,
-		u.PhoneNumber as Telefono,
-		u.UserName as NombreUsuario,
-		u.PasswordHash as Contrasena,
-		u.FechaDeNacimiento as FechaNacimiento,
-		u.FechaDeRegistro as FechaRegistro,
-		ar.Name as Rol,
-		u.Estado 
-		from FitnessCenterDB.dbo.AspNetUsers as u
-		INNER JOIN FitnessCenterDB.dbo.AspNetUserRoles aur ON u.Id = aur.UserId
-        INNER JOIN FitnessCenterDB.dbo.AspNetRoles ar ON aur.RoleId = ar.Id
-		join FitnessCenterDB.dbo.Citas as c on c.UserId =  u.Id and c.Estado in ('agendada','Agendada')
+    SELECT
+        -- MODIFICADO: Campos de AspNetUsers y AspNetRoles
+        u.NombreCompleto AS Nombre,
+        u.Apellido,
+        u.Email,
+        u.PhoneNumber AS Telefono,
+        u.UserName AS NombreUsuario,
+        u.PasswordHash AS Contrasena,
+        u.FechaDeNacimiento AS FechaNacimiento,
+        u.FechaDeRegistro AS FechaRegistro,
+        ar.Name AS Rol,
+        u.Estado
+    FROM FitnessCenterDB.dbo.AspNetUsers AS u
+    -- NUEVO: Uniones con AspNetUserRoles y AspNetRoles
+    INNER JOIN FitnessCenterDB.dbo.AspNetUserRoles ur ON u.Id = ur.UserId
+    INNER JOIN FitnessCenterDB.dbo.AspNetRoles ar ON ur.RoleId = ar.Id
+    INNER JOIN FitnessCenterDB.dbo.Citas AS c
+    -- MODIFICADO: Campo 'UserId' de 'Citas' en lugar de 'UsuarioID'
+    ON c.UserId = u.Id AND c.Estado IN ('agendada','Agendada');
 END;
 
-CREATE   PROCEDURE dbo.sp_preReservarHorario
-    @idUsuarioQueReserva int,
+CREATE       PROCEDURE dbo.sp_preReservarHorario
+    @idUsuarioQueReserva nvarchar(450),
     @fechaTentativa date,
-    @idHoraLaboral int
+    @idHoraLaboral int,
+    @idPrereservaOut int OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -2018,7 +2128,7 @@ BEGIN
             
             COMMIT TRANSACTION;
             PRINT '6/9 preReserva registrada con éxito'; 
-            SELECT SCOPE_IDENTITY() AS IdPreReserva, 'Horario pre-reservado exitosamente' AS Mensaje;
+            SELECT @idPrereservaOut = SCOPE_IDENTITY() ;
         END
         ELSE
         BEGIN
@@ -2185,14 +2295,13 @@ BEGIN
         END
 
         DECLARE 
-        @ProcName NVARCHAR(128) = OBJECT_NAME(@@PROCID),
-        @ErrorNumber INT = ERROR_NUMBER(),
-        @ErrorSeverity INT = ERROR_SEVERITY(),
-        @ErrorState INT = ERROR_STATE(),
-        @ErrorMessage NVARCHAR(MAX) = ERROR_MESSAGE(),
-        @ErrorLine INT = ERROR_LINE(); 
+            @ProcName NVARCHAR(128) = OBJECT_NAME(@@PROCID),
+            @ErrorNumber INT = ERROR_NUMBER(),
+            @ErrorSeverity INT = ERROR_SEVERITY(),
+            @ErrorState INT = ERROR_STATE(),
+            @ErrorMessage NVARCHAR(MAX) = ERROR_MESSAGE(),
+            @ErrorLine INT = ERROR_LINE(); 
 
-        SET @estadoOperacion = 0;
         PRINT N'3/5 registrando log de error';
         EXEC sp_RegistrarError 
             @ProcName,
@@ -2217,8 +2326,8 @@ END;
 -- =============================================
 CREATE PROCEDURE [dbo].[sp_registrarCita]
 ( 
-@usuarioID int,
-@entrenadorID int,
+@usuarioID nvarchar(450),
+@entrenadorID nvarchar(450),
 @fechaInicio datetime,
 @tipoCita nvarchar(50),
 @estado nvarchar(50),
@@ -2230,7 +2339,10 @@ CREATE PROCEDURE [dbo].[sp_registrarCita]
 	
 AS
 BEGIN
-		insert into Citas(UsuarioID,
+	BEGIN TRY
+		PRINT N'fecha inicio'+  CAST(@fechaInicio AS NVARCHAR(50));
+		PRINT N'fecha fin'+  CAST(@fechaHoraFin AS NVARCHAR(50));
+		insert into Citas(UserId,
 							 EntrenadorID,
 							 FechaHora,
 							 TipoCita,
@@ -2239,14 +2351,53 @@ BEGIN
 						values(
 							@usuarioID,
 							@entrenadorID,
-							FORMAT(@fechaInicio, 'yyyy-MM-dd HH:mm:ss'),
+							@fechaInicio,
 							@tipoCita,
 							@estado,
-							FORMAT(@fechaHoraFin, 'yyyy-MM-dd HH:mm:ss')
+							@fechaHoraFin
 						)
+	
+	END TRY
+	BEGIN CATCH
+		PRINT N'11/14 excepción capturada';
+        IF XACT_STATE() <> 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END
+    
+        DECLARE 
+        @ProcName NVARCHAR(128) = OBJECT_NAME(@@PROCID),
+        @ErrorNumber INT = ERROR_NUMBER(),
+        @ErrorSeverity INT = ERROR_SEVERITY(),
+        @ErrorState INT = ERROR_STATE(),
+        @LoginOriginal SYSNAME = ORIGINAL_LOGIN(),
+        @Host NVARCHAR(128) = HOST_NAME(),
+        @App  NVARCHAR(128) = APP_NAME(),
+        @ErrorMessage NVARCHAR(MAX) = ERROR_MESSAGE(),
+        @ErrorLine INT = ERROR_LINE(),
+        @CompleteMessage nvarchar(max) = '';
+        SET @CompleteMessage = @ErrorMessage + CAST(@ErrorLine AS NVARCHAR(10))+ N'  ' + CAST(@fechaInicio AS NVARCHAR(50)) + N' ' + CAST(@fechaHoraFin AS NVARCHAR(50));
+
+        PRINT N'12/14 registrando log de error';
+        EXEC sp_RegistrarError 
+            @ProcName,
+            @CompleteMessage,
+            @ErrorSeverity,
+            @ErrorState,
+            @LoginOriginal,
+            @Host,
+        	@App;
+
+        PRINT N'13/14 error registrado correctamente';
+
+        -- Opcional: volver a lanzar el error para que el cliente lo reciba
+        PRINT N'14/14 relanzando THROW'; 
+        THROW;
+	END CATCH
+		
 END;
 
-CREATE   PROCEDURE dbo.sp_registrarClaseProgramada
+CREATE       PROCEDURE dbo.sp_registrarClaseProgramada
     @datos dbo.DatosClaseProgramada READONLY
 AS
 BEGIN
@@ -2376,10 +2527,10 @@ BEGIN
     END CATCH
 END;
 
-CREATE   PROCEDURE dbo.sp_registrarHorarioDeClaseProgramada
+CREATE     PROCEDURE dbo.sp_registrarHorarioDeClaseProgramada
     @fkClaseProgramada INT,
     @fkHorarioLaboral INT,
-    @fkEntrenador INT,
+    @fkEntrenador nvarchar(450),
     @fechaDeLaClase DATE
 AS
 BEGIN
@@ -2391,25 +2542,71 @@ BEGIN
     RETURN SCOPE_IDENTITY();
 END;
 
-CREATE PROCEDURE dbo.sp_registrarInsrcipcionAClase(
-    @idCliente INT,
+CREATE       PROCEDURE dbo.sp_registrarInsrcipcionAClase
+(
+    @idCliente nvarchar(450),
     @fkProgramacionClase INT
 )
 AS
 BEGIN
-	
-	declare @idEstatusActivoDeInscripcion int = (select idEstadoInscripcion from v_idEstadoVigenteInscripcionAClase);
-    -- Registrar nueva inscripción en la tabla inscripcionesDeClases
-    INSERT INTO FitnessCenterDB.dbo.inscripcionesDeClases
-     (fkCliente, fkProgramacionClase, fechaDeInscripcion, fkEstadoInscripcion)
-    VALUES (@idCliente, @fkProgramacionClase, GETDATE(), @idEstatusActivoDeInscripcion);
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE @idEstatusActivoDeInscripcion INT = (SELECT idEstadoInscripcion FROM v_idEstadoVigenteInscripcionAClase);
+        
+        INSERT INTO FitnessCenterDB.dbo.inscripcionesDeClases
+        (
+            fkCliente, 
+            fkProgramacionClase, 
+            fechaDeInscripcion, 
+            fkEstadoInscripcion
+        )
+        VALUES
+        (
+            @idCliente, 
+            @fkProgramacionClase, 
+            GETDATE(), 
+            @idEstatusActivoDeInscripcion
+        );
+
+        COMMIT TRANSACTION;
+
+    END TRY
+    BEGIN CATCH
+
+        IF XACT_STATE() <> 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END
+
+        DECLARE 
+            @ProcName NVARCHAR(128) = OBJECT_NAME(@@PROCID),
+            @ErrorNumber INT = ERROR_NUMBER(),
+            @ErrorSeverity INT = ERROR_SEVERITY(),
+            @ErrorState INT = ERROR_STATE(),
+            @ErrorMessage NVARCHAR(MAX) = ERROR_MESSAGE(),
+            @ErrorLine INT = ERROR_LINE(); 
+
+        -- Registrar el error
+        EXEC sp_RegistrarError 
+            @ProcName,
+            @ErrorNumber,
+            @ErrorSeverity,
+            @ErrorState,
+            @ErrorMessage,
+            @ErrorLine;
+
+        THROW;
+    END CATCH
 END;
 
 -- =============================================
 -- Author:		Yesenia Esquivel
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
--- =============================================
+-- =====================================
 CREATE PROCEDURE [dbo].[sp_registrarMedida]
 ( 
 @fkUsuario int,
@@ -2444,30 +2641,30 @@ END;
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE [dbo].[sp_registrarRutina]
-( 
-@usuarioID int,
-@entrenadorID int,
-@fechaCreacion datetime,
-@observaciones nvarchar(max)
-)	
+CREATE   PROCEDURE [dbo].[sp_registrarRutina]
+(
+    @usuarioID NVARCHAR(450),    -- MODIFICADO: Tipo de dato de INT a NVARCHAR(450)
+    @entrenadorID NVARCHAR(450), -- MODIFICADO: Tipo de dato de INT a NVARCHAR(450)
+    @fechaCreacion datetime,
+    @observaciones nvarchar(max)
+)
 AS
 BEGIN
-	
-	IF @fechaCreacion is null
-	begin
-		set @fechaCreacion = GETDATE();
-	end
-		insert into Rutinas(
-		UsuarioID,
-		EntrenadorID,
-		FechaCreacion,
-		Observaciones)
-		values(
-		@usuarioID,
-		@entrenadorID,
-		@fechaCreacion,
-		@observaciones)
+    IF @fechaCreacion IS NULL
+    BEGIN
+        SET @fechaCreacion = GETDATE();
+    END
+
+    INSERT INTO FitnessCenterDB.dbo.Rutinas(
+        UserId,       -- MODsp_consultarRutinasDeUsuarioIFICADO: UsuarioID a UserId
+        EntrenadorId, -- MODIFICADO: EntrenadorID a EntrenadorId
+        FechaCreacion,
+        Observaciones)
+    VALUES(
+        @usuarioID,
+        @entrenadorID,
+        @fechaCreacion,
+        @observaciones)
 END;
 
 CREATE PROCEDURE dbo.sp_servicioLimpiarPreReservasCaducadas
@@ -2564,7 +2761,7 @@ BEGIN
             @ErrorLine INT = ERROR_LINE(); 
 
         -- Registrar el error
-        EXEC FitnessCenterDB.dbo.sp_RegistrarError 
+        EXEC sp_RegistrarError 
             @ProcName,
             @ErrorNumber,
             @ErrorSeverity,
@@ -2576,87 +2773,3 @@ BEGIN
         THROW;
     END CATCH
 END;
-
-CREATE function dbo.yaExisteClaseProgramada(
-@fecha date,
-@fksHorasLaborales IdsHorasLaborales READONLY)
-
-returns BIT
-AS
-BEGIN
-	DECLARE @yaExiste BIT = 0;
-    -- Verificar si ya hay una clase programada
-    IF EXISTS (
-			SELECT
-				1
-			FROM
-				FitnessCenterDB.dbo.Clases c
-				join FitnessCenterDB.dbo.clasesProgramadas cp  
-								on cp.fkClase = c.ClaseID
-				join FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp 
-								on cp.idProgramacionClase = hcp.fkClaseProgramada
-								and hcp.fechaDeLaClase 	 =   @fecha
-								and hcp.fkHorarioLaboral in (select fkHoraLaboral from @fksHorasLaborales)
-				join FitnessCenterDB.dbo.estadosHorarioClaseProgramada ehcp 
-								on ehcp.idEstadoHorarioClase = hcp.fkEstadoHorarioClase 
-								and ehcp.nombreEstadoHorario = 'activo'
-			)
-    BEGIN
-        SET @yaExiste = 1;
-	END;
-return @yaExiste;
-END;
-
-CREATE function dbo.yaExistePreRegistroDeClase(
-@fechaReservada date,
-@fksHorasLaborales IdsHorasLaborales READONLY
-)
-returns BIT
-AS
-BEGIN
-	
-	DECLARE @yaExiste BIT = 0;
-    -- Verificar si ya hay un preregistro prexistente,eso significa que otro usuario ya reservo temporalmente el horario
-    IF EXISTS (
-        SELECT 1 
-        FROM FitnessCenterDB.dbo.preReservasDeHorario pr
-        join FitnessCenterDB.dbo.horasLaborales hl 
-        	on pr.fkHoraLaboral in (select fkHoraLaboral from @fksHorasLaborales)
-        where  pr.fechaReservada = @fechaReservada
-        and GETDATE() 
-        	BETWEEN pr.fechaInicioDeLaReserva 
-        		and pr.fechaDeExpiracionDeLaReserva
-    )
-    BEGIN
-        SET @yaExiste = 1;
-    END;
-return @yaExiste;
-END;
-
-CREATE OR ALTER FUNCTION dbo.fn_obtenerClasesProgramadaPorIdProgramacionClase(@idProgramacionClase INT)
-RETURNS TABLE
-AS
-RETURN
-(
-    SELECT 
-        cp.idProgramacionClase AS idClaseProgramada,
-        cp.fkClase,
-        cp.cupoMaximo,
-        (SELECT dbo.fn_cupoDisponibleClaseProgramada(cp.idProgramacionClase)) as cupoDisponible,
-        hcp.fechaDeLaClase,
-        hl.idHora,
-        hl.horaInicio,
-        hl.horaFin,
-        CONCAT(CONVERT(varchar(5), hl.horaInicio, 108), ' - ', CONVERT(varchar(5), hl.horaFin, 108)) AS labelHorario,
-        cp.fkEntrenador,
-        CONCAT(u.Nombre, ' ', u.Apellido) AS nombreEntrenador
-    FROM FitnessCenterDB.dbo.clasesProgramadas cp
-    INNER JOIN FitnessCenterDB.dbo.horariosDeClasesProgramadas hcp 
-        ON cp.idProgramacionClase = hcp.fkClaseProgramada
-    INNER JOIN FitnessCenterDB.dbo.horasLaborales hl 
-        ON hcp.fkHorarioLaboral = hl.idHora
-    INNER JOIN FitnessCenterDB.dbo.AspNetUsers u 
-        ON cp.fkEntrenador = u.Id
-    WHERE cp.idProgramacionClase = @idProgramacionClase
-        AND (select dbo.fn_cupoDisponibleClaseProgramada(cp.idProgramacionClase)) > 0
-);

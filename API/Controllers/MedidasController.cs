@@ -8,6 +8,8 @@ using Microsoft.Data.SqlClient;
 using EllipticCurve.Utils;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using DataAccess.Identity;
 
 
 namespace API.Controllers
@@ -17,9 +19,13 @@ namespace API.Controllers
 
 
         private readonly FitnessCenterDbContext _db;
-        public MedidasController(FitnessCenterDbContext context)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public MedidasController(FitnessCenterDbContext context
+            , UserManager<ApplicationUser> userManager
+            )
         {
             _db = context;
+            _userManager = userManager;
         }
 
         [Authorize(Roles = "empleado")]
@@ -111,29 +117,28 @@ namespace API.Controllers
         [Authorize(Roles = "cliente")]
         [HttpGet]
         [Route("api/progresoDeUsuario")]
-        public async Task<IActionResult> getProgresoDelCliente([FromQuery] int idUsuario)
+        public async Task<IActionResult> getProgresoDelCliente([FromQuery] string idUsuario)
         {
-            
-            HttpResponseProgresoUsuario respuesta = new HttpResponseProgresoUsuario();
-            List<DTOItemProgreso> itemsProgreso = null;
+            DTOResponse<List<DTOItemProgreso>> respuesta = new DTOResponse<List<DTOItemProgreso>>();
             try
             {
+                // Llamar al stored procedure para obtener ultimas medidas
                 var ultimasMedidas = await _db.ultimasMedidasDeParametroSP.FromSqlInterpolated($@"EXEC sp_obtenerUltimasMedidasDelUsuario @idUsuario={idUsuario}").ToListAsync();
+
+                // Llamar al stored procedure para obtener ultimas metas
                 var ultimasMetas = await _db.ultimasMetasDeParametroSP.FromSqlInterpolated($@"EXEC sp_obtenerMetasActualesDelClientePorParametro @idUsuario={idUsuario}").ToListAsync();
-                itemsProgreso = ObjectAssembler.ensamblarItemsProgreso(ultimasMedidas, ultimasMetas);
-                respuesta.ok = true;
-                respuesta.message = "consulta exitosa";
-                respuesta.errors = null;
-                respuesta.data = itemsProgreso;
+
+                // Ensamblar items de progreso (usar ObjectAssembler existente si aplica)
+                var itemsProgreso = BL.Utils.ObjectAssembler.ensamblarItemsProgreso(ultimasMedidas, ultimasMetas);
+
+                respuesta = ResponseManager.BuildResponse(true, 200, "Consulta exitosa", null, itemsProgreso);
+                return Ok(respuesta);
             }
             catch (Exception ex)
             {
-                respuesta.ok = false;
-                respuesta.message = "Error al consultar los parametros de medicion";
-                respuesta.errors = null;
-                respuesta.data = itemsProgreso;
+                respuesta = ResponseManager.BuildResponse<List<DTOItemProgreso>>(false, 500, "Error al obtener progreso del cliente", new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } }, null);
+                return StatusCode(500, respuesta);
             }
-            return Ok(respuesta);
         }
 
         [Authorize(Roles = "empleado,cliente")]
@@ -163,121 +168,120 @@ namespace API.Controllers
         }
 
 
-        [Authorize(Roles = "cliente,empleado")]
-        [HttpGet("obtenerDetallesDeProgreso")]
-        public async Task<ActionResult<List<DTOUltimaMedidaDeParametro>>> ObtenerDetallesDeProgreso(
-    [FromQuery] int idCliente,
-    [FromQuery] int idParametro,
-    [FromQuery] int? idEjercicio,
-    [FromQuery] string? espaciadoTemporal,
-    [FromQuery] string? tipoDeBusqueda,
-    [FromQuery] DateTime? fechaDeInicio = null,
-    [FromQuery] DateTime? fechaFin = null,
-    [FromQuery] bool conDetalle = false,
-    [FromQuery] int[]? mesesDeFiltro = null,
-    [FromQuery] int[]? añosDeFiltro = null,
-    [FromQuery] DateTime? fechaDeCreacion = null
-    )
+        
+        [Authorize(Roles = "empleado,cliente")]
+        [HttpGet("api/obtenerEjerciciosYParametros")]
+        public async Task<ActionResult<DTOResponse<List<DTOEjerciciosYParametrosDelCliente>>>> ObtenerDetallesDeProgreso([FromQuery] string idCliente)
         {
-            HTTPResponseDetallesDeProgreso finalResponse = new HTTPResponseDetallesDeProgreso();
             try
             {
-            
-                DataTable mesesPorDefecto = new DataTable();       // Mes por defecto        
-                DataTable añosPorDefecto = new DataTable();        // Año por defecto          
-                DataTable datosDeMedida = new DataTable();          // Datos de medida
+                var existingClient = await _userManager.FindByIdAsync(idCliente);
+                if (existingClient == null)
+                {
+                    return BadRequest(ResponseManager.BuildResponse<List<DTOEjerciciosYParametrosDelCliente>>(false, 400, "El cliente no existe", new List<ErrorModel> { new ErrorModel { propiedad = "idCliente", message = "Cliente no encontrado" } }, null));
+                }
+
+                var ejercicioYParametros = await _db.ejerciciosYParametrosDelClienteSP.FromSqlInterpolated($@"EXEC sp_obtenerEjerciciosYParametrosDelCliente @idCliente={idCliente}").ToListAsync();
+
+                var respuesta = ResponseManager.BuildResponse(true, 200, "Consulta exitosa", null, ejercicioYParametros);
+
+                return Ok(respuesta);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ResponseManager.BuildResponse<List<DTOEjerciciosYParametrosDelCliente>>(false, 500, $"Error al ejecutar el procedimiento almacenado: {ex.Message}", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null));
+            }
+        }
+
+        [Authorize(Roles = "cliente,empleado")]
+        [HttpGet("api/obtenerDetallesDeProgreso")]
+        public async Task<ActionResult<DTOResponse<MedidasConMetas>>> ObtenerDetallesDeProgresoApi(
+            [FromQuery] string idCliente,
+            [FromQuery] int idParametro,
+            [FromQuery] int? idEjercicio,
+            [FromQuery] string? espaciadoTemporal,
+            [FromQuery] string? tipoDeBusqueda,
+            [FromQuery] DateTime? fechaDeInicio = null,
+            [FromQuery] DateTime? fechaFin = null,
+            [FromQuery] bool conDetalle = false,
+            [FromQuery] int[]? mesesDeFiltro = null,
+            [FromQuery] int[]? añosDeFiltro = null,
+            [FromQuery] DateTime? fechaDeCreacion = null
+        )
+        {
+            try
+            {
+                if (idParametro == 0) {
+                    idParametro = _db.ParametrosDeMedicions.FirstOrDefault(param => param.Nombre == "peso").ParametroMedicionId;
+                }
+                // Prepare datatables for structured parameters
+                DataTable mesesPorDefecto = new DataTable();
+                DataTable añosPorDefecto = new DataTable();
+                DataTable datosDeMedida = new DataTable();
+                
                 List<DatosMetaDeMedida> datosMetaDeMedida = ObjectAssembler.ensamblarDatosMetaDeMedida(mesesDeFiltro, añosDeFiltro);
+
                 if (mesesDeFiltro != null && mesesDeFiltro.Length > 0)
                 {
-                    mesesPorDefecto = DataTableConverter.ConvertToDataTable(mesesDeFiltro);//(new List<Dictionary<string, int>> { new Dictionary<string, int> { { "mes", mesActual.Value } } });       // Mes por defecto        
+                    mesesPorDefecto = DataTableConverter.ConvertToDataTable(mesesDeFiltro);
                 }
                 if (añosDeFiltro != null && añosDeFiltro.Length > 0)
                 {
-                    añosPorDefecto = DataTableConverter.ConvertToDataTable(añosDeFiltro);//(new List<Dictionary<string, int>> { new Dictionary<string, int> { { "año", añoActual.Value } } });        // Año por defecto
+                    añosPorDefecto = DataTableConverter.ConvertToDataTable(añosDeFiltro);
                 }
-                
-                // Crear la conexión ADO.NET
+
                 using var connection = (SqlConnection)_db.Database.GetDbConnection();
                 if (connection.State == ConnectionState.Closed)
                 {
                     await connection.OpenAsync();
                 }
+
                 var command = SqlCommandHelper.CreateSqlCommand(connection, "sp_obtenerMedidasDelUsuarioPorTiempo", CommandType.StoredProcedure, null);
-                Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)> parametersToSP = new Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)>{
-                            {"@idCliente",(SqlDbType.Int, idCliente,null)},
-                            {"@idParametro",(SqlDbType.Int, idParametro,null)},
-                            {"@idEjercicio",(SqlDbType.Int, idEjercicio,null)},
-                            {"@espaciadoTemporal",(SqlDbType.NVarChar, espaciadoTemporal,30)},
-                            {"@tipoDeBusqueda",(SqlDbType.NVarChar, tipoDeBusqueda,10)},
-                            {"@meses",(SqlDbType.Structured, mesesPorDefecto,null)},
-                            {"@años",(SqlDbType.Structured, añosPorDefecto,null)},
-                            {"@fechaDeInicio",(SqlDbType.DateTime, (object)fechaDeInicio ?? DBNull.Value,null)},
-                            {"@fechaFin",(SqlDbType.DateTime, (object)fechaFin ?? DBNull.Value,null)},
-                            {"@conDetalles",(SqlDbType.Int, conDetalle,null)}
-                        };
-                        
-                        datosDeMedida = DataTableConverter.ConvertToDataTable(datosMetaDeMedida);
-                        Dictionary<string, (SqlDbType DbType, 
-                                    object Value,
-                                    int? lengthType)> 
-                        parametersToSP2 = new Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)>{
-                            {"@idCliente",(SqlDbType.Int, idCliente,null)},
-                            {"@idParametro",(SqlDbType.Int, idParametro,null)},
-                            {"@idEjercicio",(SqlDbType.Int, idEjercicio == 0 ? DBNull.Value : idEjercicio,null)},
-                            {"@datosDeMedida",(SqlDbType.Structured, datosDeMedida,null)}
-                        };
+                Dictionary<string, (SqlDbType DbType, object Value, int? lengthType)> parametersToSP = new Dictionary<string, (SqlDbType, object, int?)>
+                {
+                    { "@idCliente", (SqlDbType.NVarChar, idCliente, null) },
+                    { "@idParametro", (SqlDbType.Int, idParametro, null) },
+                    { "@idEjercicio", (SqlDbType.Int, idEjercicio, null) },
+                    { "@espaciadoTemporal", (SqlDbType.NVarChar, espaciadoTemporal, 30) },
+                    { "@tipoDeBusqueda", (SqlDbType.NVarChar, tipoDeBusqueda, 10) },
+                    { "@meses", (SqlDbType.Structured, mesesPorDefecto, null) },
+                    { "@años", (SqlDbType.Structured, añosPorDefecto, null) },
+                    { "@fechaDeInicio", (SqlDbType.DateTime, (object)fechaDeInicio ?? DBNull.Value, null) },
+                    { "@fechaFin", (SqlDbType.DateTime, (object)fechaFin ?? DBNull.Value, null) },
+                    { "@conDetalles", (SqlDbType.Int, conDetalle ? 1 : 0, null) }
+                };
+
+
+                datosDeMedida = DataTableConverter.ConvertToDataTable<DatosMetaDeMedida>(datosMetaDeMedida);
+                var parametersToSP2 = new Dictionary<string, (SqlDbType, object, int?)>
+                {
+                    { "@idCliente", (SqlDbType.NVarChar, idCliente, null) },
+                    { "@idParametro", (SqlDbType.Int, idParametro, null) },
+                    { "@idEjercicio", (SqlDbType.Int, idEjercicio == 0 ? DBNull.Value : (object)idEjercicio, null) },
+                    { "@datosDeMedida", (SqlDbType.Structured, datosDeMedida, null) }
+                };
 
                 SqlCommandHelper.AddParameters(command, parametersToSP);
                 var reader = await SqlCommandHelper.ExecuteCommandAsync(command);
-                List<DTOUltimaMedidaDeParametro> resultados = SqlCommandHelper.MapToList<DTOUltimaMedidaDeParametro>(reader);
-                finalResponse.data.medidas = resultados;
+                List<DTOUltimaMedidaDeParametro> medidas = SqlCommandHelper.MapToList<DTOUltimaMedidaDeParametro>(reader);
+
                 var commandObtenerMetas = SqlCommandHelper.CreateSqlCommand(connection, "sp_obtenerMetasDeMedidas", CommandType.StoredProcedure, null);
-                
-                
                 SqlCommandHelper.AddParameters(commandObtenerMetas, parametersToSP2);
                 reader.Close();
                 var reader2 = await SqlCommandHelper.ExecuteCommandAsync(commandObtenerMetas);
-                List<DTOUltimaMetaDeParametro> resultados2 = SqlCommandHelper.MapToList<DTOUltimaMetaDeParametro>(reader2);
-                finalResponse.data.metasDeMedida = resultados2;
-                finalResponse.ok = true;
-                finalResponse.message = "Consulta exitosa";
-                return Ok(finalResponse);
-            }
-            catch (Exception ex)
-            {
-                finalResponse.ok = false;
-                finalResponse.message = "Error al ejecutar el procedimiento almacenado";
-                finalResponse.errors.Add(new ErrorModel { message = ex.Message });
-                return StatusCode(500, finalResponse);
-            }   
-            return null;
-        }
+                List<DTOUltimaMetaDeParametro> metas = SqlCommandHelper.MapToList<DTOUltimaMetaDeParametro>(reader2);
 
-        [Authorize(Roles = "empleado")]
-        [HttpGet("api/obtenerEjerciciosYParametros")]
-        public async Task<ActionResult<List<DTOEjerciciosYParametrosDelCliente>>> ObtenerDetallesDeProgreso
-        ([FromQuery] int idCliente)
-        {
-            try
-            {
-                
-                HttpResponseEjerciciosYParametrosDelCliente responseForFrontend = new HttpResponseEjerciciosYParametrosDelCliente();
-                var existingClient = _db.Usuarios.Find(idCliente);
-                if( existingClient == null){
-                    return BadRequest("El cliente no existe");
-                }
-                var ejercicioYParametros = await _db.ejerciciosYParametrosDelClienteSP.FromSqlInterpolated($@"EXEC sp_obtenerEjerciciosYParametrosDelCliente @idCliente={idCliente}").ToListAsync();
-                responseForFrontend.ok = true;
-                responseForFrontend.message = "Consulta exitosa";
-                responseForFrontend.errors = null;  
-                responseForFrontend.data = ejercicioYParametros;
-                return Ok(responseForFrontend);
+                var payload = new MedidasConMetas();
+                payload.medidas = medidas;
+                payload.metasDeMedida = metas;
+
+                var respuesta = ResponseManager.BuildResponse(true, 200, "Consulta exitosa", null, payload);
+                return Ok(respuesta);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error al ejecutar el procedimiento almacenado: {ex.Message}");
+                return StatusCode(500, ResponseManager.BuildResponse<MedidasConMetas>(false, 500, "Error al ejecutar el procedimiento almacenado", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null));
             }
-            return null;
         }
     }
 }

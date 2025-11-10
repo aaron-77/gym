@@ -1,59 +1,74 @@
 @model DTO.Dtos.ProgresoElement;
 @using DTO.Dtos;
 
-@functions{
-    public string getTipoDeBorde(){
+
+@functions {
+    public string getTipoDeBorde()
+    {
         var tipoDeBorde = "";
-        if(Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida){
+        if (Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida)
+        {
             tipoDeBorde = "specialBorder-ultimoValor";
-        }else if(Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta){
+        }
+        else if (Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta)
+        {
             tipoDeBorde = "specialBorder-meta";
-        }    
+        }
         return tipoDeBorde;
     }
-    public bool isDetailButton(){
+    public bool isDetailButton()
+    {
         return Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Detalle;
     }
 }
-<div id="containerProgesoElement" 
-    class="d-flex flex-column justify-content-center align-items-center container-progreso-element">
-    <div id="tituloProgresoElement" class="text-center tituloElement">
-        @Model.titulo
-    </div>
- 
-   
-    <div id="datoPrincipalContainer" 
-    class="d-flex justify-content-center align-items-center container-dato-principal 
-    @getTipoDeBorde()">
-        @if (@Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida
-            || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta
-            || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.UnidadDeMedida
-        )
-        {
-            <p id='datoPrincipalContentContainer' class="contenido-texto-dato-principal">
-                            @Model.datoPrincipal
-            </p>
 
-        }
-        else 
-        {
-            <img id="@Model.idHtmlElement" src="@Model.datoPrincipal" class="exerciseIcon @(@isDetailButton() ? "details-button" : "") @Model.cssClasses" />
-        }
+<div class="progreso-element-card">
+    <div class="progreso-element-header">
+        <h3 class="progreso-element-title">@Model.titulo</h3>
     </div>
-    @if (@Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida 
-    || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta)
-    {
-        <div id="unidadDeMedidaContainer" class="text-center container-unidadDeMedida">
-            @Model.unidadDeMedida
+
+    <div class="progreso-element-body">
+        <div class="progreso-value-container @getTipoDeBorde()">
+            @if (@Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida
+                        || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta
+                        || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.UnidadDeMedida)
+            {
+                <div class="value-display">
+                    <span class="value-number">@Model.datoPrincipal</span>
+                    @if (@Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida
+                                    || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta)
+                    {
+                        <span class="value-unit">@Model.unidadDeMedida</span>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="icon-container">
+                    <img id="@Model.idHtmlElement"
+                         src="@Url.Content(Model.datoPrincipal)"
+                         class="progreso-icon @(@isDetailButton() ? "details-button" : "") @Model.cssClasses"
+                         alt="@Model.titulo" />
+                </div>
+            }
         </div>
 
-    }
-    @if (@Model.tipoDeElemento != DTO.Enums.TipoDeElemento.Detalle)
-    {
-        <div id="datonSecundarioContainer" class="text-center container-dato-secundario">
-            @Model.datoSecundario
-        </div>
-    }
+        @if (@Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Medida || @Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Meta)
+        {
+            <div class="progreso-element-footer">
+                <span class="timestamp-label">Registrado:</span>
+                <span class="timestamp-value">@Model.datoSecundario</span>
+            </div>
+        }
 
+        @if (@Model.tipoDeElemento == DTO.Enums.TipoDeElemento.Parametro)
+        {
 
+            <div class="progreso-element-footer-parameter">
+                <span class="timestamp-value">@Model.datoSecundario</span>
+            </div>
+
+        }
+        
+    </div>
 </div>

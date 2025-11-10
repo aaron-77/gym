@@ -18,11 +18,11 @@ using API.Controllers;
 using DataAccess;
 using System.Runtime.InteropServices;
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile(
-    Path.Combine(AppContext.BaseDirectory, "appsettings.json"),
-    optional: false,
-    reloadOnChange: true
-);
+//builder.Configuration.AddJsonFile(
+//    Path.Combine(AppContext.BaseDirectory, "appsettings.Development.json"),
+//    optional: false,
+//    reloadOnChange: true
+//);
 //builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
 builder.Services.Configure<JwtSettings>(jwtSection);
@@ -124,12 +124,21 @@ string smtpUsername = smtpSettings["Username"];
 string smtpPassword = smtpSettings["Password"];
 
 builder.Services.AddScoped(sp => new EmailManagerMailKit(smtpServer, smtpPort, smtpUsername, smtpPassword));
+
+
+bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
+
+// Escoge la URL del backend según el valor de UseSsl
+string baseApiUrl = builder.Configuration[
+    useSsl ? "EndPoints:api:ssl" : "EndPoints:api:nossl"
+] ?? "http://localhost:5274";
+
 builder.Services.AddHttpClient<HttpCustomClient>(client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["urls"]);
+    client.BaseAddress = new Uri(baseApiUrl);
 }).AddHttpMessageHandler<AuthHeaderHandler>();
+
 builder.Services.AddScoped<HorariosService>();
-builder.Services.AddScoped<HttpCustomClient>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<UserRoleService>();
 builder.Services.AddScoped<ReservacionesHub>();

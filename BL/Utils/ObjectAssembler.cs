@@ -5,8 +5,9 @@ namespace BL.Utils
     public class ObjectAssembler
     {
         public static List<DTOItemProgreso> ensamblarItemsProgreso
-        (List<DTOUltimaMedidaDeParametro> medidas,
-        List<DTOUltimaMetaDeParametro> metas)
+        (
+           List<DTOUltimaMedidaDeParametro> medidas,
+           List<DTOUltimaMetaDeParametro> metas)
         {
             List<DTOItemProgreso> itemsProgresoList = new List<DTOItemProgreso>();
             

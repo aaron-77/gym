@@ -69,37 +69,7 @@ namespace GymFrontend.Controllers
             _cookieService.AgregarCookie(Response, "AuthToken", respuesta.payload.IdToken);
             _cookieService.AgregarCookie(Response, "AccessToken", respuesta.payload.AccessToken);
             _cookieService.AgregarCookie(Response, "RefreshToken", respuesta.payload.RefreshToken);
-            /* Response.Cookies.Append(
-                "AuthToken",
-                respuesta.payload.IdToken,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                }
-            );
-            Response.Cookies.Append(
-                "AccessToken",
-                respuesta.payload.AccessToken,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                }
-            );
-
-            Response.Cookies.Append(
-                "RefreshToken",
-                respuesta.payload.RefreshToken,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                }
-            ); */
+            
             var roles = _jwtTokenGenerator.GetRoles(claims);
             var empleadoPage = config["pages:empleados"];
             var clientePage = config["pages:clientes"];
@@ -110,7 +80,8 @@ namespace GymFrontend.Controllers
             ViewBag.cel = respuesta.payload.Telefono;
             ViewBag.correo = respuesta.payload.Correo;
 
-            return Redirect(clientePage);
+            return RedirectToAction("dirigirACrearPaginaDeClientes", new { idUser = respuesta.payload.Id });
+        
         }
 
         [Authorize(Roles = "empleado,cliente")]
@@ -189,22 +160,29 @@ namespace GymFrontend.Controllers
         [HttpGet]
         [Route("clientes")]
         public async Task<IActionResult> dirigirACrearPaginaDeClientes(
-            [FromQuery] string celular,
-            [FromQuery] int idUser
+            [FromQuery] string idUser
         )
         {
-            HttpResponseProgresoUsuario responseProgreso =
-                await medidasManager.obtenerProgresoDelUsuario(idUser);
+            // idUser is expected as string (could be numeric id or guid depending on system)
+            var response = await medidasManager.obtenerProgresoDelUsuario(idUser);
+            
+            if (response == null || !response.success)
+            {
+                // Handle error: redirect or show error page
+                ViewBag.message = response?.message ?? "Error al obtener progreso del usuario.";
+                return View("ClientesMainPage", null);
+            }
 
-            return View("ClientesMainPage", responseProgreso.data);
+            return View("ClientesMainPage", response.payload);
         }
 
         [HttpGet]
         [Route("detallesDeProgreso")]
         public async Task<IActionResult> dirigirADetallesDeProgreso([FromQuery] int idCliente)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             HttpResponseAñosActivo responseAñosActivo =
-                await medidasManager.obtenerAñosActivosDelCliente(idCliente);
+                await medidasManager.obtenerAñosActivosDelCliente(userId);
             return View("DetallesDeProgreso", responseAñosActivo.data);
         }
 
