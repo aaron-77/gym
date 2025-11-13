@@ -1,3 +1,7 @@
+@{
+    var userId = ViewBag.userId;
+
+ }
 <!DOCTYPE html>
 <html lang="en">
 
@@ -63,7 +67,7 @@
             <li class="nav-heading">Pages</li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="/clientes?idUser=@Model[0].medida.fkUsuario">
+                <a class="nav-link collapsed" href="/clientes?idUser=@userId">
                     <span>Tu Progreso</span>
                 </a>
             </li>

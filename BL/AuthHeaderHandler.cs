@@ -15,11 +15,12 @@ public class AuthHeaderHandler : DelegatingHandler
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var backendAddressNossl = _configuration["backendAddresses:nossl"];
-        var frontendAddress = _configuration["urls"];
+        var backendAddress = Environment.GetEnvironmentVariable("BACKEND_BASE_ADDRESS");
+        var frontendAddress = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+
         var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
         var idToken = _httpContextAccessor.HttpContext?.Request.Cookies["AuthToken"];
-        bool isApiRequest = request.RequestUri.ToString().Contains(backendAddressNossl, StringComparison.OrdinalIgnoreCase);
+        bool isApiRequest = request.RequestUri.ToString().Contains(backendAddress, StringComparison.OrdinalIgnoreCase);
         bool isFrontendRequest = request.RequestUri.ToString().Contains(frontendAddress, StringComparison.OrdinalIgnoreCase);
         if (!string.IsNullOrEmpty(accessToken) && isApiRequest)
         {

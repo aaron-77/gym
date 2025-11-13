@@ -11,20 +11,29 @@ using DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Console.WriteLine("=== DEBUGGING URLS ===");
+Console.WriteLine($"ASPNETCORE_URLS env: {Environment.GetEnvironmentVariable("ASPNETCORE_URLS")}");
+Console.WriteLine($"ASPNETCORE_URLS config: {builder.Configuration["ASPNETCORE_URLS"]}");
+Console.WriteLine($"Urls property: {string.Join(", ", builder.WebHost.GetSetting("urls") ?? "null")}");
+Console.WriteLine("======================");
+
+string aspnetcore_urls = builder.Configuration["ASPNETCORE_URLS"] ?? "";
+aspnetcore_urls = aspnetcore_urls.Trim().ToLowerInvariant();
+
 builder.Services.AddControllersWithViews();//.AddRazorRuntimeCompilation();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<AuthHeaderHandler>();
 bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
 
 // Escoge la URL del backend según el valor de UseSsl
-string baseApiUrl = builder.Configuration[
-    useSsl ? "EndPoints:frontend:ssl" : "EndPoints:frontend:nossl"
-] ?? "http://localhost:5062";
+string BaseApiUrlForClientHttp = builder.Configuration[
+    aspnetcore_urls.Contains("https") ? "EndPoints:api:ssl" : "EndPoints:api:nossl"
+] ?? "http://localhost:5274";
 
 
 builder.Services.AddHttpClient<HttpCustomClient>(client =>
 {
-    client.BaseAddress = new Uri(baseApiUrl);
+    client.BaseAddress = new Uri(BaseApiUrlForClientHttp);
 }).AddHttpMessageHandler<AuthHeaderHandler>();
 
 builder.Services.AddScoped<EndPointsManager>();
@@ -54,6 +63,10 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
+    string audience = jwtSettings.FrontAudiencie;
+    if (aspnetcore_urls.Contains("https")) {
+        audience = jwtSettings.FrontendAudienceSsl;
+    }
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -61,7 +74,7 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.FrontAudiencie,
+        ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 
@@ -108,7 +121,7 @@ builder.Services.AddDataAccess(); // Agregado
 builder.Services.AddBusinessLayer(); // Agregado
 
 
-
+/*
 if (builder.Environment.IsDevelopment()) {
     builder.WebHost.ConfigureKestrel(options =>
     {
@@ -125,8 +138,38 @@ if (builder.Environment.IsDevelopment()) {
         options.ListenLocalhost(5062); // puerto HTTP opcional
    });
 }
-
+*/
 var app = builder.Build();
+
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+var config = app.Configuration;
+
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    var addresses = app.Urls;
+    var useSsl = config.GetValue<bool>("UseSsl");
+    var jwtSettings = config.GetSection("JwtSettings").Get<JwtSettings>();
+    
+    Console.WriteLine("\n" + new string('=', 60));
+    Console.WriteLine("?? APLICACIÓN INICIADA");
+    Console.WriteLine(new string('=', 60));
+    
+    foreach (var address in addresses)
+    {
+        logger.LogInformation($"Escuchando en: {address}");
+        Console.WriteLine($"  ? {address}");
+    }
+    
+    Console.WriteLine(new string('-', 60));
+    Console.WriteLine("??  CONFIGURACIÓN ACTIVA:");
+    Console.WriteLine($"  • SSL Habilitado: {useSsl}");
+    Console.WriteLine($"  • Issuer: {jwtSettings?.Issuer}");
+    Console.WriteLine($"  • Audiencia Frontend: {(useSsl ? jwtSettings?.FrontendAudienceSsl : jwtSettings?.FrontAudiencie)}");
+    Console.WriteLine($"  • Expiración Token: {jwtSettings?.ExpiryMinutes} minutos");
+    Console.WriteLine(new string('=', 60) + "\n");
+    
+    logger.LogInformation("Configuración JWT cargada correctamente");
+});
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

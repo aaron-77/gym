@@ -292,6 +292,11 @@ namespace API.Controllers
         [Route("api/autenticar")]
         public async Task<IActionResult> AutenticarUsuario([FromBody] UserCredentials credenciales)
         {
+
+            string bases = Request.PathBase;
+            string query = Request.Path;
+            string proto = Request.Protocol;
+            string origin = Request.Headers["Origin"].FirstOrDefault();
             var loggedUser = await _authService.AuthenticateUser(
                 credenciales.correo,
                 credenciales.contrasena

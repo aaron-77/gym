@@ -26,7 +26,13 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Configuration.AddJsonFile("API/appsettings.json", optional: false, reloadOnChange: false);
 var jwtSection = builder.Configuration.GetSection("JwtSettings");
 builder.Services.Configure<JwtSettings>(jwtSection);
+var claimsSection = builder.Configuration.GetSection("ClaimsSettings");
+builder.Services.Configure<ClaimsSettings>(claimsSection);
 var dbConnectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
+string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
+aspnetcore_urls = aspnetcore_urls.Trim().ToLowerInvariant();
+
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) { 
     dbConnectionString = builder.Configuration["ConnectionStrings:windowsConnection"];
 }
@@ -44,6 +50,12 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme,options =>
 {
+    
+    string audience = jwtSettings.BackendAudiencie;
+    if (aspnetcore_urls.Contains("https"))
+    {
+        audience = jwtSettings.BackendAudienceSsl;
+    }
     options.TokenValidationParameters = new TokenValidationParameters
     {
 
@@ -52,7 +64,7 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.BackendAudiencie,
+        ValidAudience = audience,
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
     
@@ -126,11 +138,11 @@ string smtpPassword = smtpSettings["Password"];
 builder.Services.AddScoped(sp => new EmailManagerMailKit(smtpServer, smtpPort, smtpUsername, smtpPassword));
 
 
-bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
+
 
 // Escoge la URL del backend según el valor de UseSsl
 string baseApiUrl = builder.Configuration[
-    useSsl ? "EndPoints:api:ssl" : "EndPoints:api:nossl"
+    aspnetcore_urls.Contains("https") ? "EndPoints:api:ssl" : "EndPoints:api:nossl"
 ] ?? "http://localhost:5274";
 
 builder.Services.AddHttpClient<HttpCustomClient>(client =>
@@ -180,6 +192,7 @@ builder.Services.AddDataAccess(); // Agregado
 builder.Services.AddBusinessLayer(); // Agregado
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

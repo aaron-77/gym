@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -17,58 +18,144 @@ namespace BL.Utils;
 public class JwtTokenGenerator
 {
     private readonly JwtSettings _jwtSettings;
+    private readonly ClaimsSettings _claimsSettings;
     private readonly IAccessTokenRepository _accessTokenRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public JwtTokenGenerator(
         IOptions<JwtSettings> jwtOptions,
+        IOptions<ClaimsSettings> claimsOptions,
         IAccessTokenRepository accessTokenRepository,
         IRefreshTokenRepository refreshTokenRepository,
         IHttpContextAccessor httpContextAccessor
     )
     {
         _jwtSettings = jwtOptions.Value;
+        _claimsSettings = claimsOptions.Value;
         _accessTokenRepository = accessTokenRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _httpContextAccessor = httpContextAccessor;
+    }
+
+    /// <summary>
+    /// Crea un JwtSecurityToken con la configuración especificada según el tipo de token y esquema SSL
+    /// </summary>
+    /// <param name="tokenType">Tipo de token a generar (FrontendToken, BackendToken, RefreshToken)</param>
+    /// <param name="ssl">Si es true, usa las audiencias SSL; si es false, usa las audiencias estándar</param>
+    /// <param name="userValues">Diccionario con los valores del usuario (userId, userName, email, nombreCompleto, numeroDeIdentificacion)</param>
+    /// <param name="roles">Lista de roles del usuario</param>
+    /// <returns>JwtSecurityToken configurado</returns>
+    public JwtSecurityToken CreateTokenWithConfig(
+        TokenType tokenType,
+        bool ssl,
+        Dictionary<string, string> userValues,
+        IList<string> roles)
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        
+        // Obtener expiryMinutes desde la configuración
+        int expiryMinutes = _jwtSettings.ExpiryMinutes;
+        var expires = DateTime.UtcNow.AddMinutes(expiryMinutes);
+
+        string issuer = _jwtSettings.Issuer;
+        string audience = GetAudienceForTokenType(tokenType, ssl);
+
+        // Construir los claims según el tipo de token
+        var claims = BuildClaimsForTokenType(tokenType, userValues, roles);
+
+        var token = new JwtSecurityToken(
+            issuer: issuer,
+            audience: audience,
+            claims: claims,
+            expires: expires,
+            signingCredentials: creds
+        );
+
+        return token;
+    }
+
+    /// <summary>
+    /// Construye los claims para el tipo de token especificado usando la configuración
+    /// </summary>
+    private List<Claim> BuildClaimsForTokenType(
+        TokenType tokenType,
+        Dictionary<string, string> userValues,
+        IList<string> roles)
+    {
+        var claims = new List<Claim>();
+
+        switch (tokenType)
+        {
+            case TokenType.BackendToken:
+                // Agregar claims desde la configuración de BackendTokenClaims
+                claims.Add(new Claim(ClaimTypes.NameIdentifier, userValues.GetValueOrDefault("userId") ?? ""));
+                claims.Add(new Claim(ClaimTypes.Name, userValues.GetValueOrDefault("userName") ?? ""));
+                break;
+
+            case TokenType.FrontendToken:
+                // Agregar claims desde la configuración de FrontendTokenClaims
+                claims.Add(new Claim("sub", userValues.GetValueOrDefault("userId") ?? ""));
+                claims.Add(new Claim("name", userValues.GetValueOrDefault("userName") ?? ""));
+                claims.Add(new Claim("email", userValues.GetValueOrDefault("email") ?? ""));
+                claims.Add(new Claim("preferred_username", userValues.GetValueOrDefault("userName") ?? ""));
+                claims.Add(new Claim("given_name", userValues.GetValueOrDefault("nombreCompleto") ?? ""));
+                claims.Add(new Claim("family_name", userValues.GetValueOrDefault("numeroDeIdentificacion") ?? ""));
+                break;
+
+            case TokenType.RefreshToken:
+                // Agregar claims mínimos para RefreshToken
+                claims.Add(new Claim("sub", userValues.GetValueOrDefault("userId") ?? ""));
+                claims.Add(new Claim("name", userValues.GetValueOrDefault("userName") ?? ""));
+                break;
+        }
+
+        // Agregar roles a todos los tipos de token
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        return claims;
+    }
+
+    /// <summary>
+    /// Obtiene la audiencia correcta según el tipo de token y el esquema SSL
+    /// </summary>
+    private string GetAudienceForTokenType(TokenType tokenType, bool ssl)
+    {
+        return tokenType switch
+        {
+            TokenType.BackendToken => ssl ? _jwtSettings.BackendAudienceSsl : _jwtSettings.BackendAudiencie,
+            TokenType.FrontendToken => ssl ? _jwtSettings.FrontendAudienceSsl : _jwtSettings.FrontAudiencie,
+            TokenType.RefreshToken => ssl ? _jwtSettings.BackendAudienceSsl : _jwtSettings.BackendAudiencie,
+            _ => throw new ArgumentException("Tipo de token no válido", nameof(tokenType))
+        };
     }
 
     public async Task<string> GenerateAccessToken(ApplicationUser user, IList<string> roles)
     {
         try
         {
-            var claims = new List<Claim>
+            var userValues = new Dictionary<string, string>
             {
-                new(ClaimTypes.NameIdentifier, user.Id),
-                new(ClaimTypes.Name, user.UserName!),
+                { "userId", user.Id },
+                { "userName", user.UserName! }
             };
-
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
-
-            var token = new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.BackendAudiencie,
-                claims: claims,
-                expires: expires,
-                signingCredentials: creds
-            );
+            string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
+            bool useSsl = aspnetcore_urls.StartsWith("https", StringComparison.OrdinalIgnoreCase);
+            //bool useSsl = _httpContextAccessor.HttpContext?.Request.IsHttps ?? false;//
+            var token = CreateTokenWithConfig(TokenType.BackendToken, useSsl, userValues, roles);
 
             var accessToken = new AccessToken
             {
                 AccessTokenId = Guid.NewGuid(),
                 UserId = user.Id,
-                ClientId = "gymAppFrontend", // Asumiendo un cliente fijo para el frontend
+                ClientId = "gymAppFrontend",
                 TokenHash = HashToken(new JwtSecurityTokenHandler().WriteToken(token)),
                 IssuedAt = DateTime.UtcNow,
-                ExpiresAt = expires,
+                ExpiresAt = token.ValidTo,
                 IpAddress =
                     _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
                 UserAgent = _httpContextAccessor
@@ -82,7 +169,6 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
-            // Considerar loggear la excepción aquí
             throw new ApplicationException("Error al generar el Access Token.", ex);
         }
     }
@@ -91,37 +177,23 @@ public class JwtTokenGenerator
     {
         try
         {
-            var claims = new List<Claim>
+            var userValues = new Dictionary<string, string>
             {
-                new("sub", user.Id), // Subject
-                new("name", user.UserName!), // Name
-                new("email", user.Email!), // Email
-                new("preferred_username", user.UserName!),
-                new("given_name", user.NombreCompleto), // Asumiendo que NombreCompleto es el nombre de pila
-                new("family_name", user.NumeroDeIdentificacion), // Asumiendo que NumeroDeIdentificacion es el apellido o un identificador familiar
+                { "userId", user.Id },
+                { "userName", user.UserName! },
+                { "email", user.Email! },
+                { "nombreCompleto", user.NombreCompleto },
+                { "numeroDeIdentificacion", user.NumeroDeIdentificacion }
             };
-
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddMinutes(_jwtSettings.ExpiryMinutes); // Mismo tiempo de expiración que el access token
-            var token = new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.FrontAudiencie,
-                claims: claims,
-                expires: expires,
-                signingCredentials: creds
-            );
+            string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
+            bool useSsl = aspnetcore_urls.StartsWith("https", StringComparison.OrdinalIgnoreCase);
+            //  bool useSsl = _httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
+            var token = CreateTokenWithConfig(TokenType.FrontendToken, useSsl, userValues, roles);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
         catch (Exception ex)
         {
-            // Considerar loggear la excepción aquí
             throw new ApplicationException("Error al generar el ID Token.", ex);
         }
     }
@@ -161,7 +233,6 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
-            // Considerar loggear la excepción aquí
             throw new ApplicationException("Error al generar el Refresh Token.", ex);
         }
     }
@@ -181,13 +252,12 @@ public class JwtTokenGenerator
                 || refreshToken.ExpiresAt <= DateTime.UtcNow
             )
             {
-                return null; // Refresh token inválido, expirado o revocado
+                return null;
             }
             return refreshToken.UserId;
         }
         catch (Exception ex)
         {
-            // Considerar loggear la excepción aquí
             throw new ApplicationException("Error al validar el Refresh Token.", ex);
         }
 
@@ -210,7 +280,6 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
-            // Considerar loggear la excepción aquí
             throw new ApplicationException("Error al revocar el Refresh Token.", ex);
         }
     }
@@ -228,7 +297,6 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
-            // Considerar loggear la excepción aquí
             throw new ApplicationException("Error al hashear el token.", ex);
         }
     }
@@ -239,6 +307,11 @@ public class JwtTokenGenerator
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
+            
+            // Determinar si la petición es SSL
+            bool requestIsHttps = _httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
+            string audience = requestIsHttps ? _jwtSettings.BackendAudienceSsl : _jwtSettings.BackendAudiencie;
+            
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -246,7 +319,7 @@ public class JwtTokenGenerator
                 ValidateIssuer = true,
                 ValidIssuer = _jwtSettings.Issuer,
                 ValidateAudience = true,
-                ValidAudience = _jwtSettings.BackendAudiencie,
+                ValidAudience = audience, // Usar una sola audiencia en lugar de un arreglo
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero,
             };
@@ -261,7 +334,6 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
-            // Considerar loggear la excepción aquí
             return null;
         }
     }
@@ -272,6 +344,11 @@ public class JwtTokenGenerator
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
+                        
+            // Determinar si la petición es SSL
+            bool requestIsHttps = _httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
+            string audience = requestIsHttps ? _jwtSettings.FrontendAudienceSsl : _jwtSettings.FrontAudiencie;
+            
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -279,7 +356,7 @@ public class JwtTokenGenerator
                 ValidateIssuer = true,
                 ValidIssuer = _jwtSettings.Issuer,
                 ValidateAudience = true,
-                ValidAudience = _jwtSettings.FrontAudiencie,
+                ValidAudience = audience, // Usar una sola audiencia en lugar de un arreglo
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero,
             };
@@ -295,14 +372,13 @@ public class JwtTokenGenerator
                     g => g.Key,
                     g =>
                         g.Key == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-                            ? string.Join(",", g.Select(c => c.Value)) // 👈 concatena roles
-                            : g.First().Value // 👈 para otros claims solo el primero
+                            ? string.Join(",", g.Select(c => c.Value))
+                            : g.First().Value
                 );
             return claims.Count > 0 ? claims : null;
         }
         catch (Exception ex)
         {
-            // Considerar loggear la excepción aquí
             return null;
         }
     }
@@ -314,10 +390,9 @@ public class JwtTokenGenerator
             && !claims.TryGetValue("role", out rolesValue)
         )
         {
-            return new List<string>(); // No hay roles
+            return new List<string>();
         }
 
-        // Separar por comas y eliminar espacios extra
         return rolesValue
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(r => r.Trim())
@@ -336,21 +411,17 @@ public class JwtTokenGenerator
         {
             var handler = new JwtSecurityTokenHandler();
 
-            // Validar formato
             if (!handler.CanReadToken(token))
                 throw new ArgumentException("El token proporcionado no tiene un formato JWT válido.");
 
-            // Leer el token sin validarlo (solo para extraer claims)
             var jwtToken = handler.ReadJwtToken(token);
 
-            // Buscar el claim solicitado
             var claim = jwtToken.Claims.FirstOrDefault(c => c.Type == claimType);
 
-            return claim?.Value; // Retorna null si no existe
+            return claim?.Value;
         }
         catch (Exception ex)
         {
-            // Aquí podrías registrar la excepción con tu logger
             throw new ApplicationException($"Error al obtener el claim '{claimType}' del token.", ex);
         }
     }

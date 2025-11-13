@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using BL;
+﻿using BL;
 using BL.Utils;
+using DataAccess.EntityFramework;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace GymFrontend.Controllers
 {
@@ -181,9 +182,10 @@ namespace GymFrontend.Controllers
         public async Task<IActionResult> dirigirADetallesDeProgreso([FromQuery] int idCliente)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            HttpResponseAñosActivo responseAñosActivo =
-                await medidasManager.obtenerAñosActivosDelCliente(userId);
-            return View("DetallesDeProgreso", responseAñosActivo.data);
+            HttpResponseAñosActivo responseAñosActivo = await medidasManager.obtenerAñosActivosDelCliente(userId);
+            ViewBag.anosActivo = responseAñosActivo.data;
+            ViewBag.userId = userId;
+            return View("DetallesDeProgreso");
         }
 
         [Authorize(Roles = "empleado")]
@@ -191,6 +193,7 @@ namespace GymFrontend.Controllers
         [Route("empleados")]
         public async Task<IActionResult> dirigirACrearPaginaDeEmpelados()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var respuestaUsuarios = await manager.obtenerUsuarios();
             List<ExistingUser> usuarios = respuestaUsuarios.payload;
            var respuestaParametros = await medidasManager.obtenerParametrosDeMedicion();
@@ -203,6 +206,7 @@ namespace GymFrontend.Controllers
             ViewBag.usuarios = usuarios;
             ViewBag.parametros = parametrosDeMedicion;
             ViewBag.unidades = unidadDeMedida;
+            
             return View("EmpleadosMainPage");
         }
 

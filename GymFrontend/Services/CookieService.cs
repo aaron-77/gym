@@ -1,7 +1,19 @@
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json.Linq;
 
 public class CookieService
 {
+
+
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public CookieService(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+
+
     /// <summary>
     /// Agrega una cookie al Response recibido desde el controller.
     /// </summary>
@@ -16,15 +28,29 @@ public class CookieService
         if (string.IsNullOrEmpty(key)) 
             throw new ArgumentException("La clave no puede ser nula o vacía", nameof(key));
 
-        // Valores por defecto si no se pasan opciones
-        var cookieOptions = options ?? new CookieOptions
+
+        var context = _httpContextAccessor.HttpContext
+                      ?? throw new InvalidOperationException("No hay contexto HTTP disponible");
+
+        var request = context.Request;
+        CookieOptions cookieOptions = options ?? new CookieOptions
         {
             HttpOnly = true,
             Secure = false,
             SameSite = SameSiteMode.Strict
             // No se asigna Expires por defecto
         };
-
+        if (request.IsHttps)
+        {
+            cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict
+            };
+        }
+        
+       
         response.Cookies.Append(key, value ?? string.Empty, cookieOptions);
     }
 }

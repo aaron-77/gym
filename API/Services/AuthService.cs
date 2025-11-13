@@ -55,9 +55,11 @@ namespace API.Services
                 var idToken = _jwtTokenGenerator.GenerateIdToken(user, roles);
 
                 // Obtener información del cliente para el refresh token
+                string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
+                bool useSsl = aspnetcore_urls.StartsWith("https", StringComparison.OrdinalIgnoreCase);
                 var httpContext = _httpContextAccessor.HttpContext;
                 var clientId = "gymwebapp-frontend"; // Puedes obtenerlo de la configuración o del request si es necesario
-                var ipAddress = httpContext?.Connection.RemoteIpAddress?.ToString();
+                var ipAddress =aspnetcore_urls;
                 var userAgent = httpContext?.Request.Headers["User-Agent"].ToString();
 
                 var refreshToken = await _jwtTokenGenerator.GenerateRefreshToken(user.Id, clientId);
