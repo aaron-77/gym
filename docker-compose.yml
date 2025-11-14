@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+    
+    # servicios
+   fitnessgym_api:
+       image: fitnessgymapi
+       ports:
+           - "8090:5274"
+        #build: 
+        #    context: ../MSSuscripcion/
+        #    dockerfile: Dockerfile
+       build:
+           https://github.com/aaron-77/gym.git#main:API
+       environment:
+           ASPNETCORE_ENVIRONMENT: "Production"
+           ASPNETCORE_URLS: "http://localhost:5274"    
+            
+   fitnessgym_frontend:
+       image: fitnessgymfrontend
+       depends_on: 
+           - "fitnessgym_api"
+       ports:
+           - "8091:5062"
+       build:
+           https://github.com/aaron-77/gym.git#main:GymFrontend
+       environment: 
+           ASPNETCORE_ENVIRONMENT: "Production"
+           ASPNETCORE_URLS: "http://localhost:5062"
+           BACKEND_BASE_ADDRESS: "http://localhost:5274"

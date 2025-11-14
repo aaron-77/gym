@@ -6,7 +6,8 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "http://localhost:5274"
+        "ASPNETCORE_URLS": "http://localhost:5274",
+        "SECRET_TOKEN_KEY": "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5274"
@@ -17,7 +18,8 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "https://localhost:7269"
+        "ASPNETCORE_URLS": "https://localhost:7269",
+        "SECRET_TOKEN_KEY": "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7269"

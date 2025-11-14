@@ -28,8 +28,8 @@ namespace API.Services
                 var preReservasDeHorario = await _horariosService.ObtenerPreReservasDeHorario();
                 DTOResponse<List<DTOHorarioVisualizacion>> respuesta = new DTOResponse<List<DTOHorarioVisualizacion>>
                 {
-                    success = (preReservasDeHorario.Count > 0),
-                    httpCode = (preReservasDeHorario.Count > 0) ? 200 : 400,
+                    success = true,
+                    httpCode = 200,
                     errors = null,
                     message = (preReservasDeHorario.Count > 0) ? "horarios pre reservados obtenidos con exito" : "no se encontraron horarios",
                     payload = preReservasDeHorario
@@ -57,8 +57,8 @@ namespace API.Services
                 var horariosDisponibles = await _horariosService.consultarHorariosDisponibles();
                 DTOResponse<List<DTOHorarioVisualizacion>> respuesta = new DTOResponse<List<DTOHorarioVisualizacion>>
                 {
-                    success = (horariosDisponibles.Count > 0),
-                    httpCode = (horariosDisponibles.Count > 0) ? 200 : 400,
+                    success = true,
+                    httpCode = 200,
                     errors = null,
                     message = (horariosDisponibles.Count > 0) ? "Horarios disponibles obtenidos con éxito" : "No se encontraron horarios disponibles",
                     payload = horariosDisponibles

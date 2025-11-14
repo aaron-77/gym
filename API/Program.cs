@@ -38,7 +38,7 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
 }
     
 var jwtSettings = jwtSection.Get<JwtSettings>();
-var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY"));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<FitnessCenterDbContext>()
@@ -139,7 +139,7 @@ builder.Services.AddScoped(sp => new EmailManagerMailKit(smtpServer, smtpPort, s
 
 
 
-
+builder.Services.AddScoped<AuthHeaderHandler>();
 // Escoge la URL del backend según el valor de UseSsl
 string baseApiUrl = builder.Configuration[
     aspnetcore_urls.Contains("https") ? "EndPoints:api:ssl" : "EndPoints:api:nossl"
