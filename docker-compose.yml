@@ -14,7 +14,7 @@ services:
            https://github.com/aaron-77/gym.git#main:API
        environment:
            ASPNETCORE_ENVIRONMENT: "Production"
-           ASPNETCORE_URLS: "http://localhost:5274"
+           ASPNETCORE_URLS: "http://localhost:5274"    
            SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
             
    fitnessgym_frontend:

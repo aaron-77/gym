@@ -54,7 +54,7 @@ builder.Services.Configure<JwtSettings>(jwtSection);
 builder.Services.Configure<PagesSettings>(pagesSection);
 var jwtSettings = jwtSection.Get<JwtSettings>();
 var pagesSettings = pagesSection.Get<PagesSettings>();
-var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY"));
 var LoginPath = pagesSettings.Login;
 var AccessDeniedPath = pagesSettings.Forbidden;
 builder.Services.AddAuthentication(options =>

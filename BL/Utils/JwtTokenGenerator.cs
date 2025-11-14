@@ -52,7 +52,7 @@ public class JwtTokenGenerator
         Dictionary<string, string> userValues,
         IList<string> roles)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY")));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         
         // Obtener expiryMinutes desde la configuración
@@ -306,8 +306,8 @@ public class JwtTokenGenerator
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
-            
+            var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY"));
+
             // Determinar si la petición es SSL
             bool requestIsHttps = _httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
             string audience = requestIsHttps ? _jwtSettings.BackendAudienceSsl : _jwtSettings.BackendAudiencie;
@@ -343,8 +343,8 @@ public class JwtTokenGenerator
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
-                        
+            var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY"));
+
             // Determinar si la petición es SSL
             bool requestIsHttps = _httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
             string audience = requestIsHttps ? _jwtSettings.FrontendAudienceSsl : _jwtSettings.FrontAudiencie;
