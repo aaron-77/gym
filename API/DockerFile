@@ -2,10 +2,10 @@
 WORKDIR /source
 
 # copy csproj and restore as distinct layers
-COPY API/*.csproj ./
-COPY BL/*.csproj ./
-COPY DataAccess/*.csproj ./
-COPY DTO/*.csproj ./
+COPY ["API/API.csproj", "API/"]
+COPY ["BL/BL.csproj", "BL/"]
+COPY ["DataAccess/DataAccess.csproj", "DataAccess/"]
+COPY ["DTO/DTO.csproj", "DTO/"]
 RUN dotnet restore "API.csproj"
 
 # copy everything else and build app
