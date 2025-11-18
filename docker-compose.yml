@@ -13,7 +13,7 @@ services:
        build:
            context: git@github.com:aaron-77/gym.git
            dockerfile: API/DockerFile
-           ssh:
+           s    sh:
                 - default
        environment:
            ASPNETCORE_ENVIRONMENT: "Production"
