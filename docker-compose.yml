@@ -11,7 +11,10 @@ services:
         #    context: ../MSSuscripcion/
         #    dockerfile: Dockerfile
        build:
-           https://github.com/aaron-77/gym.git#main:API
+           context: git@github.com:aaron-77/gym.git
+           dockerfile: API/DockerFile
+           ssh:
+                - default
        environment:
            ASPNETCORE_ENVIRONMENT: "Production"
            ASPNETCORE_URLS: "http://localhost:5274"    
@@ -24,7 +27,10 @@ services:
        ports:
            - "8091:5062"
        build:
-           https://github.com/aaron-77/gym.git#main:GymFrontend
+           context: git@github.com:aaron-77/gym.git
+           dockerfile: GymFrontend/DockerFile
+           ssh:
+                - default
        environment: 
            ASPNETCORE_ENVIRONMENT: "Production"
            ASPNETCORE_URLS: "http://localhost:5062"
