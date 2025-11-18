@@ -7,7 +7,7 @@ COPY ["GymFrontend/GymFrontend.csproj", "GymFrontend/"]
 COPY ["BL/BL.csproj", "BL/"]
 COPY ["DTO/DTO.csproj", "DTO/"]
 COPY ["DataAccess/DataAccess.csproj", "DataAccess/"]
-RUN dotnet restore "GymFrontend.csproj"
+RUN dotnet restore "GymFrontend/GymFrontend.csproj"
 
 # copy everything else and build app
 COPY GymFrontend/ ./
