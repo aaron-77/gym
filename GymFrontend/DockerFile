@@ -11,9 +11,12 @@ RUN dotnet restore "GymFrontend/GymFrontend.csproj"
 
 # copy everything else and build app
 COPY GymFrontend/ GymFrontend/
+COPY BL/ BL/
+COPY DTO/ DTO/
+COPY DataAccess/ DataAccess/
 RUN echo "=== Contenido de API/ ===" && ls -laR GymFrontend/
 RUN dotnet publish GymFrontend/GymFrontend.csproj -c release -o /app --no-restore
-RUN echo "=== Contenido de API/ ===" && ls -laR /app
+RUN echo "=== Contenido de PUBLISH--------/ ===" && ls -laR /app
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
