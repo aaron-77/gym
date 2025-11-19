@@ -10,7 +10,7 @@ COPY ["DataAccess/DataAccess.csproj", "DataAccess/"]
 RUN dotnet restore "GymFrontend/GymFrontend.csproj"
 
 # copy everything else and build app
-COPY GymFrontend/ ./
+COPY GymFrontend/ GymFrontend/
 RUN dotnet publish GymFrontend/GymFrontend.csproj -c release -o /app --no-restore
 
 # final stage/image
