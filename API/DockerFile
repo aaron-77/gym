@@ -13,11 +13,11 @@ COPY API/ /API
 COPY BL/ BL/
 COPY DTO/ DTO/
 COPY DataAccess/ DataAccess/
-RUN echo "=== Contenido de API/ ===" && ls -laR API/
 RUN dotnet publish API/API.csproj -c release -o /app --no-restore
-
+RUN echo "=== Contenido de API DESPUES DE PUBLISH/ ===" && ls -laR API/
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app ./
+RUN echo "=== Contenido de API  ENTRYPOINT--------/ ===" && ls -laR .
 ENTRYPOINT ["dotnet", "API.dll"]

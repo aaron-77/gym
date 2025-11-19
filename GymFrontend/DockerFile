@@ -14,11 +14,11 @@ COPY GymFrontend/ GymFrontend/
 COPY BL/ BL/
 COPY DTO/ DTO/
 COPY DataAccess/ DataAccess/
-RUN echo "=== Contenido de API/ ===" && ls -laR GymFrontend/
 RUN dotnet publish GymFrontend/GymFrontend.csproj -c release -o /app --no-restore
-RUN echo "=== Contenido de PUBLISH--------/ ===" && ls -laR /app
+RUN echo "=== Contenido de GYMFRONTEND  PUBLISH--------/ ===" && ls -laR /app
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app ./
+RUN echo "=== Contenido de GYMFRONTEND  ENTRYPOINT--------/ ===" && ls -laR .
 ENTRYPOINT ["dotnet", "GymFrontend.dll"]
