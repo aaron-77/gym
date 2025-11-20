@@ -14,7 +14,7 @@ COPY GymFrontend/ GymFrontend/
 COPY BL/ BL/
 COPY DTO/ DTO/
 COPY DataAccess/ DataAccess/
-
+RUN echo "=== Contenido de DIRECTORIO source EN PROYECTO GYMFRONTNED  DESPUS DE PUBLISH--------/ ===" && ls -laR .
 RUN dotnet publish GymFrontend/GymFrontend.csproj -c release -o app --no-restore
 RUN echo "=== Contenido de DIRECTORIO APP EN PROYECTO GYMFRONTNED  DESPUS DE PUBLISH--------/ ===" && ls -laR /app
 
