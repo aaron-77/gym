@@ -1,0 +1,198 @@
+/* Progreso Element Card Styles */
+.progreso-element-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e5e7eb;
+}
+
+.progress-row {
+    margin-bottom:2%;
+}
+
+.progreso-element-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Header */
+.progreso-element-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.progreso-element-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+  text-align:center;
+}
+
+/* Body */
+.progreso-element-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Value Container */
+.progreso-value-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  border-radius: 8px;
+  background: #f8fafc;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progreso-value-container::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #cbd5e1;
+  transition: all 0.3s ease;
+}
+
+/* Border Styles - Ultimo Valor (Azul) */
+.specialBorder-ultimoValor {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 2px solid #3b82f6;
+}
+
+.specialBorder-ultimoValor::before {
+  background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+  width: 5px;
+}
+
+/* Border Styles - Meta (Verde) */
+.specialBorder-meta {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 2px solid #22c55e;
+}
+
+.specialBorder-meta::before {
+  background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+  width: 5px;
+}
+
+/* Value Display */
+.value-display {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.value-number {
+  font-size: 42px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+
+.value-unit {
+  font-size: 18px;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 0.5px;
+}
+
+/* Icon Container */
+.icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60%;
+  
+}
+
+.progreso-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.progreso-icon.details-button {
+  cursor: pointer;
+
+}
+
+.progreso-icon.details-button:hover {
+  transform: scale(1.1);
+  filter: brightness(0) saturate(100%) invert(27%) sepia(98%) saturate(2592%) hue-rotate(211deg) brightness(98%)
+    contrast(101%);
+}
+
+/* Footer */
+.progreso-element-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  justify-content:center;
+  align-items:center;
+}
+.progreso-element-footer-parameter {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 12px;
+    justify-content: center;
+    align-items: center;
+}
+
+.timestamp-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timestamp-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .progreso-element-card {
+    padding: 16px;
+  }
+
+  .value-number {
+    font-size: 36px;
+  }
+
+  .value-unit {
+    font-size: 16px;
+  }
+}
+
+/* Legacy class support (mantiene compatibilidad con código existente) */
+#containerProgesoElement {
+  /* Redirige a la nueva clase */
+}
+
+.container-progreso-element {
+  /* Redirige a la nueva clase */
+}

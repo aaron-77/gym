@@ -17,6 +17,9 @@ using DataAccess.Identity;
 using API.Controllers;
 using DataAccess;
 using System.Runtime.InteropServices;
+try {
+
+
 var builder = WebApplication.CreateBuilder(args);
 //builder.Configuration.AddJsonFile(
 //    Path.Combine(AppContext.BaseDirectory, "appsettings.Development.json"),
@@ -210,3 +213,10 @@ app.MapHub<ReservacionesHub>("/reservacionesHub");
 app.MapControllers();
 
 app.Run();
+}catch (Exception ex) {
+    Console.WriteLine("Error critico al iniciar la aplicacion API:");
+    Console.WriteLine(ex.Message);
+    Console.WriteLine(ex.StackTrace);
+    Console.WriteLine(ex.Message); 
+
+}

@@ -1,0 +1,20 @@
+﻿body {
+}
+
+
+.mainContainer {
+    width:100%;
+    display:flex;
+    flex-direction:row;
+    justify-content:center;
+    align-items:center;
+    height:inherit;
+}
+.form-val-otp {
+   display:flex;
+   flex-direction:column;
+   justify-content:center;
+   align-items:center;
+    width:35%;
+
+}
