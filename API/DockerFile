@@ -21,4 +21,5 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /source/app ./
 RUN echo "=== Contenido de directorio app  en	API  ENTRYPOINT--------/ ===" && ls -laR .
-ENTRYPOINT ["dotnet", "API.dll"]
+# Cambia el ENTRYPOINT por esto temporalmente:
+ENTRYPOINT ["sh", "-c", "echo '=== Iniciando ===' && ls -la /app && echo '=== Ejecutando dotnet ===' && dotnet API.dll || (echo 'ERROR:' && cat /dev/null)"]

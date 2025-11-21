@@ -23,4 +23,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /source/app ./
 RUN echo "=== Contenido de GYMFRONTEND  APP DIRECTORY DESDE ENTRY POINT--------/ ===" && ls -laR .
-ENTRYPOINT ["dotnet", "GymFrontend.dll"]
+ENTRYPOINT ["sh", "-c", "echo '=== Iniciando ===' && ls -la /app && echo '=== Ejecutando dotnet ===' && GymFrontend.dll || (echo 'ERROR:' && cat /dev/null)"]
