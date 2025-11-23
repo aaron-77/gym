@@ -4,7 +4,7 @@ services:
    fitnessgym_api:
        image: fitnessgymapi
        ports:
-           - "8090:5274"
+           - "127.0.0.1:8090:5274"
         #build: 
         #    context: ../MSSuscripcion/
         #    dockerfile: Dockerfile
@@ -13,9 +13,10 @@ services:
            dockerfile: API/DockerFile
            ssh:
                 - default
+       container_name: apicontainer
        environment:
            ASPNETCORE_ENVIRONMENT: "Production"
-           ASPNETCORE_URLS: "http://localhost:5274"    
+           ASPNETCORE_URLS: "http://0.0.0.0:5274"    
            SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
             
    fitnessgym_frontend:
@@ -23,14 +24,15 @@ services:
        depends_on: 
            - "fitnessgym_api"
        ports:
-           - "8091:5062"
+           - "127.0.0.1:8091:5062"
        build:
            context: git@github.com:aaron-77/gym.git
            dockerfile: GymFrontend/DockerFile
            ssh:
                 - default
+       container_name: frontendcontainer
        environment: 
            ASPNETCORE_ENVIRONMENT: "Production"
-           ASPNETCORE_URLS: "http://localhost:5062"
-           BACKEND_BASE_ADDRESS: "http://localhost:5274"
+           ASPNETCORE_URLS: "http://0.0.0.0:5062"
+           BACKEND_BASE_ADDRESS: "http://0.0.0.0:5274"
            SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
