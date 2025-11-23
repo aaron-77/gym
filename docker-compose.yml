@@ -13,9 +13,10 @@ services:
            dockerfile: API/DockerFile
            ssh:
                 - default
+       container_name: apicontainer
        environment:
            ASPNETCORE_ENVIRONMENT: "Production"
-           ASPNETCORE_URLS: "http://localhost:5274"    
+           ASPNETCORE_URLS: "http://0.0.0.0:5274"    
            SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
             
    fitnessgym_frontend:
@@ -29,8 +30,9 @@ services:
            dockerfile: GymFrontend/DockerFile
            ssh:
                 - default
+       container_name: frontendcontainer
        environment: 
            ASPNETCORE_ENVIRONMENT: "Production"
-           ASPNETCORE_URLS: "http://localhost:5062"
-           BACKEND_BASE_ADDRESS: "http://localhost:5274"
+           ASPNETCORE_URLS: "http://0.0.0.0:5062"
+           BACKEND_BASE_ADDRESS: "http://0.0.0.0:5274"
            SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
