@@ -1,0 +1,82 @@
+﻿# Git
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# IDEs - JetBrains (Rider, IntelliJ, WebStorm, etc.)
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+*.swp
+
+# IDEs - Visual Studio / VS Code
+.vscode/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# IDEs - Otros
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.cache
+TestResults/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+*.dbmdl
+*.jfm
+_ReSharper*/
+*.DotSettings.user
+
+# Archivos de configuración local
+.env
+.env.*
+appsettings.Development.json
+launchSettings.json
+
+# Logs
+*.log
+logs/
+
+# Base de datos local
+*.db
+*.sqlite
+*.sqlite3
+
+# Documentación
+README.md
+LICENSE
+*.md
+docs/
+
+# Temporal
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Tests
+coverage/
+*.trx
