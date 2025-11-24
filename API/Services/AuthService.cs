@@ -7,6 +7,8 @@ using BL.Utils;
 using Microsoft.AspNetCore.Http; // Added for IHttpContextAccessor
 using DataAccess.Identity;
 using Microsoft.Extensions.Options;
+using DataAccess.EntityFramework;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
@@ -20,7 +22,7 @@ namespace API.Services
         private readonly IHttpContextAccessor _httpContextAccessor; // Inyectar IHttpContextAccessor
         private readonly TokensService _tokensService; // Inyectar TokensService
         private readonly JwtSettings _jwtSettings; // Inyectar JwtSettings para obtener ExpiryMinutes
-
+        private readonly FitnessCenterDbContext _context;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
@@ -29,7 +31,8 @@ namespace API.Services
             RoleManager<IdentityRole> roleManager,
             IHttpContextAccessor httpContextAccessor, // Añadir a la inyección de dependencias
             TokensService tokensService, // Añadir a la inyección de dependencias
-            IOptions<JwtSettings> jwtOptions
+            IOptions<JwtSettings> jwtOptions,
+            FitnessCenterDbContext context
         )
         {
             _userManager = userManager;
@@ -39,6 +42,7 @@ namespace API.Services
             _httpContextAccessor = httpContextAccessor; // Asignar
             _tokensService = tokensService; // Asignar
             _jwtSettings = jwtOptions.Value; // Asignar
+            _context = context;
         }
         public async Task<DTOLoggedUser> AuthenticateUser(string username, string password)
         {
@@ -84,7 +88,7 @@ namespace API.Services
                 };
 
             } catch (Exception ex) {
-
+                Console.WriteLine($"Error en AuthenticateUser: {_context.Database.GetConnectionString()}");
                 return null;
             }
             

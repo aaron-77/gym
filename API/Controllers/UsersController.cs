@@ -293,7 +293,8 @@ namespace API.Controllers
         public async Task<IActionResult> AutenticarUsuario([FromBody] UserCredentials credenciales)
         {
 
-            string bases = Request.PathBase;
+
+             string bases = Request.PathBase;
             string query = Request.Path;
             string proto = Request.Protocol;
             string origin = Request.Headers["Origin"].FirstOrDefault();
