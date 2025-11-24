@@ -53,7 +53,7 @@ _ReSharper*/
 # Archivos de configuración local
 .env
 .env.*
-appsettings.Development.json
+#appsettings.Development.json
 launchSettings.json
 
 # Logs
