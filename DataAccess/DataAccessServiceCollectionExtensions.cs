@@ -7,10 +7,11 @@ namespace DataAccess
     {
         public static IServiceCollection AddDataAccess(this IServiceCollection services)
         {
-            
+            var DB_CONNECTION_STRING = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+
             services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
             {
-                options.UseSqlServer("Server=localhost ;Authentication=SqlPassword;Integrated Security=False ;User Id=aaronlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False");
+                options.UseSqlServer(DB_CONNECTION_STRING);
             });
             
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

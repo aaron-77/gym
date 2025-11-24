@@ -39,10 +39,10 @@ try
     bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
     string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
     aspnetcore_urls = aspnetcore_urls.Trim().ToLowerInvariant();
-
+    var DB_CONNECTION_STRING = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     {
-        dbConnectionString = builder.Configuration["ConnectionStrings:windowsConnection"];
+        dbConnectionString = DB_CONNECTION_STRING;//builder.Configuration["ConnectionStrings:windowsConnection"];
     }
     Console.WriteLine("Connection string configurado");
 

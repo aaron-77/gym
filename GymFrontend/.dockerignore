@@ -80,3 +80,5 @@ temp/
 # Tests
 coverage/
 *.trx
+#otros archivos locales
+appp/
