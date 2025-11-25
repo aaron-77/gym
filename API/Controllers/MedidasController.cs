@@ -136,6 +136,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Error al ontener el progreso el usuario {ex.Message}\n {ex.StackTrace}");
                 respuesta = ResponseManager.BuildResponse<List<DTOItemProgreso>>(false, 500, "Error al obtener progreso del cliente", new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } }, null);
                 return StatusCode(500, respuesta);
             }
