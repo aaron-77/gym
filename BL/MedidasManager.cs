@@ -77,12 +77,12 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"-------------ARGYUMENT EXCEPCION AL OBTENER EL PROGRESO DEL USUARIO {ex.Message} \n {ex.StackTrace}");
                 return ResponseManager.BuildResponse<List<DTOItemProgreso>>(false, 500, ex.Message, new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"-------------EXCEPCION GENERICA AL OBTENER EL PROGRESO DEL USUARIO {ex.Message} \n {ex.StackTrace}");<
                 return ResponseManager.BuildResponse<List<DTOItemProgreso>>(false, 500, ex.Message, new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
             }
 
