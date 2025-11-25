@@ -37,7 +37,8 @@ public class CookieService
         {
             HttpOnly = true,
             Secure = false,
-            SameSite = SameSiteMode.Strict
+            SameSite = SameSiteMode.Strict,
+            Path = "/"
             // No se asigna Expires por defecto
         };
         if (request.IsHttps)
@@ -46,7 +47,8 @@ public class CookieService
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict
+                SameSite = SameSiteMode.Strict,
+                Path = "/"
             };
         }
         
