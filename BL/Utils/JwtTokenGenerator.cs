@@ -379,6 +379,7 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"-------------------------------ERROR AL VALIDAR ID TOKEN {ex.Message}");
             return null;
         }
     }
