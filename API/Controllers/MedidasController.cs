@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using DTO.Dtos;
+﻿using API.Services;
 using BL.Utils;
 using DataAccess.EntityFramework;
-using Microsoft.EntityFrameworkCore;
-using System.Data;
-using Microsoft.Data.SqlClient;
+using DataAccess.Identity;
+using DTO.Dtos;
 using EllipticCurve.Utils;
-using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using DataAccess.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
+using System.Text.Json;
 
 
 namespace API.Controllers
@@ -130,7 +131,11 @@ namespace API.Controllers
 
                 // Ensamblar items de progreso (usar ObjectAssembler existente si aplica)
                 var itemsProgreso = BL.Utils.ObjectAssembler.ensamblarItemsProgreso(ultimasMedidas, ultimasMetas);
-
+                Console.WriteLine(JsonSerializer.Serialize(itemsProgreso, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                }));
+                
                 respuesta = ResponseManager.BuildResponse(true, 200, "Consulta exitosa", null, itemsProgreso);
                 return Ok(respuesta);
             }
