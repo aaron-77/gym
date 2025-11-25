@@ -168,17 +168,27 @@ namespace GymFrontend.Controllers
             [FromQuery] string idUser
         )
         {
-            // idUser is expected as string (could be numeric id or guid depending on system)
-            var response = await medidasManager.obtenerProgresoDelUsuario(idUser);
-            
-            if (response == null || !response.success)
-            {
-                // Handle error: redirect or show error page
-                ViewBag.message = response?.message ?? "Error al obtener progreso del usuario.";
+
+            try {
+                // idUser is expected as string (could be numeric id or guid depending on system)
+                var response = await medidasManager.obtenerProgresoDelUsuario(idUser);
+
+                if (response == null || !response.success)
+                {
+                    // Handle error: redirect or show error page
+                    Console.WriteLine("No se encontro progreso del usuario: ");
+                    ViewBag.message = response?.message ?? "Error al obtener progreso del usuario.";
+                    return View("ClientesMainPage", null);
+                }
+
+                return View("ClientesMainPage", response.payload);
+
+            }
+            catch (Exception ex) {
+                Console.WriteLine("Error al obtener progreso del usuario: " + ex.Message);
                 return View("ClientesMainPage", null);
             }
-
-            return View("ClientesMainPage", response.payload);
+            
         }
 
         [HttpGet]
