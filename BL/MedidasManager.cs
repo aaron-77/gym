@@ -82,7 +82,7 @@ namespace BL
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"-------------EXCEPCION GENERICA AL OBTENER EL PROGRESO DEL USUARIO {ex.Message} \n {ex.StackTrace}");<
+                Console.WriteLine($"-------------EXCEPCION GENERICA AL OBTENER EL PROGRESO DEL USUARIO {ex.Message} \n {ex.StackTrace}");
                 return ResponseManager.BuildResponse<List<DTOItemProgreso>>(false, 500, ex.Message, new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
             }
 
