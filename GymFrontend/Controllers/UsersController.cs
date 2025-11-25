@@ -50,6 +50,7 @@ namespace GymFrontend.Controllers
         public async Task<IActionResult> executeSignIn([FromForm] UserCredentials credenciales)
         {
             var res = config["ConnectionStrings:DefaultConnection"];
+            Console.WriteLine("----------------------------INICIANDO LOGIN------------");
             if (!ModelState.IsValid)
             {
                 return View("Login", credenciales);
@@ -62,25 +63,28 @@ namespace GymFrontend.Controllers
                 return View("Login");
             }
 
+            Console.WriteLine("----------------------------VARIFICANDO CLAIMS------------");
             var claims = _jwtTokenGenerator.ValidateIdToken(respuesta.payload.IdToken);
             if (claims == null)
             {
                 return View("Login");
             }
+            Console.WriteLine("----------------------------CLAIMS VERIFICADOS------------");
             _cookieService.AgregarCookie(Response, "AuthToken", respuesta.payload.IdToken);
             _cookieService.AgregarCookie(Response, "AccessToken", respuesta.payload.AccessToken);
             _cookieService.AgregarCookie(Response, "RefreshToken", respuesta.payload.RefreshToken);
-            
+            Console.WriteLine("----------------------------COOKIES AGREGADAS------------");
             var roles = _jwtTokenGenerator.GetRoles(claims);
             var empleadoPage = config["pages:empleados"];
             var clientePage = config["pages:clientes"];
             if (roles.Contains("empleado"))
             {
+                Console.WriteLine("----------------------------DIRIGIENDO A EMPLEADO------------");
                 return Redirect(empleadoPage);
             }
             ViewBag.cel = respuesta.payload.Telefono;
             ViewBag.correo = respuesta.payload.Correo;
-
+            Console.WriteLine("----------------------------DIRIGIANDO A CLIENTES------------");
             return RedirectToAction("dirigirACrearPaginaDeClientes", new { idUser = respuesta.payload.Id });
         
         }
