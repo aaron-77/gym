@@ -15,8 +15,8 @@ public class AuthHeaderHandler : DelegatingHandler
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var backendAddress = Environment.GetEnvironmentVariable("BACKEND_BASE_ADDRESS");
-        var frontendAddress = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+        var backendAddress = _configuration["EndPoints:api:nossl"]; //Environment.GetEnvironmentVariable("BACKEND_BASE_ADDRESS");
+        var frontendAddress = _configuration["EndPoints:frontend:nossl"];//Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
 
         var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
         var idToken = _httpContextAccessor.HttpContext?.Request.Cookies["AuthToken"];
