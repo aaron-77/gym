@@ -618,7 +618,7 @@ async function inicializarSignalR() {
 
         // Crear la conexión al hub
         signalRConnection = new signalR.HubConnectionBuilder()
-            .withUrl('http://localhost:5274/reservacionesHub')
+            .withUrl('http://localhost:8090/reservacionesHub')
             .withAutomaticReconnect([0, 2000, 10000, 30000]) // Estrategia de reconexión automática
             .configureLogging(signalR.LogLevel.Information)
             .build();
