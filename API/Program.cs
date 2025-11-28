@@ -81,12 +81,13 @@ try
     });
     Console.WriteLine("JWT Authentication configurado");
 
+    var frontendUrl= builder.Configuration["EndPoints:frontend:external"];
     // CORS
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("originsPolicyOne", policy =>
         {
-            policy.WithOrigins("http://localhost:5062")
+            policy.WithOrigins(frontendUrl)
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
