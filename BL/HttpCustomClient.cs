@@ -34,18 +34,68 @@ namespace BL
 
         public async Task<string> post(string endPointUrl, HttpContent body)
         {
-            //await client.PostAsJsonAsync(endPointUrl, body);
-            using HttpResponseMessage response = await client.PostAsync(endPointUrl, body);
-            string responseString = await response.Content.ReadAsStringAsync();
-            return responseString;
+            try
+            {
+                //await client.PostAsJsonAsync(endPointUrl, body);
+                using HttpResponseMessage response = await client.PostAsync(endPointUrl, body);
+                string responseString = await response.Content.ReadAsStringAsync();
+                return responseString;
+            }
+            catch (HttpRequestException e)
+            {
+                string logMessage = $"[ERROR] Método: post (HttpCustomClient) - HttpRequestException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(e, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {e.GetType().Name} - {e.Message} | " +
+                    $"EndPointUrl: {endPointUrl} | " +
+                    $"Stack Trace: {e.StackTrace}";
+                Console.WriteLine(logMessage);
+                
+                return null;
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: post (HttpCustomClient) - Excepción no prevista | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"EndPointUrl: {endPointUrl} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
+                return null;
+            }
         }
 
         public async Task<string> put(string endPointUrl, HttpContent body)
         {
-            //await client.PostAsJsonAsync(endPointUrl, body);
-            using HttpResponseMessage response = await client.PutAsync(endPointUrl, body);
-            string responseString = await response.Content.ReadAsStringAsync();
-            return responseString;
+            try
+            {
+                //await client.PostAsJsonAsync(endPointUrl, body);
+                using HttpResponseMessage response = await client.PutAsync(endPointUrl, body);
+                string responseString = await response.Content.ReadAsStringAsync();
+                return responseString;
+            }
+            catch (HttpRequestException e)
+            {
+                string logMessage = $"[ERROR] Método: put (HttpCustomClient) - HttpRequestException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(e, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {e.GetType().Name} - {e.Message} | " +
+                    $"EndPointUrl: {endPointUrl} | " +
+                    $"Stack Trace: {e.StackTrace}";
+                Console.WriteLine(logMessage);
+                
+                return null;
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: put (HttpCustomClient) - Excepción no prevista | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"EndPointUrl: {endPointUrl} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
+                return null;
+            }
         }
 
         public async Task<string> get(string endPointUrl)
@@ -68,7 +118,7 @@ namespace BL
             }
             catch (HttpRequestException e)
             {
-                string logMessage = $"[ERROR] Método: get (HttpCustomClient) | " +
+                string logMessage = $"[ERROR] Método: get (HttpCustomClient) - HttpRequestException | " +
                     $"Línea: {new System.Diagnostics.StackTrace(e, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {e.GetType().Name} - {e.Message} | " +
                     $"EndPointUrl: {endPointUrl} | " +

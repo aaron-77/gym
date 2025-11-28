@@ -100,18 +100,32 @@ namespace GymFrontend.Controllers
 
         public async Task<IActionResult> DetalleDeClase(int idClase)
         {
-            string endpointUrl = $"api/clases/detallesDeClase?idClase={idClase}";
-            var responseString = await client.get(endpointUrl);
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-
-            var response = JsonSerializer.Deserialize<DTOResponse<DetalleDeClase>>(responseString, options);
-
-            if (response != null && response.success)
+            try
             {
-                return View("DetalleDeClase", response.payload);
+                string endpointUrl = $"api/clases/detallesDeClase?idClase={idClase}";
+                var responseString = await client.get(endpointUrl);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+                var response = JsonSerializer.Deserialize<DTOResponse<DetalleDeClase>>(responseString, options);
+
+                if (response != null && response.success)
+                {
+                    return View("DetalleDeClase", response.payload);
+                }
+                else
+                {
+                    return View("Error");
+                }
             }
-            else
+            catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: DetalleDeClase | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetro - IdClase: {idClase} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return View("Error");
             }
         }

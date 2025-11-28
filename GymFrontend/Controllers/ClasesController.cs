@@ -83,6 +83,12 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: InscribirAClase | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return StatusCode(500, new DTOResponse<int?> { success = false, message = "Error interno del servidor al inscribir a clase.", errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } } });
             }
         }
@@ -103,6 +109,13 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ObtenerClases | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetro - Activa: {activa} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return StatusCode(500, new DTOResponse<List<DTOClaseSimple>> { success = false, message = "Error interno del servidor al obtener clases.", errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } } });
             }
         }
@@ -121,6 +134,13 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ObtenerClasesProgramadasPorId | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetro - IdClase: {idClase} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return StatusCode(500,ResponseManager.BuildResponse<DTOResponse<List<DTOClaseProgramadaView>>> (false,500 ,"Error interno del servidor al obtener clases programadas por ID.", new List<ErrorModel> { new ErrorModel { message = ex.Message } },null));
             }
         }
@@ -139,6 +159,12 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ObtenerEstadosDeClasesProgramdas | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return StatusCode(500, new DTOResponse<List<DTOEstadoClaseProgramada>> { success = false, message = "Error interno del servidor al obtener estados de clases programadas.", errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } } });
             }
         }
@@ -162,8 +188,14 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: RegistrarClaseProgramada | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return StatusCode(500, new DTOResponse<string> { success = false, message = "Error interno del servidor al registrar clase programada.", errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } } });
             }
         }
     }
-} 
+}

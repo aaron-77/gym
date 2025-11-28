@@ -4,60 +4,135 @@ namespace BL.Utils
     {
         public static object obtenerValorDePropiedad(object objeto, string nombrePropiedad)
         {
-            object valorObtenido = null;
+            try
+            {
+                object valorObtenido = null;
 
-            System.Reflection.PropertyInfo[] propiedades = objeto.GetType().GetProperties();
-            valorObtenido = propiedades
-                .FirstOrDefault(p => p.Name == nombrePropiedad)
-                .GetValue(objeto);
+                System.Reflection.PropertyInfo[] propiedades = objeto.GetType().GetProperties();
+                valorObtenido = propiedades
+                    .FirstOrDefault(p => p.Name == nombrePropiedad)
+                    .GetValue(objeto);
 
-            return valorObtenido;
+                return valorObtenido;
+            }
+            catch (ArgumentNullException ex)
+            {
+                string logMessage = $"[ERROR] Método: obtenerValorDePropiedad - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetro: {ex.ParamName} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                throw;
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: obtenerValorDePropiedad | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"NombrePropiedad: {nombrePropiedad} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                throw;
+            }
         }
 
         public static Type obtenerTipoDePropiedad(object objeto, string nombrePropiedad)
         {
-            Type tipoObtenido = null;
-            System.Reflection.PropertyInfo[] propiedades = objeto.GetType().GetProperties();
-            var propiedad = propiedades.FirstOrDefault(p => p.Name == nombrePropiedad);
-            if (propiedad != null)
+            try
             {
-                tipoObtenido = propiedad.PropertyType;
+                Type tipoObtenido = null;
+                System.Reflection.PropertyInfo[] propiedades = objeto.GetType().GetProperties();
+                var propiedad = propiedades.FirstOrDefault(p => p.Name == nombrePropiedad);
+                if (propiedad != null)
+                {
+                    tipoObtenido = propiedad.PropertyType;
+                }
+                else
+                {
+                    throw new ArgumentException(
+                        $"La propiedad '{nombrePropiedad}' no existe en el objeto de tipo {objeto.GetType().Name}"
+                    );
+                }
+                return tipoObtenido;
             }
-            else
+            catch (ArgumentException ex)
             {
-                throw new ArgumentException(
-                    $"La propiedad '{propiedad.Name}' no existe en el objeto de tipo {objeto.GetType().Name}"
-                );
+                string logMessage = $"[ERROR] Método: obtenerTipoDePropiedad - ArgumentException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"NombrePropiedad: {nombrePropiedad} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                throw;
             }
-            return tipoObtenido;
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: obtenerTipoDePropiedad | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"NombrePropiedad: {nombrePropiedad} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                throw;
+            }
         }
 
         public static TTarget MapProperties<TSource, TTarget>(TSource source)
             where TTarget : new()
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            var target = new TTarget();
-            var sourceProps = typeof(TSource).GetProperties();
-            var targetProps = typeof(TTarget).GetProperties();
-
-            foreach (var sProp in sourceProps)
+            try
             {
-                var tProp = targetProps.FirstOrDefault(p =>
-                    p.Name == sProp.Name
-                    && p.PropertyType.IsAssignableFrom(sProp.PropertyType)
-                    && p.CanWrite
-                );
+                if (source == null)
+                    throw new ArgumentNullException(nameof(source));
 
-                if (tProp != null)
+                var target = new TTarget();
+                var sourceProps = typeof(TSource).GetProperties();
+                var targetProps = typeof(TTarget).GetProperties();
+
+                foreach (var sProp in sourceProps)
                 {
-                    var value = sProp.GetValue(source);
-                    tProp.SetValue(target, value);
-                }
-            }
+                    var tProp = targetProps.FirstOrDefault(p =>
+                        p.Name == sProp.Name
+                        && p.PropertyType.IsAssignableFrom(sProp.PropertyType)
+                        && p.CanWrite
+                    );
 
-            return target;
+                    if (tProp != null)
+                    {
+                        var value = sProp.GetValue(source);
+                        tProp.SetValue(target, value);
+                    }
+                }
+
+                return target;
+            }
+            catch (ArgumentNullException ex)
+            {
+                string logMessage = $"[ERROR] Método: MapProperties - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetro: {ex.ParamName} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                throw;
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: MapProperties | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"TipoSource: {typeof(TSource).Name}, TipoTarget: {typeof(TTarget).Name} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                throw;
+            }
         }
 
         /* public static List<Dictionary<string, int>> ObtenerMesesYAniosUnicos(List<DTOUltimaMedidaDeParametro> medidas)

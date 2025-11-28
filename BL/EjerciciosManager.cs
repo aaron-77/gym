@@ -26,12 +26,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerEjercicios - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerEjercicios | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -48,12 +58,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerEjerciciosDeCliente - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerEjerciciosDeCliente | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
         }

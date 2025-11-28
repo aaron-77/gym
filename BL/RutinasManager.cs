@@ -28,12 +28,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: registrarRutina - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: registrarRutina | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -50,12 +60,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: asignarEjercicioARutina - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: asignarEjercicioARutina | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -73,12 +93,24 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerRutinasDeUsuario - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"UsuarioID: {UsuarioID} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerRutinasDeUsuario | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"UsuarioID: {UsuarioID} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -95,12 +127,24 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerRutinasDeCliente - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"UsuarioID: {UsuarioID} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerRutinasDeCliente | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"UsuarioID: {UsuarioID} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
         }

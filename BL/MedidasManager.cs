@@ -29,12 +29,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: registrarMedida - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: registrarMedida | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -52,12 +62,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerParametrosDeMedicion - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerParametrosDeMedicion | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -77,12 +97,24 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine($"-------------ARGYUMENT EXCEPCION AL OBTENER EL PROGRESO DEL USUARIO {ex.Message} \n {ex.StackTrace}");
+                string logMessage = $"[ERROR] Método: obtenerProgresoDelUsuario - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"IdUser: {idUser} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return ResponseManager.BuildResponse<List<DTOItemProgreso>>(false, 500, ex.Message, new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"-------------EXCEPCION GENERICA AL OBTENER EL PROGRESO DEL USUARIO {ex.Message} \n {ex.StackTrace}");
+                string logMessage = $"[ERROR] Método: obtenerProgresoDelUsuario | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"IdUser: {idUser} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return ResponseManager.BuildResponse<List<DTOItemProgreso>>(false, 500, ex.Message, new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
             }
 
@@ -99,12 +131,24 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerAñosActivosDelCliente - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"IdUsuario: {idUsuario} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerAñosActivosDelCliente | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"IdUsuario: {idUsuario} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -125,12 +169,24 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: consultarDetallesDeProgresoDeUsuario - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"IdCliente: {idCliente} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return ResponseManager.BuildResponse<List<DTO.Dtos.DTOEjerciciosYParametrosDelCliente>>(false, 500, ex.Message, new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: consultarDetallesDeProgresoDeUsuario | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"IdCliente: {idCliente} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return ResponseManager.BuildResponse<List<DTO.Dtos.DTOEjerciciosYParametrosDelCliente>>(false, 500, ex.Message, new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
             }
         }
@@ -171,7 +227,13 @@ namespace BL
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: consultarDetallesDeProgreso | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetros - IdCliente: {idCliente}, IdParametro: {idParametro}, EspaciadoTemporal: {espaciadoTemporal}, TipoDeBusqueda: {tipoDeBusqueda} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return ResponseManager.BuildResponse<MedidasConMetas>(false, 500, ex.Message, new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
             }
         }

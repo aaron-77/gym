@@ -26,13 +26,34 @@ namespace GymFrontend.Controllers
         public async Task<IActionResult> obtenerEjercicios()
 
         {
-            
-            var respuesta = await ejerciciosManager.obtenerEjercicios();
-            if (respuesta.success)
+            try
             {
-                return Ok(respuesta);
+                var respuesta = await ejerciciosManager.obtenerEjercicios();
+                if (respuesta.success)
+                {
+                    return Ok(respuesta);
+                }
+                return BadRequest(respuesta);
             }
-            return BadRequest(respuesta);
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: obtenerEjercicios | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
+                return StatusCode(
+                    500,
+                    ResponseManager.BuildResponse<List<Ejercicio>>(
+                        false,
+                        500,
+                        "Error interno del servidor al obtener ejercicios.",
+                        new List<ErrorModel> { new ErrorModel { message = ex.Message } },
+                        null
+                    )
+                );
+            }
         }
 
        

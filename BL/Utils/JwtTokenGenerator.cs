@@ -169,6 +169,13 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
+            string logMessage = $"[ERROR] Método: GenerateAccessToken | " +
+                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                $"UserId: {user?.Id} | " +
+                $"Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            
             throw new ApplicationException("Error al generar el Access Token.", ex);
         }
     }
@@ -194,6 +201,13 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
+            string logMessage = $"[ERROR] Método: GenerateIdToken | " +
+                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                $"UserId: {user?.Id} | " +
+                $"Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            
             throw new ApplicationException("Error al generar el ID Token.", ex);
         }
     }
@@ -233,6 +247,13 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
+            string logMessage = $"[ERROR] Método: GenerateRefreshToken | " +
+                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                $"UserId: {userId}, ClientId: {clientId} | " +
+                $"Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            
             throw new ApplicationException("Error al generar el Refresh Token.", ex);
         }
     }
@@ -258,6 +279,12 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
+            string logMessage = $"[ERROR] Método: ValidateRefreshToken | " +
+                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                $"Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            
             throw new ApplicationException("Error al validar el Refresh Token.", ex);
         }
 
@@ -280,6 +307,12 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
+            string logMessage = $"[ERROR] Método: RevokeRefreshToken | " +
+                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                $"Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            
             throw new ApplicationException("Error al revocar el Refresh Token.", ex);
         }
     }
@@ -297,6 +330,12 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
+            string logMessage = $"[ERROR] Método: HashToken | " +
+                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                $"Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            
             throw new ApplicationException("Error al hashear el token.", ex);
         }
     }
@@ -334,6 +373,12 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
+            string logMessage = $"[ERROR] Método: ValidateAccessToken | " +
+                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                $"Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            
             return null;
         }
     }
@@ -379,7 +424,12 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"-------------------------------ERROR AL VALIDAR ID TOKEN {ex.Message}");
+            string logMessage = $"[ERROR] Método: ValidateIdToken | " +
+                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                $"Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            
             return null;
         }
     }
@@ -423,6 +473,13 @@ public class JwtTokenGenerator
         }
         catch (Exception ex)
         {
+            string logMessage = $"[ERROR] Método: GetClaimValue | " +
+                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                $"ClaimType: {claimType} | " +
+                $"Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            
             throw new ApplicationException($"Error al obtener el claim '{claimType}' del token.", ex);
         }
     }

@@ -30,7 +30,13 @@ namespace BL
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en ObtenerClases: {ex.Message}");
+                string logMessage = $"[ERROR] Método: ObtenerClases | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetro - Activa: {activa} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return new DTOResponse<List<DTOClaseSimple>> { success = false, message = "Error al obtener clases." };
             }
         }
@@ -49,7 +55,13 @@ namespace BL
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en ObtenerClasesProgramadasPorId: {ex.Message}");
+                string logMessage = $"[ERROR] Método: ObtenerClasesProgramadasPorId | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetro - IdClase: {idClase} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return new DTOResponse<List<DTOClaseProgramadaView>> { success = false, message = "Error al obtener clases programadas por ID." };
             }
         }
@@ -64,7 +76,12 @@ namespace BL
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en ObtenerEstadosDeClasesProgramdas: {ex.Message}");
+                string logMessage = $"[ERROR] Método: ObtenerEstadosDeClasesProgramdas | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return new DTOResponse<List<DTOEstadoClaseProgramada>> { success = false, message = "Error al obtener estados de clases programadas." };
             }
         }
@@ -79,7 +96,12 @@ namespace BL
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en RegistrarClaseProgramada: {ex.Message}");
+                string logMessage = $"[ERROR] Método: RegistrarClaseProgramada | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return new DTOResponse<int?> { success = false, message = "Error al registrar clase programada." };
             }
         }
@@ -94,9 +116,14 @@ namespace BL
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en InscribirAClase: {ex.Message}");
+                string logMessage = $"[ERROR] Método: InscribirAClase | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return new DTOResponse<int?> { success = false, message = "Error al hacer la inscripcion" };
             }
         }
     }
-} 
+}

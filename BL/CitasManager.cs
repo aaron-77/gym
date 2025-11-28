@@ -29,12 +29,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: registrarCita - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: registrarCita | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -52,12 +62,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: registrarDuracionCitasMedicion - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: registrarDuracionCitasMedicion | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -76,12 +96,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: modificarCita - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: modificarCita | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -97,12 +127,24 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerCitasAgendadas - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"IdUsuario: {idUsuario} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerCitasAgendadas | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"IdUsuario: {idUsuario} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -120,12 +162,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerDuracionCitasMedicion - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerDuracionCitasMedicion | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -142,12 +194,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerDuracionCita - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerDuracionCita | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
         }
@@ -163,12 +225,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerAgendadasCitasDelCliente - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerAgendadasCitasDelCliente | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
         }

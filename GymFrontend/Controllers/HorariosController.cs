@@ -42,6 +42,13 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ObtenerHorariosDisponibles | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetro - Fecha: {fecha} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return StatusCode(
                     500,
                     new DTOResponse<List<DTOHorariosDisponibles>>
@@ -68,6 +75,13 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ObtenerPreReservas | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetro - Fecha: {fecha} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return StatusCode(
                     500,
                     new DTOResponse<List<DTOHorarioVisualizacion>>
@@ -104,6 +118,12 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: PreReservarHorario | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return StatusCode(
                     500,
                     new DTOResponse<string>

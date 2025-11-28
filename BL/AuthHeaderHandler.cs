@@ -15,32 +15,47 @@ public class AuthHeaderHandler : DelegatingHandler
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var backendAddress = _configuration["EndPoints:api:nossl"]; //Environment.GetEnvironmentVariable("BACKEND_BASE_ADDRESS");
-        var frontendAddress = _configuration["EndPoints:frontend:nossl"];//Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
-
-        var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
-        var idToken = _httpContextAccessor.HttpContext?.Request.Cookies["AuthToken"];
-        bool isApiRequest = request.RequestUri.ToString().Contains(backendAddress, StringComparison.OrdinalIgnoreCase);
-        bool isFrontendRequest = request.RequestUri.ToString().Contains(frontendAddress, StringComparison.OrdinalIgnoreCase);
-        if (!string.IsNullOrEmpty(accessToken) && isApiRequest)
+        try
         {
+            var backendAddress = _configuration["EndPoints:api:nossl"]; //Environment.GetEnvironmentVariable("BACKEND_BASE_ADDRESS");
+            var frontendAddress = _configuration["EndPoints:frontend:nossl"];//Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
 
-            request.Headers.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
+            var idToken = _httpContextAccessor.HttpContext?.Request.Cookies["AuthToken"];
+            bool isApiRequest = request.RequestUri.ToString().Contains(backendAddress, StringComparison.OrdinalIgnoreCase);
+            bool isFrontendRequest = request.RequestUri.ToString().Contains(frontendAddress, StringComparison.OrdinalIgnoreCase);
+            if (!string.IsNullOrEmpty(accessToken) && isApiRequest)
+            {
+
+                request.Headers.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+            }
+
+            if (!string.IsNullOrEmpty(idToken) && isFrontendRequest)
+            {
+
+                request.Headers.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", idToken);
+            }
+            Console.WriteLine($"[HTTP REQUEST] {request.Method} {request.RequestUri}");
+            foreach (var header in request.Headers)
+            {
+                Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
+            }
+
+            return await base.SendAsync(request, cancellationToken);
         }
-
-        if (!string.IsNullOrEmpty(idToken) && isFrontendRequest)
+        catch (Exception ex)
         {
-
-            request.Headers.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", idToken);
+            string logMessage = $"[ERROR] Método: SendAsync (AuthHeaderHandler) | " +
+                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                $"RequestUri: {request?.RequestUri} | " +
+                $"Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            
+            // Re-throw the exception to allow normal error handling
+            throw;
         }
-        Console.WriteLine($"[HTTP REQUEST] {request.Method} {request.RequestUri}");
-        foreach (var header in request.Headers)
-        {
-            Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
-        }
-
-        return await base.SendAsync(request, cancellationToken);
     }
 }

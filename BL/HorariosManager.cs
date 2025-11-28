@@ -30,8 +30,13 @@ namespace BL
             }
             catch (Exception ex)
             {
-                // Log the exception (e.g., using a logging framework)
-                Console.WriteLine($"Error en ObtenerHorariosDisponibles: {ex.Message}");
+                string logMessage = $"[ERROR] Método: ObtenerHorariosDisponibles | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetro - Fecha: {fecha} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return new DTOResponse<List<DTOHorariosDisponibles>> { success = false, message = "Error al obtener horarios disponibles." };
             }
         }
@@ -50,7 +55,13 @@ namespace BL
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en ObtenerPreReservas: {ex.Message}");
+                string logMessage = $"[ERROR] Método: ObtenerPreReservas | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetro - Fecha: {fecha} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return new DTOResponse<List<DTOHorarioVisualizacion>> { success = false, message = "Error al obtener pre-reservas." };
             }
         }
@@ -65,9 +76,14 @@ namespace BL
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en PreReservarHorario: {ex.Message}");
+                string logMessage = $"[ERROR] Método: PreReservarHorario | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return new DTOResponse<int> { success = false, message = "Error al pre-reservar horario." };
             }
         }
     }
-} 
+}
