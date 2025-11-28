@@ -8,7 +8,7 @@
  */
 async function realizarPeticionAPI(endpointPath, body, params) {
     try {
-        const baseUrl = 'http://localhost:5062';
+        const baseUrl = 'http://fitnessgym_api:5274';
         let url = `${baseUrl}${endpointPath}`;
         let options = {
             method: 'GET',
