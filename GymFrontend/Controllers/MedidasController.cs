@@ -56,8 +56,20 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return ResponseManager.BuildResponse<List<DTO.Dtos.DTOEjerciciosYParametrosDelCliente>>(false, 500, "Error al obtener detalles de progreso", new List<DTO.Dtos.ErrorModel> { new DTO.Dtos.ErrorModel { message = ex.Message } }, null);
+                string logMessage = $"[ERROR] Método: ObtenerDetallesDeProgreso (obtenerEjerciciosYParametrosDelCliente) | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"IdCliente: {idCliente} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
+                return ResponseManager.BuildResponse<List<DTO.Dtos.DTOEjerciciosYParametrosDelCliente>>(
+                    false, 
+                    500, 
+                    "Error al obtener detalles de progreso", 
+                    new List<DTO.Dtos.ErrorModel> { new DTO.Dtos.ErrorModel { message = ex.Message } }, 
+                    null
+                );
             }
         }
 
@@ -82,17 +94,48 @@ namespace GymFrontend.Controllers
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 // Forward the request to BL manager which will call the API
-                var response = await medidasManager.consultarDetallesDeProgreso(userId, idParametro, idEjercicio, espaciadoTemporal, tipoDeBusqueda, fechaDeInicio, fechaFin, conDetalle, mesesDeFiltro, añosDeFiltro, fechaDeCreacion);
+                var response = await medidasManager.consultarDetallesDeProgreso(
+                    userId, 
+                    idParametro, 
+                    idEjercicio, 
+                    espaciadoTemporal, 
+                    tipoDeBusqueda, 
+                    fechaDeInicio, 
+                    fechaFin, 
+                    conDetalle, 
+                    mesesDeFiltro, 
+                    añosDeFiltro, 
+                    fechaDeCreacion
+                );
+                
                 if (response == null)
                 {
-                    return ResponseManager.BuildResponse<DTO.Dtos.MedidasConMetas>(false, 404, "No se encontraron datos de progreso para los parámetros proporcionados", null, null);
+                    return ResponseManager.BuildResponse<DTO.Dtos.MedidasConMetas>(
+                        false, 
+                        404, 
+                        "No se encontraron datos de progreso para los parámetros proporcionados", 
+                        null, 
+                        null
+                    );
                 }
                 return response;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                return ResponseManager.BuildResponse<DTO.Dtos.MedidasConMetas>(false, 500, "Error al obtener detalles de progreso", new List<DTO.Dtos.ErrorModel> { new DTO.Dtos.ErrorModel { message = ex.Message } }, null);
+                string logMessage = $"[ERROR] Método: ObtenerDetallesDeProgreso (obtenerDetallesDeProgreso) | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Parámetros - IdCliente: {idCliente}, IdParametro: {idParametro}, IdEjercicio: {idEjercicio}, EspaciadoTemporal: {espaciadoTemporal}, TipoDeBusqueda: {tipoDeBusqueda} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
+                return ResponseManager.BuildResponse<DTO.Dtos.MedidasConMetas>(
+                    false, 
+                    500, 
+                    "Error al obtener detalles de progreso", 
+                    new List<DTO.Dtos.ErrorModel> { new DTO.Dtos.ErrorModel { message = ex.Message } }, 
+                    null
+                );
             }
         }
     }

@@ -1,6 +1,4 @@
-﻿
-
-using DTO.Dtos;
+﻿using DTO.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,12 +29,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: login - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: login | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
         }
@@ -55,12 +63,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: updateIdAndAccessToken - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: updateIdAndAccessToken | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
         }
@@ -89,12 +107,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: registrarUsuario - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: registrarUsuario | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
         }
@@ -123,12 +151,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerUsuarios - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerUsuarios | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
 
@@ -144,12 +182,24 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine($"Error en ObtenerUsuariosPorRol: {ex.Message}");
+                string logMessage = $"[ERROR] Método: ObtenerUsuariosPorRol - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Rol: {rol}, Estado: {estado} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return new DTOResponse<List<QueryUser>> { success = false, message = "Error de deserialización o respuesta vacía." };
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en ObtenerUsuariosPorRol: {ex.Message}");
+                string logMessage = $"[ERROR] Método: ObtenerUsuariosPorRol | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Rol: {rol}, Estado: {estado} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return new DTOResponse<List<QueryUser>> { success = false, message = "Error al obtener usuarios por rol." };
             }
         }
@@ -165,12 +215,24 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: ObtenerEntrenadoresDisponibles - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"FechaReferencia: {fechaReferencia} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: ObtenerEntrenadoresDisponibles | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"FechaReferencia: {fechaReferencia} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
         }
@@ -187,12 +249,22 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerCodigoOTP - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: obtenerCodigoOTP | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
         }
@@ -209,15 +281,24 @@ namespace BL
             }
             catch (ArgumentNullException ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: validarCodigoOTP - ArgumentNullException | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                string logMessage = $"[ERROR] Método: validarCodigoOTP | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
         }
     }
 }
-		

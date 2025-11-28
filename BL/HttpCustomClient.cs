@@ -68,7 +68,24 @@ namespace BL
             }
             catch (HttpRequestException e)
             {
-                Console.WriteLine($"Request error: {e.Message}");
+                string logMessage = $"[ERROR] Método: get (HttpCustomClient) | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(e, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {e.GetType().Name} - {e.Message} | " +
+                    $"EndPointUrl: {endPointUrl} | " +
+                    $"Stack Trace: {e.StackTrace}";
+                Console.WriteLine(logMessage);
+                
+                return null;
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: get (HttpCustomClient) - Excepción no prevista | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"EndPointUrl: {endPointUrl} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return null;
             }
         }

@@ -120,6 +120,12 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ObtenerUsuariosPorRol | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<DTOResponse<List<QueryUser>>>(
@@ -156,6 +162,12 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: postCrearCuenta | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 ViewBag.message = "Ocurrió un error al registrar el usuario: " + ex.Message;
                 return View("CrearCuenta", usuario);
             }
@@ -185,7 +197,13 @@ namespace GymFrontend.Controllers
 
             }
             catch (Exception ex) {
-                Console.WriteLine("Error al obtener progreso del usuario: " + ex.Message);
+                string logMessage = $"[ERROR] Método: dirigirACrearPaginaDeClientes | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"IdUsuario: {idUser} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 return View("ClientesMainPage", null);
             }
             
@@ -288,6 +306,12 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: updateTokens | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
                 var reponseUpdateTokensFailed = ResponseManager.BuildResponse<string>(
                     false,
                     500,
