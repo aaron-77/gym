@@ -52,28 +52,37 @@ public class JwtTokenGenerator
         Dictionary<string, string> userValues,
         IList<string> roles)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY")));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-        
-        // Obtener expiryMinutes desde la configuración
-        int expiryMinutes = _jwtSettings.ExpiryMinutes;
-        var expires = DateTime.UtcNow.AddMinutes(expiryMinutes);
+        try
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY")));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            
+            // Obtener expiryMinutes desde la configuración
+            int expiryMinutes = _jwtSettings.ExpiryMinutes;
+            var expires = DateTime.UtcNow.AddMinutes(expiryMinutes);
 
-        string issuer = _jwtSettings.Issuer;
-        string audience = GetAudienceForTokenType(tokenType, ssl);
+            string issuer = _jwtSettings.Issuer;
+            string audience = GetAudienceForTokenType(tokenType, ssl);
 
-        // Construir los claims según el tipo de token
-        var claims = BuildClaimsForTokenType(tokenType, userValues, roles);
+            // Construir los claims según el tipo de token
+            var claims = BuildClaimsForTokenType(tokenType, userValues, roles);
 
-        var token = new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
-            claims: claims,
-            expires: expires,
-            signingCredentials: creds
-        );
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: expires,
+                signingCredentials: creds
+            );
 
-        return token;
+            return token;
+        }
+        catch (Exception ex)
+        {
+            string logMessage = $"[ERROR] Método: CreateTokenWithConfig | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | TokenType: {tokenType} | Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            throw;
+        }
     }
 
     /// <summary>
@@ -84,40 +93,49 @@ public class JwtTokenGenerator
         Dictionary<string, string> userValues,
         IList<string> roles)
     {
-        var claims = new List<Claim>();
-
-        switch (tokenType)
+        try
         {
-            case TokenType.BackendToken:
-                // Agregar claims desde la configuración de BackendTokenClaims
-                claims.Add(new Claim(ClaimTypes.NameIdentifier, userValues.GetValueOrDefault("userId") ?? ""));
-                claims.Add(new Claim(ClaimTypes.Name, userValues.GetValueOrDefault("userName") ?? ""));
-                break;
+            var claims = new List<Claim>();
 
-            case TokenType.FrontendToken:
-                // Agregar claims desde la configuración de FrontendTokenClaims
-                claims.Add(new Claim("sub", userValues.GetValueOrDefault("userId") ?? ""));
-                claims.Add(new Claim("name", userValues.GetValueOrDefault("userName") ?? ""));
-                claims.Add(new Claim("email", userValues.GetValueOrDefault("email") ?? ""));
-                claims.Add(new Claim("preferred_username", userValues.GetValueOrDefault("userName") ?? ""));
-                claims.Add(new Claim("given_name", userValues.GetValueOrDefault("nombreCompleto") ?? ""));
-                claims.Add(new Claim("family_name", userValues.GetValueOrDefault("numeroDeIdentificacion") ?? ""));
-                break;
+            switch (tokenType)
+            {
+                case TokenType.BackendToken:
+                    // Agregar claims desde la configuración de BackendTokenClaims
+                    claims.Add(new Claim(ClaimTypes.NameIdentifier, userValues.GetValueOrDefault("userId") ?? ""));
+                    claims.Add(new Claim(ClaimTypes.Name, userValues.GetValueOrDefault("userName") ?? ""));
+                    break;
 
-            case TokenType.RefreshToken:
-                // Agregar claims mínimos para RefreshToken
-                claims.Add(new Claim("sub", userValues.GetValueOrDefault("userId") ?? ""));
-                claims.Add(new Claim("name", userValues.GetValueOrDefault("userName") ?? ""));
-                break;
+                case TokenType.FrontendToken:
+                    // Agregar claims desde la configuración de FrontendTokenClaims
+                    claims.Add(new Claim("sub", userValues.GetValueOrDefault("userId") ?? ""));
+                    claims.Add(new Claim("name", userValues.GetValueOrDefault("userName") ?? ""));
+                    claims.Add(new Claim("email", userValues.GetValueOrDefault("email") ?? ""));
+                    claims.Add(new Claim("preferred_username", userValues.GetValueOrDefault("userName") ?? ""));
+                    claims.Add(new Claim("given_name", userValues.GetValueOrDefault("nombreCompleto") ?? ""));
+                    claims.Add(new Claim("family_name", userValues.GetValueOrDefault("numeroDeIdentificacion") ?? ""));
+                    break;
+
+                case TokenType.RefreshToken:
+                    // Agregar claims mínimos para RefreshToken
+                    claims.Add(new Claim("sub", userValues.GetValueOrDefault("userId") ?? ""));
+                    claims.Add(new Claim("name", userValues.GetValueOrDefault("userName") ?? ""));
+                    break;
+            }
+
+            // Agregar roles a todos los tipos de token
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            return claims;
         }
-
-        // Agregar roles a todos los tipos de token
-        foreach (var role in roles)
+        catch (Exception ex)
         {
-            claims.Add(new Claim(ClaimTypes.Role, role));
+            string logMessage = $"[ERROR] Método: BuildClaimsForTokenType | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | TokenType: {tokenType} | Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            throw;
         }
-
-        return claims;
     }
 
     /// <summary>
@@ -125,13 +143,22 @@ public class JwtTokenGenerator
     /// </summary>
     private string GetAudienceForTokenType(TokenType tokenType, bool ssl)
     {
-        return tokenType switch
+        try
         {
-            TokenType.BackendToken => ssl ? _jwtSettings.BackendAudienceSsl : _jwtSettings.BackendAudiencie,
-            TokenType.FrontendToken => ssl ? _jwtSettings.FrontendAudienceSsl : _jwtSettings.FrontAudiencie,
-            TokenType.RefreshToken => ssl ? _jwtSettings.BackendAudienceSsl : _jwtSettings.BackendAudiencie,
-            _ => throw new ArgumentException("Tipo de token no válido", nameof(tokenType))
-        };
+            return tokenType switch
+            {
+                TokenType.BackendToken => ssl ? _jwtSettings.BackendAudienceSsl : _jwtSettings.BackendAudiencie,
+                TokenType.FrontendToken => ssl ? _jwtSettings.FrontendAudienceSsl : _jwtSettings.FrontAudiencie,
+                TokenType.RefreshToken => ssl ? _jwtSettings.BackendAudienceSsl : _jwtSettings.BackendAudiencie,
+                _ => throw new ArgumentException("Tipo de token no válido", nameof(tokenType))
+            };
+        }
+        catch (Exception ex)
+        {
+            string logMessage = $"[ERROR] Método: GetAudienceForTokenType | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | TokenType: {tokenType} | Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            throw;
+        }
     }
 
     public async Task<string> GenerateAccessToken(ApplicationUser user, IList<string> roles)
@@ -436,23 +463,41 @@ public class JwtTokenGenerator
 
     public IList<string> GetRoles(IDictionary<string, string> claims)
     {
-        if (
-            !claims.TryGetValue(ClaimTypes.Role, out var rolesValue)
-            && !claims.TryGetValue("role", out rolesValue)
-        )
+        try
         {
+            if (
+                !claims.TryGetValue(ClaimTypes.Role, out var rolesValue)
+                && !claims.TryGetValue("role", out rolesValue)
+            )
+            {
+                return new List<string>();
+            }
+
+            return rolesValue
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(r => r.Trim())
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            string logMessage = $"[ERROR] Método: GetRoles | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
             return new List<string>();
         }
-
-        return rolesValue
-            .Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(r => r.Trim())
-            .ToList();
     }
 
     public string GetUserName(IDictionary<string, string> claims)
     {
-        return claims.ContainsKey(ClaimTypes.Name) ? claims[ClaimTypes.Name] : null;
+        try
+        {
+            return claims.ContainsKey(ClaimTypes.Name) ? claims[ClaimTypes.Name] : null;
+        }
+        catch (Exception ex)
+        {
+            string logMessage = $"[ERROR] Método: GetUserName | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+            Console.WriteLine(logMessage);
+            return null;
+        }
     }
     
     

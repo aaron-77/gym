@@ -57,7 +57,7 @@ namespace GymFrontend.Controllers
             }
 
             DTOResponse<DTOLoggedUser> respuesta = await manager.login(credenciales);
-            if (respuesta.success == false)
+            if (respuesta != null && respuesta.success == false)
             {
                 ViewBag.message = "Usuario y/o contraseña incorrectos";
                 return View("Login");

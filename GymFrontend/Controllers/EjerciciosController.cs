@@ -29,7 +29,7 @@ namespace GymFrontend.Controllers
             try
             {
                 var respuesta = await ejerciciosManager.obtenerEjercicios();
-                if (respuesta.success)
+                if (respuesta != null && respuesta.success)
                 {
                     return Ok(respuesta);
                 }

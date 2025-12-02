@@ -128,6 +128,10 @@ namespace GymFrontend.Controllers
             DTOResponse<DuracionCitasMedicion> response = await citasManager.obtenerDuracionCitasMedicion(); // MODIFICADO: Usar DTOResponse y await
             DuracionCitasMedicion duracionExistente = response.payload; // MODIFICADO: Usar payload
             ViewBag.duracion = duracionExistente;
+            if (responsePost == null) {
+                ViewBag.message = "Error al registrar la duracion de la cita";
+                return View("DuracionCitasMedicion", duracionParam);
+            }
             if (duracionExistente == null)
             {
                 ViewBag.message = "No tienes configuracion de duracion de citas de medicion aun, registra una ";

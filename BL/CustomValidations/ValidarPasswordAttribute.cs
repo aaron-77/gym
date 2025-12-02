@@ -12,17 +12,19 @@ namespace DTO.Dtos
 	{
 		protected override ValidationResult IsValid(object value, ValidationContext validationContext)
 		{
-			// Obtén el objeto completo que está siendo validado
-			var modelo = (User)validationContext.ObjectInstance;
-
-			if (string.IsNullOrEmpty(modelo.ContrasenaConfirmacion)) {
-				return new ValidationResult("Ingresa nuevamente la contraseña");
-			}
-			// Lógica de validación basada en otros campos del modelo
-			if (modelo.Contrasena != modelo.ContrasenaConfirmacion)
+			try
 			{
-				return new ValidationResult("Las contraseñas no coinciden");
-			}
+				// Obtén el objeto completo que está siendo validado
+				var modelo = (User)validationContext.ObjectInstance;
+
+				if (string.IsNullOrEmpty(modelo.ContrasenaConfirmacion)) {
+					return new ValidationResult("Ingresa nuevamente la contraseña");
+				}
+				// Lógica de validación basada en otros campos del modelo
+				if (modelo.Contrasena != modelo.ContrasenaConfirmacion)
+				{
+					return new ValidationResult("Las contraseñas no coinciden");
+				}
 
             var password = modelo.Contrasena;
 
@@ -53,6 +55,13 @@ namespace DTO.Dtos
             }
 
             return ValidationResult.Success;
+			}
+			catch (Exception ex)
+			{
+				string logMessage = $"[ERROR] Método: ValidarPasswordAttribute.IsValid | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+				Console.WriteLine(logMessage);
+				throw;
+			}
 		}
 	}
 }

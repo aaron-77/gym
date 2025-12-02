@@ -29,17 +29,26 @@ namespace BL.Utils
            string subject,
             string body)
         {
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(fromName, fromEmail));
-            message.To.Add(new MailboxAddress(toName, toEmail));
-            message.Subject = subject;
-
-            message.Body = new TextPart("plain")
+            try
             {
-                Text = body
-            };
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress(fromName, fromEmail));
+                message.To.Add(new MailboxAddress(toName, toEmail));
+                message.Subject = subject;
 
-            return message;
+                message.Body = new TextPart("plain")
+                {
+                    Text = body
+                };
+
+                return message;
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: crearEmail | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | From: {fromEmail} To: {toEmail} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                throw;
+            }
         }
 
         public DTO.Dtos.SmtpResponse EnviarEmail(MimeMessage message)
@@ -59,6 +68,8 @@ namespace BL.Utils
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: EnviarEmail | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
 
                 return new DTO.Dtos.SmtpResponse(false, ex.Message);
             }

@@ -1,11 +1,12 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using BL;
+﻿using BL;
 using BL.Utils;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace GymFrontend.Controllers
 {
@@ -75,8 +76,7 @@ namespace GymFrontend.Controllers
 
             var respuestaClientes = await manager.ObtenerUsuariosPorRol("cliente", "activo");
             var respuestaEntrenadores = await manager.ObtenerUsuariosPorRol("empleado", "activo");
-            ViewBag.clientes 
-= respuestaClientes.payload;
+            ViewBag.clientes = respuestaClientes.payload;
             ViewBag.entrenadores = respuestaEntrenadores.payload;
             if (!ModelState.IsValid)
             {
@@ -124,10 +124,11 @@ namespace GymFrontend.Controllers
         public async Task<IActionResult> obtenerRutinasDeCliente([FromQuery] string UsuarioID)
         {
             var respuesta = await rutinasManager.obtenerRutinasDeCliente(UsuarioID);
-            if (respuesta.success)
+            if (respuesta != null && respuesta.success)
             {
                 return Ok(respuesta);
             }
+            respuesta = ResponseManager.BuildResponse<List<Rutina>>(false, 400, "No se pudieron obtener las rutinas del cliente.", null, new List<Rutina>());
             return BadRequest(respuesta);
         }
     }

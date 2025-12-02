@@ -27,6 +27,9 @@ namespace GymFrontend.Controllers
             var respuesta = await usersManager.obtenerUsuarios();
 
             List<ExistingUser> usuarios = respuesta.payload;
+            if (usuarios == null) { 
+                usuarios = new List<ExistingUser>();
+            }
             ViewBag.usuarios = usuarios;
             if (!ModelState.IsValid)
             {   
@@ -36,6 +39,7 @@ namespace GymFrontend.Controllers
             {
                 medidaCorporal = new DTOMedida();
             }
+            
 
             var response = await medidasManager.registrarMedida(medidaCorporal);
             ViewBag.message = response.message;

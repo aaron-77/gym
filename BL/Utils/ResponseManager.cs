@@ -12,14 +12,23 @@ namespace BL.Utils
             List<ErrorModel> errors,
             T payload)
         {
-            return new DTOResponse<T>
+            try
             {
-                success = success,
-                httpCode = httpCode,
-                message = message,
-                errors = errors ?? new List<ErrorModel>(),
-                payload = payload
-            };
+                return new DTOResponse<T>
+                {
+                    success = success,
+                    httpCode = httpCode,
+                    message = message,
+                    errors = errors ?? new List<ErrorModel>(),
+                    payload = payload
+                };
+            }
+            catch (System.Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: BuildResponse | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                System.Console.WriteLine(logMessage);
+                throw;
+            }
         }
     }
 }
