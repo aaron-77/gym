@@ -22,28 +22,41 @@ namespace GymFrontend.Controllers
         [Route("registrar")]
         public async Task<IActionResult> registrarMedida(DTO.Dtos.DTOMedida medidaCorporal)
         {
+            try
+            {
+                var respuesta = await usersManager.obtenerUsuarios();
 
+                List<ExistingUser> usuarios = respuesta.payload;
+                if (usuarios == null) { 
+                    usuarios = new List<ExistingUser>();
+                }
+                ViewBag.usuarios = usuarios;
+                if (!ModelState.IsValid)
+                {   
+                    return Redirect("empleados");
+                }
+                if (medidaCorporal == null)
+                {
+                    medidaCorporal = new DTOMedida();
+                }
+                
 
-            var respuesta = await usersManager.obtenerUsuarios();
-
-            List<ExistingUser> usuarios = respuesta.payload;
-            if (usuarios == null) { 
-                usuarios = new List<ExistingUser>();
-            }
-            ViewBag.usuarios = usuarios;
-            if (!ModelState.IsValid)
-            {   
+                var response = await medidasManager.registrarMedida(medidaCorporal);
+                if (response == null)
+                {
+                    ViewBag.message = "Error al registrar la medida";
+                    return Redirect("empleados");
+                }
+                ViewBag.message = response.message;
                 return Redirect("empleados");
             }
-            if (medidaCorporal == null)
+            catch (Exception ex)
             {
-                medidaCorporal = new DTOMedida();
+                string logMessage = $"[ERROR] Método: registrarMedida | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                ViewBag.message = "Ocurrió un error al registrar la medida.";
+                return Redirect("empleados");
             }
-            
-
-            var response = await medidasManager.registrarMedida(medidaCorporal);
-            ViewBag.message = response.message;
-            return Redirect("empleados");
         }
 
         [Authorize(Roles = "cliente")]

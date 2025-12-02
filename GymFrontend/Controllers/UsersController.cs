@@ -41,52 +41,71 @@ namespace GymFrontend.Controllers
         [Route("signIn")]
         public IActionResult Index()
         {
-            var res = config["ConnectionStrings:DefaultConnection"];
-            return View("Login", new UserCredentials());
+            try
+            {
+                var res = config["ConnectionStrings:DefaultConnection"];
+                return View("Login", new UserCredentials());
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: Index (GET signIn) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                ViewBag.message = "Error al cargar la página de login.";
+                return View("Login", new UserCredentials());
+            }
         }
 
         [HttpPost]
         [Route("signIn")]
         public async Task<IActionResult> executeSignIn([FromForm] UserCredentials credenciales)
         {
-            var res = config["ConnectionStrings:DefaultConnection"];
-            Console.WriteLine("----------------------------INICIANDO LOGIN------------");
-            if (!ModelState.IsValid)
+            try
             {
+                var res = config["ConnectionStrings:DefaultConnection"];
+                Console.WriteLine("----------------------------INICIANDO LOGIN------------");
+                if (!ModelState.IsValid)
+                {
+                    return View("Login", credenciales);
+                }
+
+                DTOResponse<DTOLoggedUser> respuesta = await manager.login(credenciales);
+                if (respuesta != null && respuesta.success == false)
+                {
+                    ViewBag.message = "Usuario y/o contraseña incorrectos";
+                    return View("Login");
+                }
+
+                Console.WriteLine("----------------------------VARIFICANDO CLAIMS------------");
+                var claims = _jwtTokenGenerator.ValidateIdToken(respuesta.payload.IdToken);
+                if (claims == null)
+                {
+                    return View("Login");
+                }
+                Console.WriteLine("----------------------------CLAIMS VERIFICADOS------------");
+                _cookieService.AgregarCookie(Response, "AuthToken", respuesta.payload.IdToken);
+                _cookieService.AgregarCookie(Response, "AccessToken", respuesta.payload.AccessToken);
+                _cookieService.AgregarCookie(Response, "RefreshToken", respuesta.payload.RefreshToken);
+                Console.WriteLine("----------------------------COOKIES AGREGADAS------------");
+                var roles = _jwtTokenGenerator.GetRoles(claims);
+                var empleadoPage = config["pages:empleados"];
+                var clientePage = config["pages:clientes"];
+                if (roles.Contains("empleado"))
+                {
+                    Console.WriteLine("----------------------------DIRIGIENDO A EMPLEADO------------");
+                    return Redirect(empleadoPage);
+                }
+                ViewBag.cel = respuesta.payload.Telefono;
+                ViewBag.correo = respuesta.payload.Correo;
+                Console.WriteLine("----------------------------DIRIGIANDO A CLIENTES------------");
+                return RedirectToAction("dirigirACrearPaginaDeClientes", new { idUser = respuesta.payload.Id });
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: executeSignIn (POST signIn) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                ViewBag.message = "Ocurrió un error al procesar el inicio de sesión.";
                 return View("Login", credenciales);
             }
-
-            DTOResponse<DTOLoggedUser> respuesta = await manager.login(credenciales);
-            if (respuesta != null && respuesta.success == false)
-            {
-                ViewBag.message = "Usuario y/o contraseña incorrectos";
-                return View("Login");
-            }
-
-            Console.WriteLine("----------------------------VARIFICANDO CLAIMS------------");
-            var claims = _jwtTokenGenerator.ValidateIdToken(respuesta.payload.IdToken);
-            if (claims == null)
-            {
-                return View("Login");
-            }
-            Console.WriteLine("----------------------------CLAIMS VERIFICADOS------------");
-            _cookieService.AgregarCookie(Response, "AuthToken", respuesta.payload.IdToken);
-            _cookieService.AgregarCookie(Response, "AccessToken", respuesta.payload.AccessToken);
-            _cookieService.AgregarCookie(Response, "RefreshToken", respuesta.payload.RefreshToken);
-            Console.WriteLine("----------------------------COOKIES AGREGADAS------------");
-            var roles = _jwtTokenGenerator.GetRoles(claims);
-            var empleadoPage = config["pages:empleados"];
-            var clientePage = config["pages:clientes"];
-            if (roles.Contains("empleado"))
-            {
-                Console.WriteLine("----------------------------DIRIGIENDO A EMPLEADO------------");
-                return Redirect(empleadoPage);
-            }
-            ViewBag.cel = respuesta.payload.Telefono;
-            ViewBag.correo = respuesta.payload.Correo;
-            Console.WriteLine("----------------------------DIRIGIANDO A CLIENTES------------");
-            return RedirectToAction("dirigirACrearPaginaDeClientes", new { idUser = respuesta.payload.Id });
-        
         }
 
         [Authorize(Roles = "empleado,cliente")]
@@ -94,13 +113,22 @@ namespace GymFrontend.Controllers
         [Route("CerrarSesion")]
         public async Task<IActionResult> cerrarSesion()
         {
-            if (Request.Cookies["AuthToken"] != null)
+            try
             {
-                Response.Cookies.Delete("AuthToken");
-                Response.Cookies.Delete("AccessToken"); // Elimina la cookie
-            }
+                if (Request.Cookies["AuthToken"] != null)
+                {
+                    Response.Cookies.Delete("AuthToken");
+                    Response.Cookies.Delete("AccessToken"); // Elimina la cookie
+                }
 
-            return Redirect("signIn");
+                return Redirect("signIn");
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: cerrarSesion | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                return Redirect("signIn");
+            }
         }
 
         [HttpGet("obtenerUsuariosPorRol")]
@@ -143,7 +171,17 @@ namespace GymFrontend.Controllers
         [Route("signUp")]
         public IActionResult crearCuenta()
         {
-            return View();
+            try
+            {
+                return View();
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: crearCuenta (GET signUp) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                ViewBag.message = "Error al cargar la página de creación de cuenta.";
+                return View();
+            }
         }
 
         [HttpPost]
@@ -213,11 +251,20 @@ namespace GymFrontend.Controllers
         [Route("detallesDeProgreso")]
         public async Task<IActionResult> dirigirADetallesDeProgreso([FromQuery] int idCliente)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            HttpResponseAñosActivo responseAñosActivo = await medidasManager.obtenerAñosActivosDelCliente(userId);
-            ViewBag.anosActivo = responseAñosActivo.data;
-            ViewBag.userId = userId;
-            return View("DetallesDeProgreso");
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                HttpResponseAñosActivo responseAñosActivo = await medidasManager.obtenerAñosActivosDelCliente(userId);
+                ViewBag.anosActivo = responseAñosActivo.data;
+                ViewBag.userId = userId;
+                return View("DetallesDeProgreso");
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: dirigirADetallesDeProgreso | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                return View("DetallesDeProgreso");
+            }
         }
 
         [Authorize(Roles = "empleado")]
@@ -225,21 +272,31 @@ namespace GymFrontend.Controllers
         [Route("empleados")]
         public async Task<IActionResult> dirigirACrearPaginaDeEmpelados()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var respuestaUsuarios = await manager.obtenerUsuarios();
-            List<ExistingUser> usuarios = respuestaUsuarios.payload;
-           var respuestaParametros = await medidasManager.obtenerParametrosDeMedicion();
-            List<DTOUnidadDeMedida> unidadDeMedida = ExtractDataManager.extractMeasurementUnitData(
-                respuestaParametros.payload
-            );
-            List<DTOParametroDeMedicion> parametrosDeMedicion = respuestaParametros
-                .payload.DistinctBy(p => p.parametroMedicionId)
-                .ToList();
-            ViewBag.usuarios = usuarios;
-            ViewBag.parametros = parametrosDeMedicion;
-            ViewBag.unidades = unidadDeMedida;
-            
-            return View("EmpleadosMainPage");
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var respuestaUsuarios = await manager.obtenerUsuarios();
+                List<ExistingUser> usuarios = respuestaUsuarios.payload;
+               var respuestaParametros = await medidasManager.obtenerParametrosDeMedicion();
+                List<DTOUnidadDeMedida> unidadDeMedida = ExtractDataManager.extractMeasurementUnitData(
+                    respuestaParametros.payload
+                );
+                List<DTOParametroDeMedicion> parametrosDeMedicion = respuestaParametros
+                    .payload.DistinctBy(p => p.parametroMedicionId)
+                    .ToList();
+                ViewBag.usuarios = usuarios;
+                ViewBag.parametros = parametrosDeMedicion;
+                ViewBag.unidades = unidadDeMedida;
+                
+                return View("EmpleadosMainPage");
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: dirigirACrearPaginaDeEmpelados | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                ViewBag.message = "Error al cargar la página de empleados.";
+                return View("EmpleadosMainPage");
+            }
         }
 
         [Authorize(Roles = "empleado")]
@@ -247,22 +304,31 @@ namespace GymFrontend.Controllers
         [Route("getSessionTimeExpiration")]
         public async Task<DTOResponse<string>> getSessionTimeExpiration()
         {
-            var token = Request.Cookies["AuthToken"];
-            var claims = _jwtTokenGenerator.ValidateIdToken(token);
-            string expirationDate = claims
-                .FirstOrDefault(c =>
-                    c.Key == ClaimTypes.Expiration || c.Key == JwtRegisteredClaimNames.Exp
-                )
-                .Value;
+            try
+            {
+                var token = Request.Cookies["AuthToken"];
+                var claims = _jwtTokenGenerator.ValidateIdToken(token);
+                string expirationDate = claims
+                    .FirstOrDefault(c =>
+                        c.Key == ClaimTypes.Expiration || c.Key == JwtRegisteredClaimNames.Exp
+                    )
+                    .Value;
 
-            var response = ResponseManager.BuildResponse(
-                true,
-                200,
-                "se obtuvo la expiracion de la sesion",
-                null,
-                expirationDate
-            );
-            return response;
+                var response = ResponseManager.BuildResponse(
+                    true,
+                    200,
+                    "se obtuvo la expiracion de la sesion",
+                    null,
+                    expirationDate
+                );
+                return response;
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: getSessionTimeExpiration | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                return ResponseManager.BuildResponse<string>(false, 500, "Error interno al obtener la expiración.", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
+            }
         }
 
         [Authorize(Roles = "empleado,cliente")]
@@ -330,33 +396,61 @@ namespace GymFrontend.Controllers
             [FromQuery] string email
         )
         {
-            celular = celular.Trim();
-            email = email.Trim();
-
-            OTPCodeVerification verificacion = new OTPCodeVerification()
+            try
             {
-                cel = "+" + celular,
-                correo = email,
-            };
-            CanalDeEnvioOTP canal = new CanalDeEnvioOTP() { cel = "+" + celular, correo = email };
-            HttpResponseGenerateOTP response = manager.obtenerCodigoOTP(canal).Result;
-            return View("ValidacionOTP", verificacion);
+                celular = celular.Trim();
+                email = email.Trim();
+
+                OTPCodeVerification verificacion = new OTPCodeVerification()
+                {
+                    cel = "+" + celular,
+                    correo = email,
+                };
+                CanalDeEnvioOTP canal = new CanalDeEnvioOTP() { cel = "+" + celular, correo = email };
+                HttpResponseGenerateOTP response = manager.obtenerCodigoOTP(canal).Result;
+                return View("ValidacionOTP", verificacion);
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: dirigirACrearPaginaValidacionOTP | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                ViewBag.message = "Error al procesar la solicitud de validación OTP.";
+                return View("ValidacionOTP");
+            }
         }
 
         [HttpPost]
         [Route("validacionOTPPost")]
         public IActionResult pedirValidacionDeCodigoOTP(OTPCodeVerification verificacion)
         {
-            HttpLoginResponse response = manager.validarCodigoOTP(verificacion).Result;
-
-            return Redirect(response.urlPageForUser);
+            try
+            {
+                HttpLoginResponse response = manager.validarCodigoOTP(verificacion).Result;
+                return Redirect(response.urlPageForUser);
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: pedirValidacionDeCodigoOTP | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                ViewBag.message = "Error al validar el código OTP.";
+                return View("ValidacionOTP", verificacion);
+            }
         }
 
         [HttpGet]
         [Route("AccesoDenegado")]
         public async Task<IActionResult> dirigirAAccesoDenegado([FromQuery] int idCliente)
         {
-            return View("AccesoDenegado");
+            try
+            {
+                return View("AccesoDenegado");
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: dirigirAAccesoDenegado | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                return View("AccesoDenegado");
+            }
         }
     }
 }

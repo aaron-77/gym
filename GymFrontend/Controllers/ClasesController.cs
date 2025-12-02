@@ -24,32 +24,42 @@ namespace GymFrontend.Controllers
         [Route("registrarClase")]
         public IActionResult RegistroDeClases()
         {
-            // Datos de ejemplo para los combobox
-            ViewBag.Instructores = new List<dynamic>
+            try
             {
-                new { Id = 1, Nombre = "Alex Rodriguez" },
-                new { Id = 2, Nombre = "Sarah Johnson" },
-                new { Id = 3, Nombre = "Mike Williams" },
-                new { Id = 4, Nombre = "Emma Davis" }
-            };
+                // Datos de ejemplo para los combobox
+                ViewBag.Instructores = new List<dynamic>
+                {
+                    new { Id = 1, Nombre = "Alex Rodriguez" },
+                    new { Id = 2, Nombre = "Sarah Johnson" },
+                    new { Id = 3, Nombre = "Mike Williams" },
+                    new { Id = 4, Nombre = "Emma Davis" }
+                };
 
-            ViewBag.Intensidades = new List<dynamic>
+                ViewBag.Intensidades = new List<dynamic>
+                {
+                    new { Id = 1, Nombre = "Baja" },
+                    new { Id = 2, Nombre = "Media" },
+                    new { Id = 3, Nombre = "Alta" },
+                    new { Id = 4, Nombre = "Extrema" }
+                };
+
+                ViewBag.Dificultades = new List<dynamic>
+                {
+                    new { Id = 1, Nombre = "Principiante" },
+                    new { Id = 2, Nombre = "Intermedio" },
+                    new { Id = 3, Nombre = "Avanzado" },
+                    new { Id = 4, Nombre = "Experto" }
+                };
+
+                return View();
+            }
+            catch (Exception ex)
             {
-                new { Id = 1, Nombre = "Baja" },
-                new { Id = 2, Nombre = "Media" },
-                new { Id = 3, Nombre = "Alta" },
-                new { Id = 4, Nombre = "Extrema" }
-            };
-
-            ViewBag.Dificultades = new List<dynamic>
-            {
-                new { Id = 1, Nombre = "Principiante" },
-                new { Id = 2, Nombre = "Intermedio" },
-                new { Id = 3, Nombre = "Avanzado" },
-                new { Id = 4, Nombre = "Experto" }
-            };
-
-            return View();
+                string logMessage = $"[ERROR] Método: RegistroDeClases | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                ViewBag.message = "Error al cargar la vista de registro de clases.";
+                return View();
+            }
         }
 
         [Authorize(Roles = "empleado")]
@@ -57,7 +67,17 @@ namespace GymFrontend.Controllers
         [Route("registroClasesProgramadas")]
         public IActionResult RegistroDeClasesProgramadas()
         {
-            return View();
+            try
+            {
+                return View();
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: RegistroDeClasesProgramadas | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                ViewBag.message = "Error al cargar la vista de clases programadas.";
+                return View();
+            }
         }
 
         [Authorize(Roles = "empleado")]
@@ -65,7 +85,17 @@ namespace GymFrontend.Controllers
         [Route("inscripcionAClases")]
         public IActionResult InscripcionAClases()
         {
-            return View();
+            try
+            {
+                return View();
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: InscripcionAClases (GET) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                ViewBag.message = "Error al cargar la vista de inscripción a clases.";
+                return View();
+            }
         }
 
         [HttpPost]
@@ -83,17 +113,12 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: InscribirAClase | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
-                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
-                    $"Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] Método: InscribirAClase | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 
                 return StatusCode(500, new DTOResponse<int?> { success = false, message = "Error interno del servidor al inscribir a clase.", errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } } });
             }
         }
-
-        
 
         [HttpGet("obtenerClases")]
         public async Task<IActionResult> ObtenerClases([FromQuery] bool? activa = null)
