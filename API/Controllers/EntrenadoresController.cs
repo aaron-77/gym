@@ -39,6 +39,9 @@ namespace API.Controllers
             }
             catch (System.Exception ex) // MODIFICADO: Capturar la excepción para registrarla
             {
+                string logMessage = $"[ERROR] Método: ObtenerEntrenadoresDisponibles (EntrenadoresController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | FechaInicio: {fechaInicio} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 respuesta = BL.Utils.ResponseManager.BuildResponse<List<QueryUser>>(
                     success: false,
                     httpCode: 500,

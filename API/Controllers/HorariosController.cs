@@ -42,6 +42,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ConsultarHorariosPreReservados (HorariosController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Fecha: {fecha} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 var response = new DTOResponse<List<DTOHorarioVisualizacion>>
                 {
                     success = false,
@@ -79,6 +82,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: obtenerHorariosDisponibles (HorariosController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Fecha: {fecha} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 var response = new DTOResponse<List<DTOHorarioVisualizacion>>
                 {
                     success = false,
@@ -117,6 +123,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: registrarPreReservaDeHorario (HorariosController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | PreReserva.UserId: {preReserva?.idUsuarioQueReserva} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 var response = new DTOResponse<int>
                 {
                     success = false,

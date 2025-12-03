@@ -59,20 +59,31 @@ namespace API.Controllers
         [Route("api/obtenerUsuarios")]
         public async Task<IActionResult> getUsuarios()
         {
-            var jwt = Request.Cookies["AuthToken"];
-            DTOResponse<List<ExistingUser>> respuesta = new DTOResponse<List<ExistingUser>>();
+            try
+            {
+                var jwt = Request.Cookies["AuthToken"];
+                DTOResponse<List<ExistingUser>> respuesta = new DTOResponse<List<ExistingUser>>();
 
-            List<ExistingUser> usuarios = await _userManager.Users
-                .Select(u => new ExistingUser()
-                {
-                    Id = u.Id,
-                    NombreCompleto = u.NombreCompleto,
-                    Apellido = u.Apellido,
-                    FechaDeNacimiento = u.FechaDeNacimiento,
-                })
-                .ToListAsync();
-            respuesta.payload = usuarios;
-            return Ok(respuesta);
+                List<ExistingUser> usuarios = await _userManager.Users
+                    .Select(u => new ExistingUser()
+                    {
+                        Id = u.Id,
+                        NombreCompleto = u.NombreCompleto,
+                        Apellido = u.Apellido,
+                        FechaDeNacimiento = u.FechaDeNacimiento,
+                    })
+                    .ToListAsync();
+                respuesta.payload = usuarios;
+                return Ok(respuesta);
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: getUsuarios | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                var respuesta = BL.Utils.ResponseManager.BuildResponse<List<ExistingUser>>(false, 500, "Error al obtener usuarios", new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } }, null);
+                return StatusCode(500, respuesta);
+            }
         }
 
         [Authorize(Roles = "empleado")]
@@ -103,6 +114,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: getUsuariosPorRol | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Rol: {rol}, Estado: {estado} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 var respuesta = BL.Utils.ResponseManager.BuildResponse(
                     success: false,
                     httpCode: 500,
@@ -211,6 +225,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: RegistrarUsuario | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | UsuarioEmail: {usuario?.Email} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
                     success: false,
                     httpCode: 500,
@@ -269,6 +286,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: AgregarRolUsuario | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | UserId: {request?.UserId}, Role: {request?.Role} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 respuesta = ResponseManager.BuildResponse<string>(
                     success: false,
                     httpCode: 500,
@@ -286,43 +306,50 @@ namespace API.Controllers
             return Ok(respuesta);
         }
 
-        
-
         [HttpPost]
         [Route("api/autenticar")]
         public async Task<IActionResult> AutenticarUsuario([FromBody] UserCredentials credenciales)
         {
-
-
-             string bases = Request.PathBase;
-            string query = Request.Path;
-            string proto = Request.Protocol;
-            string origin = Request.Headers["Origin"].FirstOrDefault();
-            var loggedUser = await _authService.AuthenticateUser(
-                credenciales.correo,
-                credenciales.contrasena
-            );
-            DTOResponse<DTOLoggedUser> response = ResponseManager.BuildResponse<DTOLoggedUser>(
-                success: false,
-                httpCode: 400,
-                message: "Usuario o contraseña incorrectos",
-                errors: null,
-                payload: null
-            );
-            if (loggedUser == null)
+            try
             {
-                return Unauthorized(response);
-            }
+                string bases = Request.PathBase;
+                string query = Request.Path;
+                string proto = Request.Protocol;
+                string origin = Request.Headers["Origin"].FirstOrDefault();
+                var loggedUser = await _authService.AuthenticateUser(
+                    credenciales.correo,
+                    credenciales.contrasena
+                );
+                DTOResponse<DTOLoggedUser> response = ResponseManager.BuildResponse<DTOLoggedUser>(
+                    success: false,
+                    httpCode: 400,
+                    message: "Usuario o contraseña incorrectos",
+                    errors: null,
+                    payload: null
+                );
+                if (loggedUser == null)
+                {
+                    return Unauthorized(response);
+                }
 
-            response = ResponseManager.BuildResponse<DTOLoggedUser>(
-                success: true,
-                httpCode: 200,
-                message: "Autenticación exitosa",
-                errors: null,
-                payload: loggedUser
-            );
-            // Devolver token
-            return Ok(response);
+                response = ResponseManager.BuildResponse<DTOLoggedUser>(
+                    success: true,
+                    httpCode: 200,
+                    message: "Autenticación exitosa",
+                    errors: null,
+                    payload: loggedUser
+                );
+                // Devolver token
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: AutenticarUsuario | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | CredencialUsuario: {credenciales?.correo} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                var response = ResponseManager.BuildResponse<DTOLoggedUser>(false, 500, "Error interno al autenticar", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
+                return StatusCode(500, response);
+            }
         }
 
         [Authorize(Roles = "empleado,cliente")]
@@ -330,28 +357,38 @@ namespace API.Controllers
         [Route("api/refresh")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
         {
-            var refreshedUser = await _authService.RefreshAccessToken(request.RefreshToken);
-            if (refreshedUser == null)
+            try
             {
-                return Unauthorized(
-                    ResponseManager.BuildResponse<DTOLoggedUser>(
-                        success: false,
-                        httpCode: 401,
-                        message: "Refresh token inválido o expirado",
-                        errors: null,
-                        payload: refreshedUser
-                    )
-                );
-            }
+                var refreshedUser = await _authService.RefreshAccessToken(request.RefreshToken);
+                if (refreshedUser == null)
+                {
+                    return Unauthorized(
+                        ResponseManager.BuildResponse<DTOLoggedUser>(
+                            success: false,
+                            httpCode: 401,
+                            message: "Refresh token inválido o expirado",
+                            errors: null,
+                            payload: refreshedUser
+                        )
+                    );
+                }
 
-            var response = ResponseManager.BuildResponse<DTOLoggedUser>(
-                success: true,
-                httpCode: 200,
-                message: "Tokens refrescados exitosamente",
-                errors: null,
-                payload: refreshedUser
-            );
-            return Ok(response);
+                var response = ResponseManager.BuildResponse<DTOLoggedUser>(
+                    success: true,
+                    httpCode: 200,
+                    message: "Tokens refrescados exitosamente",
+                    errors: null,
+                    payload: refreshedUser
+                );
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: RefreshToken | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | RefreshTokenRequest: {request?.RefreshToken} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                return StatusCode(500, ResponseManager.BuildResponse<DTOLoggedUser>(false, 500, "Error interno al refrescar token", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null));
+            }
         }
 
         [Authorize(Roles = "empleado,cliente")]
@@ -359,15 +396,24 @@ namespace API.Controllers
         [Route("api/logout")]
         public IActionResult Logout([FromBody] LogoutRequest request)
         {
-            _authService.RevokeRefreshToken(request.RefreshToken);
-            var response = ResponseManager.BuildResponse<object>(
-                success: true,
-                httpCode: 200,
-                message: "Sesión cerrada exitosamente",
-                errors: null,
-                payload: null
-            );
-            return Ok(response);
+            try
+            {
+                _authService.RevokeRefreshToken(request.RefreshToken);
+                var response = ResponseManager.BuildResponse<object>(
+                    success: true,
+                    httpCode: 200,
+                    message: "Sesión cerrada exitosamente",
+                    errors: null,
+                    payload: null
+                );
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: Logout | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | RefreshToken: {request?.RefreshToken} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                return StatusCode(500, ResponseManager.BuildResponse<object>(false, 500, "Error al cerrar sesión", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null));
+            }
         }
 
         [HttpPost]
@@ -394,6 +440,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: obtenerCodigoOTP | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Canal: {canal?.cel}, {canal?.correo} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 response.ok = false;
                 response.message = "No se pudo crear el codigo de verificacion";
                 response.errors.Add(new ErrorModel() { message = ex.Message, propiedad = null });
@@ -409,72 +458,6 @@ namespace API.Controllers
             [FromBody] OTPCodeVerification userVerification
         )
         {
-
-            /*
-            HttpLoginResponse response = new HttpLoginResponse();
-            string baseUrl = _jwtSettings.BackendAudiencie;
-            try
-            {
-                TwilioClient.Init(
-                    "AC9ecb12865c83eb291ab8a2c520fcee14",
-                    "cb8c1ceafb83b80649f064806617eab8"
-                );
-                var verificacion = await VerificationCheckResource.CreateAsync(
-                    to: userVerification.cel,
-                    code: userVerification.codigo,
-                    pathServiceSid: "VA7cfeb5608d0f76ca2bd2960546149332"
-                );
-
-                if (verificacion.Status == "approved")
-                {
-                    response.ok = true;
-                    response.message = "validacion exitosa";
-                    response.errors = null;
-                    var loggedUser = _db
-                        .AspNetUsers.Include(u => u.Roles)
-                        .Where(u => u.PhoneNumber == userVerification.cel)
-                        .FirstOrDefault();
-
-                    NewUser responseUser = new NewUser(
-                        loggedUser.NombreCompleto,
-                        loggedUser.FechaDeNacimiento,
-                        "",
-                        "",
-                        loggedUser.Email,
-                        loggedUser.PhoneNumber,
-                        loggedUser.Apellido,
-                        ""
-                    );
-                    response.ok = true;
-                    response.data = responseUser;
-                    response.message = "Verificacion exitosa";
-                    if (loggedUser.Roles.FirstOrDefault()?.Name == "empleado")
-                    {
-                        response.urlPageForUser = baseUrl + "/empleados";
-                    }
-                    else if (loggedUser.Roles.FirstOrDefault()?.Name == "cliente")
-                    {
-                        response.urlPageForUser = baseUrl + "/clientes";
-                    }
-                }
-                else
-                {
-                    response.ok = true;
-                    response.data = null;
-                    response.message = "No se pudo verificar tu identidad";
-                    response.urlPageForUser = baseUrl + "/signIn";
-                }
-            }
-            catch (Exception ex)
-            {
-                response.ok = false;
-                response.message = "Error en el proceso de verificacion del codigo";
-                response.errors.Add(new ErrorModel() { message = ex.Message, propiedad = null });
-                response.data = null;
-            }
-
-            return Ok(response);
-            */
             return Ok();
         }
 
@@ -524,6 +507,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: CambiarPassword | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | UserId: {model?.UserId} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 respuesta = ResponseManager.BuildResponse<string>(
                     success: false,
                     httpCode: 500,

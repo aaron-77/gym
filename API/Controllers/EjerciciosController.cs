@@ -32,6 +32,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: obtenerEjercicios (EjerciciosController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 respuesta = ResponseManager.BuildResponse<List<DTO.Dtos.Ejercicio>>(false, 500, "Error al consultar los ejercicios", new List<ErrorModel>() { new ErrorModel() { propiedad = null, message = ex.Message } }, null);
 
             }

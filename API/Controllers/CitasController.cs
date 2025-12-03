@@ -73,6 +73,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: RegistrarCita (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Cita.FkCliente: {cita?.fkCliente}, FkEntrenador: {cita?.fkEntrenador} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 respuesta = new DTOResponse<DTO.Dtos.Cita>();
                 respuesta.success = false;
                 respuesta.message = "no se pudo registrar tu cita";
@@ -132,6 +135,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: RegistrarDuracion (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | DuracionId: {duracion?.Id} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 respuesta.success = false;
                 respuesta.message = "no se pudo registrar la duracion";
                 respuesta.payload = null;
@@ -181,6 +187,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ModificarCita (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | CitaId: {cita?.Id} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 respuesta.success = false;
                 respuesta.message = "no se pudo modificar tu cita";
                 respuesta.payload = null;
@@ -196,15 +205,29 @@ namespace API.Controllers
         public async Task<IActionResult> getDuracionCita()
         {
             DTOResponse<int> responseDuracion = new DTOResponse<int>();
-            var result = await _db.DuracionCitas.FirstOrDefaultAsync();
-            responseDuracion.success = true;
-            responseDuracion.message = "consulta exitosa";
-            responseDuracion.errors = null;
-            if (result != null)
+            try
             {
-                responseDuracion.payload = result.Duracion;
+                var result = await _db.DuracionCitas.FirstOrDefaultAsync();
+                responseDuracion.success = true;
+                responseDuracion.message = "consulta exitosa";
+                responseDuracion.errors = null;
+                if (result != null)
+                {
+                    responseDuracion.payload = result.Duracion;
+                }
+                return Ok(responseDuracion);
             }
-            return Ok(responseDuracion);
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: getDuracionCita (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                responseDuracion.success = false;
+                responseDuracion.message = "Error al obtener la duración";
+                responseDuracion.errors = new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } };
+                responseDuracion.payload = 0;
+                return StatusCode(500, responseDuracion);
+            }
         }
 
         [HttpGet]
@@ -225,6 +248,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: getCitasAgendadas (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdUsuario: {idUsuario} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 responseDuracion.success = false;
                 responseDuracion.message = "Error al consultar las citas agendadas";
                 responseDuracion.errors.Add(new ErrorModel { message = ex.Message, propiedad = null });
@@ -239,26 +265,40 @@ namespace API.Controllers
         public async Task<IActionResult> getDuracionCitasMedicion()
         {
             DTOResponse<DTO.Dtos.DuracionCitasMedicion> responseDuracion = new DTOResponse<DTO.Dtos.DuracionCitasMedicion>();
-            var result = await _db.DuracionCitas.Select
-                (d => new DuracionCitasMedicion
-                {
-                    Id = d.DuracionId,
-                    duracion = d.Duracion,
-                    frecuenciaNotificaciones = d.FrecuenciaNotificaciones
-                }).FirstOrDefaultAsync();
-            responseDuracion.success = true;
-            responseDuracion.message = "consulta exitosa";
-            responseDuracion.errors = null;
-            responseDuracion.payload = result;
-
-            if (result == null)
+            try
             {
-                responseDuracion.success = false;
-                responseDuracion.message = "No hay configuracion de duracion registrada aun";
+                var result = await _db.DuracionCitas.Select
+                    (d => new DuracionCitasMedicion
+                    {
+                        Id = d.DuracionId,
+                        duracion = d.Duracion,
+                        frecuenciaNotificaciones = d.FrecuenciaNotificaciones
+                    }).FirstOrDefaultAsync();
+                responseDuracion.success = true;
+                responseDuracion.message = "consulta exitosa";
                 responseDuracion.errors = null;
                 responseDuracion.payload = result;
+
+                if (result == null)
+                {
+                    responseDuracion.success = false;
+                    responseDuracion.message = "No hay configuracion de duracion registrada aun";
+                    responseDuracion.errors = null;
+                    responseDuracion.payload = result;
+                }
+                return Ok(responseDuracion);
             }
-            return Ok(responseDuracion);
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: getDuracionCitasMedicion (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                responseDuracion.success = false;
+                responseDuracion.message = "Error al obtener la configuración de duración";
+                responseDuracion.errors = new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } };
+                responseDuracion.payload = null;
+                return StatusCode(500, responseDuracion);
+            }
         }
     }
 }

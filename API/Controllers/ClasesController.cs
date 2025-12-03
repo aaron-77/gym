@@ -153,7 +153,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.StackTrace);
+                string logMessage = $"[ERROR] Método: ConsultarDetallesDeClase (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdClase: {idClase} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<DetalleDeClase>(
@@ -204,6 +205,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ObtenerClases (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Activa: {activa} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<List<DTOClaseSimple>>(
@@ -249,6 +252,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ObtenerNivelesDeDificultad (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<List<VNivelesDeDificultad>>(
@@ -294,6 +299,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ObtenerNivelesDeIntensidad (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<List<VNivelesDeIntensidad>>(
@@ -378,6 +385,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: RegistrarClase (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Modelo.NombreClase: {modelo?.NombreClase} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<int>(
@@ -505,7 +515,7 @@ namespace API.Controllers
                             modelo.idUsuarioQueReserva
                         );
                         await _servicioActualizaciones.enviarHorariosDisponiblesActualizados(
-                            modelo.idUsuarioQueReserva
+                            modelo.idUsuarioQue Reserva
                         );
 
                         return Ok(
@@ -522,6 +532,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: RegistrarClaseProgramada (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Modelo.FkClase: {modelo?.fkClase} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<int>(
@@ -658,6 +671,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: CancelarClasesProgramadas (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | SolicitudesCount: {solicitudes?.Count} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<string>(
@@ -754,6 +770,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: ReagendarClase (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdInscripcionCancelada: {modelo?.idInscripcionCancelada} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<string>(
