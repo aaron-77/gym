@@ -92,9 +92,11 @@ namespace API.Services
                 
                 var parametros = new SqlParameter[]
                 {
-                    new SqlParameter("@idUsuarioQueReserva", preReserva.idUsuarioQueReserva),
+                    new SqlParameter("@idUsuarioQueReserva", preReserva.idUsuarioQueReserva ?? (object)DBNull.Value),
                     new SqlParameter("@fechaTentativa", fechaDateTime),
                     new SqlParameter("@idHoraLaboral", preReserva.idHoraLaboral),
+                    new SqlParameter("@idClase", preReserva.idClase ?? (object)DBNull.Value),
+                    new SqlParameter("@idEntrenador", preReserva.idEntrenador ?? (object)DBNull.Value),
                     new SqlParameter("@idPrereservaOut", SqlDbType.Int)
                     {
                         Direction = ParameterDirection.Output
@@ -102,7 +104,7 @@ namespace API.Services
                 };
 
                 await _context.Database.ExecuteSqlRawAsync(
-                    "EXEC sp_preReservarHorario @idUsuarioQueReserva, @fechaTentativa, @idHoraLaboral, @idPrereservaOut OUTPUT",
+                    "EXEC sp_preReservarHorario @idUsuarioQueReserva, @fechaTentativa, @idHoraLaboral, @idClase, @idEntrenador, @idPrereservaOut OUTPUT",
                     parametros
                 );
 

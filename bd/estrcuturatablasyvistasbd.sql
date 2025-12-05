@@ -1,7 +1,7 @@
 
 
 
-134902453
+
 -- FitnessCenterDB.dbo.AspNetRoles definition
 
 -- Drop table
