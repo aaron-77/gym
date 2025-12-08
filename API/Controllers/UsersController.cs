@@ -225,7 +225,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: RegistrarUsuario | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | UsuarioEmail: {usuario?.Email} | Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] Método: RegistrarUsuario | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
 
                 respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
@@ -507,7 +507,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: CambiarPassword | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | UserId: {model?.UserId} | Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] Método: CambiarPassword | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message}| Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
 
                 respuesta = ResponseManager.BuildResponse<string>(

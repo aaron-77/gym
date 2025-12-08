@@ -17,7 +17,7 @@ namespace DataAccess.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.19")
+                .HasAnnotation("ProductVersion", "8.0.22")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -40,12 +40,14 @@ namespace DataAccess.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("FechaHora");
 
-                    b.Property<int>("fkCliente")
-                        .HasColumnType("int")
+                    b.Property<string>("fkCliente")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("UsuarioID");
 
-                    b.Property<int>("fkEntrenador")
-                        .HasColumnType("int")
+                    b.Property<string>("fkEntrenador")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("EntrenadorID");
 
                     b.Property<string>("tipoCita")
@@ -88,8 +90,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fkClase");
 
-                    b.Property<int>("fkEntrenador")
-                        .HasColumnType("int")
+                    b.Property<string>("fkEntrenador")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("fkEntrenador");
 
                     b.Property<TimeSpan>("horaFin")
@@ -206,8 +209,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("idPreReserva");
 
-                    b.Property<int>("idUsuarioQueReserva")
-                        .HasColumnType("int")
+                    b.Property<string>("idUsuarioQueReserva")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("idUsuarioQueReserva");
 
                     b.ToTable((string)null);
@@ -325,8 +329,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fkParametro");
 
-                    b.Property<int>("fkUsuario")
-                        .HasColumnType("int");
+                    b.Property<string>("fkUsuario")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("medidaId")
                         .HasColumnType("int")
@@ -382,8 +387,9 @@ namespace DataAccess.Migrations
                     b.Property<int>("fkParametro")
                         .HasColumnType("int");
 
-                    b.Property<int>("fkUsuario")
-                        .HasColumnType("int");
+                    b.Property<string>("fkUsuario")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("intencion")
                         .IsRequired()
@@ -508,11 +514,11 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Email");
 
-                    b.Property<DateTime>("FechaNacimiento")
+                    b.Property<DateTime?>("FechaNacimiento")
                         .HasColumnType("datetime2")
                         .HasColumnName("FechaNacimiento");
 
-                    b.Property<DateTime>("FechaRegistro")
+                    b.Property<DateTime?>("FechaRegistro")
                         .HasColumnType("datetime2")
                         .HasColumnName("FechaRegistro");
 
@@ -526,8 +532,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("Telefono");
 
-                    b.Property<int>("UsuarioID")
-                        .HasColumnType("int")
+                    b.Property<string>("UsuarioID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("UsuarioID");
 
                     b.ToTable("userSP");
@@ -535,8 +542,9 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DTO.Dtos.Rutina", b =>
                 {
-                    b.Property<int>("EntrenadorID")
-                        .HasColumnType("int")
+                    b.Property<string>("EntrenadorID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("EntrenadorID");
 
                     b.Property<DateTime>("FechaCreacion")
@@ -552,9 +560,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("RutinaId");
 
-                    b.Property<int?>("UsuarioID")
+                    b.Property<string>("UsuarioID")
                         .IsRequired()
-                        .HasColumnType("int")
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("UsuarioID");
 
                     b.ToTable("rutinaSP");
@@ -565,87 +573,47 @@ namespace DataAccess.Migrations
                     b.Property<Guid>("AccessTokenId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("AccessTokenId")
-                        .HasDefaultValueSql("NEWID()");
+                        .HasDefaultValueSql("(newid())");
 
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("ClientId");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("ExpiresAt");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("IpAddress");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("IssuedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasColumnName("IssuedAt")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
+                        .HasDefaultValueSql("(sysutcdatetime())");
 
                     b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("RevokedAt");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("TokenHash");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("UserAgent")
                         .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("UserAgent");
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("UserId");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("AccessTokenId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_AccessTokens_UserId");
 
-                    b.ToTable("AccessTokens", (string)null);
-                });
-
-            modelBuilder.Entity("DataAccess.EntityFramework.Año", b =>
-                {
-                    b.Property<int>("IdAño")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("idAño");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdAño"));
-
-                    b.Property<int>("Año1")
-                        .HasColumnType("int")
-                        .HasColumnName("año");
-
-                    b.Property<DateTime?>("FechaCreacion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasColumnName("fechaCreacion")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasColumnName("fechaModificacion")
-                        .HasDefaultValueSql("(getdate())");
-
-                    b.HasKey("IdAño")
-                        .HasName("PK__años__3E033B60DDD23740");
-
-                    b.ToTable("años", (string)null);
+                    b.ToTable("AccessTokens");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.BeneficiosDeClase", b =>
@@ -706,9 +674,9 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CitaId"));
 
-                    b.Property<int?>("EntrenadorId")
-                        .HasColumnType("int")
-                        .HasColumnName("EntrenadorID");
+                    b.Property<string>("EntrenadorId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Estado")
                         .IsRequired()
@@ -721,27 +689,21 @@ namespace DataAccess.Migrations
                     b.Property<DateTime>("FechaHoraFin")
                         .HasColumnType("datetime");
 
-                    b.Property<string>("NewEntrenadorId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NewUserId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("TipoCita")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("UsuarioId")
-                        .HasColumnType("int")
-                        .HasColumnName("UsuarioID");
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("CitaId")
                         .HasName("PK__Citas__F0E2D9F2556E9C13");
 
                     b.HasIndex("EntrenadorId");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Citas");
                 });
@@ -768,8 +730,8 @@ namespace DataAccess.Migrations
                     b.Property<int>("DuracionEnMinutosConDescansoIncluido")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("duracionEnMinutosConDescansoIncluido")
-                        .HasDefaultValueSql("((60))");
+                        .HasDefaultValue(60)
+                        .HasColumnName("duracionEnMinutosConDescansoIncluido");
 
                     b.Property<int?>("FkDificultad")
                         .HasColumnType("int")
@@ -783,12 +745,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fkIntensidad");
 
-                    b.Property<int?>("InstructorId")
-                        .HasColumnType("int")
-                        .HasColumnName("InstructorID");
-
-                    b.Property<string>("NewInstructorId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("InstructorId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("NombreClase")
                         .IsRequired()
@@ -798,8 +757,8 @@ namespace DataAccess.Migrations
                     b.Property<int>("TiempoDeDescansoEnMinutos")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("tiempoDeDescansoEnMinutos")
-                        .HasDefaultValueSql("((15))");
+                        .HasDefaultValue(15)
+                        .HasColumnName("tiempoDeDescansoEnMinutos");
 
                     b.HasKey("ClaseId")
                         .HasName("PK__Clases__F54296B30E7E66FD");
@@ -834,14 +793,6 @@ namespace DataAccess.Migrations
                         .HasColumnName("fechaCreacion")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<DateTime>("FechaFin")
-                        .HasColumnType("datetime")
-                        .HasColumnName("fechaFin");
-
-                    b.Property<DateTime>("FechaInicio")
-                        .HasColumnType("datetime")
-                        .HasColumnName("fechaInicio");
-
                     b.Property<DateTime?>("FechaModificacion")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -852,17 +803,15 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fkClase");
 
-                    b.Property<int>("FkEntrenador")
-                        .HasColumnType("int")
+                    b.Property<string>("FkEntrenador")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("fkEntrenador");
 
                     b.Property<int>("FkEstadoClaseProgramada")
                         .HasColumnType("int")
                         .HasColumnName("fkEstadoClaseProgramada")
                         .HasComment("los estados seran: disponible,no disponible,cancelada");
-
-                    b.Property<string>("NewFkEntrenador")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdProgramacionClase")
                         .HasName("PK__clasesPr__712E87EE8D30E7B0");
@@ -1014,75 +963,105 @@ namespace DataAccess.Migrations
                     b.ToTable("DetalleEntrenamiento", (string)null);
                 });
 
-            modelBuilder.Entity("DataAccess.EntityFramework.DiasDeLaSemana", b =>
+            modelBuilder.Entity("DataAccess.EntityFramework.DiasFestivosVariable", b =>
                 {
-                    b.Property<int>("IdDia")
+                    b.Property<int>("IdDiaFestivoVariable")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("idDia");
+                        .HasColumnName("idDiaFestivoVariable");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDia"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDiaFestivoVariable"));
 
-                    b.Property<bool?>("Activo")
+                    b.Property<int>("DeQueDia")
+                        .HasColumnType("int")
+                        .HasColumnName("deQueDia");
+
+                    b.Property<int?>("DeQueMes")
+                        .HasColumnType("int")
+                        .HasColumnName("deQueMes");
+
+                    b.Property<int?>("DeQueSemana")
+                        .HasColumnType("int")
+                        .HasColumnName("deQueSemana");
+
+                    b.Property<DateTime>("FechaCreacion")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValueSql("((1))");
+                        .HasColumnType("datetime")
+                        .HasColumnName("fechaCreacion")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("datetime")
+                        .HasColumnName("fechaModificacion");
+
+                    b.Property<int>("FkEstadoActividadLaboral")
+                        .HasColumnType("int")
+                        .HasColumnName("fkEstadoActividadLaboral");
+
+                    b.Property<int>("FkTipoDeRecurrenciaDelFestivo")
+                        .HasColumnType("int")
+                        .HasColumnName("fkTipoDeRecurrenciaDelFestivo");
+
+                    b.Property<string>("NombreDiasFestivoVariable")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("nombreDiasFestivoVariable");
+
+                    b.HasKey("IdDiaFestivoVariable")
+                        .HasName("PK__diasFest__499CE46553695ECB");
+
+                    b.HasIndex("FkEstadoActividadLaboral");
+
+                    b.HasIndex("FkTipoDeRecurrenciaDelFestivo");
+
+                    b.ToTable("diasFestivosVariables", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.DiasFestivosYdescanso", b =>
+                {
+                    b.Property<int>("IdDiaFestivo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idDiaFestivo");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdDiaFestivo"));
+
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("descripcion");
+
+                    b.Property<DateTime?>("FcehaModificacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("fcehaModificacion")
+                        .HasDefaultValueSql("(getdate())");
 
                     b.Property<DateTime?>("FechaCreacion")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
+                        .HasColumnName("fechaCreacion")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<DateTime?>("FechaModificacion")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasDefaultValueSql("(getdate())");
+                    b.Property<DateOnly>("FechaFestivaOdescanso")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaFestivaODescanso");
 
-                    b.Property<string>("NombreDia")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(10)")
-                        .HasColumnName("nombreDia");
-
-                    b.HasKey("IdDia")
-                        .HasName("PK__diasDeLa__3E416597E1AE4B2B");
-
-                    b.ToTable("diasDeLaSemana", (string)null);
-                });
-
-            modelBuilder.Entity("DataAccess.EntityFramework.DiasDeLaSemanaHorasLaborale", b =>
-                {
-                    b.Property<int>("IdHorarioLaboral")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("FkEstadoActividadLaboral")
                         .HasColumnType("int")
-                        .HasColumnName("idHorarioLaboral");
+                        .HasColumnName("fkEstadoActividadLaboral");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdHorarioLaboral"));
+                    b.HasKey("IdDiaFestivo")
+                        .HasName("PK__diasFest__A066CE26B7DC05E6");
 
-                    b.Property<int>("FkAño")
-                        .HasColumnType("int")
-                        .HasColumnName("fkAño");
+                    b.HasIndex("FkEstadoActividadLaboral");
 
-                    b.Property<int>("FkDiaDeLaSemana")
-                        .HasColumnType("int")
-                        .HasColumnName("fkDiaDeLaSemana");
+                    b.HasIndex(new[] { "FechaFestivaOdescanso" }, "IX_diasFestivosYDescansos_Fecha");
 
-                    b.Property<int>("FkHoraLaboral")
-                        .HasColumnType("int")
-                        .HasColumnName("fkHoraLaboral");
-
-                    b.HasKey("IdHorarioLaboral")
-                        .HasName("PK__diasDeLa__AC96C3A6A1255770");
-
-                    b.HasIndex("FkAño");
-
-                    b.HasIndex("FkHoraLaboral");
-
-                    b.HasIndex(new[] { "FkDiaDeLaSemana", "FkHoraLaboral", "FkAño" }, "UQ_diasDeLaSemana_horasLaborales_Compuesto")
+                    b.HasIndex(new[] { "FechaFestivaOdescanso" }, "fecha_unica")
                         .IsUnique();
 
-                    b.ToTable("diasDeLaSemana_horasLaborales", (string)null);
+                    b.ToTable("diasFestivosYDescansos", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.DuracionCita", b =>
@@ -1267,6 +1246,38 @@ namespace DataAccess.Migrations
                     b.ToTable("estadosClasesProgramadas", (string)null);
                 });
 
+            modelBuilder.Entity("DataAccess.EntityFramework.EstadosDeActividadLaboral", b =>
+                {
+                    b.Property<int>("IdEstadoActividadLaboral")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idEstadoActividadLaboral");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdEstadoActividadLaboral"));
+
+                    b.Property<DateTime?>("FcehaModificacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("fcehaModificacion")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<DateTime?>("FechaCreacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("fechaCreacion")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("NombreEstadoActividadLaboral")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("nombreEstadoActividadLaboral");
+
+                    b.HasKey("IdEstadoActividadLaboral")
+                        .HasName("PK__estadosD__F41B8ED8EC454C75");
+
+                    b.ToTable("estadosDeActividadLaboral", (string)null);
+                });
+
             modelBuilder.Entity("DataAccess.EntityFramework.EstadosDeClase", b =>
                 {
                     b.Property<int>("IdEstadoClase")
@@ -1302,6 +1313,38 @@ namespace DataAccess.Migrations
                         .HasName("PK__estadosD__A4F595D46615EEBC");
 
                     b.ToTable("estadosDeClases", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.EstadosHorarioClaseProgramadum", b =>
+                {
+                    b.Property<int>("IdEstadoHorarioClase")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idEstadoHorarioClase");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdEstadoHorarioClase"));
+
+                    b.Property<DateTime?>("FechaCreacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("fechaCreacion")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("fechaModificacion")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<string>("NombreEstadoHorario")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("nombreEstadoHorario");
+
+                    b.HasKey("IdEstadoHorarioClase")
+                        .HasName("PK__estadosH__FE1509CB80800E66");
+
+                    b.ToTable("estadosHorarioClaseProgramada", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.EstadosInscripcione", b =>
@@ -1401,9 +1444,24 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdHorarioDeClaseProgramada"));
 
+                    b.Property<DateOnly?>("FechaDeLaClase")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaDeLaClase");
+
                     b.Property<int>("FkClaseProgramada")
                         .HasColumnType("int")
                         .HasColumnName("fkClaseProgramada");
+
+                    b.Property<string>("FkEntrenador")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("fkEntrenador");
+
+                    b.Property<int>("FkEstadoHorarioClase")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1)
+                        .HasColumnName("fkEstadoHorarioClase");
 
                     b.Property<int>("FkHorarioLaboral")
                         .HasColumnType("int")
@@ -1412,10 +1470,13 @@ namespace DataAccess.Migrations
                     b.HasKey("IdHorarioDeClaseProgramada")
                         .HasName("PK__horarios__873B1A4EFA42A731");
 
-                    b.HasIndex("FkHorarioLaboral");
+                    b.HasIndex("FkClaseProgramada");
 
-                    b.HasIndex(new[] { "FkClaseProgramada", "FkHorarioLaboral" }, "UQ_horariosDeClasesProgramadas_Compuesto")
-                        .IsUnique();
+                    b.HasIndex("FkEntrenador");
+
+                    b.HasIndex("FkEstadoHorarioClase");
+
+                    b.HasIndex("FkHorarioLaboral");
 
                     b.ToTable("horariosDeClasesProgramadas", (string)null);
                 });
@@ -1441,11 +1502,11 @@ namespace DataAccess.Migrations
                         .HasColumnName("fechaModificacion")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<TimeSpan>("HoraFin")
+                    b.Property<TimeOnly>("HoraFin")
                         .HasColumnType("time")
                         .HasColumnName("horaFin");
 
-                    b.Property<TimeSpan>("HoraInicio")
+                    b.Property<TimeOnly>("HoraInicio")
                         .HasColumnType("time")
                         .HasColumnName("horaInicio");
 
@@ -1580,8 +1641,9 @@ namespace DataAccess.Migrations
                         .HasColumnName("fechaDeInscripcion")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<int>("FkCliente")
-                        .HasColumnType("int")
+                    b.Property<string>("FkCliente")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("fkCliente");
 
                     b.Property<int>("FkEstadoInscripcion")
@@ -1720,12 +1782,10 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fkParametro");
 
-                    b.Property<int>("FkUsuario")
-                        .HasColumnType("int")
+                    b.Property<string>("FkUsuario")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("fkUsuario");
-
-                    b.Property<string>("NewFkUsuario")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Valor")
                         .HasColumnType("decimal(10, 2)")
@@ -1783,19 +1843,17 @@ namespace DataAccess.Migrations
                     b.Property<int>("FkNivelDeLogro")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("fkNivelDeLogro")
-                        .HasDefaultValueSql("((1))");
+                        .HasDefaultValue(1)
+                        .HasColumnName("fkNivelDeLogro");
 
                     b.Property<int>("FkParametro")
                         .HasColumnType("int")
                         .HasColumnName("fkParametro");
 
-                    b.Property<int>("FkUsuario")
-                        .HasColumnType("int")
+                    b.Property<string>("FkUsuario")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("fkUsuario");
-
-                    b.Property<string>("NewFkUsuario")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("ValorObjetivo")
                         .HasColumnType("decimal(10, 2)")
@@ -1929,17 +1987,14 @@ namespace DataAccess.Migrations
                     b.Property<decimal>("Monto")
                         .HasColumnType("decimal(10, 2)");
 
-                    b.Property<string>("NewUserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("UsuarioId")
-                        .HasColumnType("int")
-                        .HasColumnName("UsuarioID");
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("PagoId")
                         .HasName("PK__Pagos__F00B6158C2211D16");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Pagos");
                 });
@@ -2021,14 +2076,23 @@ namespace DataAccess.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("fechaInicioDeLaReserva");
 
-                    b.Property<int>("FkHorarioClaseProgramada")
+                    b.Property<DateOnly>("FechaReservada")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaReservada");
+
+                    b.Property<int>("FkHoraLaboral")
                         .HasColumnType("int")
-                        .HasColumnName("fkHorarioClaseProgramada");
+                        .HasColumnName("fkHoraLaboral");
+
+                    b.Property<int>("IdUsuarioQueReserva")
+                        .HasColumnType("int")
+                        .HasColumnName("idUsuarioQueReserva")
+                        .HasComment("id del usuario que esta registrando la clase programada,es para saber a que usuario hay que enviarle la respuesta ya que es por tiempo real");
 
                     b.HasKey("IdPreReserva")
                         .HasName("PK__preReser__0FAC6FC5DD04E13F");
 
-                    b.HasIndex("FkHorarioClaseProgramada");
+                    b.HasIndex("FkHoraLaboral");
 
                     b.ToTable("preReservasDeHorario", (string)null);
                 });
@@ -2038,60 +2102,50 @@ namespace DataAccess.Migrations
                     b.Property<Guid>("RefreshTokenId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("RefreshTokenId")
-                        .HasDefaultValueSql("NEWID()");
+                        .HasDefaultValueSql("(newid())");
 
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("ClientId");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("ExpiresAt");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("IpAddress");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime>("IssuedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
-                        .HasColumnName("IssuedAt")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
+                        .HasDefaultValueSql("(sysutcdatetime())");
 
                     b.Property<Guid?>("ReplacedByTokenId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("ReplacedByTokenId");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("RevokedAt");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("TokenHash");
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("UserAgent")
                         .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)")
-                        .HasColumnName("UserAgent");
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("UserId");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("RefreshTokenId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_RefreshTokens_UserId");
 
-                    b.ToTable("RefreshTokens", (string)null);
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.RegistrosEntrenamiento", b =>
@@ -2108,23 +2162,20 @@ namespace DataAccess.Migrations
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<string>("NewUserId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int?>("RutinaId")
                         .HasColumnType("int")
                         .HasColumnName("RutinaID");
 
-                    b.Property<int?>("UsuarioId")
-                        .HasColumnType("int")
-                        .HasColumnName("UsuarioID");
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("RegistroId")
                         .HasName("PK__Registro__B897313EAB9C2539");
 
                     b.HasIndex("RutinaId");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("RegistrosEntrenamiento", (string)null);
                 });
@@ -2158,9 +2209,9 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RutinaId"));
 
-                    b.Property<int?>("EntrenadorId")
-                        .HasColumnType("int")
-                        .HasColumnName("EntrenadorID");
+                    b.Property<string>("EntrenadorId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime?>("FechaCreacion")
                         .ValueGeneratedOnAdd()
@@ -2175,19 +2226,13 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fkTipoRutina");
 
-                    b.Property<string>("NewEntrenadorId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NewUserId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Observaciones")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int?>("UsuarioId")
-                        .HasColumnType("int")
-                        .HasColumnName("UsuarioID");
+                    b.Property<string>("UserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("RutinaId")
                         .HasName("PK__Rutinas__E76E165A11753A49");
@@ -2198,7 +2243,7 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("FkTipoRutina");
 
-                    b.HasIndex("UsuarioId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Rutinas");
                 });
@@ -2310,6 +2355,48 @@ namespace DataAccess.Migrations
                     b.ToTable("TipoRutina", (string)null);
                 });
 
+            modelBuilder.Entity("DataAccess.EntityFramework.TiposDeRecurrenciaDeDiasFestivo", b =>
+                {
+                    b.Property<int>("IdTipoDeRecurrenciaDeDiaFestivo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idTipoDeRecurrenciaDeDiaFestivo");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdTipoDeRecurrenciaDeDiaFestivo"));
+
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("descripcion");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("fechaCreacion")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("datetime")
+                        .HasColumnName("fechaModificacion");
+
+                    b.Property<string>("NombreTipoDeRecurrencia")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("nombreTipoDeRecurrencia");
+
+                    b.HasKey("IdTipoDeRecurrenciaDeDiaFestivo")
+                        .HasName("PK__tiposDeR__3A34B1D521F4C5E6");
+
+                    b.HasIndex(new[] { "NombreTipoDeRecurrencia" }, "IX_tiposDeRecurrenciaDeDiasFestivos_Nombre");
+
+                    b.ToTable("tiposDeRecurrenciaDeDiasFestivos", null, t =>
+                        {
+                            t.HasTrigger("TR_tiposDeRecurrenciaDeDiasFestivos_Update");
+                        });
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+                });
+
             modelBuilder.Entity("DataAccess.EntityFramework.UnidadesDeMedidum", b =>
                 {
                     b.Property<int>("UnidadDeMedidaId")
@@ -2369,7 +2456,7 @@ namespace DataAccess.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime>("FechaNacimiento")
+                    b.Property<DateOnly>("FechaNacimiento")
                         .HasColumnType("date");
 
                     b.Property<DateTime?>("FechaRegistro")
@@ -2411,6 +2498,66 @@ namespace DataAccess.Migrations
                         .IsUnique();
 
                     b.ToTable("Usuarios");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.VEstadoActivoClase", b =>
+                {
+                    b.Property<int>("IdEstadoClase")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idEstadoClase");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("v_estadoActivoClases", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.VIdEstadoCanceladoClasesProgramada", b =>
+                {
+                    b.Property<int>("IdEstadoClaseProgramada")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idEstadoClaseProgramada");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("v_idEstadoCanceladoClasesProgramadas", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.VIdEstadoCanceladoInscripcionAclase", b =>
+                {
+                    b.Property<int>("IdEstadoInscripcion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idEstadoInscripcion");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("v_idEstadoCanceladoInscripcionAClase", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.VIdEstadoDisponibleClasesProgramada", b =>
+                {
+                    b.Property<int>("IdEstadoClaseProgramada")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idEstadoClaseProgramada");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("v_idEstadoDisponibleClasesProgramadas", (string)null);
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.VIdEstadoVigenteInscripcionAclase", b =>
+                {
+                    b.Property<int>("IdEstadoInscripcion")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("idEstadoInscripcion");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("v_idEstadoVigenteInscripcionAClase", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.VNivelesDeDificultad", b =>
@@ -2528,6 +2675,9 @@ namespace DataAccess.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("idSecundario")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -2692,7 +2842,7 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("DataAccess.EntityFramework.AccessToken", b =>
                 {
                     b.HasOne("DataAccess.Identity.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("AccessTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -2721,19 +2871,19 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.EntityFramework.Cita", b =>
                 {
-                    b.HasOne("DataAccess.EntityFramework.Usuario", "Entrenador")
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "Entrenador")
                         .WithMany("CitaEntrenadors")
                         .HasForeignKey("EntrenadorId")
-                        .HasConstraintName("FK__Citas__Entrenado__44FF419A");
+                        .HasConstraintName("FK_Citas_AspNetUsers_NewEntrenadorId");
 
-                    b.HasOne("DataAccess.EntityFramework.Usuario", "Usuario")
-                        .WithMany("CitaUsuarios")
-                        .HasForeignKey("UsuarioId")
-                        .HasConstraintName("FK__Citas__UsuarioID__440B1D61");
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
+                        .WithMany("CitaUsers")
+                        .HasForeignKey("UserId")
+                        .HasConstraintName("FK_Citas_AspNetUsers_NewUserId");
 
                     b.Navigation("Entrenador");
 
-                    b.Navigation("Usuario");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.Clase", b =>
@@ -2753,10 +2903,10 @@ namespace DataAccess.Migrations
                         .HasForeignKey("FkIntensidad")
                         .HasConstraintName("FK_Clases_Intensidad");
 
-                    b.HasOne("DataAccess.EntityFramework.Usuario", "Instructor")
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "Instructor")
                         .WithMany("Clases")
                         .HasForeignKey("InstructorId")
-                        .HasConstraintName("FK__Clases__Instruct__5AEE82B9");
+                        .HasConstraintName("FK_Clases_AspNetUsers_NewInstructorId");
 
                     b.Navigation("FkDificultadNavigation");
 
@@ -2775,11 +2925,10 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_ClasesProgramadas_Clase");
 
-                    b.HasOne("DataAccess.EntityFramework.Usuario", "FkEntrenadorNavigation")
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "FkEntrenadorNavigation")
                         .WithMany("ClasesProgramada")
                         .HasForeignKey("FkEntrenador")
-                        .IsRequired()
-                        .HasConstraintName("FK_ClasesProgramadas_Usuarios");
+                        .HasConstraintName("FK_ClasesProgramadas_AspNetUsers_NewFkEntrenador");
 
                     b.HasOne("DataAccess.EntityFramework.EstadosClasesProgramada", "FkEstadoClaseProgramadaNavigation")
                         .WithMany("ClasesProgramada")
@@ -2840,31 +2989,34 @@ namespace DataAccess.Migrations
                     b.Navigation("Registro");
                 });
 
-            modelBuilder.Entity("DataAccess.EntityFramework.DiasDeLaSemanaHorasLaborale", b =>
+            modelBuilder.Entity("DataAccess.EntityFramework.DiasFestivosVariable", b =>
                 {
-                    b.HasOne("DataAccess.EntityFramework.Año", "FkAñoNavigation")
-                        .WithMany("DiasDeLaSemanaHorasLaborales")
-                        .HasForeignKey("FkAño")
+                    b.HasOne("DataAccess.EntityFramework.EstadosDeActividadLaboral", "FkEstadoActividadLaboralNavigation")
+                        .WithMany("DiasFestivosVariables")
+                        .HasForeignKey("FkEstadoActividadLaboral")
                         .IsRequired()
-                        .HasConstraintName("FK_diasDeLaSemana_horasLaborales_años");
+                        .HasConstraintName("fk_estadosDeActividdadLaboral_diasFestivosVariables");
 
-                    b.HasOne("DataAccess.EntityFramework.DiasDeLaSemana", "FkDiaDeLaSemanaNavigation")
-                        .WithMany("DiasDeLaSemanaHorasLaborales")
-                        .HasForeignKey("FkDiaDeLaSemana")
+                    b.HasOne("DataAccess.EntityFramework.TiposDeRecurrenciaDeDiasFestivo", "FkTipoDeRecurrenciaDelFestivoNavigation")
+                        .WithMany("DiasFestivosVariables")
+                        .HasForeignKey("FkTipoDeRecurrenciaDelFestivo")
                         .IsRequired()
-                        .HasConstraintName("FK_diasDeLaSemana_horasLaborales_diasDeLaSemana");
+                        .HasConstraintName("fk_tiposDeRecurrenciaDeDiasFestivos_diasFestivosVariables");
 
-                    b.HasOne("DataAccess.EntityFramework.HorasLaborale", "FkHoraLaboralNavigation")
-                        .WithMany("DiasDeLaSemanaHorasLaborales")
-                        .HasForeignKey("FkHoraLaboral")
+                    b.Navigation("FkEstadoActividadLaboralNavigation");
+
+                    b.Navigation("FkTipoDeRecurrenciaDelFestivoNavigation");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.DiasFestivosYdescanso", b =>
+                {
+                    b.HasOne("DataAccess.EntityFramework.EstadosDeActividadLaboral", "FkEstadoActividadLaboralNavigation")
+                        .WithMany("DiasFestivosYdescansos")
+                        .HasForeignKey("FkEstadoActividadLaboral")
                         .IsRequired()
-                        .HasConstraintName("FK_diasDeLaSemana_horasLaborales_horasLaborales");
+                        .HasConstraintName("FK_diasFestivosYDescansos_EstadoActividadLaboral");
 
-                    b.Navigation("FkAñoNavigation");
-
-                    b.Navigation("FkDiaDeLaSemanaNavigation");
-
-                    b.Navigation("FkHoraLaboralNavigation");
+                    b.Navigation("FkEstadoActividadLaboralNavigation");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.Ejercicio", b =>
@@ -2942,13 +3094,28 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_horariosDeClasesProgramadas_clasesProgramadas");
 
-                    b.HasOne("DataAccess.EntityFramework.DiasDeLaSemanaHorasLaborale", "FkHorarioLaboralNavigation")
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "FkEntrenadorNavigation")
+                        .WithMany("HorariosDeClasesProgramada")
+                        .HasForeignKey("FkEntrenador")
+                        .HasConstraintName("FK_HorariosDeClasesProgramadas_AspNetUsers_NewFkEntrenador");
+
+                    b.HasOne("DataAccess.EntityFramework.EstadosHorarioClaseProgramadum", "FkEstadoHorarioClaseNavigation")
+                        .WithMany("HorariosDeClasesProgramada")
+                        .HasForeignKey("FkEstadoHorarioClase")
+                        .IsRequired()
+                        .HasConstraintName("fk_estadosClasesProgramadas_horariosDeClasesProgramadas");
+
+                    b.HasOne("DataAccess.EntityFramework.HorasLaborale", "FkHorarioLaboralNavigation")
                         .WithMany("HorariosDeClasesProgramada")
                         .HasForeignKey("FkHorarioLaboral")
                         .IsRequired()
-                        .HasConstraintName("FK_horariosDeClasesProgramadas_diasDeLaSemana_horasLaborales");
+                        .HasConstraintName("FK_horasLborales_horariosClasesProgramadas");
 
                     b.Navigation("FkClaseProgramadaNavigation");
+
+                    b.Navigation("FkEntrenadorNavigation");
+
+                    b.Navigation("FkEstadoHorarioClaseNavigation");
 
                     b.Navigation("FkHorarioLaboralNavigation");
                 });
@@ -2978,11 +3145,10 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.EntityFramework.InscripcionesDeClase", b =>
                 {
-                    b.HasOne("DataAccess.EntityFramework.Usuario", "FkClienteNavigation")
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "FkClienteNavigation")
                         .WithMany("InscripcionesDeClases")
                         .HasForeignKey("FkCliente")
-                        .IsRequired()
-                        .HasConstraintName("FK_InscripcionesDeClases_Cliente");
+                        .HasConstraintName("FK_InscripcionesDeClases_AspNetUsers_NewFkCliente");
 
                     b.HasOne("DataAccess.EntityFramework.EstadosInscripcione", "FkEstadoInscripcionNavigation")
                         .WithMany("InscripcionesDeClases")
@@ -3015,11 +3181,10 @@ namespace DataAccess.Migrations
                         .HasForeignKey("FkParametro")
                         .HasConstraintName("fk_medidas_parametros");
 
-                    b.HasOne("DataAccess.EntityFramework.Usuario", "FkUsuarioNavigation")
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "FkUsuarioNavigation")
                         .WithMany("Medida")
                         .HasForeignKey("FkUsuario")
-                        .IsRequired()
-                        .HasConstraintName("FK_UsuarioMedida");
+                        .HasConstraintName("FK_Medidas_AspNetUsers_NewFkUsuario");
 
                     b.Navigation("FkEjercicioNavigation");
 
@@ -3053,11 +3218,10 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Metas_Parametros");
 
-                    b.HasOne("DataAccess.EntityFramework.Usuario", "FkUsuarioNavigation")
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "FkUsuarioNavigation")
                         .WithMany("Meta")
                         .HasForeignKey("FkUsuario")
-                        .IsRequired()
-                        .HasConstraintName("FK_Metas_Usuarios");
+                        .HasConstraintName("FK_Metas_AspNetUsers_NewFkUsuario");
 
                     b.Navigation("FkEjercicioNavigation");
 
@@ -3072,12 +3236,12 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.EntityFramework.Pago", b =>
                 {
-                    b.HasOne("DataAccess.EntityFramework.Usuario", "Usuario")
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
                         .WithMany("Pagos")
-                        .HasForeignKey("UsuarioId")
-                        .HasConstraintName("FK__Pagos__UsuarioID__6383C8BA");
+                        .HasForeignKey("UserId")
+                        .HasConstraintName("FK_Pagos_AspNetUsers_NewUserId");
 
-                    b.Navigation("Usuario");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.ParametrosDeMedicion", b =>
@@ -3111,19 +3275,19 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.EntityFramework.PreReservasDeHorario", b =>
                 {
-                    b.HasOne("DataAccess.EntityFramework.HorariosDeClasesProgramada", "FkHorarioClaseProgramadaNavigation")
+                    b.HasOne("DataAccess.EntityFramework.HorasLaborale", "FkHoraLaboralNavigation")
                         .WithMany("PreReservasDeHorarios")
-                        .HasForeignKey("FkHorarioClaseProgramada")
+                        .HasForeignKey("FkHoraLaboral")
                         .IsRequired()
                         .HasConstraintName("FK_preReservasDeHorario_horariosClasesProgramadas");
 
-                    b.Navigation("FkHorarioClaseProgramadaNavigation");
+                    b.Navigation("FkHoraLaboralNavigation");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.RefreshToken", b =>
                 {
                     b.HasOne("DataAccess.Identity.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -3139,22 +3303,22 @@ namespace DataAccess.Migrations
                         .HasForeignKey("RutinaId")
                         .HasConstraintName("FK__Registros__Rutin__6FE99F9F");
 
-                    b.HasOne("DataAccess.EntityFramework.Usuario", "Usuario")
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
                         .WithMany("RegistrosEntrenamientos")
-                        .HasForeignKey("UsuarioId")
-                        .HasConstraintName("FK__Registros__Usuar__6EF57B66");
+                        .HasForeignKey("UserId")
+                        .HasConstraintName("FK_RegistrosEntrenamiento_AspNetUsers_NewUserId");
 
                     b.Navigation("Rutina");
 
-                    b.Navigation("Usuario");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.Rutina", b =>
                 {
-                    b.HasOne("DataAccess.EntityFramework.Usuario", "Entrenador")
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "Entrenador")
                         .WithMany("RutinaEntrenadors")
                         .HasForeignKey("EntrenadorId")
-                        .HasConstraintName("FK__Rutinas__Entrena__4AB81AF0");
+                        .HasConstraintName("FK_Rutinas_AspNetUsers_NewEntrenadorId");
 
                     b.HasOne("DataAccess.EntityFramework.Clase", "FkClaseNavigation")
                         .WithMany("Rutinas")
@@ -3166,10 +3330,10 @@ namespace DataAccess.Migrations
                         .HasForeignKey("FkTipoRutina")
                         .HasConstraintName("FK_Rutinas_TipoRutina");
 
-                    b.HasOne("DataAccess.EntityFramework.Usuario", "Usuario")
-                        .WithMany("RutinaUsuarios")
-                        .HasForeignKey("UsuarioId")
-                        .HasConstraintName("FK__Rutinas__Usuario__49C3F6B7");
+                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
+                        .WithMany("RutinaUsers")
+                        .HasForeignKey("UserId")
+                        .HasConstraintName("FK_Rutinas_AspNetUsers_NewUserId");
 
                     b.Navigation("Entrenador");
 
@@ -3177,7 +3341,7 @@ namespace DataAccess.Migrations
 
                     b.Navigation("FkTipoRutinaNavigation");
 
-                    b.Navigation("Usuario");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.RutinaEjercicio", b =>
@@ -3258,11 +3422,6 @@ namespace DataAccess.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("DataAccess.EntityFramework.Año", b =>
-                {
-                    b.Navigation("DiasDeLaSemanaHorasLaborales");
-                });
-
             modelBuilder.Entity("DataAccess.EntityFramework.Clase", b =>
                 {
                     b.Navigation("BeneficiosDeClases");
@@ -3288,16 +3447,6 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("DataAccess.EntityFramework.Descuento", b =>
                 {
                     b.Navigation("Cupones");
-                });
-
-            modelBuilder.Entity("DataAccess.EntityFramework.DiasDeLaSemana", b =>
-                {
-                    b.Navigation("DiasDeLaSemanaHorasLaborales");
-                });
-
-            modelBuilder.Entity("DataAccess.EntityFramework.DiasDeLaSemanaHorasLaborale", b =>
-                {
-                    b.Navigation("HorariosDeClasesProgramada");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.Ejercicio", b =>
@@ -3329,9 +3478,21 @@ namespace DataAccess.Migrations
                     b.Navigation("ClasesProgramada");
                 });
 
+            modelBuilder.Entity("DataAccess.EntityFramework.EstadosDeActividadLaboral", b =>
+                {
+                    b.Navigation("DiasFestivosVariables");
+
+                    b.Navigation("DiasFestivosYdescansos");
+                });
+
             modelBuilder.Entity("DataAccess.EntityFramework.EstadosDeClase", b =>
                 {
                     b.Navigation("Clases");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.EstadosHorarioClaseProgramadum", b =>
+                {
+                    b.Navigation("HorariosDeClasesProgramada");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.EstadosInscripcione", b =>
@@ -3339,14 +3500,11 @@ namespace DataAccess.Migrations
                     b.Navigation("InscripcionesDeClases");
                 });
 
-            modelBuilder.Entity("DataAccess.EntityFramework.HorariosDeClasesProgramada", b =>
-                {
-                    b.Navigation("PreReservasDeHorarios");
-                });
-
             modelBuilder.Entity("DataAccess.EntityFramework.HorasLaborale", b =>
                 {
-                    b.Navigation("DiasDeLaSemanaHorasLaborales");
+                    b.Navigation("HorariosDeClasesProgramada");
+
+                    b.Navigation("PreReservasDeHorarios");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.IconsForParameter", b =>
@@ -3413,20 +3571,29 @@ namespace DataAccess.Migrations
                     b.Navigation("Rutinas");
                 });
 
+            modelBuilder.Entity("DataAccess.EntityFramework.TiposDeRecurrenciaDeDiasFestivo", b =>
+                {
+                    b.Navigation("DiasFestivosVariables");
+                });
+
             modelBuilder.Entity("DataAccess.EntityFramework.UnidadesDeMedidum", b =>
                 {
                     b.Navigation("ParametrosUnidadesDeMedida");
                 });
 
-            modelBuilder.Entity("DataAccess.EntityFramework.Usuario", b =>
+            modelBuilder.Entity("DataAccess.Identity.ApplicationUser", b =>
                 {
+                    b.Navigation("AccessTokens");
+
                     b.Navigation("CitaEntrenadors");
 
-                    b.Navigation("CitaUsuarios");
+                    b.Navigation("CitaUsers");
 
                     b.Navigation("Clases");
 
                     b.Navigation("ClasesProgramada");
+
+                    b.Navigation("HorariosDeClasesProgramada");
 
                     b.Navigation("InscripcionesDeClases");
 
@@ -3436,11 +3603,13 @@ namespace DataAccess.Migrations
 
                     b.Navigation("Pagos");
 
+                    b.Navigation("RefreshTokens");
+
                     b.Navigation("RegistrosEntrenamientos");
 
                     b.Navigation("RutinaEntrenadors");
 
-                    b.Navigation("RutinaUsuarios");
+                    b.Navigation("RutinaUsers");
                 });
 #pragma warning restore 612, 618
         }

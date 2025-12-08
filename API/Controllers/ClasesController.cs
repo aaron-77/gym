@@ -515,7 +515,7 @@ namespace API.Controllers
                             modelo.idUsuarioQueReserva
                         );
                         await _servicioActualizaciones.enviarHorariosDisponiblesActualizados(
-                            modelo.idUsuarioQue Reserva
+                            modelo.idUsuarioQueReserva
                         );
 
                         return Ok(

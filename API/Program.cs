@@ -17,6 +17,7 @@ using DataAccess.Identity;
 using API.Controllers;
 using DataAccess;
 using System.Runtime.InteropServices;
+using System.Collections;
 
 try
 {
@@ -47,8 +48,18 @@ try
     Console.WriteLine("Connection string configurado");
 
     var jwtSettings = jwtSection.Get<JwtSettings>();
-    var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY"));
-    Console.WriteLine("JWT key obtenida del ambiente");
+
+    // Obtener clave secreta JWT con fallback seguros para entornos de diseño (migrations)
+    var secretFromEnv = Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY");
+    string secretKeyString = secretFromEnv
+        ?? builder.Configuration["JwtSettings:Secret"]
+        ?? builder.Configuration["JwtSettings:SecretKey"]
+        ?? jwtSettings?.GetType().GetProperty("Secret")?.GetValue(jwtSettings)?.ToString()
+        ?? jwtSettings?.GetType().GetProperty("SecretKey")?.GetValue(jwtSettings)?.ToString()
+        ?? "__development_secret_key_replace_for_production__"; // fallback para migraciones/local
+
+    var key = Encoding.UTF8.GetBytes(secretKeyString);
+    Console.WriteLine("JWT key obtenida (o fallback) para configuración");
 
     // Identity
     builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -109,10 +120,10 @@ try
     Console.WriteLine("Swagger configurado");
 
     // DbContext
-    builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
-    {
-        options.UseSqlServer(dbConnectionString);
-    });
+    //builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
+    //{
+    //    options.UseSqlServer(dbConnectionString);
+    //});
     Console.WriteLine("DbContext configurado");
 
     // Email
@@ -175,6 +186,10 @@ try
     Console.WriteLine("========================================");
     Console.WriteLine("CONSTRUYENDO APLICACION...");
     Console.WriteLine("========================================");
+    foreach (var kv in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>())
+    {
+        Console.WriteLine($"{kv.Key} = {kv.Value}");
+    }
 
     var app = builder.Build();
     Console.WriteLine("App construida exitosamente");

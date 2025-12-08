@@ -1,3 +1,7 @@
+using System;
+using System.Linq;
+using System.Reflection;
+
 namespace BL.Utils
 {
     public class ProcesadorDePropiedadesDeObjetos
@@ -6,12 +10,14 @@ namespace BL.Utils
         {
             try
             {
+                if (objeto == null) throw new ArgumentNullException(nameof(objeto));
+
                 object valorObtenido = null;
 
-                System.Reflection.PropertyInfo[] propiedades = objeto.GetType().GetProperties();
-                valorObtenido = propiedades
-                    .FirstOrDefault(p => p.Name == nombrePropiedad)
-                    .GetValue(objeto);
+                PropertyInfo[] propiedades = objeto.GetType().GetProperties();
+                var propiedad = propiedades.FirstOrDefault(p => p.Name == nombrePropiedad);
+                if (propiedad == null) return null;
+                valorObtenido = propiedad.GetValue(objeto);
 
                 return valorObtenido;
             }
