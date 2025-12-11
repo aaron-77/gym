@@ -954,7 +954,7 @@ namespace API.Controllers
                             },
                             0
                         )
-                    );|
+                    );
                 }
                 // Ejecutar el procedimiento almacenado usando ExecuteSqlInterpolatedAsync
                 var idInscripcion = await _context.Database.ExecuteSqlInterpolatedAsync(
