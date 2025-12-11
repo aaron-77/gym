@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataAccess.Identity;
+using System;
 using System.Collections.Generic;
 
 namespace DataAccess.EntityFramework;
@@ -17,5 +18,5 @@ public partial class RegistrosEntrenamiento
 
     public virtual Rutina? Rutina { get; set; }
 
-    public virtual AspNetUser? User { get; set; }
+    public virtual ApplicationUser? User { get; set; }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataAccess.Identity;
+using System;
 using System.Collections.Generic;
 
 namespace DataAccess.EntityFramework;
@@ -35,5 +36,5 @@ public partial class Meta
 
     public virtual ParametrosDeMedicion FkParametroNavigation { get; set; } = null!;
 
-    public virtual AspNetUser? FkUsuarioNavigation { get; set; }
+    public virtual ApplicationUser? FkUsuarioNavigation { get; set; }
 }

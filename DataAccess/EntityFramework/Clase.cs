@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataAccess.Identity;
+using System;
 using System.Collections.Generic;
 
 namespace DataAccess.EntityFramework;
@@ -43,7 +44,7 @@ public partial class Clase
 
     public virtual ICollection<ImagesForClase> ImagesForClases { get; set; } = new List<ImagesForClase>();
 
-    public virtual AspNetUser? Instructor { get; set; }
+    public virtual ApplicationUser? Instructor { get; set; }
 
     public virtual ICollection<Rutina> Rutinas { get; set; } = new List<Rutina>();
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataAccess.Identity;
+using System;
 using System.Collections.Generic;
 
 namespace DataAccess.EntityFramework;
@@ -25,7 +26,7 @@ public partial class ClasesProgramada
 
     public virtual Clase FkClaseNavigation { get; set; } = null!;
 
-    public virtual AspNetUser? FkEntrenadorNavigation { get; set; }
+    public virtual ApplicationUser? FkEntrenadorNavigation { get; set; }
 
     public virtual EstadosClasesProgramada FkEstadoClaseProgramadaNavigation { get; set; } = null!;
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataAccess.Identity;
+using System;
 using System.Collections.Generic;
 
 namespace DataAccess.EntityFramework;
@@ -25,5 +26,5 @@ public partial class RefreshToken
 
     public string? UserAgent { get; set; }
 
-    public virtual AspNetUser User { get; set; } = null!;
+    public virtual ApplicationUser User { get; set; } = null!;
 }
