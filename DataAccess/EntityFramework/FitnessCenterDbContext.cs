@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using DataAccess.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataAccess.EntityFramework;
 
-public partial class FitnessCenterDbContext : DbContext
+public partial class FitnessCenterDbContext :IdentityDbContext<ApplicationUser>
 {
     public FitnessCenterDbContext()
     {
@@ -167,6 +169,9 @@ public partial class FitnessCenterDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(FitnessCenterDbContext).Assembly);
+
         modelBuilder.Entity<AccessToken>(entity =>
         {
             entity.HasIndex(e => e.UserId, "IX_AccessTokens_UserId").HasFillFactor(100);
