@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
@@ -16,7 +15,7 @@ public partial class InscripcionesDeClase
 
     public string? FkCliente { get; set; }
 
-    public virtual ApplicationUser? FkClienteNavigation { get; set; }
+    public virtual AspNetUser? FkClienteNavigation { get; set; }
 
     public virtual EstadosInscripcione FkEstadoInscripcionNavigation { get; set; } = null!;
 

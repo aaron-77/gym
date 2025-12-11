@@ -9,7 +9,8 @@ public class ApplicationUser : IdentityUser
     // Puedes agregar aquí propiedades personalizadasD
 
     public string NombreCompleto { get; set; }
-    public int idSecundario { get; set; }
+    
+    public int IdSecundario { get; set; }
     [MaxLength(50)]
     public string Apellido { get; set; }
 

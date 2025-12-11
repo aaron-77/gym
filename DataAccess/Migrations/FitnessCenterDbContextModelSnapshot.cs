@@ -22,6 +22,23 @@ namespace DataAccess.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("AspNetUserRole", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex(new[] { "RoleId" }, "IX_AspNetUserRoles_RoleId");
+
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "RoleId" }, "IX_AspNetUserRoles_RoleId"), 100);
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
             modelBuilder.Entity("DTO.Dtos.Cita", b =>
                 {
                     b.Property<int>("Id")
@@ -606,14 +623,250 @@ namespace DataAccess.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("AccessTokenId");
 
                     b.HasIndex(new[] { "UserId" }, "IX_AccessTokens_UserId");
 
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "UserId" }, "IX_AccessTokens_UserId"), 100);
+
                     b.ToTable("AccessTokens");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "NormalizedName" }, "RoleNameIndex")
+                        .IsUnique()
+                        .HasFilter("([NormalizedName] IS NOT NULL)");
+
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "NormalizedName" }, "RoleNameIndex"), 100);
+
+                    b.ToTable("AspNetRoles");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetRoleClaim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "RoleId" }, "IX_AspNetRoleClaims_RoleId");
+
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "RoleId" }, "IX_AspNetRoleClaims_RoleId"), 100);
+
+                    b.ToTable("AspNetRoleClaims");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Apellido")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Direccion")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("");
+
+                    b.Property<DateTime>("FechaDeNacimiento")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaDeRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("IdAntiguo")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IdSecundario")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdSecundario"));
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NombreCompleto")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NumeroDeIdentificacion")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "NormalizedEmail" }, "EmailIndex");
+
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "NormalizedEmail" }, "EmailIndex"), 100);
+
+                    b.HasIndex(new[] { "NormalizedUserName" }, "UserNameIndex")
+                        .IsUnique()
+                        .HasFilter("([NormalizedUserName] IS NOT NULL)");
+
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "NormalizedUserName" }, "UserNameIndex"), 100);
+
+                    b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetUserClaim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex(new[] { "UserId" }, "IX_AspNetUserClaims_UserId");
+
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "UserId" }, "IX_AspNetUserClaims_UserId"), 100);
+
+                    b.ToTable("AspNetUserClaims");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetUserLogin", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex(new[] { "UserId" }, "IX_AspNetUserLogins_UserId");
+
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "UserId" }, "IX_AspNetUserLogins_UserId"), 100);
+
+                    b.ToTable("AspNetUserLogins");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetUserToken", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.BeneficiosDeClase", b =>
@@ -793,6 +1046,12 @@ namespace DataAccess.Migrations
                         .HasColumnName("fechaCreacion")
                         .HasDefaultValueSql("(getdate())");
 
+                    b.Property<DateOnly?>("FechaDeLaClase")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("date")
+                        .HasColumnName("fechaDeLaClase")
+                        .HasDefaultValueSql("(CONVERT([date],getdate()))");
+
                     b.Property<DateTime?>("FechaModificacion")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -810,8 +1069,7 @@ namespace DataAccess.Migrations
 
                     b.Property<int>("FkEstadoClaseProgramada")
                         .HasColumnType("int")
-                        .HasColumnName("fkEstadoClaseProgramada")
-                        .HasComment("los estados seran: disponible,no disponible,cancelada");
+                        .HasColumnName("fkEstadoClaseProgramada");
 
                     b.HasKey("IdProgramacionClase")
                         .HasName("PK__clasesPr__712E87EE8D30E7B0");
@@ -1058,6 +1316,8 @@ namespace DataAccess.Migrations
 
                     b.HasIndex(new[] { "FechaFestivaOdescanso" }, "IX_diasFestivosYDescansos_Fecha");
 
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "FechaFestivaOdescanso" }, "IX_diasFestivosYDescansos_Fecha"), 100);
+
                     b.HasIndex(new[] { "FechaFestivaOdescanso" }, "fecha_unica")
                         .IsUnique();
 
@@ -1179,7 +1439,11 @@ namespace DataAccess.Migrations
 
                     b.HasIndex(new[] { "FkEjercicio" }, "idx_ejercicios_parametrosDeMedicion_ejercicio");
 
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "FkEjercicio" }, "idx_ejercicios_parametrosDeMedicion_ejercicio"), 100);
+
                     b.HasIndex(new[] { "FkParametro" }, "idx_ejercicios_parametrosDeMedicion_parametro");
+
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "FkParametro" }, "idx_ejercicios_parametrosDeMedicion_parametro"), 100);
 
                     b.ToTable("ejercicios_parametrosDeMedicion", (string)null);
                 });
@@ -1444,18 +1708,9 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdHorarioDeClaseProgramada"));
 
-                    b.Property<DateOnly?>("FechaDeLaClase")
-                        .HasColumnType("date")
-                        .HasColumnName("fechaDeLaClase");
-
                     b.Property<int>("FkClaseProgramada")
                         .HasColumnType("int")
                         .HasColumnName("fkClaseProgramada");
-
-                    b.Property<string>("FkEntrenador")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("fkEntrenador");
 
                     b.Property<int>("FkEstadoHorarioClase")
                         .ValueGeneratedOnAdd()
@@ -1471,8 +1726,6 @@ namespace DataAccess.Migrations
                         .HasName("PK__horarios__873B1A4EFA42A731");
 
                     b.HasIndex("FkClaseProgramada");
-
-                    b.HasIndex("FkEntrenador");
 
                     b.HasIndex("FkEstadoHorarioClase");
 
@@ -2072,6 +2325,10 @@ namespace DataAccess.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("fechaDeExpiracionDeLaReserva");
 
+                    b.Property<DateOnly?>("FechaDeLaClase")
+                        .HasColumnType("date")
+                        .HasColumnName("fechaDeLaClase");
+
                     b.Property<DateTime>("FechaInicioDeLaReserva")
                         .HasColumnType("datetime")
                         .HasColumnName("fechaInicioDeLaReserva");
@@ -2084,15 +2341,29 @@ namespace DataAccess.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fkHoraLaboral");
 
-                    b.Property<int>("IdUsuarioQueReserva")
+                    b.Property<int?>("IdClase")
                         .HasColumnType("int")
-                        .HasColumnName("idUsuarioQueReserva")
-                        .HasComment("id del usuario que esta registrando la clase programada,es para saber a que usuario hay que enviarle la respuesta ya que es por tiempo real");
+                        .HasColumnName("idClase");
+
+                    b.Property<string>("IdEntrenador")
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("idEntrenador");
+
+                    b.Property<string>("IdUsuarioQueReserva")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("idUsuarioQueReserva");
 
                     b.HasKey("IdPreReserva")
                         .HasName("PK__preReser__0FAC6FC5DD04E13F");
 
                     b.HasIndex("FkHoraLaboral");
+
+                    b.HasIndex(new[] { "FechaDeLaClase", "IdClase" }, "IX_preReservasDeHorario_FechaClase");
+
+                    b.HasIndex(new[] { "IdClase", "FechaDeLaClase", "FkHoraLaboral", "IdEntrenador" }, "UX_preReservasDeHorario_Unique")
+                        .IsUnique()
+                        .HasFilter("([idClase] IS NOT NULL AND [fechaDeLaClase] IS NOT NULL AND [idEntrenador] IS NOT NULL)");
 
                     b.ToTable("preReservasDeHorario", (string)null);
                 });
@@ -2138,12 +2409,13 @@ namespace DataAccess.Migrations
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("RefreshTokenId");
 
                     b.HasIndex(new[] { "UserId" }, "IX_RefreshTokens_UserId");
+
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "UserId" }, "IX_RefreshTokens_UserId"), 100);
 
                     b.ToTable("RefreshTokens");
                 });
@@ -2389,9 +2661,13 @@ namespace DataAccess.Migrations
 
                     b.HasIndex(new[] { "NombreTipoDeRecurrencia" }, "IX_tiposDeRecurrenciaDeDiasFestivos_Nombre");
 
+                    SqlServerIndexBuilderExtensions.HasFillFactor(b.HasIndex(new[] { "NombreTipoDeRecurrencia" }, "IX_tiposDeRecurrenciaDeDiasFestivos_Nombre"), 100);
+
                     b.ToTable("tiposDeRecurrenciaDeDiasFestivos", null, t =>
                         {
                             t.HasTrigger("TR_tiposDeRecurrenciaDeDiasFestivos_Update");
+
+                            t.HasTrigger("TR_tiposDeRecurrenciaDeDiasFestivos_Update2");
                         });
 
                     b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
@@ -2593,260 +2869,73 @@ namespace DataAccess.Migrations
                     b.ToView("v_nivelesDeIntensidad", (string)null);
                 });
 
-            modelBuilder.Entity("DataAccess.Identity.ApplicationUser", b =>
+            modelBuilder.Entity("AspNetUserRole", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Apellido")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Direccion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<bool>("EmailConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Estado")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("FechaDeNacimiento")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaDeRegistro")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("IdAntiguo")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NombreCompleto")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NumeroDeIdentificacion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordHash")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<int>("idSecundario")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
-
-                    b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "1",
-                            Name = "empleado",
-                            NormalizedName = "EMPLEADO"
-                        },
-                        new
-                        {
-                            Id = "2",
-                            Name = "cliente",
-                            NormalizedName = "CLIENTE"
-                        });
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoleId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetRoleClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AspNetUserClaims", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
-                {
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ProviderDisplayName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("LoginProvider", "ProviderKey");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AspNetUserLogins", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetUserRoles", (string)null);
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("UserId", "LoginProvider", "Name");
-
-                    b.ToTable("AspNetUserTokens", (string)null);
+                    b.HasOne("DataAccess.EntityFramework.AspNetRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.AccessToken", b =>
                 {
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "User")
                         .WithMany("AccessTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_AccessTokens_AspNetUsers");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetRoleClaim", b =>
+                {
+                    b.HasOne("DataAccess.EntityFramework.AspNetRole", "Role")
+                        .WithMany("AspNetRoleClaims")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetUserClaim", b =>
+                {
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "User")
+                        .WithMany("AspNetUserClaims")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetUserLogin", b =>
+                {
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "User")
+                        .WithMany("AspNetUserLogins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetUserToken", b =>
+                {
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "User")
+                        .WithMany("AspNetUserTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -2871,12 +2960,12 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.EntityFramework.Cita", b =>
                 {
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "Entrenador")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "Entrenador")
                         .WithMany("CitaEntrenadors")
                         .HasForeignKey("EntrenadorId")
                         .HasConstraintName("FK_Citas_AspNetUsers_NewEntrenadorId");
 
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "User")
                         .WithMany("CitaUsers")
                         .HasForeignKey("UserId")
                         .HasConstraintName("FK_Citas_AspNetUsers_NewUserId");
@@ -2903,7 +2992,7 @@ namespace DataAccess.Migrations
                         .HasForeignKey("FkIntensidad")
                         .HasConstraintName("FK_Clases_Intensidad");
 
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "Instructor")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "Instructor")
                         .WithMany("Clases")
                         .HasForeignKey("InstructorId")
                         .HasConstraintName("FK_Clases_AspNetUsers_NewInstructorId");
@@ -2925,7 +3014,7 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_ClasesProgramadas_Clase");
 
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "FkEntrenadorNavigation")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "FkEntrenadorNavigation")
                         .WithMany("ClasesProgramada")
                         .HasForeignKey("FkEntrenador")
                         .HasConstraintName("FK_ClasesProgramadas_AspNetUsers_NewFkEntrenador");
@@ -3094,11 +3183,6 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_horariosDeClasesProgramadas_clasesProgramadas");
 
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "FkEntrenadorNavigation")
-                        .WithMany("HorariosDeClasesProgramada")
-                        .HasForeignKey("FkEntrenador")
-                        .HasConstraintName("FK_HorariosDeClasesProgramadas_AspNetUsers_NewFkEntrenador");
-
                     b.HasOne("DataAccess.EntityFramework.EstadosHorarioClaseProgramadum", "FkEstadoHorarioClaseNavigation")
                         .WithMany("HorariosDeClasesProgramada")
                         .HasForeignKey("FkEstadoHorarioClase")
@@ -3112,8 +3196,6 @@ namespace DataAccess.Migrations
                         .HasConstraintName("FK_horasLborales_horariosClasesProgramadas");
 
                     b.Navigation("FkClaseProgramadaNavigation");
-
-                    b.Navigation("FkEntrenadorNavigation");
 
                     b.Navigation("FkEstadoHorarioClaseNavigation");
 
@@ -3145,7 +3227,7 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.EntityFramework.InscripcionesDeClase", b =>
                 {
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "FkClienteNavigation")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "FkClienteNavigation")
                         .WithMany("InscripcionesDeClases")
                         .HasForeignKey("FkCliente")
                         .HasConstraintName("FK_InscripcionesDeClases_AspNetUsers_NewFkCliente");
@@ -3181,7 +3263,7 @@ namespace DataAccess.Migrations
                         .HasForeignKey("FkParametro")
                         .HasConstraintName("fk_medidas_parametros");
 
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "FkUsuarioNavigation")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "FkUsuarioNavigation")
                         .WithMany("Medida")
                         .HasForeignKey("FkUsuario")
                         .HasConstraintName("FK_Medidas_AspNetUsers_NewFkUsuario");
@@ -3218,7 +3300,7 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Metas_Parametros");
 
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "FkUsuarioNavigation")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "FkUsuarioNavigation")
                         .WithMany("Meta")
                         .HasForeignKey("FkUsuario")
                         .HasConstraintName("FK_Metas_AspNetUsers_NewFkUsuario");
@@ -3236,7 +3318,7 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.EntityFramework.Pago", b =>
                 {
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "User")
                         .WithMany("Pagos")
                         .HasForeignKey("UserId")
                         .HasConstraintName("FK_Pagos_AspNetUsers_NewUserId");
@@ -3286,7 +3368,7 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.EntityFramework.RefreshToken", b =>
                 {
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -3303,7 +3385,7 @@ namespace DataAccess.Migrations
                         .HasForeignKey("RutinaId")
                         .HasConstraintName("FK__Registros__Rutin__6FE99F9F");
 
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "User")
                         .WithMany("RegistrosEntrenamientos")
                         .HasForeignKey("UserId")
                         .HasConstraintName("FK_RegistrosEntrenamiento_AspNetUsers_NewUserId");
@@ -3315,7 +3397,7 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("DataAccess.EntityFramework.Rutina", b =>
                 {
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "Entrenador")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "Entrenador")
                         .WithMany("RutinaEntrenadors")
                         .HasForeignKey("EntrenadorId")
                         .HasConstraintName("FK_Rutinas_AspNetUsers_NewEntrenadorId");
@@ -3330,7 +3412,7 @@ namespace DataAccess.Migrations
                         .HasForeignKey("FkTipoRutina")
                         .HasConstraintName("FK_Rutinas_TipoRutina");
 
-                    b.HasOne("DataAccess.Identity.ApplicationUser", "User")
+                    b.HasOne("DataAccess.EntityFramework.AspNetUser", "User")
                         .WithMany("RutinaUsers")
                         .HasForeignKey("UserId")
                         .HasConstraintName("FK_Rutinas_AspNetUsers_NewUserId");
@@ -3371,55 +3453,44 @@ namespace DataAccess.Migrations
                     b.Navigation("Rol");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetRole", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("AspNetRoleClaims");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+            modelBuilder.Entity("DataAccess.EntityFramework.AspNetUser", b =>
                 {
-                    b.HasOne("DataAccess.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                    b.Navigation("AccessTokens");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
-                {
-                    b.HasOne("DataAccess.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                    b.Navigation("AspNetUserClaims");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("AspNetUserLogins");
 
-                    b.HasOne("DataAccess.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
+                    b.Navigation("AspNetUserTokens");
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
-                {
-                    b.HasOne("DataAccess.Identity.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("CitaEntrenadors");
+
+                    b.Navigation("CitaUsers");
+
+                    b.Navigation("Clases");
+
+                    b.Navigation("ClasesProgramada");
+
+                    b.Navigation("InscripcionesDeClases");
+
+                    b.Navigation("Medida");
+
+                    b.Navigation("Meta");
+
+                    b.Navigation("Pagos");
+
+                    b.Navigation("RefreshTokens");
+
+                    b.Navigation("RegistrosEntrenamientos");
+
+                    b.Navigation("RutinaEntrenadors");
+
+                    b.Navigation("RutinaUsers");
                 });
 
             modelBuilder.Entity("DataAccess.EntityFramework.Clase", b =>
@@ -3579,37 +3650,6 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("DataAccess.EntityFramework.UnidadesDeMedidum", b =>
                 {
                     b.Navigation("ParametrosUnidadesDeMedida");
-                });
-
-            modelBuilder.Entity("DataAccess.Identity.ApplicationUser", b =>
-                {
-                    b.Navigation("AccessTokens");
-
-                    b.Navigation("CitaEntrenadors");
-
-                    b.Navigation("CitaUsers");
-
-                    b.Navigation("Clases");
-
-                    b.Navigation("ClasesProgramada");
-
-                    b.Navigation("HorariosDeClasesProgramada");
-
-                    b.Navigation("InscripcionesDeClases");
-
-                    b.Navigation("Medida");
-
-                    b.Navigation("Meta");
-
-                    b.Navigation("Pagos");
-
-                    b.Navigation("RefreshTokens");
-
-                    b.Navigation("RegistrosEntrenamientos");
-
-                    b.Navigation("RutinaEntrenadors");
-
-                    b.Navigation("RutinaUsers");
                 });
 #pragma warning restore 612, 618
         }

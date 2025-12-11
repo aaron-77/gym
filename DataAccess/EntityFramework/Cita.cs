@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
@@ -20,7 +19,7 @@ public partial class Cita
 
     public string? UserId { get; set; }
 
-    public virtual ApplicationUser? Entrenador { get; set; }
+    public virtual AspNetUser? Entrenador { get; set; }
 
-    public virtual ApplicationUser? User { get; set; }
+    public virtual AspNetUser? User { get; set; }
 }

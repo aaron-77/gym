@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using DataAccess.Identity;
 
 namespace DataAccess.EntityFramework;
 
@@ -12,9 +11,6 @@ public partial class ClasesProgramada
 
     public int CupoMaximo { get; set; }
 
-    /// <summary>
-    /// los estados seran: disponible,no disponible,cancelada
-    /// </summary>
     public int FkEstadoClaseProgramada { get; set; }
 
     public DateTime? FechaCreacion { get; set; }
@@ -23,9 +19,13 @@ public partial class ClasesProgramada
 
     public string? FkEntrenador { get; set; }
 
+    public DateOnly? FechaDeLaClase { get; set; }
+
+    
+
     public virtual Clase FkClaseNavigation { get; set; } = null!;
 
-    public virtual ApplicationUser? FkEntrenadorNavigation { get; set; }
+    public virtual AspNetUser? FkEntrenadorNavigation { get; set; }
 
     public virtual EstadosClasesProgramada FkEstadoClaseProgramadaNavigation { get; set; } = null!;
 

@@ -1,40 +1,29 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using DataAccess.Identity;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DataAccess.EntityFramework;
 
-public class RefreshToken
+public partial class RefreshToken
 {
-        [Key]
-        public Guid RefreshTokenId { get; set; }
+    public Guid RefreshTokenId { get; set; }
 
-        [Required]
-        [MaxLength(450)]
-        public string UserId { get; set; }
+    public string UserId { get; set; } = null!;
 
-        [Required]
-        [MaxLength(100)]
-        public string ClientId { get; set; }
+    public string ClientId { get; set; } = null!;
 
-        [Required]
-        [MaxLength(256)]
-        public string TokenHash { get; set; }
+    public string TokenHash { get; set; } = null!;
 
-        public DateTime IssuedAt { get; set; }
+    public DateTime IssuedAt { get; set; }
 
-        public DateTime ExpiresAt { get; set; }
+    public DateTime ExpiresAt { get; set; }
 
-        public DateTime? RevokedAt { get; set; }
+    public DateTime? RevokedAt { get; set; }
 
-        public Guid? ReplacedByTokenId { get; set; }
+    public Guid? ReplacedByTokenId { get; set; }
 
-        [MaxLength(50)]
-        public string? IpAddress { get; set; }
+    public string? IpAddress { get; set; }
 
-        [MaxLength(250)]
-        public string? UserAgent { get; set; }
+    public string? UserAgent { get; set; }
 
-        [ForeignKey("UserId")]
-        public virtual ApplicationUser User { get; set; }
+    public virtual AspNetUser User { get; set; } = null!;
 }

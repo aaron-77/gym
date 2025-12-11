@@ -13,12 +13,15 @@ public partial class PreReservasDeHorario
 
     public int FkHoraLaboral { get; set; }
 
-    /// <summary>
-    /// id del usuario que esta registrando la clase programada,es para saber a que usuario hay que enviarle la respuesta ya que es por tiempo real
-    /// </summary>
-    public int IdUsuarioQueReserva { get; set; }
+    public string? IdUsuarioQueReserva { get; set; }
 
     public DateOnly FechaReservada { get; set; }
+
+    public int? IdClase { get; set; }
+
+    public DateOnly? FechaDeLaClase { get; set; }
+
+    public string? IdEntrenador { get; set; }
 
     public virtual HorasLaborale FkHoraLaboralNavigation { get; set; } = null!;
 }
