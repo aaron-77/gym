@@ -88,7 +88,7 @@ namespace API.Services
                 };
 
             } catch (Exception ex) {
-                Console.WriteLine($"Error en AuthenticateUser: {_context.Database.GetConnectionString()}");
+                Console.WriteLine($"Error en AuthenticateUser: {_context.Database.GetConnectionString()} Causa:{ex.Message}  \n StackTrace {ex.StackTrace}");
                 return null;
             }
             
