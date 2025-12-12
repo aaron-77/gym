@@ -1578,8 +1578,8 @@ public partial class FitnessCenterDbContext :IdentityDbContext<ApplicationUser>
                 .HasColumnName("idPreReserva")
                 .IsRequired(false)
                 .HasDefaultValue(null);
-            entity.Property(e => e.diaDeLaSemana).HasColumnName("diaDeLaSemana");
-            entity.Property(e => e.fechaDisponible).HasColumnName("fechaDisponible");
+            entity.Property(e => e.diaDeLaSemana).HasColumnName("DiaDeLaSemana");
+            entity.Property(e => e.fechaDisponible).HasColumnName("FechaDisponible");
             entity.Property(e => e.horaInicio).HasColumnName("horaInicio");
             entity.Property(e => e.horaFin).HasColumnName("horaFin");
             entity.Property(e => e.tipoDeDia).HasColumnName("tipoDeDia");
