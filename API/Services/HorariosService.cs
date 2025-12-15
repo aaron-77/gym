@@ -114,7 +114,10 @@ namespace API.Services
             }
             catch (Exception ex)
             {
-                return 0;        
+                string logMessage = $"[ERROR] Método: RegistrarPreReservaDeHorario(HorariosService) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | PreReserva.UserId: {preReserva?.idUsuarioQueReserva} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                throw;        
             }
         }
 
