@@ -17,7 +17,6 @@ let catalogoClases = [];
 
 let horariosFormateados = [];
 let horarios = {};
-const formulario = document.getElementById("claseProgramadaForm");
 
 // Variables para SignalR
 let signalRConnection = null;
@@ -243,7 +242,7 @@ function handleSelectedDate(event) {
     const selectedDate = event.detail.fecha;
     const fechaFormateada = formatearFecha(selectedDate);
     const inputFechaSeleccionada = document.getElementById("fechaDeLaClase");
-    inputFechaSeleccionada.value = selectedDate.toLocaleDateString('sv-SE');
+    if (inputFechaSeleccionada) inputFechaSeleccionada.value = selectedDate.toLocaleDateString('sv-SE');
     // Actualizar el visualizador de horarios con la fecha seleccionada
     if (scheduleViewerInstance) {
         // Obtener los horarios para la fecha seleccionada
@@ -437,8 +436,12 @@ async function inicializarAgendador() {
     document.dispatchEvent(changedDateEvent);
 }
 
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', inicializarAgendador);
+// Inicializar cuando el DOM esté listo o inmediatamente si ya está cargado
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inicializarAgendador);
+} else {
+    inicializarAgendador();
+}
 
 // Cerrar conexión SignalR cuando se cierre la página
 window.addEventListener('beforeunload', cerrarConexionSignalR);
@@ -860,22 +863,21 @@ async function cerrarConexionSignalR() {
     }
 }
 function handleSelectedSchedule (event){
-
-     // Mostrar la fecha y hora seleccionada en el label
-     const label = document.getElementById("labelHorarioSeleccionado");
-     if (label) {
-       const horario = event.detail.schedule;
-       // Obtener la fecha seleccionada del header del calendario
-       const fecha = document.getElemenschedulestById("scheduleDate")?.textContent || ""; 
-       const inputFkHoraLaboral = document.getElementById("fkHoraLaboral");
-       inputFkHoraLaboral.value =horario.idHora;
-       if (horario && fecha) {
-         label.textContent = `Seleccionaste: ${fecha} - ${horario.labelHorario}`;
-       } else if (horario) {
-         label.textContent = `Horario seleccionado: ${horario.labelHorario}`;
-       } else {
-         label.textContent = "No hay horario seleccionado";
-       }
-     }    
+    // Mostrar la fecha y hora seleccionada en el label
+    const label = document.getElementById("labelHorarioSeleccionado");
+    if (label) {
+      const horario = event.detail.schedule;
+      // Obtener la fecha seleccionada del header del calendario
+      const fecha = document.getElementById("scheduleDate")?.textContent || "";
+      const inputFkHoraLaboral = document.getElementById("fkHoraLaboral");
+      if (inputFkHoraLaboral && horario) inputFkHoraLaboral.value = horario.idHora;
+      if (horario && fecha) {
+        label.textContent = `Seleccionaste: ${fecha} - ${horario.labelHorario}`;
+      } else if (horario) {
+        label.textContent = `Horario seleccionado: ${horario.labelHorario}`;
+      } else {
+        label.textContent = "No hay horario seleccionado";
+      }
+    }    
 }
 

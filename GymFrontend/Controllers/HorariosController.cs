@@ -108,7 +108,9 @@ namespace GymFrontend.Controllers
                         c.Key == ClaimTypes.NameIdentifier || c.Key == JwtRegisteredClaimNames.Sub
                     )
                     .Value;
-                    
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                preReserva.idUsuarioQueReserva = UsuarioId;
+                
                 var result = await _horariosManager.PreReservarHorario(preReserva);
                 if (result.success)
                 {

@@ -1,6 +1,6 @@
 @model bool?
 @{
+    // Este partial se mantiene por compatibilidad pero ahora sólo renderiza el calendario.
     var mostrarCheckboxPreReservas = Model ?? false;
 }
 @Html.Partial("_Calendario")
-@Html.Partial("_HorariosDelDia",mostrarCheckboxPreReservas) 
