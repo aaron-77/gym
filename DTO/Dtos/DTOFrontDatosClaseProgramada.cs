@@ -38,7 +38,7 @@ namespace DTO.Dtos
         {
             Console.WriteLine("VALIDANDO FECHA: " + fecha);
             if (fecha < DateOnly.FromDateTime(DateTime.Now.Date))
-            {
+            {   
                 return new ValidationResult("La fecha de la clase no puede ser menor a la fecha actual");
             }
             return ValidationResult.Success;
