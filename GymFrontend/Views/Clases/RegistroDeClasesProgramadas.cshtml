@@ -84,7 +84,10 @@
 
     <!-- Mostrar el visualizador de horarios después del formulario -->
     <div class="mt-3">
-        @Html.Partial("_HorariosDelDia", true)
+        @{ 
+            var vd = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary(ViewData) { ["idFormulario"] = "claseProgramadaForm" };
+        }
+        @Html.Partial("_HorariosDelDia", true, vd)
     </div>
     <div class="row">
         <div class="col-12 text-center">

@@ -1,6 +1,8 @@
 @model bool?
 @{
     var mostrarCheckboxPreReservas = Model ?? false;
+    // idFormulario puede venir en ViewData["idFormulario"]
+    var idFormulario = (ViewData["idFormulario"] as string) ?? string.Empty;
 }
 
 <div class="schedule-viewer" id="scheduleViewer">
@@ -25,8 +27,8 @@
         </div>
     </div>
     
-    <div class="form-group">
-        <input type="number" id="fkHoraLaboral" class="form-control visually-hidden" name="fkHoraLaboral" value="" required/>
+    <div class="form-group"> 
+        <input type="number" id="fkHoraLaboral" class="form-control visually-hidden" name="fkHoraLaboral" value="" required @(string.IsNullOrEmpty(idFormulario) ? "" : $"form=\"{idFormulario}\"") />
         <div class="invalid-feedback text-center">
             selecciona un horario
         </div>
