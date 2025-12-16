@@ -17,6 +17,7 @@ let catalogoClases = [];
 
 let horariosFormateados = [];
 let horarios = {};
+const formulario = document.getElementById("claseProgramadaForm");
 
 // Variables para SignalR
 let signalRConnection = null;
