@@ -201,8 +201,14 @@ export class ScheduleViewer {
     const inputFkHoraLaboral = document.getElementById('fkHoraLaboral');
     
     const inputFecha = document.getElementById('fechaDeLaClase');
-
-    
+    const inputFkEntrenador = document.getElementById('inputEntrenador');
+    const inputIdClase = document.getElementById('inputClase');
+    if (!inputFkEntrenador.reportValidity()) {
+      return false;
+    }
+    if (!inputIdClase.reportValidity()) {
+      return false;
+    }
     if (!inputFecha.reportValidity()) {
       return false;
     }
@@ -216,11 +222,14 @@ export class ScheduleViewer {
     const idUsuarioQueReserva = ''; // Aquí puedes cambiar por el usuario real si lo tienes
     const fechaTentativa = inputFecha.value;
     const idHoraLaboral = parseInt(inputFkHoraLaboral.value);
-
+    const idEntrenador = parseInt(inputFkEntrenador.value);     
+    const idClase = parseInt(inputIdClase.value);
     const body = {
       idUsuarioQueReserva,
       fechaTentativa,
-      idHoraLaboral
+      idHoraLaboral,
+      idClase,
+      idEntrenador
     };
 
     try {
