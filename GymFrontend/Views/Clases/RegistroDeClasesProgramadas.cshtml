@@ -16,11 +16,12 @@
 <section class="section layout-registro-clases-programadas">
     
     <!-- Mostrar calendario primero -->
-    <div class="mb-3">
-        @Html.Partial("_Calendario")
-    </div>
+    
 
     <form id="claseProgramadaForm" class="administrative-form needs-validation" novalidate>
+        <div class="mb-3">
+            @Html.Partial("_Calendario")
+        </div>
         <label id="labelHorarioSeleccionado" class="label-horario-seleccionado mt-3 mb-3" style="display:block; font-weight:bold; color:#012970;">Horario seleccionado:ninguno</label>
         
         <!-- Campo oculto para la fecha -->
