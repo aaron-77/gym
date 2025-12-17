@@ -641,7 +641,7 @@ function hayClasesDisponibles(clasesProgramadas, fecha) {
  * Inicializa el agendador de clases, incluyendo calendario y visualizador
  * @param {string} calendarContainerId - ID del contenedor del calendario
  * @param {string} scheduleContainerId - ID del contenedor del visualizador
- */scheduleViewer
+ */
 function inicializarAgendador(scheduleContainerId = 'scheduleViewer') {
     try {
         const scheduleContainer = document.getElementById(scheduleContainerId);
