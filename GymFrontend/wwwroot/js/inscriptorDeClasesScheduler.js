@@ -26,7 +26,8 @@ export class ScheduleViewerInscripciones {
   cacheElements() {
     this.dateElement = this.container?.querySelector("#scheduleDate")
     this.gridElement = this.container?.querySelector("#scheduleGrid")
-    this.inputFkHoraLaboral = document.getElementById("fkHoraLaboral")
+    // input might belong to a form outside this partial; query by name then fallback to global id
+    this.inputFkHoraLaboral = this.container?.querySelector('[name="fkHoraLaboral"]') || document.getElementById("fkHoraLaboral")
     this.checkElement = document.getElementById("ocultarPreReservados")
   }
 
