@@ -132,8 +132,11 @@ namespace API.Services
 
                 return claseProgramada;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: obtenerClaseProgramadaConNuevoCupo (HorariorsService) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 throw;
             }
         }

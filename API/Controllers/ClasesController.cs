@@ -889,6 +889,7 @@ namespace API.Controllers
             [FromBody] DTOInscripcionAClase modelo
         )
         {
+            var idInscripcion = 0;
             try
             {
                 // Validar el modelo
@@ -957,7 +958,7 @@ namespace API.Controllers
                     );
                 }
                 // Ejecutar el procedimiento almacenado usando ExecuteSqlInterpolatedAsync
-                var idInscripcion = await _context.Database.ExecuteSqlInterpolatedAsync(
+                 idInscripcion = await _context.Database.ExecuteSqlInterpolatedAsync(
                     $@"EXEC dbo.sp_registrarInsrcipcionAClase 
                         @idCliente={modelo.IdCliente},
                         @fkProgramacionClase={modelo.IdProgramacionClase}"
@@ -980,6 +981,9 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: InscribirAClase (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdInscripcionRegistrada: {idInscripcion} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<int>(

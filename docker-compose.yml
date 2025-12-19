@@ -15,6 +15,7 @@ services:
                 - default
        container_name: apicontainer
        environment:
+           TZ: "America/Mexico_City"
            ASPNETCORE_ENVIRONMENT: "Production"
            ASPNETCORE_URLS: "http://0.0.0.0:5274"    
            SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
@@ -33,6 +34,7 @@ services:
                 - default
        container_name: frontendcontainer
        environment: 
+           TZ: "America/Mexico_City"
            ASPNETCORE_ENVIRONMENT: "Production"
            ASPNETCORE_URLS: "http://0.0.0.0:5062"
            BACKEND_BASE_ADDRESS: "http://0.0.0.0:5274"

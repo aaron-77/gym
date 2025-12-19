@@ -100,6 +100,9 @@ namespace API.Services
             }
             catch (System.Exception ex)
             {
+                string logMessage = $"[ERROR] Método: enviarCuposActualizadosDeClaseProgramada (ServicioActualizacionesDeHorarioRealTime) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
                 DTOResponse<List<DTOClaseProgramadaView>> respuesta = new DTOResponse<List<DTOClaseProgramadaView>>
                 {
                     success = false,
