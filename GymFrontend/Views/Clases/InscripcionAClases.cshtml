@@ -67,6 +67,12 @@
                 </div>
             </div>
         </div>
+        <div class="mt-3">
+            @{
+                var vd = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary(ViewData) { ["idFormulario"] = "formInscripcionClase" };
+            }
+            @Html.Partial("_HorariosDelDia", false, vd)
+        </div>
         <div class="row">
             <div class="col-12 text-center">
                 <button id="botonInscribir" type="submit" class="btn btn-primary">Inscribir</button>
@@ -74,12 +80,7 @@
         </div>
     </form>
     <!-- Mostrar el visualizador de horarios después del formulario -->
-    <div class="mt-3">
-        @{ 
-            var vd = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary(ViewData) { ["idFormulario"] = "formInscripcionClase" };
-        }
-        @Html.Partial("_HorariosDelDia", false, vd)
-    </div>
+    
 </section>
 
 @section Styles {
