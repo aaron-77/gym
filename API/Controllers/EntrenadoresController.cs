@@ -26,7 +26,7 @@ namespace API.Controllers
             {
                 // HttpResponseListadoQueryUsers respuesta = new HttpResponseListadoQueryUsers(); // ELIMINADO
                 List<QueryUser> entrenadores = await _db.userSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_obtenerEntrenadoresDisponibles @fechaReferencia={fechaInicio}").ToListAsync();
-                
+                Console.WriteLine($"BUSCANDO ENTRENADORES DISPONIBLES EN: {fechaInicio}");
                 respuesta = BL.Utils.ResponseManager.BuildResponse(
                     success: true,
                     httpCode: 200,
