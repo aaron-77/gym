@@ -38,12 +38,12 @@ Layout = "_LayoutSeccionAdministracion";
         <span asp-validation-for="@Model.tipoCita" class="validation-error"></span>
 
         <label for="inputFechaInicio" class="form-label">Fecha inicio</label>
-        <input type="datetime-local" name="fechaInicioCita" class="form-control empleados-main-page-input desactivable"
+        <input type="datetime-local" step="3600" name="fechaInicioCita" class="form-control empleados-main-page-input desactivable"
             id="inputFechaInicio">
         <span asp-validation-for="@Model.fechaInicioCita" class="validation-error"></span>
 
         <label for="inputFechaFin" class="form-label">Fecha fin</label>
-        <input type="datetime-local" name="fechaFinCita" class="form-control empleados-main-page-input desactivable"
+        <input type="datetime-local" step="3600" name="fechaFinCita" class="form-control empleados-main-page-input desactivable"
             id="inputFechaFin">
         <span asp-validation-for="@Model.fechaFinCita" class="validation-error"></span>
 
