@@ -70,7 +70,7 @@ const getDuracionCitas = async () => {
     duracionCita = parseInt(jsonResponse.payload); // MODIFICADO: Usar payload
 }
 const getEntrenaoresDisponibles = async () => {
-    const fechaInicio = document.getElementById("inputFechaInicio").value;
+    const fechaInicio =new Date(document.getElementById("inputFechaInicio").value);
     const fechaInicioISO = fechaInicio.toISOString();
     const fechaInicioForQueryParameter = encodeURIComponent(fechaInicioISO);
     const response = await fetch("/obtenerEntrenadoresDisponibles?fechaReferencia=" + fechaInicioForQueryParameter); // MODIFICADO: Usar endpoint del frontend sin /api
@@ -156,6 +156,18 @@ function fillComboEjercicios() {
         select.appendChild(option);
     });
 }
+function convertirADateLocal(valorInput) {
+    if (!valorInput) return null;
+
+    // Parsear como fecha local
+    const [fechaParte, horaParte = '00:00'] = valorInput.split('T');
+    const [año, mes, dia] = fechaParte.split('-').map(Number);
+    const [hora, minuto] = horaParte.split(':').map(Number);
+
+    // Crear Date en hora LOCAL
+    return new Date(año, mes - 1, dia, hora, minuto, 0);
+}
+
 addEventListener("DOMContentLoaded", async () => {
     //disableElements();
     $inputTipoCita = document.getElementById("inputTipoCita");
