@@ -4,11 +4,11 @@ export function convertirADateLocal(valorInput) {
 
     // Parsear como fecha local 
     const [fechaParte, horaParte = '00:00'] = valorInput.split('T');
-    const [año, mes, dia] = fechaParte.split('-').map(Number);
+    const [anio, mes, dia] = fechaParte.split('-').map(Number);
     const [hora, minuto] = horaParte.split(':').map(Number);
 
     // Crear Date en hora LOCAL
-    return new Date(año, mes - 1, dia, hora, minuto, 0);
+    return new Date(anio, mes - 1, dia, hora, minuto, 0);
 }
 
 export function pad(n) {
