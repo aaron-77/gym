@@ -71,8 +71,7 @@ const getDuracionCitas = async () => {
 }
 const getEntrenaoresDisponibles = async () => {
     const fechaInicio = convertirADateLocal(document.getElementById("inputFechaInicio").value);
-    const fechaInicioISO = fechaInicio.toISOString();
-    const fechaInicioForQueryParameter = encodeURIComponent(fechaInicioISO);
+    const fechaInicioForQueryParameter = fechaInicio.toISOString();
     const response = await fetch("/obtenerEntrenadoresDisponibles?fechaReferencia=" + fechaInicioForQueryParameter); // MODIFICADO: Usar endpoint del frontend sin /api
 
     const jsonResponse = await response.json();
