@@ -212,7 +212,7 @@ namespace BL
                 Console.WriteLine($"ObtenerEntrenadoresDisponibles [Frontend] (UsersManager) FECHA BUSCADA: {fechaReferencia}");
                 // Send date as ISO local string (without Z) to preserve local time across the pipeline
                 var fechaParam = fechaReferencia.ToString("yyyy-MM-ddTHH:mm:ss");
-                string entrenadoresResponse = await httpClient.get($"api/obtenerEntrenadoresDisponibles?fechaReferencia={Uri.EscapeDataString(fechaParam)}");
+                string entrenadoresResponse = await httpClient.get($"api/obtenerEntrenadoresDisponibles?fechaInicio={Uri.EscapeDataString(fechaParam)}");
                 DTOResponse<List<QueryUser>> entrenadores = JsonSerializer.Deserialize<DTOResponse<List<QueryUser>>>(entrenadoresResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return entrenadores;
             }
