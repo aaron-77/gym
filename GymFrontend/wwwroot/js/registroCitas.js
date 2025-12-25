@@ -157,7 +157,7 @@ function fillComboEjercicios() {
         select.appendChild(option);
     });
 }
-
+F
 
 addEventListener("DOMContentLoaded", async () => {
     //disableElements();
