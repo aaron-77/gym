@@ -234,6 +234,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                Console.WriteLine($"ObtenerEntrenadoresDisponibles [Frontend] (CitasController) FECHA BUSCADA: {fechaReferencia}");
                 var respuesta = await managerUsers.ObtenerEntrenadoresDisponibles(fechaReferencia);
                 if (respuesta.success)
                 {

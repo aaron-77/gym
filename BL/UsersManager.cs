@@ -209,8 +209,9 @@ namespace BL
             
             try
             {
+                Console.WriteLine($"ObtenerEntrenadoresDisponibles [Frontend] (UsersManager) FECHA BUSCADA: {fechaReferencia}");
                 string entrenadoresResponse = await httpClient.get($"api/obtenerEntrenadoresDisponibles?fechaReferencia={fechaReferencia}");
-            DTOResponse<List<QueryUser>> entrenadores = JsonSerializer.Deserialize<DTOResponse<List<QueryUser>>>(entrenadoresResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                DTOResponse<List<QueryUser>> entrenadores = JsonSerializer.Deserialize<DTOResponse<List<QueryUser>>>(entrenadoresResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return entrenadores;
             }
             catch (ArgumentNullException ex)
