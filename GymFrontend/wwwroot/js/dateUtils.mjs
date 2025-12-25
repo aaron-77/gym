@@ -2,7 +2,7 @@
 export function convertirADateLocal(valorInput) {
     if (!valorInput) return null;
 
-    // Parsear como fecha local
+    // Parsear como fecha local 
     const [fechaParte, horaParte = '00:00'] = valorInput.split('T');
     const [año, mes, dia] = fechaParte.split('-').map(Number);
     const [hora, minuto] = horaParte.split(':').map(Number);
