@@ -230,12 +230,18 @@ namespace GymFrontend.Controllers
         // NUEVO: Endpoint para obtener entrenadores disponibles
         [HttpGet]
         [Route("obtenerEntrenadoresDisponibles")] // MODIFICADO: Quitar prefijo "api/"
-        public async Task<IActionResult> ObtenerEntrenadoresDisponibles([FromQuery] DateTime fechaReferencia)
+        public async Task<IActionResult> ObtenerEntrenadoresDisponibles([FromQuery] string fechaReferencia)
         {
             try
             {
-                Console.WriteLine($"ObtenerEntrenadoresDisponibles [Frontend] (CitasController) FECHA BUSCADA: {fechaReferencia}");
-                var respuesta = await managerUsers.ObtenerEntrenadoresDisponibles(fechaReferencia);
+                // Parse incoming date string preserving local time
+                DateTime parsedFecha;
+                if (!DateTime.TryParse(fechaReferencia, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out parsedFecha))
+                {
+                    parsedFecha = DateTime.Parse(fechaReferencia, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal);
+                }
+                Console.WriteLine($"ObtenerEntrenadoresDisponibles [Frontend] (CitasController) FECHA BUSCADA: {parsedFecha}");
+                var respuesta = await managerUsers.ObtenerEntrenadoresDisponibles(parsedFecha);
                 if (respuesta.success)
                 {
                     return Ok(respuesta);

@@ -18,15 +18,21 @@ namespace API.Controllers
         [Authorize(Roles = "empleado,cliente")]
         [HttpGet]
         [Route("api/obtenerEntrenadoresDisponibles")]
-        public async Task<IActionResult> ObtenerEntrenadoresDisponibles([FromQuery] DateTime fechaInicio) // MODIFICADO: Renombrado el método y tipo de retorno para usar DTOResponse
+        public async Task<IActionResult> ObtenerEntrenadoresDisponibles([FromQuery] string fechaInicio) // Receive string to preserve local time passed from frontend
         {
             DTOResponse<List<QueryUser>> respuesta; // NUEVO: Declarar DTOResponse
 
             try
             {
-                // HttpResponseListadoQueryUsers respuesta = new HttpResponseListadoQueryUsers(); // ELIMINADO
-                List<QueryUser> entrenadores = await _db.userSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_obtenerEntrenadoresDisponibles @fechaReferencia={fechaInicio}").ToListAsync();
-                Console.WriteLine($"BUSCANDO ENTRENADORES DISPONIBLES EN: {fechaInicio}");
+                // Parse incoming date string preserving local time
+                DateTime parsedFecha;
+                if (!DateTime.TryParse(fechaInicio, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out parsedFecha))
+                {
+                    parsedFecha = DateTime.Parse(fechaInicio, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal);
+                }
+                // Call stored procedure with parsed local date
+                List<QueryUser> entrenadores = await _db.userSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_obtenerEntrenadoresDisponibles @fechaReferencia={parsedFecha}").ToListAsync();
+                Console.WriteLine($"BUSCANDO ENTRENADORES DISPONIBLES EN: {parsedFecha}");
                 respuesta = BL.Utils.ResponseManager.BuildResponse(
                     success: true,
                     httpCode: 200,

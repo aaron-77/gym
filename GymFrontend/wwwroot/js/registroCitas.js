@@ -71,8 +71,10 @@ const getDuracionCitas = async () => {
 }
 const getEntrenaoresDisponibles = async () => {
     const fechaInicio = convertirADateLocal(document.getElementById("inputFechaInicio").value);
-    const fechaInicioForQueryParameter = fechaInicio.toISOString();
-    const response = await fetch("/obtenerEntrenadoresDisponibles?fechaReferencia=" + fechaInicioForQueryParameter); // MODIFICADO: Usar endpoint del frontend sin /api
+    // Build local ISO-like string without 'Z' to preserve local time when sent as query string
+    const pad = (n) => n.toString().padStart(2, '0');
+    const fechaInicioForQueryParameter = `${fechaInicio.getFullYear()}-${pad(fechaInicio.getMonth()+1)}-${pad(fechaInicio.getDate())}T${pad(fechaInicio.getHours())}:${pad(fechaInicio.getMinutes())}:00`;
+    const response = await fetch("/obtenerEntrenadoresDisponibles?fechaReferencia=" + encodeURIComponent(fechaInicioForQueryParameter)); // send local datetime string
 
     const jsonResponse = await response.json();
     if (!jsonResponse.success) { // MODIFICADO: Usar success
