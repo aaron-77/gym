@@ -108,9 +108,12 @@ const getCitasAgendadas = async () => {
     }
     citas = jsonResponse.payload;
 }
+import { convertirADateLocal, formatLocalDateTimeForQuery } from './dateUtils.mjs';
+
 const getEntrenadoresDisponibles = async () => {
-    const fechaInicio = document.getElementById("inputFechaInicio").value;
-    const response = await fetch("/obtenerEntrenadoresDisponibles?fechaInicio=" + fechaInicio);
+    const fechaInicio = convertirADateLocal(document.getElementById("inputFechaInicio").value);
+    const fechaInicioForQueryParameter = formatLocalDateTimeForQuery(fechaInicio);
+    const response = await fetch("/obtenerEntrenadoresDisponibles?fechaInicio=" + encodeURIComponent(fechaInicioForQueryParameter));
 
     const jsonResponse = await response.json();
     if (!jsonResponse.success) {
@@ -181,6 +184,17 @@ const calculateEndDate = () => {
     $fechaFin.value = formatearFecha(newDate);
     console.log("fecha fin", formatearFecha(newDate));
 
+}
+function convertirADateLocal(valorInput) {
+    if (!valorInput) return null;
+
+    // Parsear como fecha local
+    const [fechaParte, horaParte = '00:00'] = valorInput.split('T');
+    const [año, mes, dia] = fechaParte.split('-').map(Number);
+    const [hora, minuto] = horaParte.split(':').map(Number);
+
+    // Crear Date en hora LOCAL
+    return new Date(año, mes - 1, dia, hora, minuto, 0);
 }
 
 addEventListener("DOMContentLoaded", async () => {
