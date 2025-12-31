@@ -10,7 +10,13 @@
         "SECRET_TOKEN_KEY": "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5274"
+      "applicationUrl": "http://localhost:5274",
+      
+      "EndPoints": {
+        "frontend": {
+          "external": "http://localhost:5062"
+        }
+      }
     },
     "https": {
       "commandName": "Project",
@@ -22,7 +28,12 @@
         "SECRET_TOKEN_KEY": "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7269"
+      "applicationUrl": "https://localhost:7269",
+      "EndPoints": {
+        "frontend": {
+          "external": "http://localhost:5062"
+        }
+      }
     },
     "IIS Express": {
       "commandName": "IISExpress",

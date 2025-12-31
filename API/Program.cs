@@ -1,23 +1,26 @@
-using BL;
-using BL.EnPointsLogic;
-using BL.BackGroundWork.Jobs;
-using Microsoft.EntityFrameworkCore;
-using Quartz;
-using BL.Utils;
-using API.Hubs;
-using API.Services;
-using API.Infraestructure.Auth;
-using DataAccess.EntityFramework;
-using Microsoft.AspNetCore.Identity;
-using DTO.Dtos;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using DataAccess.Identity;
 using API.Controllers;
+using API.Hubs;
+using API.Infraestructure.Auth;
+using API.Services;
+using BL;
+using BL.BackGroundWork.Jobs;
+using BL.EnPointsLogic;
+using BL.Utils;
 using DataAccess;
-using System.Runtime.InteropServices;
+using DataAccess.EntityFramework;
+using DataAccess.Identity;
+using DTO.Dtos;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Quartz;
 using System.Collections;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Text;
 
 try
 {
@@ -28,7 +31,25 @@ try
     var builder = WebApplication.CreateBuilder(args);
     Console.WriteLine("WebApplicationBuilder creado");
 
+    if (builder.Environment.IsProduction()) { 
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders =
+            ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+        options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
+    });
+    }
+    if (builder.Environment.IsDevelopment())
+    {
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders =
+                ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
+        });
+    }
     // Configuración JWT
+
     var jwtSection = builder.Configuration.GetSection("JwtSettings");
     builder.Services.Configure<JwtSettings>(jwtSection);
     var claimsSection = builder.Configuration.GetSection("ClaimsSettings");
@@ -192,14 +213,19 @@ try
     }
 
     var app = builder.Build();
+    
     Console.WriteLine("App construida exitosamente");
 
     // Configuración del pipeline
     if (app.Environment.IsDevelopment())
     {
+        app.UseForwardedHeaders();
         app.UseSwagger();
         app.UseSwaggerUI();
         Console.WriteLine("Swagger habilitado (Development)");
+    }
+    if (app.Environment.IsProduction()) {
+        app.UseForwardedHeaders();
     }
 
     app.UseHttpsRedirection();

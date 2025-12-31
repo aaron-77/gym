@@ -1,12 +1,14 @@
-using System.Text;
 using BL;
 using BL.EnPointsLogic;
 using BL.Utils;
+using DataAccess;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using DataAccess;
+using System.Net;
+using System.Text;
 
 try
 {
@@ -15,6 +17,23 @@ try
     Console.WriteLine("========================================");
 
     var builder = WebApplication.CreateBuilder(args);
+    if (builder.Environment.IsProduction())
+    {
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders =
+                ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
+        });
+    }
+    if (builder.Environment.IsDevelopment()) {
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders =
+                ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
+        });
+    }
     Console.WriteLine("WebApplicationBuilder creado");
 
     Console.WriteLine("=== DEBUGGING URLS ===");
@@ -147,6 +166,14 @@ try
     var app = builder.Build();
     Console.WriteLine("App construida exitosamente");
 
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseForwardedHeaders();
+    }
+    if (app.Environment.IsProduction())
+    {
+        app.UseForwardedHeaders();
+    }
     var logger = app.Services.GetRequiredService<ILogger<Program>>();
     var config = app.Configuration;
 

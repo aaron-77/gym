@@ -20,7 +20,7 @@ async function realizarPeticionAPI(endpointPath, body, params) {
         if ((!body || Object.keys(body).length === 0) && params && Object.keys(params).length > 0) {
             const queryString = new URLSearchParams(params).toString();
             url += `?${queryString}`;
-        }
+        }   
         if (body && Object.keys(body).length > 0) {
             options.method = 'POST';
             options.body = JSON.stringify(body);

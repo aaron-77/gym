@@ -113,7 +113,6 @@ import { convertirADateLocal, formatLocalDateTimeForQuery } from './dateUtils.mj
 const getEntrenadoresDisponibles = async () => {
     const fechaInicio = convertirADateLocal(document.getElementById("inputFechaInicio").value);
     const fechaInicioForQueryParameter = formatLocalDateTimeForQuery(fechaInicio);
-    const response = await fetch("/obtenerEntrenadoresDisponibles?fechaReferencia=" + encodeURIComponent(fechaInicioForQueryParameter));
 
     const jsonResponse = await response.json();
     if (!jsonResponse.success) {
