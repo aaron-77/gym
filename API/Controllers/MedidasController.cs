@@ -11,6 +11,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 
 namespace API.Controllers
@@ -21,12 +22,15 @@ namespace API.Controllers
 
         private readonly FitnessCenterDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<MedidasController> _logger;
         public MedidasController(FitnessCenterDbContext context
             , UserManager<ApplicationUser> userManager
+            , ILogger<MedidasController> logger
             )
         {
             _db = context;
             _userManager = userManager;
+            _logger = logger;
         }
 
         [Authorize(Roles = "empleado")]
@@ -110,6 +114,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in getParametrosDeMedicion idUsuario={IdUsuario}", idUsuario);
                 respuesta = ResponseManager.BuildResponse<List<DTOParametroDeMedicion>>(false, 500, "Error al consultar los parametros de medicion", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
             }
             return Ok(respuesta);
@@ -131,17 +136,14 @@ namespace API.Controllers
 
                 // Ensamblar items de progreso (usar ObjectAssembler existente si aplica)
                 var itemsProgreso = BL.Utils.ObjectAssembler.ensamblarItemsProgreso(ultimasMedidas, ultimasMetas);
-                Console.WriteLine(JsonSerializer.Serialize(itemsProgreso, new JsonSerializerOptions
-                {
-                    WriteIndented = true
-                }));
+                _logger.LogInformation("ItemsProgreso: {Items}", JsonSerializer.Serialize(itemsProgreso, new JsonSerializerOptions { WriteIndented = true }));
                 
                 respuesta = ResponseManager.BuildResponse(true, 200, "Consulta exitosa", null, itemsProgreso);
                 return Ok(respuesta);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al ontener el progreso el usuario {ex.Message}\n {ex.StackTrace}");
+                _logger.LogError(ex, "Error al obtener progreso del cliente idUsuario={IdUsuario}", idUsuario);
                 respuesta = ResponseManager.BuildResponse<List<DTOItemProgreso>>(false, 500, "Error al obtener progreso del cliente", new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } }, null);
                 return StatusCode(500, respuesta);
             }
@@ -165,6 +167,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in getAñosActivo idCliente={IdCliente}", idCliente);
                 respuesta.ok = false;
                 respuesta.message = "Error al consultar los parametros de medicion";
                 respuesta.errors = null;
@@ -286,6 +289,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error in ObtenerDetallesDeProgresoApi idCliente={IdCliente} idParametro={IdParametro}", idCliente, idParametro);
                 return StatusCode(500, ResponseManager.BuildResponse<MedidasConMetas>(false, 500, "Error al ejecutar el procedimiento almacenado", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null));
             }
         }

@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
@@ -30,6 +31,7 @@ namespace API.Controllers
         private readonly ServicioActualizacionesDeHorariosRealTime _servicioActualizaciones;
 
         private readonly ClasesService _clasesService;
+        private readonly ILogger<ClasesController> _logger;
 
         public ClasesController(
             FitnessCenterDbContext context,
@@ -37,6 +39,7 @@ namespace API.Controllers
             UserRoleService userRoleService,
             ServicioActualizacionesDeHorariosRealTime servicioActualizaciones,
             ClasesService clasesService
+            , ILogger<ClasesController> logger
         )
         {
             _context = context;
@@ -44,6 +47,7 @@ namespace API.Controllers
             _userRoleService = userRoleService;
             _servicioActualizaciones = servicioActualizaciones;
             _clasesService = clasesService;
+            _logger = logger;
         }
 
         /// <summary>
@@ -58,6 +62,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start ConsultarDetallesDeClase idClase={Id}", idClase);
                 // Ejecutar la función SQL para obtener los detalles de la clase
                 var detalleRaw = await _context
                     .detalleDeClaseRawSP.FromSqlInterpolated(
@@ -141,6 +146,7 @@ namespace API.Controllers
                 };
 
                 // Construir y devolver la respuesta
+                _logger?.LogInformation("Finished ConsultarDetallesDeClase idClase={Id}", idClase);
                 return Ok(
                     ResponseManager.BuildResponse(
                         true,
@@ -153,8 +159,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: ConsultarDetallesDeClase (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdClase: {idClase} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error ConsultarDetallesDeClase idClase={Id}", idClase);
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<DetalleDeClase>(
@@ -184,6 +189,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start ObtenerClases activa={Activa}", activa);
                 var clases = await _context
                     .Clases.Where(c => c.FkEstadoClase == (activa ? 1 : 2)) // Asumiendo 1=Activa, 2=Inactiva
                     .Select(c => new DTOClaseSimple
@@ -192,6 +198,8 @@ namespace API.Controllers
                         NombreClase = c.NombreClase,
                     })
                     .ToListAsync();
+
+                _logger?.LogInformation("Finished ObtenerClases returned {Count}", clases?.Count);
 
                 return Ok(
                     ResponseManager.BuildResponse(
@@ -205,8 +213,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: ObtenerClases (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Activa: {activa} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error ObtenerClases activa={Activa}", activa);
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<List<DTOClaseSimple>>(
@@ -252,8 +259,8 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: ObtenerNivelesDeDificultad (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                // already logged
+                _logger?.LogError(ex, "Error ObtenerNivelesDeDificultad");
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<List<VNivelesDeDificultad>>(
@@ -300,7 +307,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: ObtenerNivelesDeIntensidad (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger?.LogError(ex, logMessage);
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<List<VNivelesDeIntensidad>>(
@@ -326,6 +333,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start RegistrarClase NombreClase={Nombre}", modelo?.NombreClase);
                 // Ejecutar el procedimiento almacenado fn_obtenerClases
                 var resultado = await _context
                     .Clases.Where(c => c.NombreClase == modelo.NombreClase)
@@ -372,7 +380,7 @@ namespace API.Controllers
 
                 _context.Clases.Add(nuevaClase);
                 await _context.SaveChangesAsync();
-
+                _logger?.LogInformation("RegistrarClase created id={Id}", nuevaClase.ClaseId);
                 return Ok(
                     ResponseManager.BuildResponse(
                         true,
@@ -385,9 +393,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: RegistrarClase (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Modelo.NombreClase: {modelo?.NombreClase} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
-
+                _logger?.LogError(ex, "Error RegistrarClase NombreClase={Nombre}", modelo?.NombreClase);
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<int>(
@@ -415,6 +421,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start RegistrarClaseProgramada fkClase={FkClase} fkEntrenador={FkEntrenador}", modelo?.fkClase, modelo?.fkEntrenador);
                 // Validar el modelo usando las validaciones de Data Annotations
                 if (!ModelState.IsValid)
                 {
@@ -436,6 +443,7 @@ namespace API.Controllers
                 var clase = await _context.Clases.FindAsync(modelo.fkClase);
                 if (clase == null)
                 {
+                    _logger?.LogWarning("RegistrarClaseProgramada failed: clase not found fkClase={FkClase}", modelo?.fkClase);
                     return BadRequest(
                         ResponseManager.BuildResponse<int>(
                             false,
@@ -458,6 +466,7 @@ namespace API.Controllers
                 var esEmpleado = await _userRoleService.TieneRol(modelo.fkEntrenador, "empleado");
                 if (!esEmpleado)
                 {
+                    _logger?.LogWarning("RegistrarClaseProgramada failed: entrenador no empleado fkEntrenador={FkEntrenador}", modelo?.fkEntrenador);
                     return BadRequest(
                         ResponseManager.BuildResponse<int>(
                             false,
@@ -498,6 +507,7 @@ namespace API.Controllers
                         await _servicioActualizaciones.enviarClaseProgramadaRegistrada(
                             idClaseProgramada
                         );
+                        _logger?.LogInformation("RegistrarClaseProgramada created id={Id}", idClaseProgramada);
 
                         if (modelo.idPreservaDeHorario.HasValue)
                         {
@@ -507,7 +517,7 @@ namespace API.Controllers
                                 );
                             if (preReservasEliminadas <= 0)
                             {
-                                Console.WriteLine("NO SE PUDO ELIMINAR LA PRE-RESERVA ASOCIADA");
+                                _logger?.LogWarning("No se pudo eliminar la pre-reserva asociada idPreserva={IdPreserva}", modelo.idPreservaDeHorario);
                             }
                         }
 
@@ -533,7 +543,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: RegistrarClaseProgramada (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Modelo.FkClase: {modelo?.fkClase} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger?.LogError(ex, logMessage);
 
                 return StatusCode(
                     500,
@@ -672,7 +682,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: CancelarClasesProgramadas (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | SolicitudesCount: {solicitudes?.Count} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger?.LogError(ex, logMessage);
 
                 return StatusCode(
                     500,
@@ -701,6 +711,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start InscribirAClase IdProgramacionClase={IdProgramacion} IdCliente={IdCliente}", modelo?.idClaseProgramadaNueva, modelo?.idCliente);
                 // Validar el modelo
                 if (!ModelState.IsValid)
                 {
@@ -771,7 +782,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: ReagendarClase (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdInscripcionCancelada: {modelo?.idInscripcionCancelada} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger?.LogError(ex, logMessage);
 
                 return StatusCode(
                     500,
@@ -968,6 +979,7 @@ namespace API.Controllers
                 await _servicioActualizaciones.enviarCuposActualizadosDeClaseProgramada(
                     modelo.IdProgramacionClase
                 );
+                _logger?.LogInformation("InscribirAClase completed idInscripcion={IdInscripcion}", idInscripcion);
 
                 return Ok(
                     ResponseManager.BuildResponse(
@@ -981,8 +993,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: InscribirAClase (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdInscripcionRegistrada: {idInscripcion} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error InscribirAClase IdProgramacionClase={IdProgramacion} IdCliente={IdCliente}", modelo?.IdProgramacionClase, modelo?.IdCliente);
 
                 return StatusCode(
                     500,

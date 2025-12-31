@@ -9,10 +9,12 @@ namespace API.Controllers
     public class EntrenadoresController : Controller
     {
         private readonly FitnessCenterDbContext _db;
+        private readonly Microsoft.Extensions.Logging.ILogger<EntrenadoresController> _logger;
 
-        public EntrenadoresController(FitnessCenterDbContext db)
+        public EntrenadoresController(FitnessCenterDbContext db, Microsoft.Extensions.Logging.ILogger<EntrenadoresController> logger)
         {
             _db = db;
+            _logger = logger;
         }
 
         [Authorize(Roles = "empleado,cliente")]
@@ -24,6 +26,7 @@ namespace API.Controllers
 
             try
             {
+                _logger.LogInformation("Start ObtenerEntrenadoresDisponibles fechaInicio={Fecha}", fechaInicio);
                 // Parse incoming date string preserving local time
                 DateTime parsedFecha;
                 if (!DateTime.TryParse(fechaInicio, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out parsedFecha))
@@ -32,7 +35,7 @@ namespace API.Controllers
                 }
                 // Call stored procedure with parsed local date
                 List<QueryUser> entrenadores = await _db.userSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_obtenerEntrenadoresDisponibles @fechaReferencia={parsedFecha}").ToListAsync();
-                Console.WriteLine($"BUSCANDO ENTRENADORES DISPONIBLES EN: {parsedFecha}");
+                _logger.LogInformation("BUSCANDO ENTRENADORES DISPONIBLES EN: {Fecha}", parsedFecha);
                 respuesta = BL.Utils.ResponseManager.BuildResponse(
                     success: true,
                     httpCode: 200,
@@ -40,13 +43,14 @@ namespace API.Controllers
                     errors: null,
                     payload: entrenadores
                 ); // MODIFICADO: Usar ResponseManager
+                _logger.LogInformation("Finished ObtenerEntrenadoresDisponibles returned {Count} trainers", entrenadores.Count);
                 return Ok(respuesta);
 
             }
             catch (System.Exception ex) // MODIFICADO: Capturar la excepción para registrarla
             {
                 string logMessage = $"[ERROR] Método: ObtenerEntrenadoresDisponibles (EntrenadoresController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | FechaInicio: {fechaInicio} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, logMessage);
 
                 respuesta = BL.Utils.ResponseManager.BuildResponse<List<QueryUser>>(
                     success: false,

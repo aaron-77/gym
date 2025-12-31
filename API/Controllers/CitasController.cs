@@ -4,6 +4,7 @@ using DataAccess.EntityFramework;
 using DataAccess.Identity;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,13 @@ namespace API.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly FitnessCenterDbContext _db;
+        private readonly ILogger<CitasController> _logger;
 
-        public CitasController(UserManager<ApplicationUser> userManager, FitnessCenterDbContext db)
+        public CitasController(UserManager<ApplicationUser> userManager, FitnessCenterDbContext db, ILogger<CitasController> logger)
         {
             _userManager = userManager;
             _db = db;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -29,9 +32,12 @@ namespace API.Controllers
             DTOResponse<DTO.Dtos.Cita> respuesta;
             try
             {
+                _logger.LogInformation("Start RegistrarCita fkCliente={FkCliente} fkEntrenador={FkEntrenador}", cita?.fkCliente, cita?.fkEntrenador);
                 respuesta = new DTOResponse<DTO.Dtos.Cita>();
+                _logger.LogInformation("Validating model state for RegistrarCita");
                 if (!ModelState.IsValid)
                 {
+                    _logger.LogWarning("ModelState invalid in RegistrarCita");
                     List<string> nombresCampos = new List<string>() { "fechaInicioCita", "fechaFinCita", "fkCliente", "fkEntrenador", "tipoCita" };
                     foreach (var item in ModelState.Values)
                     {
@@ -70,11 +76,12 @@ namespace API.Controllers
                 respuesta.payload = cita;
                 respuesta.errors = null;
                 respuesta.message = "Registro exitoso";
+                _logger.LogInformation("RegistrarCita completed successfully for fkCliente={FkCliente}", cita?.fkCliente);
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: RegistrarCita (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Cita.FkCliente: {cita?.fkCliente}, FkEntrenador: {cita?.fkEntrenador} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, logMessage);
 
                 respuesta = new DTOResponse<DTO.Dtos.Cita>();
                 respuesta.success = false;
@@ -92,6 +99,7 @@ namespace API.Controllers
         public async Task<IActionResult> RegistrarDuracion([FromBody] DTO.Dtos.DuracionCitasMedicion duracion)
         {
             DTOResponse<DTO.Dtos.DuracionCitasMedicion> respuesta = new DTOResponse<DTO.Dtos.DuracionCitasMedicion>();
+            _logger.LogInformation("Start RegistrarDuracion Id={Id}", duracion?.Id);
             if (!ModelState.IsValid)
             {
                 List<string> nombresCampos = new List<string>() { "Duracion", "Frecuencia" };
@@ -112,6 +120,7 @@ namespace API.Controllers
             }
             try
             {
+                _logger.LogInformation("Valid model state for RegistrarDuracion");
                 DuracionCita duracionDB;
                 if (duracion.Id > 0)
                 {
@@ -132,11 +141,12 @@ namespace API.Controllers
                 respuesta.payload = duracion;
                 respuesta.errors = null;
                 respuesta.message = "Registro exitoso";
+                _logger.LogInformation("RegistrarDuracion completed Id={Id}", duracion?.Id);
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: RegistrarDuracion (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | DuracionId: {duracion?.Id} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, logMessage);
 
                 respuesta.success = false;
                 respuesta.message = "no se pudo registrar la duracion";
@@ -153,6 +163,7 @@ namespace API.Controllers
         public async Task<IActionResult> ModificarCita([FromBody] DTO.Dtos.CitaEdit cita)
         {
             DTOResponse<DTO.Dtos.CitaEdit> respuesta = new DTOResponse<DTO.Dtos.CitaEdit>();
+            _logger.LogInformation("Start ModificarCita Id={Id}", cita?.Id);
             if (!ModelState.IsValid)
             {
                 List<string> nombresCampos = new List<string>() { "Id", "fechaInicioCita", "fechaFinCita", "fkCliente", "fkEntrenador" };
@@ -173,6 +184,7 @@ namespace API.Controllers
             }
             try
             {
+                _logger.LogInformation("Valid model state for ModificarCita Id={Id}", cita?.Id);
                 await _db.Database.ExecuteSqlInterpolatedAsync($@"EXEC sp_modificarCita 
                     @citaId = {cita.Id},
                     @entrenadorID={cita.fkEntrenador},
@@ -180,6 +192,7 @@ namespace API.Controllers
                     @estado ={cita.estado},
                     @fechaHoraFin ={cita.fechaFinCita}
                 ");
+                _logger.LogInformation("ModificarCita executed for Id={Id}", cita?.Id);
                 respuesta.success = true;
                 respuesta.payload = cita;
                 respuesta.errors = null;
@@ -188,7 +201,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: ModificarCita (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | CitaId: {cita?.Id} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, logMessage);
 
                 respuesta.success = false;
                 respuesta.message = "no se pudo modificar tu cita";
@@ -207,6 +220,7 @@ namespace API.Controllers
             DTOResponse<int> responseDuracion = new DTOResponse<int>();
             try
             {
+                _logger.LogInformation("Start getDuracionCita");
                 var result = await _db.DuracionCitas.FirstOrDefaultAsync();
                 responseDuracion.success = true;
                 responseDuracion.message = "consulta exitosa";
@@ -215,12 +229,13 @@ namespace API.Controllers
                 {
                     responseDuracion.payload = result.Duracion;
                 }
+                _logger.LogInformation("getDuracionCita returned {Payload}", responseDuracion.payload);
                 return Ok(responseDuracion);
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: getDuracionCita (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, logMessage);
 
                 responseDuracion.success = false;
                 responseDuracion.message = "Error al obtener la duración";
@@ -238,6 +253,7 @@ namespace API.Controllers
             DTOResponse<List<DTO.Dtos.Cita>> responseDuracion = new DTOResponse<List<DTO.Dtos.Cita>>();
             try
             {
+                _logger.LogInformation("Start getCitasAgendadas idUsuario={IdUsuario}", idUsuario);
                 var result = await _db.citaSP.FromSqlInterpolated($@"EXEC sp_obtenerCitasAgendadasPorUsuario 
                     @idUsuario = {idUsuario}
                 ").ToListAsync();
@@ -245,11 +261,12 @@ namespace API.Controllers
                 responseDuracion.message = "consulta exitosa";
                 responseDuracion.errors = null;
                 responseDuracion.payload = result;
+                _logger.LogInformation("getCitasAgendadas returned {Count} items for {IdUsuario}", result?.Count, idUsuario);
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: getCitasAgendadas (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdUsuario: {idUsuario} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, logMessage);
 
                 responseDuracion.success = false;
                 responseDuracion.message = "Error al consultar las citas agendadas";
@@ -286,12 +303,13 @@ namespace API.Controllers
                     responseDuracion.errors = null;
                     responseDuracion.payload = result;
                 }
+                _logger.LogInformation("getDuracionCitasMedicion payload null={IsNull}", result == null);
                 return Ok(responseDuracion);
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: getDuracionCitasMedicion (API/CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, logMessage);
 
                 responseDuracion.success = false;
                 responseDuracion.message = "Error al obtener la configuración de duración";

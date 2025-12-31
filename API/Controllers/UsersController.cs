@@ -17,6 +17,7 @@ using Twilio;
 using Twilio.Clients;
 using Twilio.Rest.Verify.V2.Service;
 using Twilio.Security;
+using Microsoft.Extensions.Logging;
 
 namespace API.Controllers
 {
@@ -31,6 +32,7 @@ namespace API.Controllers
         private readonly AuthService _authService;
         private readonly JwtSettings _jwtSettings;
         private readonly FitnessCenterDbContext _db;
+        private readonly ILogger<UsersController> _logger;
 
         public UsersController(
             SignInManager<ApplicationUser> signInManager,
@@ -39,6 +41,7 @@ namespace API.Controllers
             AuthService authService,
             IOptions<JwtSettings> jwtOptions,
             FitnessCenterDbContext db
+            , ILogger<UsersController> logger
         )
         {
             _signInManager = signInManager;
@@ -47,6 +50,7 @@ namespace API.Controllers
             _authService = authService;
             _jwtSettings = jwtOptions.Value;
             _db = db;
+            _logger = logger;
         }
 
         public IActionResult Index()
@@ -61,6 +65,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger.LogInformation("Start getUsuarios");
                 var jwt = Request.Cookies["AuthToken"];
                 DTOResponse<List<ExistingUser>> respuesta = new DTOResponse<List<ExistingUser>>();
 
@@ -79,7 +84,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: getUsuarios | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, logMessage);
 
                 var respuesta = BL.Utils.ResponseManager.BuildResponse<List<ExistingUser>>(false, 500, "Error al obtener usuarios", new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } }, null);
                 return StatusCode(500, respuesta);
@@ -96,6 +101,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger.LogInformation("Start getUsuariosPorRol rol={Rol} estado={Estado}", rol, estado);
                 List<QueryUser> usuarios = await _db
                     .userSP.FromSqlInterpolated(
                         $@"EXEC [FitnessCenterDB].[dbo].sp_consultarUsuarios @tipoUsuario={rol},@estado={estado}"
@@ -114,9 +120,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: getUsuariosPorRol | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Rol: {rol}, Estado: {estado} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
-
+                _logger.LogError(ex, "Error in getUsuariosPorRol rol={Rol} estado={Estado}", rol, estado);
                 var respuesta = BL.Utils.ResponseManager.BuildResponse(
                     success: false,
                     httpCode: 500,
@@ -127,7 +131,6 @@ namespace API.Controllers
                     },
                     payload: (List<QueryUser>)null
                 );
-
                 return StatusCode(500, respuesta);
             }
         }
@@ -137,6 +140,7 @@ namespace API.Controllers
         public async Task<IActionResult> RegistrarUsuario([FromBody] NewUser usuario)
         {
             DTOResponse<DTOCreatedUser> respuesta = new DTOResponse<DTOCreatedUser>();
+            _logger.LogInformation("Start RegistrarUsuario correo={Correo}", usuario?.Correo);
             if (!ModelState.IsValid)
             {
                 List<string> nombresCampos = new List<string>()
@@ -170,6 +174,7 @@ namespace API.Controllers
                     payload: null
                 );
 
+                _logger.LogWarning("ModelState invalid in RegistrarUsuario");
                 return BadRequest(respuesta);
             }
 
@@ -193,6 +198,7 @@ namespace API.Controllers
             }
             try
             {
+                _logger.LogInformation("Attempting to register user correo={Correo}", usuario?.Correo);
                 var registerResult = await _authService.RegisterUserWithRoleAsync(
                     usuario,
                     usuario.Rol
@@ -213,6 +219,7 @@ namespace API.Controllers
                         },
                         payload: null
                     );
+                    _logger.LogError("RegisterUserWithRoleAsync returned null for correo={Correo}", usuario?.Correo);
                     return StatusCode(500, respuesta);
                 }
                 respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
@@ -226,7 +233,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: RegistrarUsuario | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, logMessage);
 
                 respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
                     success: false,
@@ -249,6 +256,7 @@ namespace API.Controllers
         {
             DTOResponse<string> respuesta = new DTOResponse<string>();
 
+            _logger.LogInformation("Start AgregarRolUsuario for UserId={UserId} Role={Role}", request?.UserId, request?.Role);
             if (!ModelState.IsValid)
             {
                 // Manejo de errores de validación
@@ -269,11 +277,13 @@ namespace API.Controllers
                     payload: null
                 );
 
+                _logger.LogWarning("ModelState invalid in AgregarRolUsuario");
                 return BadRequest(respuesta);
             }
 
             try
             {
+                _logger.LogInformation("Adding role {Role} to user {UserId}", request?.Role, request?.UserId);
                 await _authService.AddRoleToUserAsync(request.UserId, request.Role);
 
                 respuesta = ResponseManager.BuildResponse<string>(
@@ -287,7 +297,7 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: AgregarRolUsuario | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | UserId: {request?.UserId}, Role: {request?.Role} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, logMessage);
 
                 respuesta = ResponseManager.BuildResponse<string>(
                     success: false,
@@ -312,6 +322,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger.LogInformation("Start AutenticarUsuario correo={Correo}", credenciales?.correo);
                 string bases = Request.PathBase;
                 string query = Request.Path;
                 string proto = Request.Protocol;
@@ -344,8 +355,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: AutenticarUsuario | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | CredencialUsuario: {credenciales?.correo} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, "Error in AutenticarUsuario correo={Correo}", credenciales?.correo);
 
                 var response = ResponseManager.BuildResponse<DTOLoggedUser>(false, 500, "Error interno al autenticar", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
                 return StatusCode(500, response);
@@ -359,6 +369,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger.LogInformation("Start RefreshToken refreshTokenHash={Hash}", request?.RefreshToken);
                 var refreshedUser = await _authService.RefreshAccessToken(request.RefreshToken);
                 if (refreshedUser == null)
                 {
@@ -384,8 +395,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: RefreshToken | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | RefreshTokenRequest: {request?.RefreshToken} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, "Error in RefreshToken refreshToken={RefreshToken}", request?.RefreshToken);
 
                 return StatusCode(500, ResponseManager.BuildResponse<DTOLoggedUser>(false, 500, "Error interno al refrescar token", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null));
             }
@@ -398,6 +408,7 @@ namespace API.Controllers
         {
             try
             {
+                _logger.LogInformation("Start Logout refreshToken={RefreshToken}", request?.RefreshToken);
                 _authService.RevokeRefreshToken(request.RefreshToken);
                 var response = ResponseManager.BuildResponse<object>(
                     success: true,
@@ -410,8 +421,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: Logout | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | RefreshToken: {request?.RefreshToken} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, "Error in Logout refreshToken={RefreshToken}", request?.RefreshToken);
                 return StatusCode(500, ResponseManager.BuildResponse<object>(false, 500, "Error al cerrar sesión", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null));
             }
         }
@@ -424,6 +434,7 @@ namespace API.Controllers
 
             try
             {
+                _logger.LogInformation("Start obtenerCodigoOTP canal={Canal}", canal?.cel ?? canal?.correo);
                 //AccountId,Token
                 TwilioClient.Init(
                     "AC9ecb12865c83eb291ab8a2c520fcee14",
@@ -440,8 +451,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: obtenerCodigoOTP | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Canal: {canal?.cel}, {canal?.correo} | Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, "Error in obtenerCodigoOTP canal={Canal}", canal?.cel ?? canal?.correo);
 
                 response.ok = false;
                 response.message = "No se pudo crear el codigo de verificacion";
@@ -467,6 +477,7 @@ namespace API.Controllers
         {
             var respuesta = new DTOResponse<string>();
 
+            _logger.LogInformation("Start CambiarPassword email={Email}", model?.Email);
             if (!ModelState.IsValid)
             {
                 respuesta = ResponseManager.BuildResponse<string>(
@@ -507,8 +518,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: CambiarPassword | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message}| Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
+                _logger.LogError(ex, "Error in CambiarPassword email={Email}", model?.Email);
 
                 respuesta = ResponseManager.BuildResponse<string>(
                     success: false,

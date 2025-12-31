@@ -21,6 +21,7 @@ using System.Collections;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
+using Serilog;
 
 try
 {
@@ -29,6 +30,14 @@ try
     Console.WriteLine("========================================");
 
     var builder = WebApplication.CreateBuilder(args);
+    // Configure Serilog
+    Log.Logger = new LoggerConfiguration()
+        .ReadFrom.Configuration(builder.Configuration)
+        .Enrich.FromLogContext()
+        .WriteTo.Console()
+        .WriteTo.File("logs/api-.log", rollingInterval: RollingInterval.Day)
+        .CreateLogger();
+    builder.Host.UseSerilog();
     Console.WriteLine("WebApplicationBuilder creado");
 
     if (builder.Environment.IsProduction()) { 

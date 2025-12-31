@@ -13,11 +13,13 @@ namespace API.Controllers
     {
         private JwtTokenGenerator jwtTokenGenerator;
         private readonly FitnessCenterDbContext _db;
+        private readonly Microsoft.Extensions.Logging.ILogger<RutinasController> _logger;
 
-        public RutinasController(JwtTokenGenerator _jwtTokenGenerator, FitnessCenterDbContext db)
+        public RutinasController(JwtTokenGenerator _jwtTokenGenerator, FitnessCenterDbContext db, Microsoft.Extensions.Logging.ILogger<RutinasController> logger)
         {
             jwtTokenGenerator = _jwtTokenGenerator;
             _db = db;
+            _logger = logger;
         }
         public IActionResult Index()
         {
@@ -34,6 +36,7 @@ namespace API.Controllers
             HttpResponseRutina respuesta = new HttpResponseRutina();
             try
             {
+                _logger.LogInformation("Start RegistrarRutina UsuarioID={UsuarioID}", rutina?.UsuarioID);
                 var resultado = await _db.Database.ExecuteSqlInterpolatedAsync($@"EXEC sp_registrarRutina 
                 @usuarioID = {rutina.UsuarioID},
                 @entrenadorID={rutina.EntrenadorID},
@@ -46,6 +49,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error en RegistrarRutina UsuarioID={UsuarioID}", rutina?.UsuarioID);
                 respuesta.ok = false;
                 respuesta.data = null;
                 respuesta.errors.Add(new ErrorModel() { propiedad = null, message = ex.Message });
