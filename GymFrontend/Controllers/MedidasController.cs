@@ -9,14 +9,15 @@ namespace GymFrontend.Controllers
 {
     public class MedidasController : Controller
     {
+        private readonly UsersManager usersManager;
+        private readonly MedidasManager medidasManager;
+        private readonly Microsoft.Extensions.Logging.ILogger<MedidasController> _logger;
 
-        private UsersManager usersManager;
-        private MedidasManager medidasManager;
-
-        public MedidasController(UsersManager _usersManager, MedidasManager _medidasManager)
+        public MedidasController(UsersManager _usersManager, MedidasManager _medidasManager, Microsoft.Extensions.Logging.ILogger<MedidasController> logger)
         {
             usersManager = _usersManager;
             medidasManager = _medidasManager;
+            _logger = logger;
         }
         [HttpPost]
         [Route("registrar")]
@@ -24,6 +25,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start MedidasController.registrarMedida");
                 var respuesta = await usersManager.obtenerUsuarios();
 
                 List<ExistingUser> usuarios = respuesta.payload;
@@ -54,6 +56,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: registrarMedida | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error registrarMedida (MedidasController)");
                 ViewBag.message = "Ocurrió un error al registrar la medida.";
                 return Redirect("empleados");
             }
@@ -66,6 +69,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start MedidasController.ObtenerDetallesDeProgreso idCliente={Id}", idCliente);
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var result = await medidasManager.consultarDetallesDeProgresoDeUsuario(userId);
                 
@@ -73,12 +77,9 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: ObtenerDetallesDeProgreso (obtenerEjerciciosYParametrosDelCliente) | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
-                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
-                    $"IdCliente: {idCliente} | " +
-                    $"Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] Método: ObtenerDetallesDeProgreso (lista) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdCliente: {idCliente} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error ObtenerDetallesDeProgreso (MedidasController) idCliente={Id}", idCliente);
                 
                 return ResponseManager.BuildResponse<List<DTO.Dtos.DTOEjerciciosYParametrosDelCliente>>(
                     false, 
@@ -109,6 +110,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start MedidasController.ObtenerDetallesDeProgreso idCliente={IdCliente} idParametro={IdParametro}", idCliente, idParametro);
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 // Forward the request to BL manager which will call the API
                 var response = await medidasManager.consultarDetallesDeProgreso(
@@ -139,12 +141,9 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: ObtenerDetallesDeProgreso (obtenerDetallesDeProgreso) | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
-                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
-                    $"Parámetros - IdCliente: {idCliente}, IdParametro: {idParametro}, IdEjercicio: {idEjercicio}, EspaciadoTemporal: {espaciadoTemporal}, TipoDeBusqueda: {tipoDeBusqueda} | " +
-                    $"Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] Método: ObtenerDetallesDeProgreso (detalle) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdCliente: {idCliente} IdParametro: {idParametro} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error ObtenerDetallesDeProgreso (MedidasController) idCliente={IdCliente} idParametro={IdParametro}", idCliente, idParametro);
                 
                 return ResponseManager.BuildResponse<DTO.Dtos.MedidasConMetas>(
                     false, 

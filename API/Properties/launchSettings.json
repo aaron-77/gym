@@ -1,6 +1,50 @@
 {
   "profiles": {
-    "http": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "staginghttpback": {
+      "commandName": "Project",
+      "launchBrowser": true,
+
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Staging",
+        "ASPNETCORE_URLS": "http://localhost:5274",
+        "SECRET_TOKEN_KEY": "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5274",
+      "launchUrl": "http://localhost/api",
+      "EndPoints": {
+        "frontend": {
+          "external": "http://localhost:5062"
+        }
+      }
+    },
+    "develepmenthttpfront": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5062",
+        "SECRET_TOKEN_KEY": "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5062",
+      "EndPoints": {
+        "frontend": {
+          "external": "http://localhost:5062"
+        }
+      },
+      "nativeDebugging": true
+    },
+    "developmenthttpback": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "swagger",
@@ -11,37 +55,12 @@
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5274",
-      
       "EndPoints": {
         "frontend": {
           "external": "http://localhost:5062"
         }
-      }
-    },
-    "https": {
-      "commandName": "Project",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "https://localhost:7269",
-        "SECRET_TOKEN_KEY": "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
       },
-      "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7269",
-      "EndPoints": {
-        "frontend": {
-          "external": "http://localhost:5062"
-        }
-      }
-    },
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "launchUrl": "swagger",
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      "nativeDebugging": true
     }
   },
   "$schema": "https://json.schemastore.org/launchsettings.json",

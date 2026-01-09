@@ -3,7 +3,7 @@
  * Maneja la integración entre el calendario y el visualizador de horarios
  */
 
-import { realizarPeticionAPI } from './httpClient.js';
+import { realizarPeticionAPI, getApiBaseUrl } from './httpClient.js';
 import { Calendar } from './calendario.js';
 import { ScheduleViewer } from './horariosDelDia.js';
 import { formDataToJson } from './formDataToJson.js';
@@ -617,8 +617,9 @@ async function inicializarSignalR() {
         }
 
         // Crear la conexión al hub
+        const apiBaseUrl = getApiBaseUrl();
         signalRConnection = new signalR.HubConnectionBuilder()
-            .withUrl('http://localhost:5274/reservacionesHub')
+            .withUrl(`${apiBaseUrl}/reservacionesHub`)
             .withAutomaticReconnect([0, 2000, 10000, 30000]) // Estrategia de reconexión automática
             .configureLogging(signalR.LogLevel.Information)
             .build();

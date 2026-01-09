@@ -16,14 +16,17 @@ namespace GymFrontend.Controllers
     {
         private readonly HorariosManager _horariosManager;
         private JwtTokenGenerator jwtTokenGenerator;
+        private readonly Microsoft.Extensions.Logging.ILogger<HorariosController> _logger;
 
         public HorariosController(
             HorariosManager horariosManager,
-            JwtTokenGenerator jwtTokenGenerator
+            JwtTokenGenerator jwtTokenGenerator,
+            Microsoft.Extensions.Logging.ILogger<HorariosController> logger
         )
         {
             _horariosManager = horariosManager;
             this.jwtTokenGenerator = jwtTokenGenerator;
+            _logger = logger;
         }
 
         [HttpGet("obtenerHorariosDisponibles")]

@@ -32,8 +32,10 @@ async function enviarFormularioClase(event) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
         
+        // Obtener la URL base del frontend desde la configuración
+        const path = "/Clases/registrarClase";
         // Enviar datos al servidor
-        const response = await fetch(window.apiEndpoints.registrarClase, {
+        const response = await fetch(path, {
             method: 'POST',
             body: formData
         });

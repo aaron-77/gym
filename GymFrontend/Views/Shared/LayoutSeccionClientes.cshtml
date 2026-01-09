@@ -95,10 +95,13 @@
 
         @RenderBody()
     </main>
+    <!-- expose app configuration to client scripts -->
+    <app-config></app-config>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/main.js"></script>
     <script src="~/js/LocalStorageManager.js"></script>
+    <script type="module" src="~/js/httpClient.js"></script>
     <script type="module" src="/js/seccionProgreso.js"></script>
     <script type="module" src="/js/sessionValidator.js"></script>
     <script src="~/js/Logout.js"></script>

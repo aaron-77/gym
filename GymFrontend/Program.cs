@@ -26,7 +26,7 @@ try
             options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
         });
     }
-    if (builder.Environment.IsDevelopment()) {
+    if (builder.Environment.IsStaging()) {
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders =
@@ -34,6 +34,7 @@ try
             options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
         });
     }
+    
     Console.WriteLine("WebApplicationBuilder creado");
 
     Console.WriteLine("=== DEBUGGING URLS ===");
@@ -166,7 +167,7 @@ try
     var app = builder.Build();
     Console.WriteLine("App construida exitosamente");
 
-    if (app.Environment.IsDevelopment())
+    if (app.Environment.IsStaging())
     {
         app.UseForwardedHeaders();
     }
@@ -207,6 +208,7 @@ try
     // Configure the HTTP request pipeline.
     if (!app.Environment.IsDevelopment())
     {
+
         app.UseExceptionHandler("/Home/Error");
         app.UseHsts();
         Console.WriteLine("Modo Production - Exception Handler y HSTS configurados");
@@ -215,8 +217,14 @@ try
     {
         Console.WriteLine("Modo Development");
     }
-
-    app.UseHttpsRedirection();
+    if (app.Environment.IsDevelopment()) {
+        if (useSsl)
+        {
+            app.UseHttpsRedirection();
+        }
+    }
+    
+    
     Console.WriteLine("HTTPS Redirection configurado");
 
     app.UseStaticFiles();

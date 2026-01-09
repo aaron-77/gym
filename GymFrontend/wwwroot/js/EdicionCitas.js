@@ -113,6 +113,7 @@ import { convertirADateLocal, formatLocalDateTimeForQuery } from './dateUtils.mj
 const getEntrenadoresDisponibles = async () => {
     const fechaInicio = convertirADateLocal(document.getElementById("inputFechaInicio").value);
     const fechaInicioForQueryParameter = formatLocalDateTimeForQuery(fechaInicio);
+    const response = await fetch("/obtenerEntrenadoresDisponibles?fechaReferencia=" + fechaInicioForQueryParameter);
 
     const jsonResponse = await response.json();
     if (!jsonResponse.success) {
@@ -166,7 +167,10 @@ function fillEstados() {
     });
 }
 const getDuracionCitas = async () => {
-    const response = await fetch("http://localhost:5274/api/getDuracionCita");
+    // Usar ruta relativa ya que es un endpoint del frontend
+    const path = "/getDuracionCita";
+    
+    const response = await fetch(path);
     const jsonResponse = await response.json();
     if (!jsonResponse.ok) {
         console.log(jsonResponse.message);

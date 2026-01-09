@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using BL;
-using DTO.Dtos;
-using System.Threading.Tasks;
-using System;
 using BL.Utils;
+using DataAccess.EntityFramework;
+using DTO.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GymFrontend.Controllers
 {
@@ -14,10 +15,12 @@ namespace GymFrontend.Controllers
     public class ClasesController : Controller
     {
         private readonly ClasesManager _clasesManager;
+        private readonly Microsoft.Extensions.Logging.ILogger<ClasesController> _logger;
 
-        public ClasesController(ClasesManager clasesManager)
+        public ClasesController(ClasesManager clasesManager, Microsoft.Extensions.Logging.ILogger<ClasesController> logger)
         {
             _clasesManager = clasesManager;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -26,6 +29,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start ClasesController.RegistroDeClases");
                 // Datos de ejemplo para los combobox
                 ViewBag.Instructores = new List<dynamic>
                 {
@@ -184,6 +188,7 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
+                _logger?.LogError(ex, "Error ObtenerEstadosDeClasesProgramdas (ClasesController) ",$"MENSAJE DE ERROR: {ex.Message} \n STACKTRACE: {ex.StackTrace} \n EXCEPCION INTERNA {ex.InnerException} \n");
                 string logMessage = $"[ERROR] Método: ObtenerEstadosDeClasesProgramdas | " +
                     $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +

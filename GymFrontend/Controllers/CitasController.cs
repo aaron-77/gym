@@ -9,14 +9,15 @@ namespace GymFrontend.Controllers
 {
     public class CitasController : Controller
     {
+        private readonly UsersManager managerUsers;
+        private readonly CitasManager citasManager;
+        private readonly Microsoft.Extensions.Logging.ILogger<CitasController> _logger;
 
-        private UsersManager managerUsers;
-        private CitasManager citasManager;
-
-        public CitasController(UsersManager _managerUsers, CitasManager _citasManager)
+        public CitasController(UsersManager _managerUsers, CitasManager _citasManager, Microsoft.Extensions.Logging.ILogger<CitasController> logger)
         {
             managerUsers = _managerUsers;
             citasManager = _citasManager;
+            _logger = logger;
         }
         [Authorize(Roles = "empleado")]
         [HttpGet]
@@ -25,6 +26,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start CitasController.Index");
                 var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
                 ViewBag.clientes = respuestaClientes.payload;
                 return View("RegistrarCita", new Cita());
@@ -33,6 +35,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: Index (CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error Index (CitasController)");
                 ViewBag.message = "Error al cargar la página de registro de cita.";
                 return View("RegistrarCita", new Cita());
             }
@@ -45,6 +48,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start CitasController.registrarCita");
                 var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
                 ViewBag.clientes = respuestaClientes.payload;
                 cita.estado = "Agendada";
@@ -71,6 +75,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: registrarCita (CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error registrarCita (CitasController)");
                 ViewBag.message = "Ocurrió un error al registrar la cita.";
                 return View("RegistrarCita", cita);
             }
@@ -85,6 +90,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start CitasController.modificarCita (GET)");
                 var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
                 ViewBag.clientes = respuestaClientes.payload;
                 ViewBag.message = "";
@@ -99,6 +105,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: modificarCita (GET) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error modificarCita (CitasController) GET");
                 ViewBag.message = "Error al cargar la vista de modificación de cita.";
                 return View("ModificarCita");
             }
@@ -110,6 +117,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start CitasController.modificarCitaPost");
                 var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
                 ViewBag.clientes = respuestaClientes.payload;
                 if (!ModelState.IsValid)
@@ -137,6 +145,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: modificarCitaPost (POST) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error modificarCitaPost (CitasController) POST");
                 ViewBag.message = "Ocurrió un error al modificar la cita.";
                 return View("ModificarCita", cita);
             }
@@ -149,6 +158,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start CitasController.renderVistaDuracion");
                 DTOResponse<DuracionCitasMedicion> response = await citasManager.obtenerDuracionCitasMedicion(); // MODIFICADO: Usar DTOResponse y await
                 DuracionCitasMedicion duracionExistente = response.payload; // MODIFICADO: Usar payload
                 ViewBag.duracion = duracionExistente;
@@ -165,6 +175,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: renderVistaDuracion | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error renderVistaDuracion (CitasController)");
                 ViewBag.message = "Error al obtener la configuración de duración de citas.";
                 return View("DuracionCitasMedicion", new DuracionCitasMedicion());
             }
@@ -176,6 +187,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start CitasController.gestionarDuracionCitasMedicion");
                 DTOResponse<DuracionCitasMedicion> responsePost = await citasManager.registrarDuracionCitasMedicion(duracionParam); // MODIFICADO: Usar DTOResponse y await
                 DTOResponse<DuracionCitasMedicion> response = await citasManager.obtenerDuracionCitasMedicion(); // MODIFICADO: Usar DTOResponse y await
                 DuracionCitasMedicion duracionExistente = response.payload; // MODIFICADO: Usar payload
@@ -199,6 +211,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: gestionarDuracionCitasMedicion | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error gestionarDuracionCitasMedicion (CitasController)");
                 ViewBag.message = "Ocurrió un error al guardar la duración de las citas.";
                 return View("DuracionCitasMedicion", duracionParam);
             }
@@ -211,6 +224,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start CitasController.GetDuracionCita");
                 var respuesta = await citasManager.obtenerDuracionCita();
                 if (respuesta.success)
                 {
@@ -222,6 +236,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: GetDuracionCita | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error GetDuracionCita (CitasController)");
                 var errorResp = ResponseManager.BuildResponse<int>(false, 500, "Error interno al obtener la duración.", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, 0);
                 return StatusCode(500, errorResp);
             }
@@ -234,13 +249,14 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start CitasController.ObtenerEntrenadoresDisponibles fechaReferencia={Fecha}", fechaReferencia);
                 // Parse incoming date string preserving local time
                 DateTime parsedFecha;
                 if (!DateTime.TryParse(fechaReferencia, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out parsedFecha))
                 {
                     parsedFecha = DateTime.Parse(fechaReferencia, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal);
                 }
-                Console.WriteLine($"ObtenerEntrenadoresDisponibles [Frontend] (CitasController) FECHA BUSCADA: {parsedFecha}");
+                _logger?.LogInformation("ObtenerEntrenadoresDisponibles [Frontend] FECHA BUSCADA: {Fecha}", parsedFecha);
                 var respuesta = await managerUsers.ObtenerEntrenadoresDisponibles(parsedFecha);
                 if (respuesta.success)
                 {
@@ -252,6 +268,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: ObtenerEntrenadoresDisponibles | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | FechaReferencia: {fechaReferencia} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error ObtenerEntrenadoresDisponibles (CitasController) fechaReferencia={Fecha}", fechaReferencia);
                 var errorResp = ResponseManager.BuildResponse<List<QueryUser>>(false, 500, "Error interno al obtener entrenadores.", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
                 return StatusCode(500, errorResp);
             }
@@ -263,6 +280,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start CitasController.ObtenerCitasAgendadasDelCliente idUsuario={Id}", idUsuario);
                 var respuesta = await citasManager.obtenerCitasAgendadas(idUsuario);
                 if (respuesta.success)
                 {
@@ -274,6 +292,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: ObtenerCitasAgendadasDelCliente | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdUsuario: {idUsuario} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error ObtenerCitasAgendadasDelCliente (CitasController) IdUsuario={Id}", idUsuario);
                 var errorResp = ResponseManager.BuildResponse<List<Cita>>(false, 500, "Error interno al obtener citas agendadas.", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null);
                 return StatusCode(500, errorResp);
             }

@@ -12,12 +12,14 @@ namespace GymFrontend.Controllers
     [Route("[controller]")]
     public class EjerciciosController : Controller
     {
-        private EjerciciosManager ejerciciosManager;
-        private JwtTokenGenerator jwtTokenGenerator;
-        public EjerciciosController(EjerciciosManager _ejerciciosManager, JwtTokenGenerator _jwtTokenGenerator)
+        private readonly EjerciciosManager ejerciciosManager;
+        private readonly JwtTokenGenerator jwtTokenGenerator;
+        private readonly Microsoft.Extensions.Logging.ILogger<EjerciciosController> _logger;
+        public EjerciciosController(EjerciciosManager _ejerciciosManager, JwtTokenGenerator _jwtTokenGenerator, Microsoft.Extensions.Logging.ILogger<EjerciciosController> logger)
         {
             ejerciciosManager = _ejerciciosManager;
             jwtTokenGenerator = _jwtTokenGenerator;
+            _logger = logger;
         }
 
         [Authorize(Roles = "empleado")]

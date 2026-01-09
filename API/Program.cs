@@ -48,7 +48,7 @@ try
         options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
     });
     }
-    if (builder.Environment.IsDevelopment())
+    if (builder.Environment.IsStaging())
     {
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
@@ -224,20 +224,42 @@ try
     var app = builder.Build();
     
     Console.WriteLine("App construida exitosamente");
-
+    
     // Configuración del pipeline
     if (app.Environment.IsDevelopment())
     {
-        app.UseForwardedHeaders();
+        
         app.UseSwagger();
         app.UseSwaggerUI();
         Console.WriteLine("Swagger habilitado (Development)");
     }
-    if (app.Environment.IsProduction()) {
+    if (app.Environment.IsStaging())
+    {
         app.UseForwardedHeaders();
+        app.UseSwagger(c => { 
+            c.RouteTemplate = "api/swagger/{documentName}/swagger.json";
+        });
+        app.UseSwaggerUI(c => { 
+            c.RoutePrefix = "api";
+            c.SwaggerEndpoint("/api/swagger/v1/swagger.json", "FitnessGymAPI");
+
+
+        });
+        Console.WriteLine("Swagger habilitado (Development)");
+    }
+    if (app.Environment.IsProduction() ) {
+        app.UseForwardedHeaders();
+        if (useSsl)
+        {            
+            app.UseHttpsRedirection();
+
+        }
     }
 
-    app.UseHttpsRedirection();
+    if (app.Environment.IsDevelopment()) {
+        app.UseHttpsRedirection();
+    }
+    
     Console.WriteLine("HTTPS Redirection configurado");
 
     app.UseCors("originsPolicyOne");

@@ -26,6 +26,7 @@ namespace GymFrontend.Controllers
 
         public IActionResult Index()
         {
+            _logger?.LogInformation("HomeController.Index called");
             // Crear una lista de ejemplo de clases basada en las descripciones originales
             var clasesPreview = new List<DTOClasePreview>
             {
@@ -102,6 +103,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start HomeController.DetalleDeClase idClase={Id}", idClase);
                 string endpointUrl = $"api/clases/detallesDeClase?idClase={idClase}";
                 var responseString = await client.get(endpointUrl);
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };

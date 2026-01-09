@@ -1,4 +1,4 @@
-import { realizarPeticionAPI } from './httpClient.js';
+import { realizarPeticionAPI, getApiBaseUrl } from './httpClient.js';
 import { CalendarInscripcion } from './calendarioInscripcion.js';
 import { ScheduleViewerInscripciones } from './inscriptorDeClasesScheduler.js';
 import { formDataToJson } from './formDataToJson.js';
@@ -343,9 +343,13 @@ async function inicializarSignalR() {
             return;
         }
 
+        // Obtener la URL base del API desde la configuración  |
+        const apiBaseUrl = getApiBaseUrl();
+        const signalRUrl = `${apiBaseUrl}/reservacionesHub`;
+        
         // Crear la conexión al hub
         signalRConnection = new signalR.HubConnectionBuilder()
-            .withUrl('http://localhost:8090/reservacionesHub')
+            .withUrl(signalRUrl)
             .withAutomaticReconnect([0, 2000, 10000, 30000]) // Estrategia de reconexión automática
             .configureLogging(signalR.LogLevel.Information)
             .build();

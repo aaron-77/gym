@@ -21,13 +21,15 @@ namespace GymFrontend.Controllers
         private MedidasManager medidasManager;
         private JwtTokenGenerator _jwtTokenGenerator;
         private CookieService _cookieService;
+        private readonly Microsoft.Extensions.Logging.ILogger<UsersController> _logger;
 
         public UsersController(
             IConfiguration _config,
             UsersManager _manager,
             MedidasManager _medidasManager,
             JwtTokenGenerator jwtTokenGenerator,
-            CookieService cookieService
+            CookieService cookieService,
+            Microsoft.Extensions.Logging.ILogger<UsersController> logger
         )
         {
             config = _config;
@@ -35,6 +37,7 @@ namespace GymFrontend.Controllers
             medidasManager = _medidasManager;
             _jwtTokenGenerator = jwtTokenGenerator;
             _cookieService = cookieService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -43,6 +46,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start UsersController.Index (GET signIn)");
                 var res = config["ConnectionStrings:DefaultConnection"];
                 return View("Login", new UserCredentials());
             }
@@ -50,6 +54,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: Index (GET signIn) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error Index (UsersController) GET signIn");
                 ViewBag.message = "Error al cargar la página de login.";
                 return View("Login", new UserCredentials());
             }
@@ -61,8 +66,8 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start UsersController.executeSignIn");
                 var res = config["ConnectionStrings:DefaultConnection"];
-                Console.WriteLine("----------------------------INICIANDO LOGIN------------");
                 if (!ModelState.IsValid)
                 {
                     return View("Login", credenciales);
@@ -75,34 +80,32 @@ namespace GymFrontend.Controllers
                     return View("Login");
                 }
 
-                Console.WriteLine("----------------------------VARIFICANDO CLAIMS------------");
                 var claims = _jwtTokenGenerator.ValidateIdToken(respuesta.payload.IdToken);
                 if (claims == null)
                 {
                     return View("Login");
                 }
-                Console.WriteLine("----------------------------CLAIMS VERIFICADOS------------");
                 _cookieService.AgregarCookie(Response, "AuthToken", respuesta.payload.IdToken);
                 _cookieService.AgregarCookie(Response, "AccessToken", respuesta.payload.AccessToken);
                 _cookieService.AgregarCookie(Response, "RefreshToken", respuesta.payload.RefreshToken);
-                Console.WriteLine("----------------------------COOKIES AGREGADAS------------");
                 var roles = _jwtTokenGenerator.GetRoles(claims);
                 var empleadoPage = config["pages:empleados"];
                 var clientePage = config["pages:clientes"];
                 if (roles.Contains("empleado"))
                 {
-                    Console.WriteLine("----------------------------DIRIGIENDO A EMPLEADO------------");
+                    _logger?.LogInformation("User redirected to empleado page");
                     return Redirect(empleadoPage);
                 }
                 ViewBag.cel = respuesta.payload.Telefono;
                 ViewBag.correo = respuesta.payload.Correo;
-                Console.WriteLine("----------------------------DIRIGIANDO A CLIENTES------------");
+                _logger?.LogInformation("User redirected to cliente page");
                 return RedirectToAction("dirigirACrearPaginaDeClientes", new { idUser = respuesta.payload.Id });
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: executeSignIn (POST signIn) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error executeSignIn (UsersController)");
                 ViewBag.message = "Ocurrió un error al procesar el inicio de sesión.";
                 return View("Login", credenciales);
             }
@@ -115,6 +118,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start UsersController.cerrarSesion");
                 if (Request.Cookies["AuthToken"] != null)
                 {
                     Response.Cookies.Delete("AuthToken");
@@ -127,6 +131,7 @@ namespace GymFrontend.Controllers
             {
                 string logMessage = $"[ERROR] Método: cerrarSesion | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error cerrarSesion (UsersController)");
                 return Redirect("signIn");
             }
         }
@@ -139,6 +144,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start UsersController.ObtenerUsuariosPorRol rol={Rol} estado={Estado}", rol, estado);
                 var result = await manager.ObtenerUsuariosPorRol(rol, estado);
                 if (result.success)
                 {
@@ -153,6 +159,7 @@ namespace GymFrontend.Controllers
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error ObtenerUsuariosPorRol (UsersController) rol={Rol} estado={Estado}", rol, estado);
                 
                 return StatusCode(
                     500,
@@ -173,12 +180,14 @@ namespace GymFrontend.Controllers
         {
             try
             {
+                _logger?.LogInformation("Start UsersController.crearCuenta");
                 return View();
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: crearCuenta (GET signUp) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error crearCuenta (UsersController) GET signUp");
                 ViewBag.message = "Error al cargar la página de creación de cuenta.";
                 return View();
             }
@@ -194,6 +203,7 @@ namespace GymFrontend.Controllers
             }
             try
             {
+                _logger?.LogInformation("Start UsersController.postCrearCuenta");
                 ResponseHttp respuesta = manager.registrarUsuario(usuario).Result;
                 ViewBag.message = respuesta.message;
                 return View("CrearCuenta");
@@ -205,7 +215,7 @@ namespace GymFrontend.Controllers
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
-                
+                _logger?.LogError(ex, "Error postCrearCuenta (UsersController)");
                 ViewBag.message = "Ocurrió un error al registrar el usuario: " + ex.Message;
                 return View("CrearCuenta", usuario);
             }
@@ -220,6 +230,7 @@ namespace GymFrontend.Controllers
         {
 
             try {
+                _logger?.LogInformation("Start UsersController.dirigirACrearPaginaDeClientes idUser={Id}", idUser);
                 // idUser is expected as string (could be numeric id or guid depending on system)
                 var response = await medidasManager.obtenerProgresoDelUsuario(idUser);
 
@@ -241,7 +252,7 @@ namespace GymFrontend.Controllers
                     $"IdUsuario: {idUser} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
-                
+                _logger?.LogError(ex, "Error dirigirACrearPaginaDeClientes (UsersController) idUser={Id}", idUser);
                 return View("ClientesMainPage", null);
             }
             

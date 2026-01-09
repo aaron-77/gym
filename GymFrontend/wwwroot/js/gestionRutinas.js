@@ -46,7 +46,8 @@ const disableElements = () => {
     }
 }
 const getClientes = async() => {
-    const response = await fetch("http://localhost:5274/api/obtenerUsuariosPorRol?rol=cliente&estado=activo");
+    // Usar ruta relativa ya que es un endpoint del frontend
+    const response = await fetch("/obtenerUsuariosPorRol");
     const jsonResponse = await response.json();
     if (!jsonResponse.ok) {
         console.log(jsonResponse.message);

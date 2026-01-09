@@ -8,7 +8,7 @@
  */
 async function realizarPeticionAPI(endpointPath, body, params) {
     try {
-        const baseUrl = 'http://localhost:8091';
+        const baseUrl = getNginxBaseUrl();
         let url = `${baseUrl}${endpointPath}`;
         let options = {
             method: 'GET',
@@ -50,5 +50,84 @@ async function realizarPeticionAPI(endpointPath, body, params) {
     }
 }
 
-// Exportar la función para uso en otros módulos
-export { realizarPeticionAPI }; 
+
+/**
+ * Obtiene la URL base del porxy inverso(nginx) desde la configuración
+ * @returns {string} URL base del proxy inverso
+ */
+function getNginxBaseUrl() {
+    // Verificar si window.AppConfig está disponible
+    if (typeof window !== 'undefined' && window.AppConfig && window.AppConfig.EndPoints && window.AppConfig.EndPoints.nginx) {
+        // Determinar si usar SSL basado en el protocolo actual
+        const useSsl = window.location.protocol === 'https:';
+        const apiConfig = window.AppConfig.EndPoints.nginx;
+
+        // Usar SSL si está disponible y el protocolo es HTTPS, sino usar nossl
+        if (useSsl && apiConfig.ssl) {
+            return apiConfig.ssl;
+        } else if (apiConfig.nossl) {
+            return apiConfig.nossl;
+        }
+    }
+
+    // Fallback a localhost si no hay configuración disponible
+    console.warn('AppConfig no disponible, usando URL por defecto');
+    return window.location.origin;
+}
+/**
+ * Obtiene la URL base del API desde la configuración
+ * @returns {string} URL base del API
+ */
+function getApiBaseUrl() {
+    // Verificar si window.AppConfig está disponible
+    if (typeof window !== 'undefined' && window.AppConfig && window.AppConfig.EndPoints && window.AppConfig.EndPoints.api) {
+        // Determinar si usar SSL basado en el protocolo actual
+        const useSsl = window.location.protocol === 'https:';
+        const apiConfig = window.AppConfig.EndPoints.api;
+        
+        // Usar SSL si está disponible y el protocolo es HTTPS, sino usar nossl
+        if (useSsl && apiConfig.ssl) {
+            return apiConfig.ssl;
+        } else if (apiConfig.nossl) {
+            return apiConfig.nossl;
+        }
+    }
+    
+    // Fallback a localhost si no hay configuración disponible
+    console.warn('AppConfig no disponible, usando URL por defecto');
+    return window.location.origin;
+}
+
+/**
+ * Obtiene la URL base del frontend desde la configuración
+ * @returns {string} URL base del frontend
+ */
+function getFrontendBaseUrl() {
+    // Verificar si window.AppConfig está disponible
+    if (typeof window !== 'undefined' && window.AppConfig && window.AppConfig.EndPoints && window.AppConfig.EndPoints.frontend) {
+        // Determinar si usar SSL basado en el protocolo actual
+        const useSsl = window.location.protocol === 'https:';
+        const frontendConfig = window.AppConfig.EndPoints.frontend;
+        console.dir(frontendConfig)
+        // Usar SSL si está disponible y el protocolo es HTTPS, sino usar nossl
+        if (useSsl && frontendConfig.ssl) {
+            return frontendConfig.ssl;
+        } else if (frontendConfig.nossl) {
+            return frontendConfig.nossl;
+        }
+    }
+    
+    // Fallback a la URL actual si no hay configuración disponible
+    return window.location.origin;
+}
+
+// Hacer las funciones disponibles globalmente para scripts no-module
+if (typeof window !== 'undefined') {
+    window.getApiBaseUrl = getApiBaseUrl;
+    window.getFrontendBaseUrl = getFrontendBaseUrl;
+    window.getNginxBaseUrl = getNginxBaseUrl;
+    window.realizarPeticionAPI = realizarPeticionAPI;
+}
+
+// Exportar las funciones para uso en otros módulos
+export { realizarPeticionAPI, getApiBaseUrl, getFrontendBaseUrl, getNginxBaseUrl }; 

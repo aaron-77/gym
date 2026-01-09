@@ -1,28 +1,29 @@
 {
   "profiles": {
-    "https": {
+    "develepmenthttp": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ASPNETCORE_URLS": "https://localhost:7700",
+        "ASPNETCORE_URLS": "https://localhost:5062",
         "ASPNETCORE_HTTPS_PORT": "7700",
-        "BACKEND_BASE_ADDRESS": "https://localhost:7269",
+        "BACKEND_BASE_ADDRESS": "https://localhost:5279",
         "SECRET_TOKEN_KEY": "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7700"
+      "applicationUrl": "https://localhost:5062"
     },
-    "http": {
+    "staginghttp": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_ENVIRONMENT": "Staging",
         "ASPNETCORE_URLS": "http://localhost:5062",
         "BACKEND_BASE_ADDRESS": "http://localhost:5274",
         "SECRET_TOKEN_KEY": "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
       },
       "dotnetRunMessages": true,
+      "launchUrl": "http://localhost",
       "applicationUrl": "http://localhost:5062"
     },
     "IIS Express": {
