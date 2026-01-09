@@ -5,9 +5,6 @@ services:
        image: fitnessgymapi
        ports:
            - "127.0.0.1:8090:5274"
-        #build: 
-        #    context: ../MSSuscripcion/
-        #    dockerfile: Dockerfile
        build:
            context: https://github.com/aaron-77/gym.git
            dockerfile: API/DockerFile
