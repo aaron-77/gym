@@ -8,6 +8,8 @@ services:
        build:
            context: https://github.com/aaron-77/gym.git
            dockerfile: API/DockerFile
+           secrets:
+               - git_auth_token
        container_name: apicontainer
        environment:
            TZ: "America/Mexico_City"
@@ -25,6 +27,8 @@ services:
        build:
            context: https://github.com/aaron-77/gym.git
            dockerfile: GymFrontend/DockerFile
+           secrets:
+                - git_auth_token
        container_name: frontendcontainer
        environment: 
            TZ: "America/Mexico_City"
@@ -33,3 +37,6 @@ services:
            BACKEND_BASE_ADDRESS: "http://0.0.0.0:5274"
            SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
            DB_CONNECTION_STRING: "Server=host.docker.internal;Authentication=SqlPassword;Integrated Security=False ;User Id=aaronlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False"
+secrets:
+    git_auth_token:
+        environment: "GIT_AUTH_TOKEN"    
