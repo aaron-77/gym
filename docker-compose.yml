@@ -11,8 +11,6 @@ services:
        build:
            context: https://github.com/aaron-77/gym.git
            dockerfile: API/DockerFile
-           ssh:
-                - default
        container_name: apicontainer
        environment:
            TZ: "America/Mexico_City"
@@ -30,8 +28,6 @@ services:
        build:
            context: https://github.com/aaron-77/gym.git
            dockerfile: GymFrontend/DockerFile
-           ssh:
-                - default
        container_name: frontendcontainer
        environment: 
            TZ: "America/Mexico_City"
