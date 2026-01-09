@@ -9,7 +9,7 @@ services:
         #    context: ../MSSuscripcion/
         #    dockerfile: Dockerfile
        build:
-           context: git@github.com:aaron-77/gym.git
+           context: https://github.com/aaron-77/gym.git
            dockerfile: API/DockerFile
            ssh:
                 - default
@@ -28,7 +28,7 @@ services:
        ports:
            - "127.0.0.1:8091:5062"
        build:
-           context: git@github.com:aaron-77/gym.git
+           context: https://github.com/aaron-77/gym.git
            dockerfile: GymFrontend/DockerFile
            ssh:
                 - default
