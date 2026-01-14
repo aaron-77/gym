@@ -14,7 +14,7 @@ services:
            DB_CONNECTION_STRING: "Server=host.docker.internal;Database=FitnessCenterDB;User Id=aaronlogin;Password=Terrabreak13;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True"
             
    fitnessgym_frontend:
-       image: aaron77fitnessgymfrontend:1.0.0
+       image: aaron77/fitnessgymfrontend:1.0.0
        depends_on: 
            - "fitnessgym_api"
        ports:
