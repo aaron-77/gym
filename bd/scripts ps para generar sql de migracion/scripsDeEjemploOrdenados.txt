@@ -1,0 +1,222 @@
+$basedir = "D:\general\estudio\proyectos\gymwebapp-linux\bd\scripts ordenados para migrar bd"
+$server  = Connect-DbaInstance localhost\SQLEXPRESS -TrustServerCertificate
+$db      = "FitnessCenterDB"
+
+--------------------------scripts verdaderos------------------------------
+
+
+Get-DbaDbTable `
+  -SqlInstance $server `
+  -Database $db |
+Export-DbaScript `
+  -FilePath "$basedir\tablas\tablas.sql"
+
+//// datos en un solo archivo
+Get-DbaDbTable `
+  -SqlInstance $server `
+	  -Database $db |
+Export-DbaDbTableData `
+  -FilePath "$basedir\4datos\datos.sql"
+
+
+//// datos en varios archivos
+Get-DbaDbTable ` -SqlInstance $server `
+  -Database $db |
+Export-DbaDbTableData `
+  -Path "$basedir\4datos\datosArchivosSeparados"
+// datos en varios archivos usando el nombre de las tablas para nombrar //el archivo
+
+$tables = Get-DbaDbTable -SqlInstance $server -Database $db
+
+foreach ($t in $tables) {
+    $file = "$basedir\4datos\datosArchivosSeparados\01_${($t.Schema)}.${($t.Name)}.sql"
+
+    Export-DbaDbTableData `
+      -InputObject $t `
+      -FilePath $file `
+      -BatchSeparator "GO"
+}
+
+////////////////////INICIA PK////////////////////////
+
+$dir  = Join-Path $basedir "060_primary_keys"
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+$file = Join-Path $dir "060_primary_keys.sql"
+
+$options = New-DbaScriptingOption
+$options.DriPrimaryKey = $true
+$options.PrimaryObject = $false
+$options.ScriptSchema  = $true
+$options.AppendToFile  = $true
+$options.FileName      = $file
+
+Remove-Item $file -ErrorAction Ignore
+
+Get-DbaDbTable -SqlInstance $server -Database $db | ForEach-Object {
+    $_.Indexes | Where-Object IsPrimaryKey | ForEach-Object {
+        $_.Script($options)
+    }
+}
+
+///////////////////FIN PK////////////////////////////
+
+////////////////////INICIO UNIQUE CONSTRAINTS///////////////
+$dir = Join-Path $basedir "070_unique_constraints"
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+$options = New-DbaScriptingOption
+$options.DriUniqueKeys = $true
+$options.PrimaryObject = $true
+$options.ScriptSchema  = $true
+
+$i = 1
+Get-DbaDbTable -SqlInstance $server -Database $db | ForEach-Object {
+    $_.Indexes |
+    Where-Object { $_.IsUnique -and -not $_.IsPrimaryKey } |
+    ForEach-Object {
+        $options.FileName = Join-Path $dir ("{0:D3}_UQ_{1}.sql" -f $i, $_.Name)
+        $_.Script($options)
+        $i++
+    }
+}
+
+///////////////////FIN UNIQUE CONSTRAINTS///////////////////
+
+////////////////////////INICIO CHECK CONSTRAINTS///////////
+$dir = Join-Path $basedir "090_check_constraints"
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+$options = New-DbaScriptingOption
+$options.DriChecks     = $true
+$options.PrimaryObject = $true
+
+$i = 1
+Get-DbaDbTable -SqlInstance $server -Database $db | ForEach-Object {
+    $_.Checks | ForEach-Object {
+        $options.FileName = Join-Path $dir ("{0:D3}_CK_{1}.sql" -f $i, $_.Name)
+        $_.Script($options)
+        $i++
+    }
+}
+
+
+/////////////////////// FIN CHECK CONSTRAINTS//////////////
+
+///////////////////////INICIO DEFAULT  CONSTRAINTS//////////
+
+$dir = Join-Path $basedir "100_default_constraints"
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+$options = New-DbaScriptingOption
+$options.DriDefaults   = $true
+$options.PrimaryObject = $true
+
+$i = 1
+Get-DbaDbTable -SqlInstance $server -Database $db | ForEach-Object {
+    $_.Columns |
+    Where-Object { $_.DefaultConstraint } |
+    ForEach-Object {
+        $options.FileName = Join-Path $dir ("{0:D3}_DF_{1}.sql" -f $i, $_.DefaultConstraint.Name)
+        $_.DefaultConstraint.Script($options)
+        $i++
+    }
+}
+
+/////////////////////// FIN DEFAULT CONSTRAINTS/////////////
+
+Get-DbaDbForeignKey `
+  -SqlInstance $server `
+  -Database $db |
+Export-DbaScript `
+  -FilePath "$basedir\llavesForaneas\llavesForaneas.sql"
+
+///////////////////INICIO INDICES NO PK NO UNIQUE///////////
+
+$dir = Join-Path $basedir "110_indexes"
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+$options = New-DbaScriptingOption
+$options.Indexes        = $true
+$options.PrimaryObject  = $true
+$options.ClusteredIndexes    = $true
+$options.NonClusteredIndexes = $true
+
+$i = 1
+Get-DbaDbTable -SqlInstance $server -Database $db | ForEach-Object {
+    $_.Indexes |
+    Where-Object {
+        -not $_.IsPrimaryKey -and
+        -not $_.IsUniqueConstraint
+    } |
+    ForEach-Object {
+        $options.FileName = Join-Path $dir ("{0:D3}_IDX_{1}.sql" -f $i, $_.Name)
+        $_.Script($options)
+        $i++
+    }
+}
+
+/////////////////FIN INDICES NO PK NO UNIQUE/////////////////
+
+Get-DbaDbIndex `
+  -SqlInstance $server `
+  -Database $db |
+Where-Object { -not $_.IsPrimaryKey } |
+Export-DbaScript `
+  -FilePath "$basedir\indicesNoPk\inidcesNoPk.sql"
+
+
+	
+Get-DbaDbView `
+  -SqlInstance $server `
+  -Database $db -ExcludeSystemView |
+Export-DbaScript `
+  -FilePath "$basedir\vistas\vistas.sql"
+
+Get-DbaDbUserDefinedTableType `
+    -SqlInstance $server `
+    -Database $db |
+Export-DbaScript `
+    -FilePath "$basedir\tipos\tipos_tabla.sql"
+
+Get-DbaDbSequence `
+    -SqlInstance $server `
+    -Database $db -EnableException|
+Export-DbaScript `
+    -FilePath "$basedir\esquemas\secuencias.sql"
+
+
+Get-DbaDbStoredProcedure `
+  -SqlInstance $server `
+  -Database $db |
+Export-DbaScript `
+  -FilePath "$basedir\procedimientos\procedimientos.sql"
+
+Get-DbaDbUdf `
+  -SqlInstance $server `
+  -Database $db -ExcludeSystemUdf |
+Export-DbaScript `
+  -FilePath "$basedir\funciones\funciones.sql"
+
+
+Get-DbaDbUdf `
+  -SqlInstance $server `
+  -Database $db -ExcludeSystemUdf |
+Export-DbaScript `
+  -FilePath "$basedir\funciones\funciones.sql"
+
+
+Get-DbaDbTrigger `
+  -SqlInstance $server `
+  -Database $db |
+Export-DbaScript `
+  -Path "$basedir\11disparadores\disparadores.sql"
+
+
+
+Export-DbaUser `
+    -SqlInstance $server `
+    -Database $db `
+    -EnableException `	
+    -FilePath "$basedir\seguridad\usuarios.sql"
+
