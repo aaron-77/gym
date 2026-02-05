@@ -65,7 +65,7 @@ function getNginxBaseUrl() {
         // Usar SSL si está disponible y el protocolo es HTTPS, sino usar nossl
         if (useSsl && apiConfig.ssl) {
             return apiConfig.ssl;
-        } else if (apiConfig.nossl) {
+        } else if (apiConfig.nossl || apiConfig.nossl == "") {
             return apiConfig.nossl;
         }
     }
@@ -88,7 +88,7 @@ function getApiBaseUrl() {
         // Usar SSL si está disponible y el protocolo es HTTPS, sino usar nossl
         if (useSsl && apiConfig.ssl) {
             return apiConfig.ssl;
-        } else if (apiConfig.nossl) {
+        } else if (apiConfig.nossl || apiConfig.nossl == "") {
             return apiConfig.nossl;
         }
     }
@@ -112,7 +112,7 @@ function getFrontendBaseUrl() {
         // Usar SSL si está disponible y el protocolo es HTTPS, sino usar nossl
         if (useSsl && frontendConfig.ssl) {
             return frontendConfig.ssl;
-        } else if (frontendConfig.nossl) {
+        } else if (frontendConfig.nossl || frontendConfig == "") {
             return frontendConfig.nossl;
         }
     }
