@@ -60,13 +60,13 @@ function getNginxBaseUrl() {
     if (typeof window !== 'undefined' && window.AppConfig && window.AppConfig.EndPoints && window.AppConfig.EndPoints.nginx) {
         // Determinar si usar SSL basado en el protocolo actual
         const useSsl = window.location.protocol === 'https:';
-        const apiConfig = window.AppConfig.EndPoints.nginx;
+        const nginxConfig = window.AppConfig.EndPoints.nginx;
 
         // Usar SSL si está disponible y el protocolo es HTTPS, sino usar nossl
-        if (useSsl && apiConfig.ssl) {
-            return apiConfig.ssl;
-        } else if (apiConfig.nossl || apiConfig.nossl == "") {
-            return apiConfig.nossl;
+        if (useSsl && nginxConfig.frontendssl) {
+            return nginxConfig.frontendssl;
+        } else if (nginxConfig.frontend || nginxConfig.frontend == "") {
+            return nginxConfig.frontend;
         }
     }
 
@@ -80,16 +80,16 @@ function getNginxBaseUrl() {
  */
 function getApiBaseUrl() {
     // Verificar si window.AppConfig está disponible
-    if (typeof window !== 'undefined' && window.AppConfig && window.AppConfig.EndPoints && window.AppConfig.EndPoints.api) {
+    if (typeof window !== 'undefined' && window.AppConfig && window.AppConfig.EndPoints && window.AppConfig.EndPoints.api && window.AppConfig.EndPoints.frontend) {
         // Determinar si usar SSL basado en el protocolo actual
         const useSsl = window.location.protocol === 'https:';
         const apiConfig = window.AppConfig.EndPoints.api;
         
         // Usar SSL si está disponible y el protocolo es HTTPS, sino usar nossl
-        if (useSsl && apiConfig.ssl) {
-            return apiConfig.ssl;
-        } else if (apiConfig.nossl || apiConfig.nossl == "") {
-            return apiConfig.nossl;
+        if (useSsl && apiConfig.frontendssl) {
+            return apiConfig.frontendssl;
+        } else if (apiConfig.frontend || apiConfig.frontend == "") {
+            return apiConfig.frontend;
         }
     }
     
@@ -110,10 +110,10 @@ function getFrontendBaseUrl() {
         const frontendConfig = window.AppConfig.EndPoints.frontend;
         console.dir(frontendConfig)
         // Usar SSL si está disponible y el protocolo es HTTPS, sino usar nossl
-        if (useSsl && frontendConfig.ssl) {
-            return frontendConfig.ssl;
-        } else if (frontendConfig.nossl || frontendConfig == "") {
-            return frontendConfig.nossl;
+        if (useSsl && frontendConfig.frontendssl) {
+            return frontendConfig.frontendssl;
+        } else if (frontendConfig.frontend || frontendConfig.frontend == "") {
+            return frontendConfig.frontend;
         }
     }
     
