@@ -38,3 +38,4 @@ API/obj
 BL/bin
 BL/obj
 /build.log
+/nginx.conf
