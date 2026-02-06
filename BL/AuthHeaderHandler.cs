@@ -18,14 +18,19 @@ public class AuthHeaderHandler : DelegatingHandler
         try
         {
             var backendAddress = _configuration["EndPoints:api:nossl"]; //Environment.GetEnvironmentVariable("BACKEND_BASE_ADDRESS");
-            var frontendAddress = _configuration["EndPoints:frontend:nossl"];//Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+            var frontendAddress = _configuration["EndPoints:api:frontend"];//Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
 
             var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
             var idToken = _httpContextAccessor.HttpContext?.Request.Cookies["AuthToken"];
             bool isApiRequest = request.RequestUri.ToString().Contains(backendAddress, StringComparison.OrdinalIgnoreCase);
             bool isFrontendRequest = request.RequestUri.ToString().Contains(frontendAddress, StringComparison.OrdinalIgnoreCase);
+            string logMessage = $"\n\nREUQEST URL: {request.RequestUri.ToString()}\n IDTOKEN: {idToken}\n ACCESSTOKEN: {accessToken}\n isApiRequest: {isApiRequest}\n isFrontnedRequest: {isFrontendRequest} \n\n";                
+            Console.WriteLine(logMessage);
+
             if (!string.IsNullOrEmpty(accessToken) && isApiRequest)
             {
+                logMessage= $"\n\nACCESS TOKEN ADDED: {accessToken}\n\n";
+                Console.WriteLine(logMessage);
 
                 request.Headers.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
@@ -33,13 +38,17 @@ public class AuthHeaderHandler : DelegatingHandler
 
             if (!string.IsNullOrEmpty(idToken) && isFrontendRequest)
             {
-
+                logMessage= $"\n\nID TOKEN ADDED: {accessToken}\n\n";
+                Console.WriteLine(logMessage);
                 request.Headers.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", idToken);
             }
             Console.WriteLine($"[HTTP REQUEST] {request.Method} {request.RequestUri}");
+            logMessage= $"\n\nHEADERS ADDED TO REQUEST: {accessToken}\n\n";
+            Console.WriteLine(logMessage);
             foreach (var header in request.Headers)
             {
+                    
                 Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
             }
 
@@ -47,8 +56,8 @@ public class AuthHeaderHandler : DelegatingHandler
         }
         catch (Exception ex)
         {
-            string logMessage = $"[ERROR] Método: SendAsync (AuthHeaderHandler) | " +
-                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+            string logMessage = $"[ERROR] Mï¿½todo: SendAsync (AuthHeaderHandler) | " +
+                $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                 $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                 $"RequestUri: {request?.RequestUri} | " +
                 $"Stack Trace: {ex.StackTrace}";
