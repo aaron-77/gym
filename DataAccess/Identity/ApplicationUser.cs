@@ -10,7 +10,7 @@ public class ApplicationUser : IdentityUser
 
     public string NombreCompleto { get; set; }
     
-    public int IdSecundario { get; set; }
+    public int? IdSecundario { get; set; }
     [MaxLength(50)]
     public string Apellido { get; set; }
 

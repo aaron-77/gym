@@ -23,6 +23,7 @@ namespace API.Services
         private readonly TokensService _tokensService; // Inyectar TokensService
         private readonly JwtSettings _jwtSettings; // Inyectar JwtSettings para obtener ExpiryMinutes
         private readonly FitnessCenterDbContext _context;
+        private readonly Microsoft.Extensions.Logging.ILogger<AuthService> _logger;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
@@ -32,7 +33,8 @@ namespace API.Services
             IHttpContextAccessor httpContextAccessor, // Añadir a la inyección de dependencias
             TokensService tokensService, // Añadir a la inyección de dependencias
             IOptions<JwtSettings> jwtOptions,
-            FitnessCenterDbContext context
+            FitnessCenterDbContext context,
+            Microsoft.Extensions.Logging.ILogger<AuthService> logger
         )
         {
             _userManager = userManager;
@@ -43,6 +45,7 @@ namespace API.Services
             _tokensService = tokensService; // Asignar
             _jwtSettings = jwtOptions.Value; // Asignar
             _context = context;
+            _logger = logger;
         }
         public async Task<DTOLoggedUser> AuthenticateUser(string username, string password)
         {
@@ -219,6 +222,13 @@ namespace API.Services
             }
             catch (Exception ex)
             {
+                string logMessage = $"[ERROR] Método: RegisterUserAsync | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | \n" +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | \n" +
+                    $"Excepcion interna: {ex.InnerException.Message} \n"+
+                    $"Stack Trace: {ex.StackTrace} \n";
+                    Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error postCrearCuenta (UsersController)");
                 throw new InvalidOperationException($"Error al registrar usuario: {ex.Message}");
 
             }

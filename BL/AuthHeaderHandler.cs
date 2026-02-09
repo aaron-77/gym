@@ -23,7 +23,7 @@ public class AuthHeaderHandler : DelegatingHandler
             var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
             var idToken = _httpContextAccessor.HttpContext?.Request.Cookies["AuthToken"];
             bool isApiRequest = request.RequestUri.ToString().Contains(backendAddress, StringComparison.OrdinalIgnoreCase);
-            bool isFrontendRequest = request.RequestUri.ToString().Contains(frontendAddress, StringComparison.OrdinalIgnoreCase);
+            bool isFrontendRequest = request.RequestUri.ToString().Contains(frontendAddress, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(frontendAddress);
             string logMessage = $"\n\nREUQEST URL: {request.RequestUri.ToString()}\n IDTOKEN: {idToken}\n ACCESSTOKEN: {accessToken}\n isApiRequest: {isApiRequest}\n isFrontnedRequest: {isFrontendRequest} \n\n";                
             Console.WriteLine(logMessage);
 
