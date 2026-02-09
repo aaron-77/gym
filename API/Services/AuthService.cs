@@ -199,6 +199,7 @@ namespace API.Services
 
                 // Crear usuario con contraseña
                 var result = await _userManager.CreateAsync(user, model.Contrasena);
+                
 
                 if (result.Succeeded)
                 {

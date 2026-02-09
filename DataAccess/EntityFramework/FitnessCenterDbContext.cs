@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DataAccess.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace DataAccess.EntityFramework;
 
@@ -1627,6 +1628,11 @@ public partial class FitnessCenterDbContext :IdentityDbContext<ApplicationUser>
             entity.Property(e => e.nombreEntrenador).HasColumnName("nombreEntrenador");
             entity.Property(e => e.cupoMaximo).HasColumnName("cupoMaximo");
             entity.Property(e => e.cupoDisponible).HasColumnName("cupoDisponible");
+        });
+        modelBuilder.Entity<ApplicationUser>(entity =>
+        {
+            entity.Property(u => u.IdSecundario)
+                  .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
         });
 
 
