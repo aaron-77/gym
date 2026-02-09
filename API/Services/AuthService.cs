@@ -191,7 +191,8 @@ namespace API.Services
                     EmailConfirmed = true,
                     Direccion = model.Direccion,
                     FechaDeNacimiento = model.FechaDeNacimiento,
-                    NumeroDeIdentificacion = model.NumeroDeIdentificacion
+                    NumeroDeIdentificacion = model.NumeroDeIdentificacion,
+                    IdSecundario= null
 
                     // Cambiar a true si no requieres confirmación por email
                 };
