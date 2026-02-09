@@ -55,6 +55,10 @@ namespace API.Services
                     return null;
                 // Validar contraseña
                 var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
+                
+                if (result.IsLockedOut) { Console.WriteLine("EL USUARIO NO PUEDE INCIAR SESION PORQUE ESTA BLOQUEADO"); }
+                if (result.IsNotAllowed) { Console.WriteLine("EL USUARIO NO PUEDE INCIAR SESION PORQUE NECESITA CONFIRMAR EMAIL"); }
+                if (result.RequiresTwoFactor) { Console.WriteLine("EL USUARIO NO PUEDE INCIAR SESION PORQUE REQUIERE DOBLE FACTOR"); }
                 if (!result.Succeeded)
                     return null;
                 var roles = await _userManager.GetRolesAsync(user);
