@@ -51,14 +51,26 @@ namespace API.Services
         {
             try {
                 var user = await _userManager.FindByNameAsync(username);
+                var verificationResult = _userManager.PasswordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+                switch (verificationResult)
+                {
+                    case PasswordVerificationResult.Success:
+                        Console.WriteLine("¡La contraseña es correcta! El problema es una configuración de SignInManager.");
+                        break;
+                    case PasswordVerificationResult.SuccessRehashNeeded:
+                        Console.WriteLine("La contraseña es correcta, pero el algoritmo de hash ha cambiado.");
+                        break;
+                    case PasswordVerificationResult.Failed:
+                        Console.WriteLine("La contraseña NO coincide con el hash. El problema está en el Registro o en el envío del dato.");
+                        break;
+                }
+                Console.WriteLine($"¿Hash coincide?: {verificationResult}");
                 if (user == null)
                     return null;
                 // Validar contraseña
                 var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
                 
-                if (result.IsLockedOut) { Console.WriteLine("EL USUARIO NO PUEDE INCIAR SESION PORQUE ESTA BLOQUEADO"); }
-                if (result.IsNotAllowed) { Console.WriteLine("EL USUARIO NO PUEDE INCIAR SESION PORQUE NECESITA CONFIRMAR EMAIL"); }
-                if (result.RequiresTwoFactor) { Console.WriteLine("EL USUARIO NO PUEDE INCIAR SESION PORQUE REQUIERE DOBLE FACTOR"); }
+               
                 if (!result.Succeeded)
                     return null;
                 var roles = await _userManager.GetRolesAsync(user);

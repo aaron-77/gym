@@ -85,9 +85,7 @@ namespace BL
 
         public async Task<ResponseHttp> registrarUsuario(User newUser)
         {
-            // Encriptar la contraseña antes de enviar la solicitud
-            newUser.Contrasena = HashPassword(newUser.Contrasena);
-            newUser.ContrasenaConfirmacion = newUser.Contrasena; // Asegurarse de que la confirmación de la contraseña coincida
+            
             NewUser userForBody = new NewUser(newUser.Nombre,
                                                        newUser.FechaDeNacimiento,
                                                        newUser.Direccion,
