@@ -57,7 +57,7 @@ try
             options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
         });
     }
-    // Configuración JWT
+    // Configuraciï¿½n JWT
 
     var jwtSection = builder.Configuration.GetSection("JwtSettings");
     builder.Services.Configure<JwtSettings>(jwtSection);
@@ -70,16 +70,21 @@ try
     bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
     string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
     aspnetcore_urls = aspnetcore_urls.Trim().ToLowerInvariant();
-    var DB_CONNECTION_STRING = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+    
     if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     {
-        dbConnectionString = DB_CONNECTION_STRING;//builder.Configuration["ConnectionStrings:windowsConnection"];
+        dbConnectionString = builder.Configuration["ConnectionStrings:windowsConnection"];
+    }
+    if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
+    {
+        dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+        
     }
     Console.WriteLine("Connection string configurado");
 
     var jwtSettings = jwtSection.Get<JwtSettings>();
 
-    // Obtener clave secreta JWT con fallback seguros para entornos de diseño (migrations)
+    // Obtener clave secreta JWT con fallback seguros para entornos de diseï¿½o (migrations)
     var secretFromEnv = Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY");
     string secretKeyString = secretFromEnv
         ?? builder.Configuration["JwtSettings:Secret"]
@@ -89,7 +94,7 @@ try
         ?? "__development_secret_key_replace_for_production__"; // fallback para migraciones/local
 
     var key = Encoding.UTF8.GetBytes(secretKeyString);
-    Console.WriteLine("JWT key obtenida (o fallback) para configuración");
+    Console.WriteLine("JWT key obtenida (o fallback) para configuraciï¿½n");
 
     // Identity
     builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -149,11 +154,10 @@ try
     builder.Services.AddSwaggerGen();
     Console.WriteLine("Swagger configurado");
 
-    // DbContext
-    //builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
-    //{
-    //    options.UseSqlServer(dbConnectionString);
-    //});
+    builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
+    {
+        options.UseSqlServer(dbConnectionString);
+    });
     Console.WriteLine("DbContext configurado");
 
     // Email
@@ -225,7 +229,7 @@ try
     
     Console.WriteLine("App construida exitosamente");
     
-    // Configuración del pipeline
+    // Configuraciï¿½n del pipeline
     if (app.Environment.IsDevelopment())
     {
         

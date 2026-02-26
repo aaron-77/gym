@@ -121,13 +121,27 @@ function getFrontendBaseUrl() {
     return window.location.origin;
 }
 
+/**
+ * Obtiene la URL base para SignalR desde la configuración
+ * @returns {string} URL base para SignalR
+ */
+function getSignalRBaseUrl() {
+    if (typeof window !== 'undefined' && window.AppConfig && window.AppConfig.EndPoints && window.AppConfig.EndPoints.signalEndpoint) {
+        return window.AppConfig.EndPoints.signalEndpoint;
+    }
+    
+    console.warn('signalEndpoint no configurado, usando URL por defecto');
+    return getNginxBaseUrl();
+}
+
 // Hacer las funciones disponibles globalmente para scripts no-module
 if (typeof window !== 'undefined') {
     window.getApiBaseUrl = getApiBaseUrl;
     window.getFrontendBaseUrl = getFrontendBaseUrl;
     window.getNginxBaseUrl = getNginxBaseUrl;
+    window.getSignalRBaseUrl = getSignalRBaseUrl;
     window.realizarPeticionAPI = realizarPeticionAPI;
 }
 
 // Exportar las funciones para uso en otros módulos
-export { realizarPeticionAPI, getApiBaseUrl, getFrontendBaseUrl, getNginxBaseUrl }; 
+export { realizarPeticionAPI, getApiBaseUrl, getFrontendBaseUrl, getNginxBaseUrl, getSignalRBaseUrl }; 

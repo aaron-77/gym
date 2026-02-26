@@ -3,7 +3,7 @@
  * Maneja la integración entre el calendario y el visualizador de horarios
  */
 
-import { realizarPeticionAPI, getApiBaseUrl, getNginxBaseUrl } from './httpClient.js';
+import { realizarPeticionAPI, getApiBaseUrl, getNginxBaseUrl, getSignalRBaseUrl } from './httpClient.js';
 import { Calendar } from './calendario.js';
 import { ScheduleViewer } from './horariosDelDia.js';
 import { formDataToJson } from './formDataToJson.js';
@@ -621,8 +621,8 @@ async function inicializarSignalR() {
         }
 
         // Obtener la URL base del API desde la configuración
-        const apiBaseUrl = getNginxBaseUrl();
-        const signalRUrl = `${apiBaseUrl}/reservacionesHub`;
+        const signalRBaseUrl = getSignalRBaseUrl();
+        const signalRUrl = `${signalRBaseUrl}/reservacionesHub`;
         
         // Crear la conexión al hub
         signalRConnection = new signalR.HubConnectionBuilder()
