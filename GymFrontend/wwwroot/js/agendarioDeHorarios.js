@@ -621,8 +621,8 @@ async function inicializarSignalR() {
         }
 
         // Obtener la URL base del API desde la configuración
-        const signalRBaseUrl = getSignalRBaseUrl();
-        const signalRUrl = `${signalRBaseUrl}/reservacionesHub`;
+        const apiBaseUrl = getSignalRBaseUrl();
+        const signalRUrl = `${apiBaseUrl}/reservacionesHub`;
         
         // Crear la conexión al hub
         signalRConnection = new signalR.HubConnectionBuilder()
