@@ -150,10 +150,10 @@ try
     Console.WriteLine("Swagger configurado");
 
     // DbContext
-    //builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
-    //{
-    //    options.UseSqlServer(dbConnectionString);
-    //});
+    builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
+    {
+        options.UseSqlServer(dbConnectionString);
+    });
     Console.WriteLine("DbContext configurado");
 
     // Email

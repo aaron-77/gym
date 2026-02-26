@@ -572,6 +572,8 @@ namespace API.Controllers
         {
             try
             {
+                string mensaje = "";
+
                 foreach (var solicitud in solicitudes)
                 {
                     // Obtener el correo del entrenador
@@ -612,70 +614,75 @@ namespace API.Controllers
                         $"EXEC dbo.sp_procesoCompletoCancelarClasesProgramadas @idClaseProgramada, @fechaParaCancelar, @idEntrenador, @idClase, @estadoDeOperaciones OUTPUT",
                         parametros
                     );
+                    // Flujo normal: cancelación exitosa
+
+
                     int exitoCancelacion = (int)parametros[parametros.Length - 1].Value;
-                    if (exitoCancelacion > 0) // Si la cancelación fue exitosa
-                    {
-                        // Enviar correo de confirmación
-                        var emailManager = new EmailManagerMailKit(
-                            "smtp.gmail.com",
-                            587,
-                            "aaronlarabonfil@gmail.com",
-                            "kayxfchmpquogjgg"
-                        );
-                        var message = emailManager.crearEmail(
-                            "Fitness Gym",
-                            "aaronlarabonfil@gmail.com",
-                            $"{entrenador.Nombre} {entrenador.Apellido}",
-                            entrenador.Email,
-                            "Clase Cancelada",
-                            "La clase ha sido cancelada por el entrenador,en breve se te notificara la fecha de reagendacion de la clase.El entrenador se comunicara contigo para explicarte lso detalles de la cancelación"
-                        );
-                        emailManager.EnviarEmail(message);
 
-                        // Si hay una clase reagendada, registrar la nueva clase programada
-                        if (solicitud.claseReagendada != null)
-                        {
-                            var content = JsonContent.Create(solicitud.claseReagendada);
-                            var response = await _httpCustomClient.post(
-                                "api/clases/registrarClaseProgramada",
-                                content
-                            );
-
-                            if (string.IsNullOrEmpty(response))
-                            {
-                                return BadRequest(
-                                    ResponseManager.BuildResponse<string>(
-                                        false,
-                                        400,
-                                        "Error al reagendar la clase",
-                                        null,
-                                        null
-                                    )
-                                );
-                            }
-                        }
-                    }
-                    else
+                    // Guard clause: cancelación fallida
+                    if (exitoCancelacion == 0)
                     {
+                        mensaje = $"No se pudo cancelar la clase programada ID {solicitud.claseCancelada.idProgramacionClase}.";
                         return BadRequest(
                             ResponseManager.BuildResponse<string>(
                                 false,
                                 400,
-                                "No se pudo cancelar la clase programada",
+                                mensaje,
                                 null,
                                 null
                             )
                         );
                     }
+
+                    mensaje = $"Clase programada ID {solicitud.claseCancelada.idProgramacionClase} cancelada exitosamente.";
+                    // Enviar correo de confirmación
+                    var emailManager = new EmailManagerMailKit(
+                        "smtp.gmail.com",
+                        587,
+                        "aaronlarabonfil@gmail.com",
+                        "kayxfchmpquogjgg"
+                    );
+                    var message = emailManager.crearEmail(
+                        "Fitness Gym",
+                        "aaronlarabonfil@gmail.com",
+                        $"{entrenador.Nombre} {entrenador.Apellido}",
+                        entrenador.Email,
+                        "Clase Cancelada",
+                        "La clase ha sido cancelada por el entrenador,en breve se te notificara la fecha de reagendacion de la clase.El entrenador se comunicara contigo para explicarte lso detalles de la cancelación"
+                    );
+                    emailManager.EnviarEmail(message);
+
+                    // Guard clause: sin petición de reagendación
+                    if (solicitud.claseReagendada == null)
+                    {
+                        mensaje += " | Reagendación: Sin petición de reagendación.";
+                        continue;
+                    }
+                    // Flujo normal: procesar reagendación
+
+                    var content = JsonContent.Create(solicitud.claseReagendada);
+                    var response = await _httpCustomClient.post(
+                        "api/clases/registrarClaseProgramada",
+                        content
+                    );
+
+                    // Guard clause: error en reagendación
+                    if (string.IsNullOrEmpty(response))
+                    {
+                        mensaje += $" | Reagendación: Error al reagendar la clase programada ID {solicitud.claseCancelada.idProgramacionClase}.";
+                        continue;
+                    }
+                    mensaje += $" | Reagendación: Exitosa para la clase programada ID {solicitud.claseCancelada.idProgramacionClase}.";
+
                 }
 
                 return Ok(
-                    ResponseManager.BuildResponse(
+                    ResponseManager.BuildResponse<object>(
                         true,
                         200,
-                        "Clases programadas canceladas exitosamente",
+                        mensaje.Trim(),
                         null,
-                        "Cancelación exitosa"
+                        null
                     )
                 );
             }
@@ -701,17 +708,17 @@ namespace API.Controllers
         }
 
         /// <summary>
-        /// Reagenda una clase
+        /// Reagenda una insrcipcion a una clase de un cliente
         /// </summary>
         [Authorize(Roles = "empleado")]
         [HttpPost("reagendacionDeInscripcionAClase")]
-        public async Task<ActionResult<DTOResponse<string>>> ReagendarClase(
+        public async Task<ActionResult<DTOResponse<string>>> ReagendarInscripcionAClase(
             [FromBody] DTOReagendacionDeInscripcion modelo
         )
         {
             try
             {
-                _logger?.LogInformation("Start InscribirAClase IdProgramacionClase={IdProgramacion} IdCliente={IdCliente}", modelo?.idClaseProgramadaNueva, modelo?.idCliente);
+                _logger?.LogInformation("Start ReagendarInscripcionAClase IdProgramacionClase={IdProgramacion} IdCliente={IdCliente}", modelo?.idClaseProgramadaNueva, modelo?.idCliente);
                 // Validar el modelo
                 if (!ModelState.IsValid)
                 {
@@ -781,7 +788,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: ReagendarClase (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdInscripcionCancelada: {modelo?.idInscripcionCancelada} | Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] Método: ReagendarInscripcionAClase (ClasesController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | IdInscripcionCancelada: {modelo?.idInscripcionCancelada} | Stack Trace: {ex.StackTrace}";
                 _logger?.LogError(ex, logMessage);
 
                 return StatusCode(
@@ -812,7 +819,7 @@ namespace API.Controllers
         {
             try
             {
-                // Ejecutar la función SQL para obtener los estados usando el DTO registrado
+                // Ejecutar la función SQL para obtener los estados posible de una clase programada
                 var estados = await _context
                     .DtoEstadoClaseProgramada.FromSqlInterpolated(
                         $"SELECT * FROM dbo.fn_obtenerEstadosDeClasesProgramdas()"
@@ -969,11 +976,11 @@ namespace API.Controllers
                     );
                 }
                 // Ejecutar el procedimiento almacenado usando ExecuteSqlInterpolatedAsync
-                 idInscripcion = await _context.Database.ExecuteSqlInterpolatedAsync(
-                    $@"EXEC dbo.sp_registrarInsrcipcionAClase 
+                idInscripcion = await _context.Database.ExecuteSqlInterpolatedAsync(
+                   $@"EXEC dbo.sp_registrarInsrcipcionAClase 
                         @idCliente={modelo.IdCliente},
                         @fkProgramacionClase={modelo.IdProgramacionClase}"
-                );
+               );
 
                 // Notificar actualización de cupos
                 await _servicioActualizaciones.enviarCuposActualizadosDeClaseProgramada(

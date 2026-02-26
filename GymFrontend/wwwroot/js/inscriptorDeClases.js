@@ -1,4 +1,4 @@
-import { realizarPeticionAPI, getApiBaseUrl, getNginxBaseUrl } from './httpClient.js';
+import { realizarPeticionAPI, getApiBaseUrl, getNginxBaseUrl ,getSignalRBaseUrl} from './httpClient.js';
 import { CalendarInscripcion } from './calendarioInscripcion.js';
 import { ScheduleViewerInscripciones } from './inscriptorDeClasesScheduler.js';
 import { formDataToJson } from './formDataToJson.js';
@@ -344,7 +344,7 @@ async function inicializarSignalR() {
         }
 
         // Obtener la URL base del API desde la configuración  |
-        const apiBaseUrl = getNginxBaseUrl();
+        const apiBaseUrl = getSignalRBaseUrl();
         const signalRUrl = `${apiBaseUrl}/reservacionesHub`;
         
         // Crear la conexión al hub
