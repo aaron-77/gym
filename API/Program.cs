@@ -311,3 +311,5 @@ catch (Exception ex)
 
     Environment.Exit(1);
 }
+
+public partial class Program { }

@@ -1,0 +1,16 @@
+using Microsoft.AspNetCore.Mvc.Testing;
+
+namespace GymWebApp.Tests.Integration.Common;
+
+public abstract class IntegrationTestBase<TFactory> : IClassFixture<TFactory>
+    where TFactory : CitasApiWebApplicationFactory<Program>
+{
+    protected readonly TFactory Factory;
+    protected readonly HttpClient Client;
+
+    protected IntegrationTestBase(TFactory factory)
+    {
+        Factory = factory;
+        Client = factory.CreateClient();
+    }
+}

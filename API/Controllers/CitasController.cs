@@ -124,7 +124,7 @@ namespace API.Controllers
                 DuracionCita duracionDB;
                 if (duracion.Id > 0)
                 {
-                    duracionDB = await _db.DuracionCitas.FirstOrDefaultAsync();
+                    duracionDB = await _db.DuracionCitas.FindAsync(duracion.Id);
                     if (duracionDB != null)
                     {
                         duracionDB.Duracion = duracion.duracion;

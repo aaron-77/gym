@@ -75,25 +75,7 @@ function getNginxBaseUrl() {
     return window.location.origin;
 }
 
-function getSignalRBaseUrl() {
-    // Verificar si window.AppConfig está disponible
-    if (typeof window !== 'undefined' && window.AppConfig && window.AppConfig.EndPoints && window.AppConfig.EndPoints.api) {
-        // Determinar si usar SSL basado en el protocolo actual
-        const useSsl = window.location.protocol === 'https:';
-        const nginxConfig = window.AppConfig.EndPoints.api;
 
-        // Usar SSL si está disponible y el protocolo es HTTPS, sino usar nossl
-        if (useSsl && nginxConfig.signalREndpointSsl) {
-            return nginxConfig.signalREndpointSsl;
-        } else if (nginxConfig.signalREndpointNoSsl || nginxConfig.signalREndpointNoSsl == "") {
-            return nginxConfig.signalREndpointNoSsl;
-        }
-    }
-
-    // Fallback a localhost si no hay configuración disponible
-    console.warn('AppConfig no disponible, usando URL por defecto');
-    return window.location.origin;
-}
 /**
  * Obtiene la URL base del API desde la configuración
  * @returns {string} URL base del API

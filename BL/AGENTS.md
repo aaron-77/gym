@@ -5,7 +5,6 @@
 - **Framework:** .NET 8 with ASP.NET Core
 - **Layer Role:** HTTP client communication with API, data transformation
 - **Dependencies:** DTO project, System.Net.Http.Json
-- **Testing:** xUnit with Moq
 
 ## Project Structure
 

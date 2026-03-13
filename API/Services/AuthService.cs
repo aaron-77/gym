@@ -77,6 +77,7 @@ namespace API.Services
                 var accessToken = await _jwtTokenGenerator.GenerateAccessToken(user, roles);
                 var idToken = _jwtTokenGenerator.GenerateIdToken(user, roles);
 
+                
                 // Obtener información del cliente para el refresh token
                 string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
                 bool useSsl = aspnetcore_urls.StartsWith("https", StringComparison.OrdinalIgnoreCase);
