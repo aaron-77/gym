@@ -182,6 +182,7 @@ namespace API.Controllers
         /// <param name="activa">Filtro de estado: 1=activa, 0=inactiva</param>
         /// <returns>Lista de clases filtradas por estado</returns>
 
+        [Authorize]
         [HttpGet("obtenerClases")]
         public async Task<ActionResult<DTOResponse<List<DTOClaseSimple>>>> ObtenerClases(
             [FromQuery] bool activa = false

@@ -12,6 +12,7 @@ namespace GymWebApp.Tests.Integration;
 
 public class ClasesApiWebApplicationFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
 {
+    private string? _authToken;
     private readonly string _connectionString;
 
     public ClasesApiWebApplicationFactory()
@@ -22,6 +23,11 @@ public class ClasesApiWebApplicationFactory<TProgram> : WebApplicationFactory<TP
         // Solo configuramos estas variables para el entorno de testing
         // La API usará ConnectionStrings:DefaultConnection que se configura en ConfigureWebHost
         Environment.SetEnvironmentVariable("SECRET_TOKEN_KEY", "__development_secret_key_replace_for_production__");
+    }
+
+    public string GetAuthToken()
+    {
+        return _authToken ?? throw new InvalidOperationException("Token not available. Ensure ConfigureWebHost has been called.");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -48,5 +54,36 @@ public class ClasesApiWebApplicationFactory<TProgram> : WebApplicationFactory<TP
         });
 
         builder.UseEnvironment("Testing");
+    }
+
+    public async Task<string> AuthenticateAsync(HttpClient client)
+    {
+        var testUserSection = ConfigHelper.GetSection("TestUser");
+        var email = testUserSection["Email"] ?? throw new InvalidOperationException("Test user email not configured");
+        var password = testUserSection["Password"] ?? throw new InvalidOperationException("Test user password not configured");
+
+        var loginRequest = new UserCredentials
+        {
+            correo = email,
+            contrasena = password
+        };
+
+        var response = await client.PostAsJsonAsync("/api/autenticar", loginRequest);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Authentication failed. Status: {response.StatusCode}, Content: {errorContent}");
+        }
+
+        var content = await response.Content.ReadFromJsonAsync<DTOResponse<DTOLoggedUser>>();
+        
+        if (content?.payload?.AccessToken == null)
+        {
+            throw new InvalidOperationException("Authentication response does not contain access token");
+        }
+
+        _authToken = content.payload.AccessToken;
+        return _authToken;
     }
 }
