@@ -109,4 +109,29 @@ public class ObtenerClasesApiTests : IClassFixture<CitasApiWebApplicationFactory
     }
 
     #endregion
+
+    #region Authentication Tests (Integration)
+
+    /// <summary>
+    /// REQUISITO: Unauthenticated Request
+    /// Escenario: Request sin token de autenticación
+    /// GIVEN: Usuario NO autenticado (sin token JWT)
+    /// WHEN: GET /api/Clases/obtenerClases?activa=true
+    /// THEN: Returns 401 Unauthorized
+    /// </summary>
+    [Fact]
+    public async Task ObtenerClases_WithoutAuthentication_ReturnsUnauthorized()
+    {
+        // Arrange
+        await TestContainerHelper.ResetDatabaseAsync();
+        // NO authentication header - this is the key difference
+
+        // Act
+        var response = await _client.GetAsync("/api/Clases/obtenerClases?activa=true");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
+
+    #endregion
 }
