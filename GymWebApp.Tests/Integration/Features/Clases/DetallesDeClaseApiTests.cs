@@ -43,16 +43,12 @@ public class DetallesDeClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
         // Arrange
         await TestContainerHelper.ResetDatabaseAsync();
         
-        // Obtener una clase existente que tenga niveles de intensidad y dificultad (para evitar INNER JOIN nulls)
-        var existingClass = await DatabaseHelper.ExecuteQuerySingleAsync(
+        // Obtener la clase con nombre "HIIT"
+        var idClase = await DatabaseHelper.ExecuteScalarAsync<int?>(
             TestContainerHelper.ConnectionString,
-            @"SELECT TOP 1 c.ClaseId 
-              FROM Clases c
-              INNER JOIN nivelesDeIntensidadDeClase ni ON c.FkIntensidad = ni.IdNivelDeIntensidad
-              INNER JOIN nivelesDeDificultadDeClase nd ON c.FkDificultad = nd.IdNivelDeDificultadDeClase");
+            "SELECT TOP 1 ClaseId FROM Clases WHERE NombreClase = 'HIIT'");
         
-        var idClase = existingClass?["ClaseId"];
-        idClase.Should().NotBeNull("Se requiere al menos una clase en la base de datos");
+        idClase.Should().NotBeNull("La clase 'HIIT' debe existir en la base de datos");
 
         // Act
         var response = await _client.GetAsync($"/api/Clases/detallesDeClase?idClase={idClase}");
@@ -64,7 +60,26 @@ public class DetallesDeClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
         result.Should().NotBeNull();
         result!.success.Should().BeTrue();
         result.payload.Should().NotBeNull();
-        result.payload.Duracion.Should().BeGreaterThan(0);
+        
+        // Verificar todos los campos requeridos de DetalleDeClase
+        var payload = result.payload;
+        
+        // Campos escalares obligatorios
+        payload.Duracion.Should().BeGreaterThan(0, "La duración debe ser mayor a 0");
+        payload.NivelDeIntensidad.Should().NotBeNullOrEmpty("El nivel de intensidad es requerido");
+        payload.NivelDeDificultad.Should().NotBeNullOrEmpty("El nivel de dificultad es requerido");
+        payload.DescripcionDeLaClase.Should().NotBeNullOrEmpty("La descripción de la clase es requerida");
+        
+        // Campos de tipo objeto (no null, pueden estar vacíos)
+        payload.imagenesDeClase.Should().NotBeNull("Las imágenes de clase son requeridas");
+        payload.BeneficiosDeLaClase.Should().NotBeNull("Los beneficios de la clase son requeridos");
+        payload.EstructuraDeLaClase.Should().NotBeNull("La estructura de la clase es requerida");
+        payload.EjerciciosDeClase.Should().NotBeNull("Los ejercicios de clase son requeridos");
+        payload.EquipamientoRecomendado.Should().NotBeNull("El equipamiento recomendado es requerido");
+        payload.HorariosProgramados.Should().NotBeNull("Los horarios programados son requeridos");
+        
+        // Campo opcional (puede ser null)
+        // payload.Consejos puede ser null, no se verifica
     }
 
     #endregion
