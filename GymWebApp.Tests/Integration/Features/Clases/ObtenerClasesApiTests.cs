@@ -71,6 +71,19 @@ public class ObtenerClasesApiTests : IClassFixture<CitasApiWebApplicationFactory
             clase.ClaseID.Should().BeGreaterThan(0, "ClaseID must be greater than 0");
             clase.NombreClase.Should().NotBeNullOrEmpty("NombreClase must not be null or empty");
         }
+
+        // Verify classes are actually active (FkEstadoClase = 1) in database
+        foreach (var clase in result.payload)
+        {
+            var claseDb = await DatabaseHelper.ExecuteQuerySingleAsync(
+                TestContainerHelper.ConnectionString,
+                "SELECT FkEstadoClase FROM Clases WHERE ClaseID = @Id",
+                new() { ["@Id"] = clase.ClaseID });
+            
+            claseDb.Should().NotBeNull();
+            var estado = Convert.ToInt32(claseDb["FkEstadoClase"]);
+            estado.Should().Be(1, "La clase debe estar activa (FkEstadoClase = 1)");
+        }
     }
 
     #endregion
