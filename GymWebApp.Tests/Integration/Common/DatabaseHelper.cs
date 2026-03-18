@@ -2,6 +2,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.EntityFramework;
 using System.Data;
+using System.Reflection;
 
 namespace GymWebApp.Tests.Integration.Common;
 
@@ -137,4 +138,57 @@ public static class DatabaseHelper
         var rows = await ExecuteQueryAsync(connectionString, sql, parameters);
         return rows.Select(mapper).ToList();
     }
+
+    /// <summary>
+    /// Inserts an entity into the specified table and returns the saved entity with generated ID.
+    /// Throws exception on failure.
+    /// </summary>
+    public static async Task<T> NonQueryAsyncTyped<T>(
+        string connectionString,
+        string tableName,
+        T entity,
+        Action<SqlCommand, T>? configureParameters = null) where T : class
+    {
+        try
+        {
+            var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.Name != "ClaseId" && p.Name != "IdClassImage" && !p.PropertyType.IsClass)
+                .ToList();
+
+            var columns = string.Join(", ", properties.Select(p => p.Name));
+            var paramNames = string.Join(", ", properties.Select(p => $"@{p.Name}"));
+
+            var sql = $"INSERT INTO {tableName} ({columns}) VALUES ({paramNames}); SELECT SCOPE_IDENTITY();";
+
+            await using var connection = GetSqlConnection(connectionString);
+            await connection.OpenAsync();
+
+            await using var command = connection.CreateCommand();
+            command.CommandText = sql;
+
+            foreach (var prop in properties)
+            {
+                var value = prop.GetValue(entity);
+                command.Parameters.AddWithValue($"@{prop.Name}", value ?? DBNull.Value);
+            }
+
+            configureParameters?.Invoke(command, entity);
+
+            var result = await command.ExecuteScalarAsync();
+            if (result == null || result == DBNull.Value)
+                throw new InvalidOperationException($"Failed to insert into {tableName}. No identity generated.");
+
+            var generatedId = Convert.ToInt32(result);
+
+            var idProperty = typeof(T).GetProperty("ClaseId") ?? typeof(T).GetProperty("IdClassImage");
+            idProperty?.SetValue(entity, generatedId);
+
+            return entity;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Error inserting {typeof(T).Name} into {tableName}: {ex.Message}", ex);
+        }
+    }
+
 }
