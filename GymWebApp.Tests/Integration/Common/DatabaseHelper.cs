@@ -151,8 +151,32 @@ public static class DatabaseHelper
     {
         try
         {
+            var sqlCompatibleTypes = new HashSet<Type>
+            {
+                typeof(string),
+                typeof(int), typeof(int?),
+                typeof(decimal), typeof(decimal?),
+                typeof(DateTime), typeof(DateTime?),
+                typeof(bool), typeof(bool?),
+                typeof(Guid), typeof(Guid?),
+                typeof(byte), typeof(byte?),
+                typeof(double), typeof(double?),
+                typeof(float), typeof(float?),
+                typeof(long), typeof(long?),
+                typeof(short), typeof(short?),
+                typeof(char),
+                typeof(char?)
+            };
+
+            var excludePropertyNames = new HashSet<string>
+            {
+                "ClaseId", "IdClassImage", "RefreshTokenId", "UsuarioId",
+                "IdPreReserva", "IdReservacion", "IdHorario", "Id"
+            };
+
             var properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(p => p.Name != "ClaseId" && p.Name != "IdClassImage" && !p.PropertyType.IsClass)
+                .Where(p => !excludePropertyNames.Contains(p.Name))
+                .Where(p => sqlCompatibleTypes.Contains(p.PropertyType))
                 .ToList();
 
             var columns = string.Join(", ", properties.Select(p => p.Name));
