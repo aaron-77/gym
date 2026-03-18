@@ -36,7 +36,7 @@
                                     <option value="" selected disabled>Seleccione un instructor</option>
                                     @foreach (var instructor in ViewBag.Instructores)
                                     {
-                                        <option value="@instructor.Id">@instructor.Nombre</option>
+                                        <option value="@instructor.UsuarioID">@instructor.Nombre @instructor.Apellido</option>
                                     }
                                 </select>
                                 <div class="invalid-feedback">

@@ -25,48 +25,46 @@ namespace GymFrontend.Controllers
 
         [HttpGet]
         [Route("registrarClase")]
-        public IActionResult RegistroDeClases()
+        public async Task<IActionResult> RegistroDeClases()
         {
             try
             {
-                _logger?.LogInformation("Start ClasesController.RegistroDeClases");
-                // Datos de ejemplo para los combobox
-                ViewBag.Instructores = new List<dynamic>
-                {
-                    new { Id = 1, Nombre = "Alex Rodriguez" },
-                    new { Id = 2, Nombre = "Sarah Johnson" },
-                    new { Id = 3, Nombre = "Mike Williams" },
-                    new { Id = 4, Nombre = "Emma Davis" }
-                };
+                _logger?.LogInformation("Start ClasesController.RegistroDeClases (API Based)");
 
-                ViewBag.Intensidades = new List<dynamic>
-                {
-                    new { Id = 1, Nombre = "Baja" },
-                    new { Id = 2, Nombre = "Media" },
-                    new { Id = 3, Nombre = "Alta" },
-                    new { Id = 4, Nombre = "Extrema" }
-                };
+                // Consultar datos desde la API en paralelo
+                var taskInstructores = _clasesManager.ObtenerInstructores();
+                var taskIntensidades = _clasesManager.ObtenerNivelesDeIntensidad();
+                var taskDificultades = _clasesManager.ObtenerNivelesDeDificultad();
 
-                ViewBag.Dificultades = new List<dynamic>
-                {
-                    new { Id = 1, Nombre = "Principiante" },
-                    new { Id = 2, Nombre = "Intermedio" },
-                    new { Id = 3, Nombre = "Avanzado" },
-                    new { Id = 4, Nombre = "Experto" }
-                };
+                await Task.WhenAll(taskInstructores, taskIntensidades, taskDificultades);
+
+                var respInstructores = await taskInstructores;
+                var respIntensidades = await taskIntensidades;
+                var respDificultades = await taskDificultades;
+
+                ViewBag.Instructores = respInstructores.success ? respInstructores.payload : new List<QueryUser>();
+                ViewBag.Intensidades = respIntensidades.success ? respIntensidades.payload : new List<DTOIntensidad>();
+                ViewBag.Dificultades = respDificultades.success ? respDificultades.payload : new List<DTODificultad>();
 
                 return View();
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: RegistroDeClases | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] MÃ©todo: RegistroDeClases | LÃ­nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
+                _logger?.LogError(ex, "Error RegistroDeClases");
                 ViewBag.message = "Error al cargar la vista de registro de clases.";
+                
+                ViewBag.Instructores = new List<QueryUser>();
+                ViewBag.Intensidades = new List<DTOIntensidad>();
+                ViewBag.Dificultades = new List<DTODificultad>();
+                
                 return View();
             }
         }
 
         [Authorize(Roles = "empleado")]
+
         [HttpGet]
         [Route("registroClasesProgramadas")]
         public IActionResult RegistroDeClasesProgramadas()
@@ -77,7 +75,7 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: RegistroDeClasesProgramadas | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] Mï¿½todo: RegistroDeClasesProgramadas | Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 ViewBag.message = "Error al cargar la vista de clases programadas.";
                 return View();
@@ -85,6 +83,7 @@ namespace GymFrontend.Controllers
         }
 
         [Authorize(Roles = "empleado")]
+
         [HttpGet]
         [Route("inscripcionAClases")]
         public IActionResult InscripcionAClases()
@@ -95,9 +94,9 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: InscripcionAClases (GET) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] Mï¿½todo: InscripcionAClases (GET) | Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
-                ViewBag.message = "Error al cargar la vista de inscripción a clases.";
+                ViewBag.message = "Error al cargar la vista de inscripciï¿½n a clases.";
                 return View();
             }
         }
@@ -117,7 +116,7 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: InscribirAClase | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] Mï¿½todo: InscribirAClase | Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 
                 return StatusCode(500, new DTOResponse<int?> { success = false, message = "Error interno del servidor al inscribir a clase.", errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } } });
@@ -138,10 +137,10 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: ObtenerClases | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: ObtenerClases | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
-                    $"Parámetro - Activa: {activa} | " +
+                    $"Parï¿½metro - Activa: {activa} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 
@@ -163,10 +162,10 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: ObtenerClasesProgramadasPorId | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: ObtenerClasesProgramadasPorId | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
-                    $"Parámetro - IdClase: {idClase} | " +
+                    $"Parï¿½metro - IdClase: {idClase} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 
@@ -189,8 +188,8 @@ namespace GymFrontend.Controllers
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "Error ObtenerEstadosDeClasesProgramdas (ClasesController) ",$"MENSAJE DE ERROR: {ex.Message} \n STACKTRACE: {ex.StackTrace} \n EXCEPCION INTERNA {ex.InnerException} \n");
-                string logMessage = $"[ERROR] Método: ObtenerEstadosDeClasesProgramdas | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: ObtenerEstadosDeClasesProgramdas | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
@@ -218,8 +217,8 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: RegistrarClaseProgramada | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: RegistrarClaseProgramada | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
