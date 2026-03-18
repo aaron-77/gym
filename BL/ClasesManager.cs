@@ -41,6 +41,63 @@ namespace BL
             }
         }
 
+        public async Task<DTOResponse<List<DTODificultad>>> ObtenerNivelesDeDificultad()
+        {
+            try
+            {
+                string endpoint = "api/clases/nivelesDeDificultad";
+                string response = await _httpClient.get(endpoint);
+                return JsonSerializer.Deserialize<DTOResponse<List<DTODificultad>>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<List<DTODificultad>> { success = false, message = "Error de deserialización o respuesta vacía." };
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: ObtenerNivelesDeDificultad | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                return new DTOResponse<List<DTODificultad>> { success = false, message = "Error al obtener niveles de dificultad." };
+            }
+        }
+
+        public async Task<DTOResponse<List<DTOIntensidad>>> ObtenerNivelesDeIntensidad()
+        {
+            try
+            {
+                string endpoint = "api/clases/nivelesDeIntensidad";
+                string response = await _httpClient.get(endpoint);
+                return JsonSerializer.Deserialize<DTOResponse<List<DTOIntensidad>>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<List<DTOIntensidad>> { success = false, message = "Error de deserialización o respuesta vacía." };
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: ObtenerNivelesDeIntensidad | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                return new DTOResponse<List<DTOIntensidad>> { success = false, message = "Error al obtener niveles de intensidad." };
+            }
+        }
+
+        public async Task<DTOResponse<List<QueryUser>>> ObtenerInstructores()
+        {
+            try
+            {
+                string endpoint = "api/clases/instructores";
+                string response = await _httpClient.get(endpoint);
+                return JsonSerializer.Deserialize<DTOResponse<List<QueryUser>>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<List<QueryUser>> { success = false, message = "Error de deserialización o respuesta vacía." };
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: ObtenerInstructores | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                return new DTOResponse<List<QueryUser>> { success = false, message = "Error al obtener instructores." };
+            }
+        }
+
         public async Task<DTOResponse<List<DTOClaseProgramadaView>>> ObtenerClasesProgramadasPorId(int? idClase = null)
         {
             try

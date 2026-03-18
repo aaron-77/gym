@@ -22,6 +22,9 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using Serilog;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+
 
 try
 {
@@ -154,6 +157,20 @@ try
     builder.Services.AddSwaggerGen();
     Console.WriteLine("Swagger configurado");
 
+    // Rate Limiting
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.AddFixedWindowLimiter(policyName: "PublicPolicy", options =>
+        {
+            options.PermitLimit = 15;
+            options.Window = TimeSpan.FromMinutes(1);
+            options.QueueLimit = 0;
+            options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        });
+        
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    });
+
     builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
     {
         options.UseSqlServer(dbConnectionString);
@@ -189,7 +206,8 @@ try
     builder.Services.AddScoped<JwtTokenGenerator>();
     builder.Services.AddScoped<AuthService>();
     builder.Services.AddScoped<TokensService>();
-    builder.Services.AddScoped<ClasesService>();
+    builder.Services.AddScoped<IUsersService, UsersService>();
+    builder.Services.AddScoped<IClasesService, ClasesService>();
     Console.WriteLine("Servicios personalizados registrados");
 
     // Quartz
@@ -268,6 +286,12 @@ try
 
     app.UseCors("originsPolicyOne");
     Console.WriteLine("CORS aplicado");
+
+    if (app.Environment.IsStaging() || app.Environment.IsProduction())
+    {
+        app.UseRateLimiter();
+        Console.WriteLine("Rate Limiter aplicado (Staging/Production)");
+    }
 
     app.UseAuthentication();
     Console.WriteLine("Authentication middleware agregado");

@@ -15,6 +15,7 @@ using DataAccess.Infraestructure;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,7 @@ namespace API.Controllers
         private readonly UserRoleService _userRoleService;
         private readonly ServicioActualizacionesDeHorariosRealTime _servicioActualizaciones;
 
-        private readonly ClasesService _clasesService;
+        private readonly IClasesService _clasesService;
         private readonly ILogger<ClasesController> _logger;
 
         public ClasesController(
@@ -38,7 +39,7 @@ namespace API.Controllers
             HttpCustomClient httpCustomClient,
             UserRoleService userRoleService,
             ServicioActualizacionesDeHorariosRealTime servicioActualizaciones,
-            ClasesService clasesService
+            IClasesService clasesService
             , ILogger<ClasesController> logger
         )
         {
@@ -235,18 +236,14 @@ namespace API.Controllers
         /// Obtiene los niveles de dificultad disponibles
         /// </summary>
         [HttpGet("nivelesDeDificultad")]
+        [EnableRateLimiting("PublicPolicy")]
         public async Task<
-            ActionResult<DTOResponse<List<VNivelesDeDificultad>>>
+            ActionResult<DTOResponse<List<DTODificultad>>>
         > ObtenerNivelesDeDificultad()
         {
             try
             {
-                // Usar la vista v_nivelesDeDificultad definida en el procedimiento almacenado
-                var nivelesDificultad = await _context
-                    .VNivelesDeDificultads.FromSqlInterpolated(
-                        $"SELECT * FROM v_nivelesDeDificultad"
-                    )
-                    .ToListAsync();
+                var nivelesDificultad = await _clasesService.GetNivelesDeDificultadAsync();
 
                 return Ok(
                     ResponseManager.BuildResponse(
@@ -260,11 +257,10 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                // already logged
                 _logger?.LogError(ex, "Error ObtenerNivelesDeDificultad");
                 return StatusCode(
                     500,
-                    ResponseManager.BuildResponse<List<VNivelesDeDificultad>>(
+                    ResponseManager.BuildResponse<List<DTODificultad>>(
                         false,
                         500,
                         "Error al obtener niveles de dificultad",
@@ -282,18 +278,14 @@ namespace API.Controllers
         /// Obtiene los niveles de intensidad disponibles
         /// </summary>
         [HttpGet("nivelesDeIntensidad")]
+        [EnableRateLimiting("PublicPolicy")]
         public async Task<
-            ActionResult<DTOResponse<List<VNivelesDeIntensidad>>>
+            ActionResult<DTOResponse<List<DTOIntensidad>>>
         > ObtenerNivelesDeIntensidad()
         {
             try
             {
-                // Usar la vista v_nivelesDeIntensidad definida en el procedimiento almacenado
-                var nivelesIntensidad = await _context
-                    .VNivelesDeIntensidads.FromSqlInterpolated(
-                        $@"SELECT * FROM v_nivelesDeIntensidad"
-                    )
-                    .ToListAsync();
+                var nivelesIntensidad = await _clasesService.GetNivelesDeIntensidadAsync();
 
                 return Ok(
                     ResponseManager.BuildResponse(
@@ -311,7 +303,7 @@ namespace API.Controllers
                 _logger?.LogError(ex, logMessage);
                 return StatusCode(
                     500,
-                    ResponseManager.BuildResponse<List<VNivelesDeIntensidad>>(
+                    ResponseManager.BuildResponse<List<DTOIntensidad>>(
                         false,
                         500,
                         "Error al obtener niveles de intensidad",
@@ -322,6 +314,45 @@ namespace API.Controllers
                         null
                     )
                 );
+            }
+        }
+
+        /// <summary>
+        /// Obtiene los instructores disponibles (empleados)
+        /// </summary>
+        [HttpGet("instructores")]
+        [EnableRateLimiting("PublicPolicy")]
+        public async Task<ActionResult<DTOResponse<List<QueryUser>>>> ObtenerInstructores()
+        {
+            try
+            {
+                _logger.LogInformation("Start ObtenerInstructores public endpoint");
+                var usuarios = await _clasesService.GetInstructoresAsync();
+
+                var respuesta = ResponseManager.BuildResponse(
+                    success: true,
+                    httpCode: 200,
+                    message: "Consulta de instructores exitosa",
+                    errors: null,
+                    payload: usuarios
+                );
+
+                return Ok(respuesta);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ObtenerInstructores");
+                var respuesta = ResponseManager.BuildResponse(
+                    success: false,
+                    httpCode: 500,
+                    message: "Error al obtener instructores",
+                    errors: new List<ErrorModel>
+                    {
+                        new ErrorModel { message = ex.Message, propiedad = "NONE" },
+                    },
+                    payload: (List<QueryUser>)null
+                );
+                return StatusCode(500, respuesta);
             }
         }
 
@@ -512,10 +543,10 @@ namespace API.Controllers
 
                         if (modelo.idPreservaDeHorario.HasValue)
                         {
-                            int preReservasEliminadas =
-                                await _clasesService.eliminarPreReservaDeClaseProgramada(
-                                    modelo.idPreservaDeHorario
-                                );
+                            int preReservasEliminadas = await _context.PreReservasDeHorarios
+                                .Where(p => p.IdPreReserva == modelo.idPreservaDeHorario)
+                                .ExecuteDeleteAsync();
+
                             if (preReservasEliminadas <= 0)
                             {
                                 _logger?.LogWarning("No se pudo eliminar la pre-reserva asociada idPreserva={IdPreserva}", modelo.idPreservaDeHorario);
@@ -1028,9 +1059,9 @@ namespace API.Controllers
             int preReservasEliminadas = 0;
             try
             {
-                preReservasEliminadas = await _clasesService.eliminarPreReservaDeClaseProgramada(
-                    idPreReserva
-                );
+                preReservasEliminadas = await _context.PreReservasDeHorarios
+                    .Where(p => p.IdPreReserva == idPreReserva)
+                    .ExecuteDeleteAsync();
             }
             catch (Exception ex)
             {
@@ -1058,6 +1089,46 @@ namespace API.Controllers
                     preReservasEliminadas
                 )
             );
+        }
+
+        /// <summary>
+        /// Obtiene las clases activas con sus imágenes de banner para vista previa pública
+        /// </summary>
+        /// <returns>Lista de previews de clases activas</returns>
+        [HttpGet("preview")]
+        [EnableRateLimiting("PublicPolicy")]
+        public async Task<ActionResult<DTOResponse<List<DTOClasePreview>>>> GetPreview()
+        {
+            try
+            {
+                _logger.LogInformation("Start GetPreview public endpoint");
+                var previews = await _clasesService.GetPreviewDeClasesAsync();
+
+                var respuesta = ResponseManager.BuildResponse(
+                    success: true,
+                    httpCode: 200,
+                    message: "Previews de clases obtenidos correctamente",
+                    errors: null,
+                    payload: previews
+                );
+
+                return Ok(respuesta);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetPreview");
+                var respuesta = ResponseManager.BuildResponse<List<DTOClasePreview>>(
+                    success: false,
+                    httpCode: 500,
+                    message: "Error al obtener previews de clases",
+                    new List<ErrorModel>
+                    {
+                        new ErrorModel { message = ex.Message, propiedad = "NONE" },
+                    },
+                    null
+                );
+                return StatusCode(500, respuesta);
+            }
         }
     }
 }
