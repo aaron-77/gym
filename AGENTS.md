@@ -1,21 +1,32 @@
 # AGENTS.md - FitnessGym Project Guidelines
 
 ## External File Loading
+CRITICAL:
+Before developing any task, read these instructions to ensure you have the necessary context:
+This is a monorepo project and it contains multiple context files called agents.md, one for each project. Therefore, before performing any task, search for the relevant agents.md files based on the task, using the locations of the agents.md files found in the directories corresponding to each project, which are listed below.
 
-CRITICAL: When you encounter a file reference (e.g., @rules/general.md), use your Read tool to load it on a need-to-know basis. They're relevant to the SPECIFIC task at hand.
+CRITICAL: When you encounter a file reference (e.g., api/general.md,directory/*/AGENTS.md), use your Read tool to load it on a need-to-know basis. They're relevant to the SPECIFIC task at hand.
 
 Instructions:
 
 - Do NOT preemptively load all references - use lazy loading based on actual need
 - When loaded, treat content as mandatory instructions that override defaults
 - Follow references recursively when needed
-## agents.md extra context mapping
-If you work in API/* read API/AGENTS.md
-If you work in BL/* read BL/AGENTS.md
-If you work in DataAccess/* read DataAccess/AGENTS.md
-If you work in DTO/* read DataAccess/AGENTS.md
-If you work in GymFrontend/* read DataAccess/AGENTS.md
-If you work in GymWebApp.Tests/* read DataAccess/AGENTS.md
+- read "agents.md locations per proyect" section to locate the relevant agents.md files for the tasks
+## agents.md locations per proyect
+When working on tasks in the API project, use the agents.md file at [API/AGENTS.md]
+When working on tasks in the BL project, use the agents.md file at [BL/AGENTS.md]
+When working on tasks in the DataAccess project, use the agents.md file at [DataAccess/AGENTS.md]
+When working on tasks in the DTO project, use the agents.md file at [DTO/AGENTS.md]
+When working on frontend tasks, use the agents.md file at [GymFrontend/AGENTS.md]
+When working on testing tasks (GymWebApp.Tests), use the agents.md file at [GymWebApp.Tests/AGENTS.md]
+
+## Extra Context Directory
+
+Context files referenced in this document are stored in [extraContext/](extraContext/). This directory contains:
+- **code-style/**: Naming conventions, imports order, best practices, logging, database, configuration
+- **ejemplosArquitecturaYCodigoGenerales/**: Code pattern examples (async/await, error handling, response pattern, etc.)
+- **build-commands.md**: Build and test commands
 
 ## Rules
 
@@ -90,24 +101,6 @@ FitnessGym/
 | DataAccess | Entities, Repositories, Migrations | Persistence only |
 | DTO | Data Transfer Objects | Communication between layers |
 
-### Frontend MVC (GymFrontend)
-
-| Layer | Contains | Rule |
-|-------|----------|------|
-| Controllers | MVC Controllers | HTTP handling only, return Views |
-| Views | Razor Views | View rendering, minimal logic |
-| Views/Shared | Partial Views | Reusable UI components |
-| wwwroot/js | JavaScript | Client-side logic, API calls |
-| wwwroot/css | Styles | Bootstrap + custom CSS |
-
-### Controller Types (Frontend)
-
-| Type | Returns | Use Case |
-|------|---------|----------|
-| View | Razor View | Pages with UI |
-| API | JSON data | AJAX calls |
-| Operation | Redirect + Cookies | Form submissions |
-
 ## Dev  workflow
 
 ### Phase 1: Architecture & Planning
@@ -137,37 +130,17 @@ FitnessGym/
 
 ## Build Commands
 
-```bash
-# Build entire solution
-dotnet build
+See [extraContext/build-commands.md](extraContext/build-commands.md) for commands.
 
-# Build specific project
-dotnet build API/API.csproj
+## Skills (Auto-load based on context)
 
-# Run all tests
-dotnet test
-
-# Run single test by method name
-dotnet test --filter "FullyQualifiedName~Namespace.ClassName.MethodName"
-# Example: dotnet test --filter "FullyQualifiedName~GymWebApp.Tests.UnitTest1.Test1"
-
-# Run tests with coverage
-dotnet test --collect:"XPlat Code Coverage"
-```
+See [extraContext/skillsUsageInstructions.md](extraContext/skillsUsageInstructions.md) for the full skills reference.
 
 ## Code Style
 
-### Naming Conventions
-
-- **Classes/Methods/Enums:** PascalCase (`UsersManager`, `GetUsuariosAsync`)
-- **Parameters/Private fields:** camelCase (`userCredentials`, `_context`)
-- **DTOs:** `DTO` prefix (`DTOResponse<T>`, `DTOLoggedUser`)
-- **Interfaces:** `I` prefix (`IRefreshTokenRepository`)
-
-### Imports Order
-
-1. System namespaces, 2. Third-party (`Microsoft`, `Twilio`, `BCrypt`), 3. Project namespaces (`DTO.Dtos`, `BL`, `DataAccess.EntityFramework`)
-
+See [extraContext/code-style/naming-conventions.md](extraContext/code-style/naming-conventions.md)
+See [extraContext/code-style/imports-order.md](extraContext/code-style/imports-order.md)
+See [extraContext/code-style/best-practices.md](extraContext/code-style/best-practices.md)
 
 ### Type Usage
 
@@ -175,92 +148,42 @@ dotnet test --collect:"XPlat Code Coverage"
 - **Nullable** reference types enabled - use `?` for optional
 - Use `async/await` for I/O; return `Task<T>`
 
-See [ejemplosArquitecturaYCodigoGenerales/async-await.md](ejemplosArquitecturaYCodigoGenerales/async-await.md) for example.
-
-### Best Practices
-- use solid principles, clean code, and meaningful variable/method names
+See [extraContext/ejemplosArquitecturaYCodigoGenerales/async-await.md](extraContext/ejemplosArquitecturaYCodigoGenerales/async-await.md) for example.
 
 ## Error Handling
 
-See [ejemplosArquitecturaYCodigoGenerales/error-handling.md](ejemplosArquitecturaYCodigoGenerales/error-handling.md) for example.
+See [extraContext/ejemplosArquitecturaYCodigoGenerales/error-handling.md](extraContext/ejemplosArquitecturaYCodigoGenerales/error-handling.md) for example.
 
 ## Response Pattern
 
-See [ejemplosArquitecturaYCodigoGenerales/response-pattern.md](ejemplosArquitecturaYCodigoGenerales/response-pattern.md) for example.
+See [extraContext/ejemplosArquitecturaYCodigoGenerales/response-pattern.md](extraContext/ejemplosArquitecturaYCodigoGenerales/response-pattern.md) for example.
 
 ## Repository Pattern
 
-See [ejemplosArquitecturaYCodigoGenerales/repository-pattern.md](ejemplosArquitecturaYCodigoGenerales/repository-pattern.md) for example.
+See [extraContext/ejemplosArquitecturaYCodigoGenerales/repository-pattern.md](extraContext/ejemplosArquitecturaYCodigoGenerales/repository-pattern.md) for example.
 
 ## Validation
 
 Use DataAnnotations and custom `ValidationAttribute`:
 
-See [ejemplosArquitecturaYCodigoGenerales/validation.md](ejemplosArquitecturaYCodigoGenerales/validation.md) for example.
+See [extraContext/ejemplosArquitecturaYCodigoGenerales/validation.md](extraContext/ejemplosArquitecturaYCodigoGenerales/validation.md) for example.
 
 ## Controller Pattern
 
-See [ejemplosArquitecturaYCodigoGenerales/controller-pattern.md](ejemplosArquitecturaYCodigoGenerales/controller-pattern.md) for example.
+See [extraContext/ejemplosArquitecturaYCodigoGenerales/controller-pattern.md](extraContext/ejemplosArquitecturaYCodigoGenerales/controller-pattern.md) for example.
 
 ## Logging
 
-- **BL Layer:** `Console.WriteLine()`
-- **API Layer:** Serilog with `_logger.LogError(ex, message)`
-- Include method name, line number, exception type, message
+See [extraContext/code-style/logging.md](extraContext/code-style/logging.md)
 
 ## Testing
 
-See [ejemplosArquitecturaYCodigoGenerales/testing.md](ejemplosArquitecturaYCodigoGenerales/testing.md) for example.
+See [extraContext/ejemplosArquitecturaYCodigoGenerales/testing.md](extraContext/ejemplosArquitecturaYCodigoGenerales/testing.md) for example.
 
 ## Database
 
-- SQL Server with EF Core; migrations in `DataAccess/Migrations/`
-- Stored procedures in `bd/` directory
-- Use `dotnet ef` commands
+See [extraContext/code-style/database.md](extraContext/code-style/database.md)
 
-## Configuration
+## app Configuration
 
-- Environment variables for secrets (never commit)
-- `appsettings.json` for non-sensitive settings
-- JWT settings in `JwtSettings` DTO class
-
-## Skills (Auto-load based on context)
-
-IMPORTANT: When you detect any of these contexts, IMMEDIATELY read the corresponding skill file BEFORE writing any code. These are your coding standards.
-
-### Framework/Library Detection
-
-| Context | Skill File |
-|---------|------------|
-| xUnit Unit Tests | [.opencode/skills/xunit-dotnet/SKILL.md](.opencode/skills/xunit-dotnet/SKILL.md) |
-| xUnit Integration Tests | [.opencode/skills/xunit-integration/SKILL.md](.opencode/skills/xunit-integration/SKILL.md) |
-| Playwright E2E (.NET) | [.opencode/skills/playwright-dotnet/SKILL.md](.opencode/skills/playwright-dotnet/SKILL.md) |
-| SQL Server DB Testing | [.opencode/skills/sqlserver-dbtesting/SKILL.md](.opencode/skills/sqlserver-dbtesting/SKILL.md) |
-| React | [.opencode/skills/react-19/SKILL.md](.opencode/skills/react-19/SKILL.md) |
-| Next.js | [.opencode/skills/nextjs-15/SKILL.md](.opencode/skills/nextjs-15/SKILL.md) |
-| TypeScript | [.opencode/skills/typescript/SKILL.md](.opencode/skills/typescript/SKILL.md) |
-| Tailwind | [.opencode/skills/tailwind-4/SKILL.md](.opencode/skills/tailwind-4/SKILL.md) |
-| Zod | [.opencode/skills/zod-4/SKILL.md](.opencode/skills/zod-4/SKILL.md) |
-| Zustand | [.opencode/skills/zustand-5/SKILL.md](.opencode/skills/zustand-5/SKILL.md) |
-| AI SDK | [.opencode/skills/ai-sdk-5/SKILL.md](.opencode/skills/ai-sdk-5/SKILL.md) |
-| Django DRF | [.opencode/skills/django-drf/SKILL.md](.opencode/skills/django-drf/SKILL.md) |
-| Angular Core | [.opencode/skills/angular/core/SKILL.md](.opencode/skills/angular/core/SKILL.md) |
-| Angular Forms | [.opencode/skills/angular/forms/SKILL.md](.opencode/skills/angular/forms/SKILL.md) |
-| Angular Performance | [.opencode/skills/angular/performance/SKILL.md](.opencode/skills/angular/performance/SKILL.md) |
-| Angular Architecture | [.opencode/skills/angular/architecture/SKILL.md](.opencode/skills/angular/architecture/SKILL.md) |
-| Pytest | [.opencode/skills/pytest/SKILL.md](.opencode/skills/pytest/SKILL.md) |
-| Playwright (generic) | [.opencode/skills/playwright/SKILL.md](.opencode/skills/playwright/SKILL.md) |
-| Jira Task | [.opencode/skills/jira-task/SKILL.md](.opencode/skills/jira-task/SKILL.md) |
-| Jira Epic | [.opencode/skills/jira-epic/SKILL.md](.opencode/skills/jira-epic/SKILL.md) |
-| GitHub PR | [.opencode/skills/github-pr/SKILL.md](.opencode/skills/github-pr/SKILL.md) |
-| Skill Creator | [.opencode/skills/skill-creator/SKILL.md](.opencode/skills/skill-creator/SKILL.md) |
-| Bogus Factory | [.opencode/skills/bogus-factory/SKILL.md](.opencode/skills/bogus-factory/SKILL.md) |
-| Integration Test Base | [.opencode/skills/integration-test-base/SKILL.md](.opencode/skills/integration-test-base/SKILL.md) |
-| Test Helper | [.opencode/skills/test-helper/SKILL.md](.opencode/skills/test-helper/SKILL.md) |
-
-### How to use skills
-
-1. Detect context from user request or current file being edited
-2. Read the relevant SKILL.md file(s) BEFORE writing code
-3. Apply ALL patterns and rules from the skill
-4. Multiple skills can apply (e.g., react-19 + typescript + tailwind-4)
+See [extraContext/code-style/configuration.md](extraContext/code-style/configuration.md)

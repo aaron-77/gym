@@ -284,6 +284,17 @@ try
     
     Console.WriteLine("HTTPS Redirection configurado");
 
+    app.Use(async (context, next) =>
+    {
+        var origin = context.Request.Headers["Origin"].ToString();
+        if (!string.IsNullOrEmpty(origin) && origin != frontendUrl)
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return;
+        }
+        await next();
+    });
+
     app.UseCors("originsPolicyOne");
     Console.WriteLine("CORS aplicado");
 

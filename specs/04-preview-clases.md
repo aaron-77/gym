@@ -113,11 +113,11 @@ The system MUST restrict CORS to only allow requests from the configured fronten
 
 ## Scenario Summary
 
-| # | Name | Type | Expected Outcome |
-|---|------|------|-----------------|
-| 1 | Anonymous user requests class previews | Happy Path | 200 OK with list of DTOClasePreview |
-| 2 | No active classes exist | Edge Case | 200 OK with empty list |
-| 3 | Rate limit exceeded in Production | Error State | 429 Too Many Requests |
-| 4 | Rate limit bypassed in Development | Edge Case | 200 OK (no rate limiting) |
-| 5 | Request from allowed origin | Happy Path | 200 OK with CORS headers |
-| 6 | Request from disallowed origin | Error State | 403 Forbidden |
+| # | Name | Type | Expected Outcome | Status |
+|---|------|------|-----------------|--------|
+| 1 | Anonymous user requests class previews | Happy Path | 200 OK with list of DTOClasePreview | ✅ Implemented |
+| 2 | No active classes exist | Edge Case | 200 OK with empty list | ✅ Implemented |
+| 3 | Rate limit exceeded in Production | Error State | 429 Too Many Requests | ✅ Implemented |
+| 4 | Rate limit bypassed in Development | Edge Case | 200 OK (no rate limiting) | ✅ Implemented |
+| 5 | Request from allowed origin | Happy Path | 200 OK with CORS headers | 🔲 Pending |
+| 6 | Request from disallowed origin | Error State | 403 Forbidden | 🔲 Pending |

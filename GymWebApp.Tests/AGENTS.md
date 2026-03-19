@@ -88,7 +88,7 @@ GymWebApp.Tests/
 
 ## Ejemplo de relaciones
 
-Ver [Integration/skills-usage_example.md](Integration/skills_usage_example.md) para ver cómo se relacionan los skills entre sí.
+Ver [Integration/skills-usage_example.md](extraContext/skills_usage_example.md) para ver cómo se relacionan los skills entre sí.
 
 ## Comandos de tests
 

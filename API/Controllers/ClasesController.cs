@@ -1096,6 +1096,7 @@ namespace API.Controllers
         /// </summary>
         /// <returns>Lista de previews de clases activas</returns>
         [HttpGet("preview")]
+        [HttpOptions("preview")]
         [EnableRateLimiting("PublicPolicy")]
         public async Task<ActionResult<DTOResponse<List<DTOClasePreview>>>> GetPreview()
         {
