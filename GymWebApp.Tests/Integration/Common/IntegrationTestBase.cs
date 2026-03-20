@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Mvc.Testing;
 using GymWebApp.Tests.Integration.Common;
 
@@ -8,6 +9,7 @@ public abstract class IntegrationTestBase<TFactory> : IClassFixture<TFactory>, I
 {
     protected readonly TFactory Factory;
     protected readonly HttpClient Client;
+    protected string? _authToken;
 
     protected IntegrationTestBase(TFactory factory)
     {
@@ -27,5 +29,19 @@ public abstract class IntegrationTestBase<TFactory> : IClassFixture<TFactory>, I
     public virtual Task DisposeAsync()
     {
         return Task.CompletedTask;
+    }
+
+    protected async Task SetAuthHeaderAsync()
+    {
+        if (string.IsNullOrEmpty(_authToken))
+        {
+            _authToken = await Factory.AuthenticateAsync(Client);
+        }
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
+    }
+
+    protected void ClearAuthHeader()
+    {
+        Client.DefaultRequestHeaders.Authorization = null;
     }
 }

@@ -235,6 +235,7 @@ namespace API.Controllers
         /// <summary>
         /// Obtiene los niveles de dificultad disponibles
         /// </summary>
+        [Authorize]
         [HttpGet("nivelesDeDificultad")]
         [EnableRateLimiting("PublicPolicy")]
         public async Task<

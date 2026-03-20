@@ -1,5 +1,6 @@
 using Bogus;
 using DataAccess.EntityFramework;
+using DTOClaseDto = DTO.Dtos.DTOClase;
 
 namespace GymWebApp.Tests.Integration.Factories;
 
@@ -133,5 +134,27 @@ public static class ClaseFactory
 
         customRules?.Invoke(faker);
         return faker.Generate(cantidad);
+    }
+
+    /// <summary>
+    /// Creates a valid DTOClase for API requests
+    /// </summary>
+    public static DTOClaseDto CrearDTOClaseValida(Action<Faker<DTOClaseDto>>? customRules = null)
+    {
+        var faker = new Faker<DTOClaseDto>("es")
+            .RuleFor(c => c.ClaseID, 0)
+            .RuleFor(c => c.NombreClase, f => $"Clase Test {Guid.NewGuid():N}")
+            .RuleFor(c => c.Descripcion, f => f.Lorem.Sentences(2))
+            .RuleFor(c => c.DuracionEnMinutos, 60)
+            .RuleFor(c => c.FkIntensidad, f => f.PickRandom(1, 2, 3))
+            .RuleFor(c => c.FkDificultad, f => f.PickRandom(1, 2, 3))
+            .RuleFor(c => c.TiempoDeDescansoEnMinutos, 15)
+            .RuleFor(c => c.DuracionEnMinutosConDescansoIncluido, 75)
+            .RuleFor(c => c.Cupo, 20)
+            .RuleFor(c => c.FkEstadoClase, 1)
+            .RuleFor(c => c.InstructorId, f => (string?)null);
+
+        customRules?.Invoke(faker);
+        return faker.Generate();
     }
 }
