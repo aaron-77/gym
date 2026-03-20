@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using GymWebApp.Tests.Integration.Common;
-using GymWebApp.Tests.Integration.Factories;
+using GymWebApp.Tests.Factories;
 using FluentAssertions;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;

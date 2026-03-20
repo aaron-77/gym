@@ -2,7 +2,7 @@ using Bogus;
 using DataAccess.EntityFramework;
 using DTOClaseDto = DTO.Dtos.DTOClase;
 
-namespace GymWebApp.Tests.Integration.Factories;
+namespace GymWebApp.Tests.Factories;
 
 public static class ClaseFactory
 {

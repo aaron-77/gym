@@ -1,6 +1,6 @@
 using System.Net;
 using GymWebApp.Tests.Integration.Common;
-using GymWebApp.Tests.Integration.Factories;
+using GymWebApp.Tests.Factories;
 using FluentAssertions;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;

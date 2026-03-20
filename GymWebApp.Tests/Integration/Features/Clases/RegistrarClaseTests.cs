@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
-using GymWebApp.Tests.Integration.Factories;
+using GymWebApp.Tests.Factories;
 using DTO.Dtos;
 using FluentAssertions;
 using Xunit;
