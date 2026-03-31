@@ -12,6 +12,6 @@ namespace DTO.Dtos
         public int idClaseProgramadaNueva { get; set; }
 
         [Required]
-        public int idCliente { get; set; }
+        public string idCliente { get; set; }
     }
 }

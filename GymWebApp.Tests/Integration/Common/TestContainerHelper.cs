@@ -1,3 +1,4 @@
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Respawn;
 using Respawn.Graph;
@@ -60,12 +61,19 @@ public static class TestContainerHelper
 
             await WaitForContainerReady();
 
-            // First connect to master to restore the database
-            _connectionString = _msSqlContainer.GetConnectionString();
-            await RestoreDatabaseFromBackupAsync();
+            // Extraer solo el Server (host:puerto) del connection string original
+            var fullConnectionString = _msSqlContainer.GetConnectionString();
+            var serverPart = fullConnectionString.Split(';')[0]; // "Server=localhost,xxxxx"
 
-            // Now connect to FitnessCenterDB with timeout
-            _connectionString = _msSqlContainer.GetConnectionString() + ";Database=FitnessCenterDB;Connect Timeout=60;TrustServerCertificate=True";
+            // Construir connection string limpio para master (restaurar backup)
+            var masterConnectionString = $"{serverPart};Database=master;User Id=sa;Password={sqlPassword};TrustServerCertificate=True";
+
+            await using var masterConnection = DatabaseHelper.GetSqlConnection(masterConnectionString);
+            await masterConnection.OpenAsync();
+            await RestoreDatabaseFromBackupAsync(masterConnection);
+
+            // Construir connection string limpio para FitnessCenterDB (uso normal en tests)
+            _connectionString = $"{serverPart};Database=FitnessCenterDB;User Id=sa;Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
 
             await InitializeRespawnAsync();
 
@@ -175,17 +183,11 @@ public static class TestContainerHelper
         });
     }
 
-    private static async Task RestoreDatabaseFromBackupAsync()
+    private static async Task RestoreDatabaseFromBackupAsync(SqlConnection connection)
     {
-        // Use the mounted path inside the container
-        var backupPath = "/backup/respaldoporfindaws.bak";
-
+        var backupPath = "/backup/FitnessCenterDB20260331.bak";
         var databaseName = "FitnessCenterDB";
 
-        await using var connection = DatabaseHelper.GetSqlConnection(_connectionString!);
-        await connection.OpenAsync();
-
-        // First, get the file list from the backup to know logical names
         var fileListSql = "RESTORE FILELISTONLY FROM DISK = @BackupPath";
         
         List<string> moveStatements = new();
@@ -198,8 +200,8 @@ public static class TestContainerHelper
             await using var reader = await fileListCommand.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                var logicalName = reader.GetString(0); // LogicalName
-                var type = reader.GetString(2); // Type (D = data, L = log)
+                var logicalName = reader.GetString(0);
+                var type = reader.GetString(2);
                 
                 var extension = type == "L" ? ".ldf" : ".mdf";
                 var newPath = $"/var/opt/mssql/data/{databaseName}{extension}";
@@ -209,7 +211,6 @@ public static class TestContainerHelper
 
         var moveClause = string.Join(", ", moveStatements);
         
-        // Try RESTORE first (creates DB if not exists), then set to single user if exists
         var sql = $@"
             BEGIN TRY
                 RESTORE DATABASE [{databaseName}] FROM DISK = @BackupPath WITH REPLACE, RECOVERY, {moveClause};
@@ -220,7 +221,10 @@ public static class TestContainerHelper
             END CATCH;
         ";
 
-        await DatabaseHelper.ExecuteNonQueryAsync(_connectionString!, sql, new() { ["@BackupPath"] = backupPath });
+        await using var command = connection.CreateCommand();
+        command.CommandText = sql;
+        command.Parameters.AddWithValue("@BackupPath", backupPath);
+        await command.ExecuteNonQueryAsync();
     }
 
     public static async Task ResetDatabaseAsync()
@@ -234,5 +238,26 @@ public static class TestContainerHelper
         await using var connection = DatabaseHelper.GetSqlConnection(_connectionString);
         await connection.OpenAsync();
         await _respawner.ResetAsync(connection);
+
+        // Reseed identities for tables that are ignored by Respawn but need fresh seeds
+        //await ReseedIdentitiesAsync(connection);
+    }
+
+    private static async Task ReseedIdentitiesAsync(SqlConnection connection)
+    {
+        // Reseed identity columns for tables that have seed data
+        var reseedCommands = new[]
+        {
+            "DBCC CHECKIDENT ('inscripcionesDeClases', RESEED, 0)",
+            "DBCC CHECKIDENT ('clasesProgramadas', RESEED, 0)",
+            "DBCC CHECKIDENT ('horariosDeClasesProgramadas', RESEED, 0)"
+        };
+
+        foreach (var command in reseedCommands)
+        {
+            await using var cmd = connection.CreateCommand();
+            cmd.CommandText = command;
+            await cmd.ExecuteNonQueryAsync();
+        }
     }
 }

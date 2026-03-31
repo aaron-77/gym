@@ -1852,7 +1852,7 @@ GO
 CREATE PROCEDURE dbo.sp_procesoCompletoCancelarClasesProgramadas
     @idClaseProgramada int = null,
 	@fechaParaCancelar date = null,
-    @idEntrenador int = null,
+    @idEntrenador nvarchar(450) = null,
     @idClase int = null,
     @estadoDeOperaciones int OUTPUT
 AS

@@ -19,9 +19,11 @@ public class CitasApiWebApplicationFactory<TProgram> : WebApplicationFactory<TPr
     {
         ConfigHelper.RegisterConfig("appsettings.Testing.json");
         _connectionString = TestContainerHelper.ConnectionString;
+        Console.WriteLine($"[FACTORY] Connection string: {_connectionString}");
         
         // Set environment variables before the API starts
         Environment.SetEnvironmentVariable("DB_CONNECTION_STRING", _connectionString);
+        Console.WriteLine($"[FACTORY] DB_CONNECTION_STRING env var: {Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")}");
         Environment.SetEnvironmentVariable("SECRET_TOKEN_KEY", "__development_secret_key_replace_for_production__");
     }
 
@@ -58,6 +60,10 @@ public class CitasApiWebApplicationFactory<TProgram> : WebApplicationFactory<TPr
 
     public async Task<string> AuthenticateAsync(HttpClient client)
     {
+
+        try
+        {
+
         var testUserSection = ConfigHelper.GetSection("TestUser");
         var email = testUserSection["Email"] ?? throw new InvalidOperationException("Test user email not configured");
         var password = testUserSection["Password"] ?? throw new InvalidOperationException("Test user password not configured");
@@ -85,5 +91,11 @@ public class CitasApiWebApplicationFactory<TProgram> : WebApplicationFactory<TPr
 
         _authToken = content.payload.AccessToken;
         return _authToken;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 }

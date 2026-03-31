@@ -123,7 +123,7 @@ public static class DatabaseHelper
         if (result == null || result == DBNull.Value)
             return default;
 
-        return (T)result;
+        return (T)Convert.ChangeType(result, typeof(T));
     }
 
     /// <summary>

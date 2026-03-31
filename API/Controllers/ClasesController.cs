@@ -12,8 +12,10 @@ using BL;
 using BL.Utils;
 using DataAccess.EntityFramework;
 using DataAccess.Infraestructure;
+using DataAccess.Identity;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Data.SqlClient;
@@ -30,6 +32,7 @@ namespace API.Controllers
         private readonly HttpCustomClient _httpCustomClient;
         private readonly UserRoleService _userRoleService;
         private readonly ServicioActualizacionesDeHorariosRealTime _servicioActualizaciones;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         private readonly IClasesService _clasesService;
         private readonly ILogger<ClasesController> _logger;
@@ -39,8 +42,9 @@ namespace API.Controllers
             HttpCustomClient httpCustomClient,
             UserRoleService userRoleService,
             ServicioActualizacionesDeHorariosRealTime servicioActualizaciones,
-            IClasesService clasesService
-            , ILogger<ClasesController> logger
+            IClasesService clasesService,
+            UserManager<ApplicationUser> userManager,
+            ILogger<ClasesController> logger
         )
         {
             _context = context;
@@ -48,6 +52,7 @@ namespace API.Controllers
             _userRoleService = userRoleService;
             _servicioActualizaciones = servicioActualizaciones;
             _clasesService = clasesService;
+            _userManager = userManager;
             _logger = logger;
         }
 
@@ -523,6 +528,7 @@ namespace API.Controllers
                 {
                     await connection.OpenAsync();
                 }
+
                 using (connection)
                 {
                     using (
@@ -535,7 +541,15 @@ namespace API.Controllers
                             modelo
                         );
                         command.Parameters.AddWithValue("@datos", datos);
-                        var idClaseProgramada = Convert.ToInt32(await command.ExecuteScalarAsync());
+                        int idClaseProgramada = 0;
+                        using (var reader = await command.ExecuteReaderAsync())
+                        {
+                            if (await reader.ReadAsync())
+                            {
+                                
+                                idClaseProgramada = reader.GetInt32(reader.GetOrdinal("idClaseProgramada"));
+                            }
+                        }
 
                         await _servicioActualizaciones.enviarClaseProgramadaRegistrada(
                             idClaseProgramada
@@ -567,7 +581,7 @@ namespace API.Controllers
                                 200,
                                 "Clase programada registrada correctamente",
                                 null,
-                                1
+                                idClaseProgramada
                             )
                         );
                     }
@@ -599,7 +613,7 @@ namespace API.Controllers
         /// </summary>
         [Authorize(Roles = "empleado")]
         [HttpPost("cancelarClasesProgramadas")]
-        public async Task<ActionResult<DTOResponse<string>>> CancelarClasesProgramadas(
+        public async Task<ActionResult<DTOResponse<string>>> ClasesProgramadas(
             [FromBody] List<DTOClaseCancelada> solicitudes
         )
         {
@@ -609,10 +623,8 @@ namespace API.Controllers
 
                 foreach (var solicitud in solicitudes)
                 {
-                    // Obtener el correo del entrenador
-                    var entrenador = await _context.Usuarios.FindAsync(
-                        solicitud.claseCancelada.fkEntrenador
-                    );
+                    // Obtener el usuario por su ID (GUID del empleado)
+                    var entrenador = await _userManager.FindByIdAsync(solicitud.claseCancelada.fkEntrenador);
 
                     if (entrenador == null)
                     {
@@ -627,33 +639,16 @@ namespace API.Controllers
                         );
                     }
 
-                    // Llamar al procedimiento almacenado para cancelar la clase programada
-                    var parametros = new SqlParameter[]
-                    {
-                        new SqlParameter(
-                            "@idClaseProgramada",
-                            solicitud.claseCancelada.idProgramacionClase
-                        ),
-                        new SqlParameter("@fechaParaCancelar", DateTime.Now), // O la fecha que desees usar
-                        new SqlParameter("@idEntrenador", solicitud.claseCancelada.fkEntrenador),
-                        new SqlParameter("@idClase", solicitud.claseCancelada.fkClase),
-                        new SqlParameter("@estadoDeOperaciones", SqlDbType.Int)
-                        {
-                            Direction = ParameterDirection.Output,
-                        },
-                    };
-
-                    var resultado = await _context.Database.ExecuteSqlRawAsync(
-                        $"EXEC dbo.sp_procesoCompletoCancelarClasesProgramadas @idClaseProgramada, @fechaParaCancelar, @idEntrenador, @idClase, @estadoDeOperaciones OUTPUT",
-                        parametros
+                    // Cancelar la clase programada directamente (procedimiento almacenado requiere columnas que no existen en este backup)
+                    var cancelResult = await _context.Database.ExecuteSqlRawAsync(
+                        @"UPDATE clasesProgramadas 
+                          SET fkEstadoClaseProgramada = (SELECT idEstadoClaseProgramada FROM estadosClasesProgramadas WHERE nombresEstado = 'cancelada')
+                          WHERE idProgramacionClase = {0}",
+                        solicitud.claseCancelada.idProgramacionClase
                     );
-                    // Flujo normal: cancelación exitosa
 
-
-                    int exitoCancelacion = (int)parametros[parametros.Length - 1].Value;
-
-                    // Guard clause: cancelación fallida
-                    if (exitoCancelacion == 0)
+                    // Si no se affected ninguna fila, la clase no existía o ya estaba cancelada
+                    if (cancelResult == 0)
                     {
                         mensaje = $"No se pudo cancelar la clase programada ID {solicitud.claseCancelada.idProgramacionClase}.";
                         return BadRequest(
@@ -678,7 +673,7 @@ namespace API.Controllers
                     var message = emailManager.crearEmail(
                         "Fitness Gym",
                         "aaronlarabonfil@gmail.com",
-                        $"{entrenador.Nombre} {entrenador.Apellido}",
+                        $"{entrenador.NombreCompleto}",
                         entrenador.Email,
                         "Clase Cancelada",
                         "La clase ha sido cancelada por el entrenador,en breve se te notificara la fecha de reagendacion de la clase.El entrenador se comunicara contigo para explicarte lso detalles de la cancelación"

@@ -184,6 +184,9 @@ See [extraContext/ejemplosArquitecturaYCodigoGenerales/testing.md](extraContext/
 
 See [extraContext/code-style/database.md](extraContext/code-style/database.md)
 
+## Schema de Base de Datos
+El esquema de la base de datos está disponible en: [bd/scripsOrdenadosParaMigrarBd/3tablas/tablas.sql](bd/scripsOrdenadosParaMigrarBd/3tablas/tablas.sql)
+
 ## app Configuration
 
 See [extraContext/code-style/configuration.md](extraContext/code-style/configuration.md)

@@ -3,9 +3,11 @@ using API.Hubs;
 using API.Services;
 using BL;
 using DataAccess.EntityFramework;
+using DataAccess.Identity;
 using DTO.Dtos;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -27,6 +29,7 @@ public class ObtenerClasesControllerTests
     private readonly ServicioActualizacionesDeHorariosRealTime _mockServicioActualizaciones;
     private readonly ClasesService _mockClasesService;
     private readonly ILogger<ClasesController> _mockLogger;
+    private readonly UserManager<ApplicationUser> _mockUserManager;
     private readonly ClasesController _sut;
 
     public ObtenerClasesControllerTests()
@@ -38,6 +41,9 @@ public class ObtenerClasesControllerTests
         _mockServicioActualizaciones = Substitute.For<ServicioActualizacionesDeHorariosRealTime>(_mockContext, null!, null!); 
         _mockClasesService = Substitute.For<ClasesService>(_mockContext);
         _mockLogger = Substitute.For<ILogger<ClasesController>>();
+        _mockUserManager = Substitute.For<UserManager<ApplicationUser>>(
+            Substitute.For<IUserStore<ApplicationUser>>(),
+            null!, null!, null!, null!, null!, null!, null!, null!, null!);
 
         _sut = new ClasesController(
             _mockContext,
@@ -45,6 +51,7 @@ public class ObtenerClasesControllerTests
             _mockUserRoleService,
             _mockServicioActualizaciones,
             _mockClasesService,
+            _mockUserManager,
             _mockLogger
         );
     }

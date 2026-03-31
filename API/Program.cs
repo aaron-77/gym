@@ -23,6 +23,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Serilog;
 using Microsoft.AspNetCore.RateLimiting;
+using System.Diagnostics;
 using System.Threading.RateLimiting;
 
 
@@ -69,7 +70,14 @@ try
     Console.WriteLine("Configuracion JWT cargada");
 
     // Connection String
-    var dbConnectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+    var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+    
+    if (string.IsNullOrEmpty(dbConnectionString))
+    {
+        dbConnectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+    }
+    Console.WriteLine($"[PROGRAM] Connection string usado: {dbConnectionString}");
+
     bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
     string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
     aspnetcore_urls = aspnetcore_urls.Trim().ToLowerInvariant();
@@ -80,9 +88,9 @@ try
     }
     if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
     {
-        dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
-        
+        dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ?? dbConnectionString;
     }
+    Console.WriteLine($"[PROGRAM] Connection string final: {dbConnectionString}");
     Console.WriteLine("Connection string configurado");
 
     var jwtSettings = jwtSection.Get<JwtSettings>();

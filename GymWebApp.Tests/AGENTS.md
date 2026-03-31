@@ -14,7 +14,7 @@
 | **TSQL** | Pruebas de lógica en BD |
 | **TestContainers** | BD de pruebas en Docker |
 
-## Estructura de pruebas
+## Arquitectura de pruebas
 
 ```
 GymWebApp.Tests/
@@ -53,6 +53,9 @@ GymWebApp.Tests/
 - **ESTRICTAMENTE SEGÚN SPEC**: Solo se deben implementar las pruebas definidas explícitamente en la especificación. No se acepta ninguna prueba que no esté documentada en el spec al momento de la implementación.
 - **PROHIBIDO TESTS DERIVADOS**: Bajo ninguna circunstancia se deben implementar pruebas secundarias, adicionales o "casos que se te ocurran" sin preguntar.
 - **CONSULTA OBLIGATORIA**: Si identificás la necesidad de cubrir un escenario extra, debés proponerlo primero y esperar la confirmación del usuario antes de implementar.
+- **NO HELPERS EN TESTS**: No escribir lógica de helper dentro de las clases de prueba. Usar clases helper existentes (DatabaseHelper, TestContainerHelper) o crear nuevas en GymWebApp.Tests/Integration/Helpers/ y llamarlas desde los tests.
+- **CONSULTAR ESQUEMA DE BD**: Antes de escribir queries SQL, verificar los nombres de columnas 
+  en bd/scripsOrdenadosParaMigrarBd/3tablas/tablas.sql. El esquema es la fuente de verdad.
 
 ## Directorios de Especificaciones (Requerimientos)
 
@@ -86,9 +89,48 @@ GymWebApp.Tests/
 - **Respawn Helper:** Limpieza de BD entre tests
 - **Database Helper:** Obtener conexiones y DbContext
 
+## Patron de dependencia de arquitectura de pruebas
+
+Para garantizar la estabilidad y el aislamiento de los tests de integración, se debe seguir estrictamente este esquema de jerarquía y flujo de inicialización.
+
+### 1. Jerarquía de Ejecución
+1.  **Infraestructura (Nivel 0):** `TestContainerHelper`. Es el cimiento que levanta Docker (SQL Server). Debe inicializarse antes que cualquier componente dependiente de la base de datos.
+2.  **Hosting (Nivel 1):** `WebApplicationFactory`. Levanta la API en memoria. Depende de la conexión provista por el Nivel 0.
+3.  **Orquestación (Nivel 2):** **Clase de Prueba**. Hereda de `IClassFixture<TFactory>`. Es la encargada de asegurar que el entorno esté listo en su constructor.
+4.  **Soporte (Nivel 3):** `Factories` (Generación de datos via Bogus) y `DatabaseHelper` (Consultas SQL directas para validación).
+
+### 2. Ejemplo de Implementación (Patrón Constructor)
+Toda prueba de integración debe inicializar el contenedor y resetear la base de datos (limpieza + seed) directamente en el constructor para asegurar un estado limpio:
+
+```csharp
+public class RegistrarClaseProgramadaTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+{
+    private readonly ClasesApiWebApplicationFactory<Program> _factory;
+    private readonly HttpClient _client;
+
+    public RegistrarClaseProgramadaTests(ClasesApiWebApplicationFactory<Program> factory)
+    {
+        _factory = factory;
+        _client = factory.CreateClient();
+        
+        // ORDEN CRÍTICO:
+        // 1. Asegurar que el contenedor Docker esté arriba
+        TestContainerHelper.InitializeAsync().GetAwaiter().GetResult();
+        
+        // 2. Limpiar tablas y ejecutar Seed Data
+        TestContainerHelper.ResetDatabaseAsync().GetAwaiter().GetResult();
+    }
+}
+```
+
+### 3. Uso de Componentes
+*   **`ClaseFactory`**: Único punto de verdad para la creación de objetos de prueba (`Clase` o `DTOClase`) usando Bogus. Evita la creación manual de DTOs en las pruebas.
+*   **`AuthenticateAsync`**: Método del factory para obtener tokens JWT válidos según el rol necesario (ej. `empleado`).
+*   **`DatabaseHelper`**: Utilizado exclusivamente en la fase de **Assert** para realizar `SELECT` directos y confirmar que los cambios del API se impactaron correctamente en el almacenamiento físico.
+
 ## Ejemplo de relaciones
 
-Ver [Integration/skills-usage_example.md](extraContext/skills_usage_example.md) para ver cómo se relacionan los skills entre sí.
+Ver [extraContext/skillsUsageInstructions.md] para ver cómo se relacionan los skills entre sí.
 
 ## Comandos de tests
 
