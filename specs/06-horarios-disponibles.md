@@ -74,3 +74,51 @@ The endpoint MUST reject requests without valid authentication.
 - GIVEN no authentication token is provided
 - WHEN a POST request is made to `/api/horarios/preReservarHorario`
 - THEN the response status MUST be `401 Unauthorized`
+
+### Requirement 6: Authenticated User Creates Pre-Reservation with idClase
+
+The endpoint MUST create a pre-reservation when valid idClase is provided.
+
+#### Scenario: Authenticated employee creates pre-reservation with class
+
+- GIVEN there is at least one valid `idHoraLaboral` in `horasLaborales`
+- AND there is at least one `Clase` in the database
+- AND the user is authenticated with a valid JWT token with "empleado" role
+- WHEN a POST request is made to `/api/horarios/preReservarHorario` with `idClase` set to a valid ClaseID
+- THEN the response status MUST be `200 OK`
+- AND the `success` field MUST be `true`
+- AND the `payload` MUST contain an integer greater than 0
+- AND the `idClase` field in the `preReservasDeHorario` table MUST match the provided value (verified via direct DB query)
+
+### Requirement 7: Authenticated User Creates Pre-Reservation with idEntrenador
+
+The endpoint MUST create a pre-reservation when valid idEntrenador is provided.
+
+#### Scenario: Authenticated employee creates pre-reservation with trainer
+
+- GIVEN there is at least one valid `idHoraLaboral` in `horasLaborales`
+- AND there is at least one user with "empleado" role in `AspNetUsers`
+- AND the user is authenticated with a valid JWT token with "empleado" role
+- WHEN a POST request is made to `/api/horarios/preReservarHorario` with `idEntrenador` set to a valid user ID
+- THEN the response status MUST be `200 OK`
+- AND the `success` field MUST be `true`
+- AND the `payload` MUST contain an integer greater than 0
+- AND the `idEntrenador` field in the `preReservasDeHorario` table MUST match the provided value (verified via direct DB query)
+
+### Requirement 8: Authenticated User Creates Pre-Reservation with Complete Data
+
+The endpoint MUST create a pre-reservation when all fields (idClase + idEntrenador) are provided.
+
+#### Scenario: Authenticated employee creates pre-reservation with all fields
+
+- GIVEN there are valid records in `horasLaborales`, `Clases`, and `AspNetUsers` (empleado)
+- AND the user is authenticated with a valid JWT token with "empleado" role
+- WHEN a POST request is made to `/api/horarios/preReservarHorario` with:
+  - `idClase`: a valid ClaseID
+  - `idEntrenador`: a valid user ID with "empleado" role
+  - `idHoraLaboral`: a valid idHora
+  - `fechaTentativa`: a future date
+- THEN the response status MUST be `200 OK`
+- AND the `success` field MUST be `true`
+- AND the `payload` MUST contain an integer greater than 0
+- AND all fields in the `preReservasDeHorario` table MUST match the provided values (verified via direct DB query)
