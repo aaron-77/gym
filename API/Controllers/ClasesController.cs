@@ -1074,6 +1074,23 @@ namespace API.Controllers
             [FromBody] int idPreReserva
         )
         {
+            // Sad Path 2: Range validation for idPreReserva
+            if (idPreReserva <= 0)
+            {
+                return BadRequest(
+                    ResponseManager.BuildResponse<int>(
+                        false,
+                        400,
+                        "Datos inválidos",
+                        new List<ErrorModel>
+                        {
+                            new ErrorModel { propiedad = "idPreReserva", message = "El idPreReserva debe ser mayor a 0." },
+                        },
+                        0
+                    )
+                );
+            }
+
             int preReservasEliminadas = 0;
             try
             {
@@ -1094,6 +1111,23 @@ namespace API.Controllers
                             new ErrorModel { propiedad = "NONE", message = ex.Message },
                         },
                         null
+                    )
+                );
+            }
+
+            // Sad Path 3: Not found handling
+            if (preReservasEliminadas == 0)
+            {
+                return NotFound(
+                    ResponseManager.BuildResponse<int>(
+                        false,
+                        404,
+                        "No se encontró la pre-reserva especificada",
+                        new List<ErrorModel>
+                        {
+                            new ErrorModel { propiedad = "idPreReserva", message = $"No existe una pre-reserva con el ID {idPreReserva}." },
+                        },
+                        0
                     )
                 );
             }
