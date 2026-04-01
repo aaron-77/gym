@@ -268,5 +268,307 @@ public class PreReservarHorarioApiTests : IntegrationTestBase<CitasApiWebApplica
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
+    /// <summary>
+    /// REQUISITO: Intento de crear pre-reserva duplicada con clase y entrenador
+    /// Escenario: Ya existe pre-reserva con misma combinación (idClase, idEntrenador, fecha, hora)
+    /// GIVEN: Hay una pre-reserva existente con idClase + idEntrenador + fecha + hora
+    /// AND el usuario está autenticado con token JWT válido
+    /// WHEN: POST /api/horarios/preReservarHorario con la MISMA combinación
+    /// THEN: Returns 500 Internal Server Error
+    /// AND solo existe UN registro en preReservasDeHorario (verificado en BD)
+    /// </summary>
+    [Fact]
+    public async Task PreReservarHorario_WithDuplicateClassAndTrainer_ReturnsError()
+    {
+        // Arrange
+        await TestContainerHelper.ResetDatabaseAsync();
+        await SetAuthHeaderAsync();
+
+        // Get valid ids
+        var horaResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            "SELECT TOP 1 idHora FROM horasLaborales",
+            new());
+        var idHora = Convert.ToInt32(horaResult["idHora"]);
+
+        var claseResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            "SELECT TOP 1 ClaseID FROM Clases",
+            new());
+        var idClase = Convert.ToInt32(claseResult["ClaseID"]);
+
+        var trainerResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            @"SELECT TOP 1 u.Id FROM AspNetUsers u 
+              INNER JOIN AspNetUserRoles ur ON u.Id = ur.UserId 
+              INNER JOIN AspNetRoles r ON ur.RoleId = r.Id 
+              WHERE r.Name = 'empleado'",
+            new());
+        var idEntrenador = trainerResult["Id"]!.ToString()!;
+
+        var testDate = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
+
+        // Act 1: Create first pre-reservation (should succeed)
+        var preReserva1 = new DTOPreReservaDeHorario
+        {
+            idUsuarioQueReserva = "test-user-1",
+            fechaTentativa = testDate,
+            idHoraLaboral = idHora,
+            idClase = idClase,
+            idEntrenador = idEntrenador
+        };
+        var response1 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva1);
+        response1.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result1 = await response1.Content.ReadFromJsonAsync<DTOResponse<int>>();
+        result1!.payload.Should().BeGreaterThan(0);
+
+        // Act 2: Try to create duplicate (should fail)
+        var preReserva2 = new DTOPreReservaDeHorario
+        {
+            idUsuarioQueReserva = "test-user-2",
+            fechaTentativa = testDate,
+            idHoraLaboral = idHora,
+            idClase = idClase,
+            idEntrenador = idEntrenador
+        };
+        var response2 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva2);
+
+        // Assert
+        response2.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        
+        var result2 = await response2.Content.ReadFromJsonAsync<DTOResponse<int>>();
+        result2.Should().NotBeNull();
+        result2!.success.Should().BeFalse();
+
+        // Verify only one record exists in database
+        var countResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            @"SELECT COUNT(*) as Total FROM preReservasDeHorario 
+              WHERE fkHoraLaboral = @IdHora 
+                AND fechaReservada = @Fecha 
+                AND idClase = @IdClase 
+                AND idEntrenador = @IdEntrenador",
+            new() { 
+                ["@IdHora"] = idHora, 
+                ["@Fecha"] = testDate.ToDateTime(TimeOnly.MinValue),
+                ["@IdClase"] = idClase,
+                ["@IdEntrenador"] = idEntrenador
+            });
+        var count = Convert.ToInt32(countResult["Total"]);
+        count.Should().Be(1, "Only one pre-reservation should exist for this combination");
+    }
+
+    /// <summary>
+    /// REQUISITO: Intento de crear pre-reserva duplicada solo con clase (sin entrenador)
+    /// Escenario: Ya existe pre-reserva con misma combinación (idClase, fecha, hora) sin entrenador
+    /// GIVEN: Hay una pre-reserva existente con idClase + null idEntrenador + fecha + hora
+    /// AND el usuario está autenticado con token JWT válido
+    /// WHEN: POST /api/horarios/preReservarHorario con la MISMA combinación
+    /// THEN: Returns 500 Internal Server Error
+    /// </summary>
+    [Fact]
+    public async Task PreReservarHorario_WithDuplicateClassOnly_ReturnsError()
+    {
+        // Arrange
+        await TestContainerHelper.ResetDatabaseAsync();
+        await SetAuthHeaderAsync();
+
+        var horaResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            "SELECT TOP 1 idHora FROM horasLaborales",
+            new());
+        var idHora = Convert.ToInt32(horaResult["idHora"]);
+
+        var claseResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            "SELECT TOP 1 ClaseID FROM Clases",
+            new());
+        var idClase = Convert.ToInt32(claseResult["ClaseID"]);
+
+        var testDate = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
+
+        // Act 1: Create first pre-reservation with class only
+        var preReserva1 = new DTOPreReservaDeHorario
+        {
+            idUsuarioQueReserva = "test-user-1",
+            fechaTentativa = testDate,
+            idHoraLaboral = idHora,
+            idClase = idClase,
+            idEntrenador = ""
+        };
+        var response1 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva1);
+        response1.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Act 2: Try to create duplicate
+        var preReserva2 = new DTOPreReservaDeHorario
+        {
+            idUsuarioQueReserva = "test-user-2",
+            fechaTentativa = testDate,
+            idHoraLaboral = idHora,
+            idClase = idClase,
+            idEntrenador = ""
+        };
+        var response2 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva2);
+
+        // Assert
+        response2.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        
+        // Verify only one record exists
+        var countResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            @"SELECT COUNT(*) as Total FROM preReservasDeHorario 
+              WHERE fkHoraLaboral = @IdHora 
+                AND fechaReservada = @Fecha 
+                AND idClase = @IdClase 
+                AND (idEntrenador = '' OR idEntrenador IS NULL)",
+            new() { 
+                ["@IdHora"] = idHora, 
+                ["@Fecha"] = testDate.ToDateTime(TimeOnly.MinValue),
+                ["@IdClase"] = idClase
+            });
+        var count = Convert.ToInt32(countResult["Total"]);
+        count.Should().Be(1);
+    }
+
+    /// <summary>
+    /// REQUISITO: Intento de crear pre-reserva duplicada solo con entrenador (sin clase)
+    /// Escenario: Ya existe pre-reserva con misma combinación (idEntrenador, fecha, hora) sin clase
+    /// GIVEN: Hay una pre-reserva existente con null idClase + idEntrenador + fecha + hora
+    /// AND el usuario está autenticado con token JWT válido
+    /// WHEN: POST /api/horarios/preReservarHorario con la MISMA combinación
+    /// THEN: Returns 500 Internal Server Error
+    /// </summary>
+    [Fact]
+    public async Task PreReservarHorario_WithDuplicateTrainerOnly_ReturnsError()
+    {
+        // Arrange
+        await TestContainerHelper.ResetDatabaseAsync();
+        await SetAuthHeaderAsync();
+
+        var horaResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            "SELECT TOP 1 idHora FROM horasLaborales",
+            new());
+        var idHora = Convert.ToInt32(horaResult["idHora"]);
+
+        var trainerResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            @"SELECT TOP 1 u.Id FROM AspNetUsers u 
+              INNER JOIN AspNetUserRoles ur ON u.Id = ur.UserId 
+              INNER JOIN AspNetRoles r ON ur.RoleId = r.Id 
+              WHERE r.Name = 'empleado'",
+            new());
+        var idEntrenador = trainerResult["Id"]!.ToString()!;
+
+        var testDate = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
+
+        // Act 1: Create first pre-reservation with trainer only
+        var preReserva1 = new DTOPreReservaDeHorario
+        {
+            idUsuarioQueReserva = "test-user-1",
+            fechaTentativa = testDate,
+            idHoraLaboral = idHora,
+            idClase = null,
+            idEntrenador = idEntrenador
+        };
+        var response1 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva1);
+        response1.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Act 2: Try to create duplicate
+        var preReserva2 = new DTOPreReservaDeHorario
+        {
+            idUsuarioQueReserva = "test-user-2",
+            fechaTentativa = testDate,
+            idHoraLaboral = idHora,
+            idClase = null,
+            idEntrenador = idEntrenador
+        };
+        var response2 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva2);
+
+        // Assert
+        response2.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        
+        // Verify only one record exists
+        var countResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            @"SELECT COUNT(*) as Total FROM preReservasDeHorario 
+              WHERE fkHoraLaboral = @IdHora 
+                AND fechaReservada = @Fecha 
+                AND idClase IS NULL 
+                AND idEntrenador = @IdEntrenador",
+            new() { 
+                ["@IdHora"] = idHora, 
+                ["@Fecha"] = testDate.ToDateTime(TimeOnly.MinValue),
+                ["@IdEntrenador"] = idEntrenador
+            });
+        var count = Convert.ToInt32(countResult["Total"]);
+        count.Should().Be(1);
+    }
+
+    /// <summary>
+    /// REQUISITO: Intento de crear pre-reserva duplicada sin clase ni entrenador
+    /// Escenario: Ya existe pre-reserva con misma combinación (fecha, hora) sin clase ni entrenador
+    /// GIVEN: Hay una pre-reserva existente con null idClase + '' idEntrenador + fecha + hora
+    /// AND el usuario está autenticado con token JWT válido
+    /// WHEN: POST /api/horarios/preReservarHorario con la MISMA combinación
+    /// THEN: Returns 500 Internal Server Error
+    /// </summary>
+    [Fact]
+    public async Task PreReservarHorario_WithDuplicateMinimalData_ReturnsError()
+    {
+        // Arrange
+        await TestContainerHelper.ResetDatabaseAsync();
+        await SetAuthHeaderAsync();
+
+        var horaResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            "SELECT TOP 1 idHora FROM horasLaborales",
+            new());
+        var idHora = Convert.ToInt32(horaResult["idHora"]);
+
+        var testDate = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
+
+        // Act 1: Create first pre-reservation with minimal data
+        var preReserva1 = new DTOPreReservaDeHorario
+        {
+            idUsuarioQueReserva = "test-user-1",
+            fechaTentativa = testDate,
+            idHoraLaboral = idHora,
+            idClase = null,
+            idEntrenador = ""
+        };
+        var response1 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva1);
+        response1.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        // Act 2: Try to create duplicate
+        var preReserva2 = new DTOPreReservaDeHorario
+        {
+            idUsuarioQueReserva = "test-user-2",
+            fechaTentativa = testDate,
+            idHoraLaboral = idHora,
+            idClase = null,
+            idEntrenador = ""
+        };
+        var response2 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva2);
+
+        // Assert
+        response2.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+        
+        // Verify only one record exists
+        var countResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            @"SELECT COUNT(*) as Total FROM preReservasDeHorario 
+              WHERE fkHoraLaboral = @IdHora 
+                AND fechaReservada = @Fecha 
+                AND idClase IS NULL 
+                AND (idEntrenador = '' OR idEntrenador IS NULL)",
+            new() { 
+                ["@IdHora"] = idHora, 
+                ["@Fecha"] = testDate.ToDateTime(TimeOnly.MinValue)
+            });
+        var count = Convert.ToInt32(countResult["Total"]);
+        count.Should().Be(1);
+    }
+
     #endregion
 }

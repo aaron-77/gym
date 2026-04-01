@@ -122,3 +122,55 @@ The endpoint MUST create a pre-reservation when all fields (idClase + idEntrenad
 - AND the `success` field MUST be `true`
 - AND the `payload` MUST contain an integer greater than 0
 - AND all fields in the `preReservasDeHorario` table MUST match the provided values (verified via direct DB query)
+
+### Requirement 9: Duplicate Pre-Reservation with Class and Trainer Returns Error
+
+The endpoint MUST reject requests that attempt to create a pre-reservation with the same (idClase, idEntrenador, fechaReservada, idHoraLaboral) combination that already exists.
+
+#### Scenario: Duplicate pre-reservation with class and trainer
+
+- GIVEN there is a valid pre-reservation with idClase, idEntrenador, fechaReservada, and idHoraLaboral
+- AND the user is authenticated with a valid JWT token with "empleado" role
+- WHEN a POST request is made to `/api/horarios/preReservarHorario` with the same combination
+- THEN the response status MUST be `500 Internal Server Error`
+- AND the `success` field MUST be `false`
+- AND only ONE record MUST exist in `preReservasDeHorario` for that combination (verified via direct DB query)
+
+### Requirement 10: Duplicate Pre-Reservation with Class Only Returns Error
+
+The endpoint MUST reject requests that attempt to create a pre-reservation with the same (idClase, fechaReservada, idHoraLaboral) combination when idEntrenador is null or empty.
+
+#### Scenario: Duplicate pre-reservation with class only
+
+- GIVEN there is a valid pre-reservation with idClase, null/empty idEntrenador, fechaReservada, and idHoraLaboral
+- AND the user is authenticated with a valid JWT token with "empleado" role
+- WHEN a POST request is made to `/api/horarios/preReservarHorario` with the same combination
+- THEN the response status MUST be `500 Internal Server Error`
+- AND the `success` field MUST be `false`
+- AND only ONE record MUST exist in `preReservasDeHorario` for that combination (verified via direct DB query)
+
+### Requirement 11: Duplicate Pre-Reservation with Trainer Only Returns Error
+
+The endpoint MUST reject requests that attempt to create a pre-reservation with the same (idEntrenador, fechaReservada, idHoraLaboral) combination when idClase is null.
+
+#### Scenario: Duplicate pre-reservation with trainer only
+
+- GIVEN there is a valid pre-reservation with null idClase, idEntrenador, fechaReservada, and idHoraLaboral
+- AND the user is authenticated with a valid JWT token with "empleado" role
+- WHEN a POST request is made to `/api/horarios/preReservarHorario` with the same combination
+- THEN the response status MUST be `500 Internal Server Error`
+- AND the `success` field MUST be `false`
+- AND only ONE record MUST exist in `preReservasDeHorario` for that combination (verified via direct DB query)
+
+### Requirement 12: Duplicate Pre-Reservation with Minimal Data Returns Error
+
+The endpoint MUST reject requests that attempt to create a pre-reservation with the same (fechaReservada, idHoraLaboral) combination when both idClase and idEntrenador are null/empty.
+
+#### Scenario: Duplicate pre-reservation with minimal data
+
+- GIVEN there is a valid pre-reservation with null idClase, empty/null idEntrenador, fechaReservada, and idHoraLaboral
+- AND the user is authenticated with a valid JWT token with "empleado" role
+- WHEN a POST request is made to `/api/horarios/preReservarHorario` with the same combination
+- THEN the response status MUST be `500 Internal Server Error`
+- AND the `success` field MUST be `false`
+- AND only ONE record MUST exist in `preReservasDeHorario` for that combination (verified via direct DB query)
