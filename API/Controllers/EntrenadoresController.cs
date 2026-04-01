@@ -22,17 +22,37 @@ namespace API.Controllers
         [Route("api/obtenerEntrenadoresDisponibles")]
         public async Task<IActionResult> ObtenerEntrenadoresDisponibles([FromQuery] string fechaInicio) // Receive string to preserve local time passed from frontend
         {
+            // Validación de formato: null, empty o no parseable
+            if (string.IsNullOrWhiteSpace(fechaInicio) || !DateTime.TryParse(fechaInicio, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out DateTime parsedFecha))
+            {
+                var badResponse = BL.Utils.ResponseManager.BuildResponse<List<QueryUser>>(
+                    success: false,
+                    httpCode: 400,
+                    message: "La fecha tiene un formato incorrecto",
+                    errors: null,
+                    payload: null
+                );
+                return BadRequest(badResponse);
+            }
+
+            // Validación de fecha pasada
+            if (parsedFecha.Date < DateTime.Now.Date)
+            {
+                var badResponse = BL.Utils.ResponseManager.BuildResponse<List<QueryUser>>(
+                    success: false,
+                    httpCode: 400,
+                    message: "La fecha no puede ser anterior a la fecha actual",
+                    errors: null,
+                    payload: null
+                );
+                return BadRequest(badResponse);
+            }
+
             DTOResponse<List<QueryUser>> respuesta; // NUEVO: Declarar DTOResponse
 
             try
             {
                 _logger.LogInformation("Start ObtenerEntrenadoresDisponibles fechaInicio={Fecha}", fechaInicio);
-                // Parse incoming date string preserving local time
-                DateTime parsedFecha;
-                if (!DateTime.TryParse(fechaInicio, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal, out parsedFecha))
-                {
-                    parsedFecha = DateTime.Parse(fechaInicio, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeLocal);
-                }
                 // Call stored procedure with parsed local date
                 List<QueryUser> entrenadores = await _db.userSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_obtenerEntrenadoresDisponibles @fechaReferencia={parsedFecha}").ToListAsync();
                 _logger.LogInformation("BUSCANDO ENTRENADORES DISPONIBLES EN: {Fecha}", parsedFecha);
