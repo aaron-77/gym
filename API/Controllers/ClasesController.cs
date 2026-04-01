@@ -16,6 +16,7 @@ using DataAccess.Infraestructure;
 using DataAccess.Identity;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -1148,7 +1149,7 @@ namespace API.Controllers
         /// </summary>
         /// <returns>Lista de previews de clases activas</returns>
         [HttpGet("preview")]
-        [HttpOptions("preview")]
+        [EnableCors("public")]
         [EnableRateLimiting("PublicPolicy")]
         public async Task<ActionResult<DTOResponse<List<DTOClasePreview>>>> GetPreview()
         {

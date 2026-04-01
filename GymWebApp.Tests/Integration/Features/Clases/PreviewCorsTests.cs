@@ -9,8 +9,7 @@ namespace GymWebApp.Tests.Integration.Features.Clases;
 /// <summary>
 /// Integration tests for CORS behavior on /api/Clases/preview endpoint.
 /// 
-/// GREEN Phase: Tests verify CORS configuration works correctly when the origin
-/// matches the configured origin from "EndPoints:frontend:external".
+/// Tests verify that the public CORS policy allows any origin to access the endpoint.
 /// </summary>
 [Collection("PreviewClasesCorsIntegrationTests")]
 public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
@@ -18,8 +17,8 @@ public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Pro
     private readonly ClasesApiWebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
     
-    // Origin configured in appsettings.Testing.json as EndPoints:frontend:external
-    private const string AllowedOrigin = "http://localhost:5062";
+    // With EnableCors("public"), any origin is allowed
+    private const string AnyOrigin = "http://any-origin.com";
 
     public PreviewCorsTests(ClasesApiWebApplicationFactory<Program> factory)
     {
@@ -49,10 +48,9 @@ public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Pro
     }
 
     /// <summary>
-    /// Scenario 1: Request from allowed origin should return CORS headers.
+    /// Scenario: Request from any origin should return CORS headers.
     /// 
-    /// GREEN Phase: With origin matching the configuration, CORS middleware
-    /// should return Access-Control-Allow-Origin header.
+    /// With EnableCors("public"), any origin is allowed.
     /// </summary>
     [Fact]
     public async Task CorsAllowedOrigin_ReturnsOkWithCorsHeaders()
@@ -64,25 +62,22 @@ public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Pro
         var imagen = ClaseFactory.CrearImagenParaBanner(saved.ClaseId);
         await DatabaseHelper.NonQueryAsyncTyped(connectionString, "ImagesForClases", imagen);
 
-        // Create client that simulates request from allowed origin
-        var clientWithOrigin = CreateClientWithOrigin(AllowedOrigin);
+        // Create client that simulates request from any origin
+        var clientWithOrigin = CreateClientWithOrigin(AnyOrigin);
 
-        // Act - request from allowed origin
+        // Act - request from any origin
         var response = await clientWithOrigin.GetAsync("/api/Clases/preview");
 
         // Assert - Response should be OK
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        // Assert - CORS headers MUST be present (GREEN phase: should pass)
+        // Assert - CORS headers MUST be present
         response.Headers.Should().ContainKey("Access-Control-Allow-Origin");
-        response.Headers.GetValues("Access-Control-Allow-Origin").Should().Contain(AllowedOrigin);
+        response.Headers.GetValues("Access-Control-Allow-Origin").Should().Contain(AnyOrigin);
     }
 
     /// <summary>
-    /// Verifies that GET requests from allowed origin include CORS headers.
-    /// 
-    /// GREEN Phase: With origin matching the configuration, GET requests
-    /// should return Access-Control-Allow-Origin header.
+    /// Verifies that GET requests from any origin include CORS headers.
     /// </summary>
     [Fact]
     public async Task CorsAllowedOrigin_IncludesAllowMethodsAndHeaders()
@@ -93,7 +88,7 @@ public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Pro
             f => f.RuleFor(c => c.NombreClase, "CORS Test Class"));
         await DatabaseHelper.NonQueryAsyncTyped(connectionString, "Clases", clase);
 
-        var clientWithOrigin = CreateClientWithOrigin(AllowedOrigin);
+        var clientWithOrigin = CreateClientWithOrigin(AnyOrigin);
 
         // Act - Make GET request with Origin header (not OPTIONS)
         var response = await clientWithOrigin.GetAsync("/api/Clases/preview");
@@ -101,7 +96,7 @@ public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Pro
         // Assert - Verify CORS header is present
         
         response.Headers.Should().ContainKey("Access-Control-Allow-Origin");
-        response.Headers.GetValues("Access-Control-Allow-Origin").Should().Contain(AllowedOrigin);
+        response.Headers.GetValues("Access-Control-Allow-Origin").Should().Contain(AnyOrigin);
     }
 
     /// <summary>
@@ -123,30 +118,6 @@ public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Pro
         
         // Assert - No CORS headers expected when no Origin in request
         response.Headers.Should().NotContainKey("Access-Control-Allow-Origin");
-    }
-
-    /// <summary>
-    /// Scenario 6: Request from disallowed origin should return 403 Forbidden.
-    /// 
-    /// RED Phase: This test MUST FAIL because:
-    /// - ASP.NET Core CORS by default does not return 403 for disallowed origins
-    /// - It simply omits CORS headers but returns 200 OK
-    /// - The spec explicitly requires 403 Forbidden for untrusted origins
-    /// - We need custom middleware to enforce this behavior
-    /// </summary>
-    [Fact]
-    public async Task CorsDisallowedOrigin_ReturnsForbidden()
-    {
-        // Arrange - use origin NOT in allowed list
-        var disallowedOrigin = "http://malicious-site.com";
-        var clientWithOrigin = CreateClientWithOrigin(disallowedOrigin);
-
-        // Act - request from disallowed origin
-        var response = await clientWithOrigin.GetAsync("/api/Clases/preview");
-
-        // Assert - RED Phase: Will FAIL because ASP.NET Core returns 200 OK without CORS headers
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden,
-            "Requests from untrusted origins should be forbidden with 403");
     }
 }
 

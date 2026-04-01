@@ -142,14 +142,21 @@ try
     // CORS
     builder.Services.AddCors(options =>
     {
-        options.AddPolicy("originsPolicyOne", policy =>
-        {
-            policy.WithOrigins(frontendUrl)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
-        });
+    options.AddPolicy("originsPolicyOne", policy =>
+    {
+        policy.WithOrigins(frontendUrl)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
+
+    options.AddPolicy("public", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
     Console.WriteLine("CORS configurado");
 
     // Controllers y SignalR
@@ -294,6 +301,13 @@ try
 
     app.Use(async (context, next) =>
     {
+        // Excluir endpoint público de preview del bloqueo de origins
+        if (context.Request.Path.StartsWithSegments("/api/Clases/preview"))
+        {
+            await next();
+            return;
+        }
+        
         var origin = context.Request.Headers["Origin"].ToString();
         if (!string.IsNullOrEmpty(origin) && origin != frontendUrl)
         {
@@ -305,27 +319,6 @@ try
 
     app.UseCors("originsPolicyOne");
     Console.WriteLine("CORS aplicado");
-
-    // Strip CORS headers from OPTIONS preflight requests for /api/Clases/preview
-    app.Use(async (context, next) =>
-    {
-        if (context.Request.Path.StartsWithSegments("/api/Clases/preview") &&
-            context.Request.Method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
-        {
-            // Remove CORS headers added by UseCors middleware
-            context.Response.Headers.Remove("Access-Control-Allow-Origin");
-            context.Response.Headers.Remove("Access-Control-Allow-Methods");
-            context.Response.Headers.Remove("Access-Control-Allow-Headers");
-            context.Response.Headers.Remove("Access-Control-Allow-Credentials");
-            context.Response.Headers.Remove("Access-Control-Max-Age");
-            
-            // Return 200 OK without CORS headers
-            context.Response.StatusCode = StatusCodes.Status200OK;
-            return;
-        }
-        await next();
-    });
-    Console.WriteLine("CORS strip middleware applied for OPTIONS /api/Clases/preview");
 
     if (app.Environment.IsStaging() || app.Environment.IsProduction())
     {
