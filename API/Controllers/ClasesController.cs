@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Net.Http;
@@ -889,8 +890,29 @@ namespace API.Controllers
         [HttpGet("obtenerClasesProgramadasPorId")]
         public async Task<
             ActionResult<DTOResponse<List<DTOClaseProgramadaView>>>
-        > obtenerClasesProgramadasPorId([FromQuery] int idClase)
+        > obtenerClasesProgramadasPorId([FromQuery][Range(1, int.MaxValue)] int? idClase)
         {
+            // Validar el modelo
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(
+                    ResponseManager.BuildResponse<List<DTOClaseProgramadaView>>(
+                        false,
+                        400,
+                        "Datos inválidos",
+                        ModelState
+                            .Values.SelectMany(v => v.Errors)
+                            .Select(e => new ErrorModel
+                            {
+                                propiedad = "NONE",
+                                message = e.ErrorMessage,
+                            })
+                            .ToList(),
+                        null
+                    )
+                );
+            }
+
             try
             {
                 var resultado = await _context
