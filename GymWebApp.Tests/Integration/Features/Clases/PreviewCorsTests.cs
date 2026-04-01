@@ -73,7 +73,7 @@ public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Pro
 
         // Assert - CORS headers MUST be present
         response.Headers.Should().ContainKey("Access-Control-Allow-Origin");
-        response.Headers.GetValues("Access-Control-Allow-Origin").Should().Contain(AnyOrigin);
+        response.Headers.GetValues("Access-Control-Allow-Origin").Should().Contain("*");
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Pro
         // Assert - Verify CORS header is present
         
         response.Headers.Should().ContainKey("Access-Control-Allow-Origin");
-        response.Headers.GetValues("Access-Control-Allow-Origin").Should().Contain(AnyOrigin);
+        response.Headers.GetValues("Access-Control-Allow-Origin").Should().Contain("*");
     }
 
     /// <summary>
