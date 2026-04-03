@@ -100,14 +100,23 @@ namespace API.Controllers
             }
 
 
-            [Authorize(Roles = "empleado,cliente")]
-            [HttpGet]
-            [Route("api/getParametrosDeMedicion")]
-            public async Task<IActionResult> getParametrosDeMedicion([FromQuery] string idUsuario)
-            {
-                DTOResponse<List<DTOParametroDeMedicion>> respuesta = new DTOResponse<List<DTOParametroDeMedicion>>();
+        [Authorize(Roles = "empleado,cliente")]
+        [HttpGet]
+        [Route("api/getParametrosDeMedicion")]
+        public async Task<IActionResult> getParametrosDeMedicion([FromQuery][ValidGuid] string idUsuario)
+        {
+            DTOResponse<List<DTOParametroDeMedicion>> respuesta = new DTOResponse<List<DTOParametroDeMedicion>>();
 
-                // Agregar validación de GUID
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ResponseManager.BuildResponse<List<DTOParametroDeMedicion>>(
+                    false, 400, "Datos inválidos",
+                    ModelState.SelectMany(x => x.Value.Errors)
+                        .Select(x => new ErrorModel { message = x.ErrorMessage }).ToList(),
+                    null));
+            }
+
+            // Agregar validación de GUID
                 if (string.IsNullOrWhiteSpace(idUsuario) || !Guid.TryParse(idUsuario, out _))
                 {
                     return BadRequest(ResponseManager.BuildResponse<List<DTOParametroDeMedicion>>(
@@ -132,9 +141,18 @@ namespace API.Controllers
         [Authorize(Roles = "cliente")]
         [HttpGet]
         [Route("api/progresoDeUsuario")]
-        public async Task<IActionResult> getProgresoDelCliente([FromQuery] string idUsuario)
+        public async Task<IActionResult> getProgresoDelCliente([FromQuery][ValidGuid] string idUsuario)
         {
             DTOResponse<List<DTOItemProgreso>> respuesta = new DTOResponse<List<DTOItemProgreso>>();
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ResponseManager.BuildResponse<List<DTOItemProgreso>>(
+                    false, 400, "Datos inválidos",
+                    ModelState.SelectMany(x => x.Value.Errors)
+                        .Select(x => new ErrorModel { message = x.ErrorMessage }).ToList(),
+                    null));
+            }
 
             // Agregar validación de GUID
             if (string.IsNullOrWhiteSpace(idUsuario) || !Guid.TryParse(idUsuario, out _))
@@ -171,11 +189,20 @@ namespace API.Controllers
         [Authorize(Roles = "empleado,cliente")]
         [HttpGet]
         [Route("api/obtenerAñosConActividadDelCliente")]
-        public async Task<IActionResult> getAñosActivo([FromQuery] string idCliente)
+        public async Task<IActionResult> getAñosActivo([FromQuery][ValidGuid] string idCliente)
         {
             
             HttpResponseAñosActivo respuesta = new HttpResponseAñosActivo();
             List<int> añosActivo = new List<int>();
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ResponseManager.BuildResponse<List<int>>(
+                    false, 400, "Datos inválidos",
+                    ModelState.SelectMany(x => x.Value.Errors)
+                        .Select(x => new ErrorModel { message = x.ErrorMessage }).ToList(),
+                    null));
+            }
 
             // Agregar validación de GUID
             if (string.IsNullOrWhiteSpace(idCliente) || !Guid.TryParse(idCliente, out _))
@@ -234,11 +261,11 @@ namespace API.Controllers
         [Authorize(Roles = "cliente,empleado")]
         [HttpGet("api/obtenerDetallesDeProgreso")]
         public async Task<ActionResult<DTOResponse<MedidasConMetas>>> ObtenerDetallesDeProgresoApi(
-            [FromQuery] string idCliente,
+            [FromQuery][ValidGuid] string idCliente,
             [FromQuery] int idParametro,
             [FromQuery] int? idEjercicio,
-            [FromQuery] string? espaciadoTemporal,
-            [FromQuery] string? tipoDeBusqueda,
+            [FromQuery][ValidEspaciadoTemporal] string? espaciadoTemporal,
+            [FromQuery][ValidTipoDeBusqueda] string? tipoDeBusqueda,
             [FromQuery] DateTime? fechaDeInicio = null,
             [FromQuery] DateTime? fechaFin = null,
             [FromQuery] bool conDetalle = false,
@@ -247,6 +274,15 @@ namespace API.Controllers
             [FromQuery] DateTime? fechaDeCreacion = null
         )
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ResponseManager.BuildResponse<MedidasConMetas>(
+                    false, 400, "Datos inválidos",
+                    ModelState.SelectMany(x => x.Value.Errors)
+                        .Select(x => new ErrorModel { message = x.ErrorMessage }).ToList(),
+                    null));
+            }
+
             try
             {
                 // Validaciones de parámetros
