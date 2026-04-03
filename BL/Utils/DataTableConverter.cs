@@ -13,13 +13,13 @@ namespace BL.Utils
             {
                 // Crear un nuevo DataTable
                 DataTable convertedTable =   new DataTable();
-                // Agregar una columna llamada "Value" para almacenar los enteros
-                convertedTable.Columns.Add("Value", typeof(int));
+                // Agregar una columna llamada "mesOAño" para almacenar los enteros (coincide con UnidadDeTiempo tipo)
+                convertedTable.Columns.Add("mesOAño", typeof(int));
                 // Recorrer cada arreglo de enteros en la lista
                 foreach (var intValue in dataList)
                 {
                         var row = convertedTable.NewRow();
-                            row["Value"] = intValue;
+                            row["mesOAño"] = intValue;
                             convertedTable.Rows.Add(row);   
                 }
                 return convertedTable;

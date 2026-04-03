@@ -98,4 +98,35 @@ public class CitasApiWebApplicationFactory<TProgram> : WebApplicationFactory<TPr
             throw;
         }
     }
+
+    public async Task<string> AuthenticateAsClienteAsync(HttpClient client)
+    {
+        var testUserSection = ConfigHelper.GetSection("TestUserCliente");
+        var email = testUserSection["Email"] ?? throw new InvalidOperationException("Test cliente email not configured");
+        var password = testUserSection["Password"] ?? throw new InvalidOperationException("Test cliente password not configured");
+        
+        var loginRequest = new UserCredentials
+        {
+            correo = email,
+            contrasena = password
+        };
+
+        var response = await client.PostAsJsonAsync("/api/autenticar", loginRequest);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException($"Authentication failed. Status: {response.StatusCode}, Content: {errorContent}");
+        }
+
+        var content = await response.Content.ReadFromJsonAsync<DTOResponse<DTOLoggedUser>>();
+        
+        if (content?.payload?.AccessToken == null)
+        {
+            throw new InvalidOperationException("Authentication response does not contain access token");
+        }
+
+        _authToken = content.payload.AccessToken;
+        return _authToken;
+    }
 }

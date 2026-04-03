@@ -56,6 +56,19 @@ namespace BL.Utils
             try
             {
                 List<DatosMetaDeMedida> datosMetaDeMedidaList = new List<DatosMetaDeMedida>();
+                
+                // Handle null cases
+                if (meses == null || meses.Length == 0)
+                {
+                    return datosMetaDeMedidaList; // Return empty list
+                }
+                
+                // Ensure años is not null or empty
+                if (años == null || años.Length == 0)
+                {
+                    años = new int[] { 0 }; // Default year to avoid index issues
+                }
+                
                 for (int index = 0; index < meses.Length; index++)
                 {
                     DatosMetaDeMedida datosMetaDeMedida = new DatosMetaDeMedida();
