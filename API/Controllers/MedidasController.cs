@@ -2,6 +2,7 @@
 using BL.Utils;
 using DataAccess.EntityFramework;
 using DataAccess.Identity;
+using DTO.CustomValidations;
 using DTO.Dtos;
 
 using Microsoft.AspNetCore.Authorization;
@@ -102,13 +103,21 @@ namespace API.Controllers
             [Authorize(Roles = "empleado,cliente")]
             [HttpGet]
             [Route("api/getParametrosDeMedicion")]
-            public async Task<IActionResult> getParametrosDeMedicion([FromQuery] int idUsuario)
-        {
-            
-            DTOResponse<List<DTOParametroDeMedicion>> respuesta = new DTOResponse<List<DTOParametroDeMedicion>>();
-
-            try
+            public async Task<IActionResult> getParametrosDeMedicion([FromQuery] string idUsuario)
             {
+                DTOResponse<List<DTOParametroDeMedicion>> respuesta = new DTOResponse<List<DTOParametroDeMedicion>>();
+
+                // Agregar validación de GUID
+                if (string.IsNullOrWhiteSpace(idUsuario) || !Guid.TryParse(idUsuario, out _))
+                {
+                    return BadRequest(ResponseManager.BuildResponse<List<DTOParametroDeMedicion>>(
+                        false, 400, "El idUsuario debe tener formato GUID válido",
+                        new List<ErrorModel> { new ErrorModel { propiedad = "idUsuario", message = "El idUsuario debe tener formato GUID válido" } },
+                        null));
+                }
+
+                try
+                {
                 var listadoParametrosDeMedicion = await _db.parametrosDeMedicionSP.FromSqlInterpolated($@"EXEC sp_obtenerParametrosDeMedicionConUnidad").ToListAsync();
                 respuesta = ResponseManager.BuildResponse(true, 200, "consulta exitosa", null,listadoParametrosDeMedicion);
             }
@@ -126,6 +135,16 @@ namespace API.Controllers
         public async Task<IActionResult> getProgresoDelCliente([FromQuery] string idUsuario)
         {
             DTOResponse<List<DTOItemProgreso>> respuesta = new DTOResponse<List<DTOItemProgreso>>();
+
+            // Agregar validación de GUID
+            if (string.IsNullOrWhiteSpace(idUsuario) || !Guid.TryParse(idUsuario, out _))
+            {
+                return BadRequest(ResponseManager.BuildResponse<List<DTOItemProgreso>>(
+                    false, 400, "El idUsuario debe tener formato GUID válido",
+                    new List<ErrorModel> { new ErrorModel { propiedad = "idUsuario", message = "El idUsuario debe tener formato GUID válido" } },
+                    null));
+            }
+
             try
             {
                 // Llamar al stored procedure para obtener ultimas medidas
@@ -157,6 +176,16 @@ namespace API.Controllers
             
             HttpResponseAñosActivo respuesta = new HttpResponseAñosActivo();
             List<int> añosActivo = new List<int>();
+
+            // Agregar validación de GUID
+            if (string.IsNullOrWhiteSpace(idCliente) || !Guid.TryParse(idCliente, out _))
+            {
+                return BadRequest(ResponseManager.BuildResponse<List<int>>(
+                    false, 400, "El idCliente debe tener formato GUID válido",
+                    new List<ErrorModel> { new ErrorModel { propiedad = "idCliente", message = "El idCliente debe tener formato GUID válido" } },
+                    null));
+            }
+
             try
             {
                 añosActivo = await _db.Medidas.Where(m => m.FkUsuario == idCliente).Select(m => m.FechaDeCreacion.Value.Year).Distinct().ToListAsync();
@@ -220,12 +249,49 @@ namespace API.Controllers
         {
             try
             {
+                // Validaciones de parámetros
+                if (string.IsNullOrWhiteSpace(idCliente) || !Guid.TryParse(idCliente, out _))
+                {
+                    return BadRequest(ResponseManager.BuildResponse<MedidasConMetas>(
+                        false, 400, "El idCliente debe tener formato GUID válido",
+                        new List<ErrorModel> { new ErrorModel { propiedad = "idCliente", message = "El idCliente debe tener formato GUID válido" } },
+                        null));
+                }
+
+                if (idParametro < 0)
+                {
+                    return BadRequest(ResponseManager.BuildResponse<MedidasConMetas>(
+                        false, 400, "El idParametro no puede ser negativo",
+                        new List<ErrorModel> { new ErrorModel { propiedad = "idParametro", message = "El idParametro no puede ser negativo" } },
+                        null));
+                }
+
+                if (!string.IsNullOrEmpty(espaciadoTemporal) && 
+                    !new[] { "individual", "promedio" }.Contains(espaciadoTemporal.ToLower()))
+                {
+                    return BadRequest(ResponseManager.BuildResponse<MedidasConMetas>(
+                        false, 400, "El espaciadoTemporal debe ser 'individual' o 'promedio'",
+                        new List<ErrorModel> { new ErrorModel { propiedad = "espaciadoTemporal", message = "El espaciadoTemporal debe ser 'individual' o 'promedio'" } },
+                        null));
+                }
+
+                if (!string.IsNullOrEmpty(tipoDeBusqueda) && 
+                    !new[] { "MES", "AÑO" }.Contains(tipoDeBusqueda.ToUpper()))
+                {
+                    return BadRequest(ResponseManager.BuildResponse<MedidasConMetas>(
+                        false, 400, "El tipoDeBusqueda debe ser 'MES' o 'AÑO'",
+                        new List<ErrorModel> { new ErrorModel { propiedad = "tipoDeBusqueda", message = "El tipoDeBusqueda debe ser 'MES' o 'AÑO'" } },
+                        null));
+                }
+
                 if (idParametro == 0) {
                     idParametro = _db.ParametrosDeMedicions.FirstOrDefault(param => param.Nombre == "peso").ParametroMedicionId;
                 }
-                // Prepare datatables for structured parameters
+                 // Prepare datatables for structured parameters - ensure they have correct structure
                 DataTable mesesPorDefecto = new DataTable();
+                mesesPorDefecto.Columns.Add("mesOAño", typeof(int));
                 DataTable añosPorDefecto = new DataTable();
+                añosPorDefecto.Columns.Add("mesOAño", typeof(int));
                 DataTable datosDeMedida = new DataTable();
                 
                 List<DatosMetaDeMedida> datosMetaDeMedida = ObjectAssembler.ensamblarDatosMetaDeMedida(mesesDeFiltro, añosDeFiltro);
@@ -234,9 +300,24 @@ namespace API.Controllers
                 {
                     mesesPorDefecto = DataTableConverter.ConvertToDataTable(mesesDeFiltro);
                 }
+                else
+                {
+                    // Add a dummy row to ensure the structured parameter is not empty
+                    var row = mesesPorDefecto.NewRow();
+                    row["mesOAño"] = 0;
+                    mesesPorDefecto.Rows.Add(row);
+                }
+                
                 if (añosDeFiltro != null && añosDeFiltro.Length > 0)
                 {
                     añosPorDefecto = DataTableConverter.ConvertToDataTable(añosDeFiltro);
+                }
+                else
+                {
+                    // Add a dummy row to ensure the structured parameter is not empty
+                    var row = añosPorDefecto.NewRow();
+                    row["mesOAño"] = 0;
+                    añosPorDefecto.Rows.Add(row);
                 }
 
                 using var connection = (SqlConnection)_db.Database.GetDbConnection();
