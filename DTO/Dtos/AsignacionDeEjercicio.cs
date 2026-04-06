@@ -20,7 +20,7 @@ namespace DTO.Dtos
         public int EjercicioID { get; set; }
         [Range(1, int.MaxValue, ErrorMessage = "Ingresa los sets")]
         public int Sets { get; set; }
-        [Range(0, int.MaxValue, ErrorMessage = "Ingresa el peso")]
+        [Range(1, int.MaxValue, ErrorMessage = "Ingresa las repeticiones")]
         public int Repeticiones { get; set; }
         [Range(0, int.MaxValue, ErrorMessage = "Ingresa las repeticiones")]
         public decimal Peso { get; set; }

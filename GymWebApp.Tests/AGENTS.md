@@ -128,6 +128,44 @@ public class RegistrarClaseProgramadaTests : IClassFixture<ClasesApiWebApplicati
 *   **`AuthenticateAsync`**: Método del factory para obtener tokens JWT válidos según el rol necesario (ej. `empleado`).
 *   **`DatabaseHelper`**: Utilizado exclusivamente en la fase de **Assert** para realizar `SELECT` directos y confirmar que los cambios del API se impactaron correctamente en el almacenamiento físico.
 
+## Patrón de Tests Unitarios para Validaciones de Controladores
+
+### Por qué se usa ModelState.AddModelError()
+
+En tests unitarios de controladores ASP.NET Core, **SIEMPRE** debemos usar `_sut.ModelState.AddModelError()` para simular errores de validación. Esto ocurre porque:
+
+1. **[ApiController]** valida automáticamente el modelo en requests HTTP reales
+2. **Tests unitarios** llaman el método del controller directamente, saltando el pipeline de ASP.NET
+3. Por lo tanto, la validación automática **NO ocurre** en tests unitarios
+
+### Patrón Correcto
+
+```csharp
+[Fact]
+public async Task WhenUsuarioIDIsNull_ReturnsBadRequest()
+{
+    // Arrange - usar factory para crear objeto
+    var request = new ConsultarRutinasRequest { UsuarioID = null };
+    
+    // IMPORTANTE: Simular error de validación
+    _sut.ModelState.AddModelError("UsuarioID", "El ID de usuario es requerido");
+
+    // Act
+    var result = await _sut.obtenerRutinasDeUusario(request);
+
+    // Assert
+    result.Should().BeOfType<BadRequestObjectResult>();
+}
+```
+
+### No usar:
+- ❌ Intentar que el controller valide automáticamente en tests unitarios
+- ❌ Crear objetos con valores inválidos y esperar que ASP.NET valide
+
+### Referencia:
+- **Ejemplo completo:** `GymWebApp.Tests/Unit/Rutinas/ConsultarRutinasValidationTests.cs`
+- **Patrón base:** `GymWebApp.Tests/Unit/Clases/InscribirAClaseUnitTests.cs` (líneas 72-73)
+
 ## Ejemplo de relaciones
 
 Ver [extraContext/skillsUsageInstructions.md] para ver cómo se relacionan los skills entre sí.

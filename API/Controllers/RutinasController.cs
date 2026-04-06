@@ -9,7 +9,8 @@ using System.IdentityModel.Tokens.Jwt;
 
 namespace API.Controllers
 {
-    public class RutinasController : Controller
+    [ApiController]
+    public class RutinasController : ControllerBase
     {
         private JwtTokenGenerator jwtTokenGenerator;
         private readonly FitnessCenterDbContext _db;
@@ -21,11 +22,6 @@ namespace API.Controllers
             _db = db;
             _logger = logger;
         }
-        public IActionResult Index()
-        {
-            return View();
-        }
-
 
         [Authorize(Roles = "empleado")]
         [HttpPost]
@@ -34,6 +30,12 @@ namespace API.Controllers
         public async Task<IActionResult> RegistrarRutina([FromBody] DTO.Dtos.Rutina rutina)
         {
             HttpResponseRutina respuesta = new HttpResponseRutina();
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            
             try
             {
                 _logger.LogInformation("Start RegistrarRutina UsuarioID={UsuarioID}", rutina?.UsuarioID);
@@ -65,6 +67,12 @@ namespace API.Controllers
         public async Task<IActionResult> asignarEjercicioARutina([FromBody] DTO.Dtos.AsignacionDeEjercicio asignacionDeEjercicio)
         {
             HttpResponseAsignacion respuesta = new HttpResponseAsignacion();
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            
             try
             {
                 var resultado = await _db.Database.
@@ -97,12 +105,17 @@ namespace API.Controllers
         [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("api/consultarRutinas")]
-        public async Task<IActionResult> obtenerRutinasDeUusario([FromQuery] string UsuarioID = null)
+        public async Task<IActionResult> obtenerRutinasDeUusario([FromQuery] ConsultarRutinasRequest request)
         {
-             var respuesta = new DTOResponse<List<DTO.Dtos.Rutina>>();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            
+            var respuesta = new DTOResponse<List<DTO.Dtos.Rutina>>();
             try
             {
-                var rutinasDelCliente = await _db.rutinaSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_consultarRutinasDeUsuario @usuarioID={UsuarioID}").ToListAsync();
+                var rutinasDelCliente = await _db.rutinaSP.FromSqlInterpolated($@"EXEC [FitnessCenterDB].[dbo].sp_consultarRutinasDeUsuario @usuarioID={request.UsuarioID}").ToListAsync();
                 respuesta = ResponseManager.BuildResponse(true, 200, "Consulta exitosa", null,rutinasDelCliente);                
             }
             catch (Exception ex)
