@@ -67,7 +67,7 @@ namespace API.Controllers
             {
                 _logger.LogInformation("Start getUsuarios");
                 var jwt = Request.Cookies["AuthToken"];
-                DTOResponse<List<ExistingUser>> respuesta = new DTOResponse<List<ExistingUser>>();
+                
 
                 List<ExistingUser> usuarios = await _userManager.Users
                     .Select(u => new ExistingUser()
@@ -78,7 +78,7 @@ namespace API.Controllers
                         FechaDeNacimiento = u.FechaDeNacimiento,
                     })
                     .ToListAsync();
-                respuesta.payload = usuarios;
+                DTOResponse<List<ExistingUser>> respuesta = ResponseManager.BuildResponse(true,200,"consulta existosa",null,usuarios);
                 return Ok(respuesta);
             }
             catch (Exception ex)
@@ -250,6 +250,7 @@ namespace API.Controllers
             return Ok(respuesta);
         }
 
+        [Authorize(Roles = "empleado")]
         [Route("api/AgregarRolUsuario")]
         [HttpPost]
         public async Task<IActionResult> AgregarRolUsuario([FromBody] DTOAgregarRol request)
@@ -446,6 +447,7 @@ namespace API.Controllers
                     //serviceId
                     pathServiceSid: "VA7cfeb5608d0f76ca2bd2960546149332"
                 );
+                response.ok = true;
                 response.data.status = verificacion.Status;
                 response.data.channel = verificacion.Channel.ToString();
             }

@@ -40,7 +40,7 @@ GymWebApp.Tests/
 
 ### Tests de Integración
 - **Propósito**: Verificar el flujo completo (end-to-end interno).
-- **Alcance**: Solo deben cubrir el **Happy Path** (casos de éxito).
+- **Alcance**: Happy Path + Sad Path de acceso sin autenticación al endpoint.
 - **Ubicación**: `Integration/Features/{Dominio}/`.
 
 ### Tests Unitarios
@@ -83,11 +83,26 @@ GymWebApp.Tests/
 
 ## Skills disponibles
 
-- **Bogus Factory:** Generar datos de prueba
-- **Integration Test Base:** Clases base para tests de integración
-- **Test Helper:** Crear helpers con métodos estáticos
-- **Respawn Helper:** Limpieza de BD entre tests
-- **Database Helper:** Obtener conexiones y DbContext
+| Skill | Trigger | Propósito |
+|-------|---------|-----------|
+| **bogus-factory** | "Cuando cualquier prueba necesite crear objetos/datos de prueba" | Generar datos de prueba |
+| **integration-test-base** | "Cuando se necesitan tests de integración con WebApplicationFactory" | Clases base |
+| **test-helper** | "Cuando se necesitan métodos reutilizables en tests de integración" | Helpers con métodos estáticos |
+| **xunit-dotnet** | "Cuando se escriben tests unitarios para .NET" | Patrones de unit testing |
+| **xunit-integration** | "Cuando se escriben tests de integración para .NET" | Patrones de integración |
+| **sqlserver-dbtesting** | "Cuando se testing SQL Server stored procedures y functions" | Tests de lógica en BD |
+| **playwright-dotnet** | "Cuando se escriben E2E tests para ASP.NET Core" | E2E y componentes |
+
+## HelpersBasicos
+
+Helpers base disponibles en el proyecto de tests para todas las pruebas:
+
+| Helper | Ubicación | Propósito |
+|--------|------------|-----------|
+| **IntegrationTestBase** | `Integration/Common/` | Clase base con WebApplicationFactory |
+| **DatabaseHelper** | `Integration/Common/` | Obtener conexiones y DbContext |
+| **RespawnHelper** | `Integration/Common/` | Limpieza de BD entre tests |
+| **TestContainerHelper** | `Integration/Common/` | Gestión de Docker/SQL Server |
 
 ## Patron de dependencia de arquitectura de pruebas
 

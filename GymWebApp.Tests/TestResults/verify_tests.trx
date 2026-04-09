@@ -1,0 +1,955 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="bdd4f12f-fab3-4152-937d-1d4d03230854" name="@Aleph 2026-04-03 15:22:35" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-04-03T15:22:35.5506944-06:00" queuing="2026-04-03T15:22:35.5506945-06:00" start="2026-04-03T15:22:14.7712699-06:00" finish="2026-04-03T15:22:40.1648145-06:00" />
+  <TestSettings name="default" id="90bc6686-5617-46bd-ad2f-9ea2c68cc14f">
+    <Deployment runDeploymentRoot="_Aleph_2026-04-03_15_22_35" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="76b5bd07-8ea2-4420-8a31-794cf32f9df8" testId="7f6092ab-0a4b-22c0-7bba-05053d7ec2e5" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerDetallesDeProgreso_WithoutAuth_Returns401" computerName="Aleph" duration="00:00:00.0048353" startTime="2026-04-03T15:22:37.0709719-06:00" endTime="2026-04-03T15:22:37.0756810-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="76b5bd07-8ea2-4420-8a31-794cf32f9df8" />
+    <UnitTestResult executionId="c39cb3f3-df5c-4342-9101-a842427d79e8" testId="7fd2035a-436b-04b4-faff-b8ea564a6fe4" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.GetParametrosDeMedicion_AsEmpleado_Returns200" computerName="Aleph" duration="00:00:05.1665949" startTime="2026-04-03T15:22:30.3009808-06:00" endTime="2026-04-03T15:22:35.4384792-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c39cb3f3-df5c-4342-9101-a842427d79e8" />
+    <UnitTestResult executionId="94016cf8-a857-4511-aff1-48e7be4661a0" testId="1dafaa26-21a5-e338-8eee-3b2f86775c9c" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerEjerciciosYParametros_WithoutAuth_Returns401" computerName="Aleph" duration="00:00:00.0379351" startTime="2026-04-03T15:22:36.0812426-06:00" endTime="2026-04-03T15:22:36.1126510-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="94016cf8-a857-4511-aff1-48e7be4661a0" />
+    <UnitTestResult executionId="ab026d0f-1711-46ba-ba13-30017400f25b" testId="d1bb63cf-258b-15eb-a705-b6dd3bdbe135" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.RegistrarMedida_AsCliente_Returns403" computerName="Aleph" duration="00:00:00.2161247" startTime="2026-04-03T15:22:39.8176368-06:00" endTime="2026-04-03T15:22:40.0335942-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ab026d0f-1711-46ba-ba13-30017400f25b" />
+    <UnitTestResult executionId="2beecd3d-dc44-46fe-8e21-156ecd152d15" testId="cabfcc37-9521-10c8-5460-35fb265b667f" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.GetParametrosDeMedicion_AsCliente_Returns200" computerName="Aleph" duration="00:00:00.4887762" startTime="2026-04-03T15:22:36.1134866-06:00" endTime="2026-04-03T15:22:36.6040517-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2beecd3d-dc44-46fe-8e21-156ecd152d15" />
+    <UnitTestResult executionId="9ee02632-2000-48f1-aa99-ab85a890ef5e" testId="ae5f7493-fc2e-c9bb-3ccd-45f796988a69" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.GetProgresoDeUsuario_AsCliente_Returns200" computerName="Aleph" duration="00:00:00.4057133" startTime="2026-04-03T15:22:37.0761838-06:00" endTime="2026-04-03T15:22:37.4820146-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9ee02632-2000-48f1-aa99-ab85a890ef5e" />
+    <UnitTestResult executionId="32a3455f-5b8d-479d-a26e-f63bd485bdb7" testId="0ce1afce-aae0-2a55-dba1-e0c283bf12e7" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerDetallesDeProgreso_AsEmpleado_Returns200" computerName="Aleph" duration="00:00:00.3740500" startTime="2026-04-03T15:22:38.1536770-06:00" endTime="2026-04-03T15:22:38.5282944-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="32a3455f-5b8d-479d-a26e-f63bd485bdb7" />
+    <UnitTestResult executionId="4ab12c4e-5d14-4990-b7a7-c63f65fd0085" testId="0d39d5f5-6506-6fb3-2cda-2c1197750300" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerEjerciciosYParametros_AsEmpleado_Returns200" computerName="Aleph" duration="00:00:00.4669051" startTime="2026-04-03T15:22:36.6047553-06:00" endTime="2026-04-03T15:22:37.0704762-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4ab12c4e-5d14-4990-b7a7-c63f65fd0085" />
+    <UnitTestResult executionId="45cbcd3c-1c57-41e0-8995-be37356f85c6" testId="a84bf96d-5411-b1a7-b627-b742f794fd66" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerAñosConActividadDelCliente_AsCliente_Returns200" computerName="Aleph" duration="00:00:00.5862927" startTime="2026-04-03T15:22:38.9926928-06:00" endTime="2026-04-03T15:22:39.5784867-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="45cbcd3c-1c57-41e0-8995-be37356f85c6" />
+    <UnitTestResult executionId="99941b21-8c75-4149-a761-b26c0e420d9e" testId="895866af-00ff-c478-3c32-dd3eae8188a2" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.RegistrarMedida_AsEmpleado_Returns200AndInsertsToDb" computerName="Aleph" duration="00:00:00.6702492" startTime="2026-04-03T15:22:37.4824678-06:00" endTime="2026-04-03T15:22:38.1528343-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="99941b21-8c75-4149-a761-b26c0e420d9e" />
+    <UnitTestResult executionId="2373e22b-57f1-4abf-82e4-fe3f5f8ffc21" testId="0400d8d0-4f4d-ac4f-fabb-35c32ff248fc" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerDetallesDeProgreso_AsCliente_Returns200" computerName="Aleph" duration="00:00:00.6287492" startTime="2026-04-03T15:22:35.5140072-06:00" endTime="2026-04-03T15:22:36.0715823-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2373e22b-57f1-4abf-82e4-fe3f5f8ffc21" />
+    <UnitTestResult executionId="b6a49cc6-6522-4cd9-a6b0-5ffeebc30640" testId="df3f9bec-f16b-1b28-fc46-20b6e2b4a0fb" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerAñosConActividadDelCliente_AsEmpleado_Returns200" computerName="Aleph" duration="00:00:00.2271320" startTime="2026-04-03T15:22:39.5900402-06:00" endTime="2026-04-03T15:22:39.8170709-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b6a49cc6-6522-4cd9-a6b0-5ffeebc30640" />
+    <UnitTestResult executionId="1abdc2ea-07d1-427b-b1bc-ffca83e8dc2c" testId="46bf8852-8fd0-336a-ac0c-6662d72157db" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.GetProgresoDeUsuario_WithoutAuth_Returns401" computerName="Aleph" duration="00:00:00.0202385" startTime="2026-04-03T15:22:38.5373760-06:00" endTime="2026-04-03T15:22:38.5598776-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1abdc2ea-07d1-427b-b1bc-ffca83e8dc2c" />
+    <UnitTestResult executionId="c5d4aba2-6a27-417e-9117-e07b22fc24a7" testId="15d1361f-ec5f-0c27-4960-525be7a1d666" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerAñosConActividadDelCliente_WithoutAuth_Returns401" computerName="Aleph" duration="00:00:00.0188353" startTime="2026-04-03T15:22:38.9686514-06:00" endTime="2026-04-03T15:22:38.9918392-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c5d4aba2-6a27-417e-9117-e07b22fc24a7" />
+    <UnitTestResult executionId="509ae9d1-5527-49d6-9c74-badf8e59edfc" testId="764b8d93-2686-0f3c-1880-31ce73a45c74" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.GetParametrosDeMedicion_WithoutAuth_Returns401" computerName="Aleph" duration="00:00:00.0093478" startTime="2026-04-03T15:22:39.5792538-06:00" endTime="2026-04-03T15:22:39.5892948-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="509ae9d1-5527-49d6-9c74-badf8e59edfc" />
+    <UnitTestResult executionId="636edf76-70c8-47d0-a5e9-42daa051349a" testId="2932ce69-43a0-de3f-6add-3797b641edf9" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.RegistrarMedida_WithoutAuth_Returns401" computerName="Aleph" duration="00:00:00.0061569" startTime="2026-04-03T15:22:38.5287623-06:00" endTime="2026-04-03T15:22:38.5368562-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="636edf76-70c8-47d0-a5e9-42daa051349a" />
+    <UnitTestResult executionId="b82e8891-ad6d-42a0-9978-85c4444d0105" testId="ce748423-515b-1fd7-0872-9441b22932bf" testName="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerEjerciciosYParametros_AsCliente_Returns200" computerName="Aleph" duration="00:00:00.4066471" startTime="2026-04-03T15:22:38.5609899-06:00" endTime="2026-04-03T15:22:38.9680412-06:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="b82e8891-ad6d-42a0-9978-85c4444d0105" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.GetParametrosDeMedicion_AsEmpleado_Returns200" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="7fd2035a-436b-04b4-faff-b8ea564a6fe4">
+      <Execution id="c39cb3f3-df5c-4342-9101-a842427d79e8" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="GetParametrosDeMedicion_AsEmpleado_Returns200" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerAñosConActividadDelCliente_AsCliente_Returns200" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="a84bf96d-5411-b1a7-b627-b742f794fd66">
+      <Execution id="45cbcd3c-1c57-41e0-8995-be37356f85c6" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="ObtenerAñosConActividadDelCliente_AsCliente_Returns200" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.RegistrarMedida_AsCliente_Returns403" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="d1bb63cf-258b-15eb-a705-b6dd3bdbe135">
+      <Execution id="ab026d0f-1711-46ba-ba13-30017400f25b" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="RegistrarMedida_AsCliente_Returns403" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerDetallesDeProgreso_WithoutAuth_Returns401" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="7f6092ab-0a4b-22c0-7bba-05053d7ec2e5">
+      <Execution id="76b5bd07-8ea2-4420-8a31-794cf32f9df8" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="ObtenerDetallesDeProgreso_WithoutAuth_Returns401" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.GetProgresoDeUsuario_AsCliente_Returns200" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="ae5f7493-fc2e-c9bb-3ccd-45f796988a69">
+      <Execution id="9ee02632-2000-48f1-aa99-ab85a890ef5e" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="GetProgresoDeUsuario_AsCliente_Returns200" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerEjerciciosYParametros_WithoutAuth_Returns401" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="1dafaa26-21a5-e338-8eee-3b2f86775c9c">
+      <Execution id="94016cf8-a857-4511-aff1-48e7be4661a0" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="ObtenerEjerciciosYParametros_WithoutAuth_Returns401" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerAñosConActividadDelCliente_AsEmpleado_Returns200" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="df3f9bec-f16b-1b28-fc46-20b6e2b4a0fb">
+      <Execution id="b6a49cc6-6522-4cd9-a6b0-5ffeebc30640" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="ObtenerAñosConActividadDelCliente_AsEmpleado_Returns200" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerEjerciciosYParametros_AsCliente_Returns200" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="ce748423-515b-1fd7-0872-9441b22932bf">
+      <Execution id="b82e8891-ad6d-42a0-9978-85c4444d0105" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="ObtenerEjerciciosYParametros_AsCliente_Returns200" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerEjerciciosYParametros_AsEmpleado_Returns200" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="0d39d5f5-6506-6fb3-2cda-2c1197750300">
+      <Execution id="4ab12c4e-5d14-4990-b7a7-c63f65fd0085" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="ObtenerEjerciciosYParametros_AsEmpleado_Returns200" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerAñosConActividadDelCliente_WithoutAuth_Returns401" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="15d1361f-ec5f-0c27-4960-525be7a1d666">
+      <Execution id="c5d4aba2-6a27-417e-9117-e07b22fc24a7" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="ObtenerAñosConActividadDelCliente_WithoutAuth_Returns401" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.GetParametrosDeMedicion_WithoutAuth_Returns401" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="764b8d93-2686-0f3c-1880-31ce73a45c74">
+      <Execution id="509ae9d1-5527-49d6-9c74-badf8e59edfc" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="GetParametrosDeMedicion_WithoutAuth_Returns401" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.RegistrarMedida_WithoutAuth_Returns401" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="2932ce69-43a0-de3f-6add-3797b641edf9">
+      <Execution id="636edf76-70c8-47d0-a5e9-42daa051349a" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="RegistrarMedida_WithoutAuth_Returns401" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerDetallesDeProgreso_AsEmpleado_Returns200" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="0ce1afce-aae0-2a55-dba1-e0c283bf12e7">
+      <Execution id="32a3455f-5b8d-479d-a26e-f63bd485bdb7" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="ObtenerDetallesDeProgreso_AsEmpleado_Returns200" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.GetProgresoDeUsuario_WithoutAuth_Returns401" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="46bf8852-8fd0-336a-ac0c-6662d72157db">
+      <Execution id="1abdc2ea-07d1-427b-b1bc-ffca83e8dc2c" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="GetProgresoDeUsuario_WithoutAuth_Returns401" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.RegistrarMedida_AsEmpleado_Returns200AndInsertsToDb" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="895866af-00ff-c478-3c32-dd3eae8188a2">
+      <Execution id="99941b21-8c75-4149-a761-b26c0e420d9e" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="RegistrarMedida_AsEmpleado_Returns200AndInsertsToDb" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.GetParametrosDeMedicion_AsCliente_Returns200" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="cabfcc37-9521-10c8-5460-35fb265b667f">
+      <Execution id="2beecd3d-dc44-46fe-8e21-156ecd152d15" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="GetParametrosDeMedicion_AsCliente_Returns200" />
+    </UnitTest>
+    <UnitTest name="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests.ObtenerDetallesDeProgreso_AsCliente_Returns200" storage="/mnt/archivos/estudio/proyectos/gym/gymwebapp.tests/bin/debug/net8.0/gymwebapp.tests.dll" id="0400d8d0-4f4d-ac4f-fabb-35c32ff248fc">
+      <Execution id="2373e22b-57f1-4abf-82e4-fe3f5f8ffc21" />
+      <TestMethod codeBase="/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/bin/Debug/net8.0/GymWebApp.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner3/netcore/" className="GymWebApp.Tests.Integration.Features.Medidas.MedidasApiTests" name="ObtenerDetallesDeProgreso_AsCliente_Returns200" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="7f6092ab-0a4b-22c0-7bba-05053d7ec2e5" executionId="76b5bd07-8ea2-4420-8a31-794cf32f9df8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7fd2035a-436b-04b4-faff-b8ea564a6fe4" executionId="c39cb3f3-df5c-4342-9101-a842427d79e8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1dafaa26-21a5-e338-8eee-3b2f86775c9c" executionId="94016cf8-a857-4511-aff1-48e7be4661a0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d1bb63cf-258b-15eb-a705-b6dd3bdbe135" executionId="ab026d0f-1711-46ba-ba13-30017400f25b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cabfcc37-9521-10c8-5460-35fb265b667f" executionId="2beecd3d-dc44-46fe-8e21-156ecd152d15" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ae5f7493-fc2e-c9bb-3ccd-45f796988a69" executionId="9ee02632-2000-48f1-aa99-ab85a890ef5e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0ce1afce-aae0-2a55-dba1-e0c283bf12e7" executionId="32a3455f-5b8d-479d-a26e-f63bd485bdb7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0d39d5f5-6506-6fb3-2cda-2c1197750300" executionId="4ab12c4e-5d14-4990-b7a7-c63f65fd0085" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a84bf96d-5411-b1a7-b627-b742f794fd66" executionId="45cbcd3c-1c57-41e0-8995-be37356f85c6" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="895866af-00ff-c478-3c32-dd3eae8188a2" executionId="99941b21-8c75-4149-a761-b26c0e420d9e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0400d8d0-4f4d-ac4f-fabb-35c32ff248fc" executionId="2373e22b-57f1-4abf-82e4-fe3f5f8ffc21" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="df3f9bec-f16b-1b28-fc46-20b6e2b4a0fb" executionId="b6a49cc6-6522-4cd9-a6b0-5ffeebc30640" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="46bf8852-8fd0-336a-ac0c-6662d72157db" executionId="1abdc2ea-07d1-427b-b1bc-ffca83e8dc2c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="15d1361f-ec5f-0c27-4960-525be7a1d666" executionId="c5d4aba2-6a27-417e-9117-e07b22fc24a7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="764b8d93-2686-0f3c-1880-31ce73a45c74" executionId="509ae9d1-5527-49d6-9c74-badf8e59edfc" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2932ce69-43a0-de3f-6add-3797b641edf9" executionId="636edf76-70c8-47d0-a5e9-42daa051349a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ce748423-515b-1fd7-0872-9441b22932bf" executionId="b82e8891-ad6d-42a0-9978-85c4444d0105" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Resultados sin formato de lista" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="Todos los resultados cargados" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="17" executed="17" passed="17" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.0+00ab0a9ec4 (64-bit .NET 8.0.25)
+[xUnit.net 00:00:00.23]   Discovering: GymWebApp.Tests
+[xUnit.net 00:00:00.34]   Discovered:  GymWebApp.Tests
+[xUnit.net 00:00:00.41]   Starting:    GymWebApp.Tests
+[testcontainers.org 00:00:00.52] Connected to Docker:
+  Host: unix:///var/run/docker.sock
+  Server Version: 28.5.1-ce
+  Kernel Version: 6.12.0-160000.27-default
+  API Version: 1.51
+  Operating System: openSUSE Leap 16.0
+  Total Memory: 23.35 GB
+[testcontainers.org 00:00:00.96] Docker container 0746cc040e9f created
+[testcontainers.org 00:00:01.05] Start Docker container 0746cc040e9f
+[testcontainers.org 00:00:01.31] Wait for Docker container 0746cc040e9f to complete readiness checks
+[testcontainers.org 00:00:01.32] Docker container 0746cc040e9f ready
+[testcontainers.org 00:00:01.39] Docker container 005a3a46fa45 created
+[testcontainers.org 00:00:01.39] Start Docker container 005a3a46fa45
+[testcontainers.org 00:00:01.68] Wait for Docker container 005a3a46fa45 to complete readiness checks
+[testcontainers.org 00:00:01.69] Execute "/bin/sh -c find /opt/mssql-tools*/bin/sqlcmd -type f -print -quit" at Docker container 005a3a46fa45
+[testcontainers.org 00:00:01.92] Execute "/opt/mssql-tools18/bin/sqlcmd -C -Q SELECT 1;" at Docker container 005a3a46fa45
+[testcontainers.org 00:00:09.60] Docker container 005a3a46fa45 ready
+[FACTORY] Connection string: Server=127.0.0.1,32801;Database=FitnessCenterDB;User Id=sa;Password=TerraBreak13*;TrustServerCertificate=True;Connect Timeout=60
+[FACTORY] DB_CONNECTION_STRING env var: Server=127.0.0.1,32801;Database=FitnessCenterDB;User Id=sa;Password=TerraBreak13*;TrustServerCertificate=True;Connect Timeout=60
+========================================
+INICIANDO API...
+========================================
+WebApplicationBuilder creado
+Configuracion JWT cargada
+[PROGRAM] Connection string usado: Server=127.0.0.1,32801;Database=FitnessCenterDB;User Id=sa;Password=TerraBreak13*;TrustServerCertificate=True;Connect Timeout=60
+[PROGRAM] Connection string final: Server=127.0.0.1,32801;Database=FitnessCenterDB;User Id=sa;Password=TerraBreak13*;TrustServerCertificate=True;Connect Timeout=60
+Connection string configurado
+JWT key obtenida (o fallback) para configuraci�n
+Identity configurado
+JWT Authentication configurado
+CORS configurado
+Controllers y SignalR registrados
+Swagger configurado
+DbContext configurado
+Email configurado
+HttpClient configurado
+Servicios personalizados registrados
+Quartz configurado
+Authorization, DataAccess y BusinessLayer registrados
+========================================
+CONSTRUYENDO APLICACION...
+========================================
+XDG_SESSION_DESKTOP = KDE
+KDE_SESSION_VERSION = 6
+SYSTEMD_EXEC_PID = 1999
+MACHTYPE = x86_64-suse-linux
+GUESTFISH_INIT = \e[1;34m
+NVM_BIN = /home/aaron/.nvm/versions/node/v24.13.1/bin
+LESS_ADVANCED_PREPROCESSOR = no
+CPU = x86_64
+MAIL = /var/mail/aaron
+QT_WAYLAND_RECONNECT = 1
+MSBuildExtensionsPath = /usr/share/dotnet/sdk/10.0.201/
+G_BROKEN_FILENAMES = 1
+XDG_SEAT = seat0
+GPG_TTY = /dev/pts/0
+MANPATHISSET = yes
+LESS = -M -I -R
+XDG_RUNTIME_DIR = /run/user/1000
+WINDOWMANAGER = /usr/bin/startplasma-x11
+LOGNAME = aaron
+WAYLAND_DISPLAY = wayland-0
+XDG_CURRENT_DESKTOP = KDE
+JOURNAL_STREAM = 9:13415
+LANGUAGE = 
+AUDIODRIVER = pulseaudio
+OSTYPE = linux
+KONSOLE_DBUS_WINDOW = /Windows/1
+LESSOPEN = lessopen.sh %s
+HOME = /home/aaron
+_MSBUILDTLENABLED = 0
+NVM_CD_FLAGS = 
+GTK_RC_FILES = /etc/gtk/gtkrc:/home/aaron/.gtkrc:/home/aaron/.config/gtkrc
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session1
+VSTEST_MSBUILD_NOLOGO = 1
+XDG_MENU_PREFIX = plasma-
+VSTEST_DOTNET_ROOT_PATH = /usr/share/dotnet
+XDG_CONFIG_HOME = /home/aaron/.config
+DEBUGINFOD_URLS = https://debuginfod.opensuse.org/ 
+DB_CONNECTION_STRING = Server=127.0.0.1,32801;Database=FitnessCenterDB;User Id=sa;Password=TerraBreak13*;TrustServerCertificate=True;Connect Timeout=60
+LS_OPTIONS = -N --color=tty -T 0
+WINDOWID = 94651525733120
+KONSOLE_VERSION = 250403
+XDG_SESSION_ID = 3
+KONSOLE_DBUS_SESSION = /Sessions/1
+MSBuildSDKsPath = /usr/share/dotnet/sdk/10.0.201/Sdks
+GUESTFISH_OUTPUT = \e[0m
+MINICOM = -c on
+MORE = -sl
+XKB_DEFAULT_MODEL = microsoftpro
+XDG_STATE_HOME = /home/aaron/.local/state
+G_FILENAME_ENCODING = @locale,UTF-8,ISO-8859-15,CP1252
+MSBUILDENSURESTDOUTFORTASKPROCESSES = 1
+DOTNET_CLI_TELEMETRY_SESSIONID = bc658666-2d45-41a3-950b-5e155c7dcfe2
+XDG_DATA_DIRS = /home/aaron/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
+HOSTNAME = Aleph
+XDG_SESSION_TYPE = wayland
+XKB_DEFAULT_LAYOUT = latam
+DOTNET_ROOT_X64 = /usr/share/dotnet
+LANG = es_ES.UTF-8
+_ = /usr/bin/dotnet
+LESSCLOSE = lessclose.sh %s %s
+TERM = xterm-256color
+USER = aaron
+LS_COLORS = no=00:fi=00:di=01;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=00:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.7z=01;31:*.ace=01;31:*.alz=01;31:*.apk=01;31:*.arc=01;31:*.arj=01;31:*.bz=01;31:*.bz2=01;31:*.cab=01;31:*.cpio=01;31:*.crate=01;31:*.deb=01;31:*.drpm=01;31:*.dwm=01;31:*.dz=01;31:*.ear=01;31:*.egg=01;31:*.esd=01;31:*.gz=01;31:*.jar=01;31:*.lha=01;31:*.lrz=01;31:*.lz=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.lzo=01;31:*.pyz=01;31:*.rar=01;31:*.rpm=01;31:*.rz=01;31:*.sar=01;31:*.swm=01;31:*.t7z=01;31:*.tar=01;31:*.taz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tgz=01;31:*.tlz=01;31:*.txz=01;31:*.tz=01;31:*.tzo=01;31:*.tzst=01;31:*.udeb=01;31:*.war=01;31:*.whl=01;31:*.wim=01;31:*.xz=01;31:*.z=01;31:*.Z=01;31:*.zip=01;31:*.zoo=01;31:*.zst=01;31:*.asf=01;35:*.avi=01;35:*.avif=01;35:*.bmp=01;35:*.cgm=01;35:*.dl=01;35:*.emf=01;35:*.flc=01;35:*.fli=01;35:*.flv=01;35:*.gif=01;35:*.gl=01;35:*.jpeg=01;35:*.jpg=01;35:*.jxl=01;35:*.m2v=01;35:*.m4v=01;35:*.mjpeg=01;35:*.mjpg=01;35:*.mkv=01;35:*.mng=01;35:*.mov=01;35:*.mp4=01;35:*.mp4v=01;35:*.mpeg=01;35:*.mpg=01;35:*.nuv=01;35:*.ogm=01;35:*.pbm=01;35:*.pcx=01;35:*.pgm=01;35:*.png=01;35:*.ppm=01;35:*.qt=01;35:*.rm=01;35:*.rmvb=01;35:*.svg=01;35:*.svgz=01;35:*.tga=01;35:*.tif=01;35:*.tiff=01;35:*.vob=01;35:*.webm=01;35:*.webp=01;35:*.wmv=01;35:*.xbm=01;35:*.xcf=01;35:*.xpm=01;35:*.xwd=01;35:*.yuv=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.aiff=00;36:*.ape=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.voc=00;36:*.wav=00;36:*.wma=00;36:*.wv=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:*#=00;90:*~=00;90:*.bak=00;90:*.crdownload=00;90:*.dpkg-dist=00;90:*.dpkg-new=00;90:*.dpkg-old=00;90:*.dpkg-tmp=00;90:*.old=00;90:*.orig=00;90:*.part=00;90:*.rej=00;90:*.rpmnew=00;90:*.rpmorig=00;90:*.rpmsave=00;90:*.swp=00;90:*.tmp=00;90:*.ucf-dist=00;90:*.ucf-new=00;90:*.ucf-old=00;90:
+AGENT = 1
+DOTNET_NUGET_SIGNATURE_VERIFICATION = True
+PWD = /mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests
+PROFILEREAD = true
+MOZ_GMP_PATH = /usr/lib64/mozilla/plugins/gmp-gmpopenh264/system-installed
+DOTNET_HOST_PATH = /usr/share/dotnet/dotnet
+LESSKEY = /usr/etc/lesskey.bin
+PATH = /home/aaron/.opencode/bin:/home/aaron/.opencode/bin:/home/aaron/.nvm/versions/node/v24.13.1/bin:/home/aaron/.local/bin:/usr/local/bin:/usr/bin:/bin:/home/aaron/.dotnet/tools:/opt/mssql-tools18/bin:/opt/mssql-tools18/bin:/usr/local/go/bin:/opt/mssql-tools18/bin
+XKEYSYMDB = /usr/X11R6/lib/X11/XKeysymDB
+MSBuildLoadMicrosoftTargetsReadOnly = true
+MANPATH = /home/aaron/.nvm/versions/node/v24.13.1/share/man:/usr/local/man:/usr/share/man
+PAM_KWALLET5_LOGIN = /run/user/1000/kwallet5.socket
+XDG_VTNR = 3
+KDE_APPLICATIONS_AS_SCOPE = 1
+OPENCODE = 1
+XDG_SESSION_CLASS = user
+HOST = Aleph
+PROFILEHOME = 
+VSTEST_DOTNET_ROOT_ARCHITECTURE = X64
+KDE_SESSION_UID = 1000
+XKB_DEFAULT_OPTIONS = terminate:ctrl_alt_bksp
+MANAGERPID = 1717
+XAUTHORITY = /run/user/1000/xauth_WcuTXX
+OPENCODE_PID = 3345
+ICEAUTHORITY = /run/user/1000/iceauth_bRZlIy
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+DISPLAY = :1
+SESSION_MANAGER = local/Aleph:@/tmp/.ICE-unix/2141,unix/Aleph:/tmp/.ICE-unix/2141
+DESKTOP_SESSION = plasmawayland
+XNLSPATH = /usr/share/X11/nls
+NVM_INC = /home/aaron/.nvm/versions/node/v24.13.1/include/node
+MSBUILDUSESERVER = 0
+COLORFGBG = 15;0
+PAGER = less
+INVOCATION_ID = c3bcde74885b403aaae3e4cde3a2d131
+CSHEDIT = emacs
+XDG_DATA_HOME = /home/aaron/.local/share
+SECRET_TOKEN_KEY = __development_secret_key_replace_for_production__
+SHELL = /bin/bash
+OLDPWD = /home/aaron/archivosl/estudio/proyectos/gym
+GUESTFISH_PS1 = \[\e[1;32m\]&gt;&lt;fs&gt;\[\e[0;31m\] 
+SHELL_SESSION_ID = d2a353fc922541c58a4e0059661665b1
+COLORTERM = truecolor
+NVM_DIR = /home/aaron/.nvm
+HOSTTYPE = x86_64
+HISTSIZE = 1000
+XDG_CACHE_HOME = /home/aaron/.cache
+SHLVL = 2
+VENDOR = suse
+KONSOLE_DBUS_SERVICE = :1.64
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+GTK2_RC_FILES = /etc/gtk-2.0/gtkrc:/home/aaron/.gtkrc-2.0:/home/aaron/.config/gtkrc-2.0
+KGLOBALACCELD_PLATFORM = org.kde.kwin
+XAUTHLOCALHOSTNAME = Aleph
+XDG_CONFIG_DIRS = /home/aaron/.config/kdedefaults:/etc/xdg:/usr/local/etc/xdg:/usr/etc/xdg
+KDE_FULL_SESSION = true
+QEMU_AUDIO_DRV = pa
+MSBUILDFAILONDRIVEENUMERATINGWILDCARD = 1
+GUESTFISH_RESTORE = \e[0m
+App construida exitosamente
+HTTPS Redirection configurado
+CORS aplicado
+Authentication middleware agregado
+Authorization middleware agregado
+SignalR Hub mapeado
+Controllers mapeados
+========================================
+API LISTA - INICIANDO SERVIDOR...
+========================================
+[15:22:31 INF] User profile is available. Using '/home/aaron/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+[15:22:31 INF] Initialized Scheduler Signaller of type: Quartz.Core.SchedulerSignalerImpl
+[15:22:31 INF] Quartz Scheduler created
+[15:22:31 INF] JobFactory set to: Quartz.Simpl.MicrosoftDependencyInjectionJobFactory
+[15:22:31 INF] RAMJobStore initialized.
+[15:22:31 INF] Quartz Scheduler 3.13.0.0 - 'QuartzScheduler' with instanceId 'NON_CLUSTERED' initialized
+[15:22:31 INF] Using thread pool 'Quartz.Simpl.DefaultThreadPool', size: 10
+[15:22:31 INF] Using job store 'Quartz.Simpl.RAMJobStore', supports persistence: False, clustered: False
+[15:22:31 INF] Adding 1 jobs, 1 triggers.
+[15:22:31 INF] Adding job: DEFAULT.AppointmentRemainder
+[15:22:31 INF] Scheduler QuartzScheduler_$_NON_CLUSTERED started.
+[15:22:31 INF] Request starting HTTP/1.1 POST http://localhost/api/autenticar - application/json; charset=utf-8 54
+[15:22:31 INF] Executing endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:31 INF] Route matched with {action = "AutenticarUsuario", controller = "Users"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AutenticarUsuario(DTO.Dtos.UserCredentials) on controller API.Controllers.UsersController (API).
+[15:22:31 INF] Start AutenticarUsuario correo=uno@gmail.com
+[15:22:33 WRN] No store type was specified for the decimal property 'valor' on entity type 'DTOUltimaMedidaDeParametro'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+[15:22:33 WRN] No store type was specified for the decimal property 'valorObjetivo' on entity type 'DTOUltimaMetaDeParametro'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+[15:22:34 INF] Executed DbCommand (16ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+¡La contraseña es correcta! El problema es una configuración de SignInManager.
+¿Hash coincide?: Success
+[15:22:34 INF] Executed DbCommand (8ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+[15:22:34 INF] Executed DbCommand (16ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:35 INF] Executed DbCommand (9ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (Size = 256), @p8='?' (Size = 250), @p9='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [RefreshTokens] ([RefreshTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [ReplacedByTokenId], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+[15:22:35 INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:35 INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:35 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.DTOLoggedUser, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:35 INF] Executed action API.Controllers.UsersController.AutenticarUsuario (API) in 3482.1546ms
+[15:22:35 INF] Executed endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:35 INF] Request finished HTTP/1.1 POST http://localhost/api/autenticar - 200 null application/json; charset=utf-8 3672.4386ms
+[15:22:35 INF] Request starting HTTP/1.1 GET http://localhost/api/getParametrosDeMedicion?idUsuario=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - null null
+[15:22:35 INF] Executing endpoint 'API.Controllers.MedidasController.getParametrosDeMedicion (API)'
+[15:22:35 INF] Route matched with {action = "getParametrosDeMedicion", controller = "Medidas"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] getParametrosDeMedicion(Int32) on controller API.Controllers.MedidasController (API).
+[15:22:35 INF] Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+EXEC sp_obtenerParametrosDeMedicionConUnidad
+[15:22:35 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[System.Collections.Generic.List`1[[DTO.Dtos.DTOParametroDeMedicion, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+[15:22:35 INF] Executed action API.Controllers.MedidasController.getParametrosDeMedicion (API) in 138.4179ms
+[15:22:35 INF] Executed endpoint 'API.Controllers.MedidasController.getParametrosDeMedicion (API)'
+[15:22:35 INF] Request finished HTTP/1.1 GET http://localhost/api/getParametrosDeMedicion?idUsuario=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - 200 null application/json; charset=utf-8 229.2468ms
+[15:22:35 INF] Request starting HTTP/1.1 POST http://localhost/api/autenticar - application/json; charset=utf-8 62
+[15:22:35 INF] Executing endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:35 INF] Route matched with {action = "AutenticarUsuario", controller = "Users"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AutenticarUsuario(DTO.Dtos.UserCredentials) on controller API.Controllers.UsersController (API).
+[15:22:35 INF] Start AutenticarUsuario correo=aaronhl1313@gmail.com
+[15:22:35 INF] Executed DbCommand (1ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+¡La contraseña es correcta! El problema es una configuración de SignInManager.
+¿Hash coincide?: Success
+[15:22:35 INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+[15:22:35 INF] Executed DbCommand (7ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:35 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (Size = 256), @p8='?' (Size = 250), @p9='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [RefreshTokens] ([RefreshTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [ReplacedByTokenId], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+[15:22:35 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:35 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:35 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.DTOLoggedUser, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:35 INF] Executed action API.Controllers.UsersController.AutenticarUsuario (API) in 262.2405ms
+[15:22:35 INF] Executed endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:35 INF] Request finished HTTP/1.1 POST http://localhost/api/autenticar - 200 null application/json; charset=utf-8 274.3642ms
+[15:22:35 INF] Request starting HTTP/1.1 GET http://localhost/api/obtenerDetallesDeProgreso?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5&amp;idParametro=1&amp;espaciadoTemporal=individual&amp;tipoDeBusqueda=MES - null null
+[15:22:35 INF] Executing endpoint 'API.Controllers.MedidasController.ObtenerDetallesDeProgresoApi (API)'
+[15:22:35 INF] Route matched with {action = "ObtenerDetallesDeProgresoApi", controller = "Medidas"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[DTO.Dtos.DTOResponse`1[DTO.Dtos.MedidasConMetas]]] ObtenerDetallesDeProgresoApi(System.String, Int32, System.Nullable`1[System.Int32], System.String, System.String, System.Nullable`1[System.DateTime], System.Nullable`1[System.DateTime], Boolean, Int32[], Int32[], System.Nullable`1[System.DateTime]) on controller API.Controllers.MedidasController (API).
+[15:22:36 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.MedidasConMetas, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:36 INF] Executed action API.Controllers.MedidasController.ObtenerDetallesDeProgresoApi (API) in 312.9007ms
+[15:22:36 INF] Executed endpoint 'API.Controllers.MedidasController.ObtenerDetallesDeProgresoApi (API)'
+[15:22:36 INF] Request finished HTTP/1.1 GET http://localhost/api/obtenerDetallesDeProgreso?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5&amp;idParametro=1&amp;espaciadoTemporal=individual&amp;tipoDeBusqueda=MES - 200 null application/json; charset=utf-8 328.6084ms
+[15:22:36 INF] Request starting HTTP/1.1 GET http://localhost/api/obtenerEjerciciosYParametros?idCliente=test - null null
+[15:22:36 INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (empleado|cliente)
+[15:22:36 INF] AuthenticationScheme: Bearer was challenged.
+[15:22:36 INF] Request finished HTTP/1.1 GET http://localhost/api/obtenerEjerciciosYParametros?idCliente=test - 401 null null 19.7501ms
+[15:22:36 INF] Request starting HTTP/1.1 POST http://localhost/api/autenticar - application/json; charset=utf-8 62
+[15:22:36 INF] Executing endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:36 INF] Route matched with {action = "AutenticarUsuario", controller = "Users"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AutenticarUsuario(DTO.Dtos.UserCredentials) on controller API.Controllers.UsersController (API).
+[15:22:36 INF] Start AutenticarUsuario correo=aaronhl1313@gmail.com
+[15:22:36 INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+¡La contraseña es correcta! El problema es una configuración de SignInManager.
+¿Hash coincide?: Success
+[15:22:36 INF] Executed DbCommand (2ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+[15:22:36 INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:36 INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (Size = 256), @p8='?' (Size = 250), @p9='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [RefreshTokens] ([RefreshTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [ReplacedByTokenId], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+[15:22:36 INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:36 INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:36 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.DTOLoggedUser, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:36 INF] Executed action API.Controllers.UsersController.AutenticarUsuario (API) in 448.7156ms
+[15:22:36 INF] Executed endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:36 INF] Request finished HTTP/1.1 POST http://localhost/api/autenticar - 200 null application/json; charset=utf-8 451.9805ms
+[15:22:36 INF] Request starting HTTP/1.1 GET http://localhost/api/getParametrosDeMedicion?idUsuario=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - null null
+[15:22:36 INF] Executing endpoint 'API.Controllers.MedidasController.getParametrosDeMedicion (API)'
+[15:22:36 INF] Route matched with {action = "getParametrosDeMedicion", controller = "Medidas"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] getParametrosDeMedicion(Int32) on controller API.Controllers.MedidasController (API).
+[15:22:36 INF] Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+EXEC sp_obtenerParametrosDeMedicionConUnidad
+[15:22:36 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[System.Collections.Generic.List`1[[DTO.Dtos.DTOParametroDeMedicion, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+[15:22:36 INF] Executed action API.Controllers.MedidasController.getParametrosDeMedicion (API) in 11.8045ms
+[15:22:36 INF] Executed endpoint 'API.Controllers.MedidasController.getParametrosDeMedicion (API)'
+[15:22:36 INF] Request finished HTTP/1.1 GET http://localhost/api/getParametrosDeMedicion?idUsuario=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - 200 null application/json; charset=utf-8 18.2156ms
+[15:22:36 INF] Request starting HTTP/1.1 POST http://localhost/api/autenticar - application/json; charset=utf-8 54
+[15:22:36 INF] Executing endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:36 INF] Route matched with {action = "AutenticarUsuario", controller = "Users"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AutenticarUsuario(DTO.Dtos.UserCredentials) on controller API.Controllers.UsersController (API).
+[15:22:36 INF] Start AutenticarUsuario correo=uno@gmail.com
+[15:22:36 INF] Executed DbCommand (1ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+¡La contraseña es correcta! El problema es una configuración de SignInManager.
+¿Hash coincide?: Success
+[15:22:36 INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+[15:22:36 INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:36 INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (Size = 256), @p8='?' (Size = 250), @p9='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [RefreshTokens] ([RefreshTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [ReplacedByTokenId], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+[15:22:36 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:36 INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:36 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.DTOLoggedUser, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:36 INF] Executed action API.Controllers.UsersController.AutenticarUsuario (API) in 321.6622ms
+[15:22:36 INF] Executed endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:36 INF] Request finished HTTP/1.1 POST http://localhost/api/autenticar - 200 null application/json; charset=utf-8 324.1752ms
+[15:22:36 INF] Request starting HTTP/1.1 GET http://localhost/api/obtenerEjerciciosYParametros?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - null null
+[15:22:36 INF] Executing endpoint 'API.Controllers.MedidasController.ObtenerDetallesDeProgreso (API)'
+[15:22:36 INF] Route matched with {action = "ObtenerDetallesDeProgreso", controller = "Medidas"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[DTO.Dtos.DTOResponse`1[System.Collections.Generic.List`1[DTO.Dtos.DTOEjerciciosYParametrosDelCliente]]]] ObtenerDetallesDeProgreso(System.String) on controller API.Controllers.MedidasController (API).
+[15:22:37 INF] Executed DbCommand (7ms) [Parameters=[@__p_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[Id] = @__p_0
+[15:22:37 INF] Executed DbCommand (14ms) [Parameters=[p0='?' (Size = 4000)], CommandType='Text', CommandTimeout='30']
+EXEC sp_obtenerEjerciciosYParametrosDelCliente @idCliente=@p0
+[15:22:37 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[System.Collections.Generic.List`1[[DTO.Dtos.DTOEjerciciosYParametrosDelCliente, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+[15:22:37 INF] Executed action API.Controllers.MedidasController.ObtenerDetallesDeProgreso (API) in 110.9128ms
+[15:22:37 INF] Executed endpoint 'API.Controllers.MedidasController.ObtenerDetallesDeProgreso (API)'
+[15:22:37 INF] Request finished HTTP/1.1 GET http://localhost/api/obtenerEjerciciosYParametros?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - 200 null application/json; charset=utf-8 118.9465ms
+[15:22:37 INF] Request starting HTTP/1.1 GET http://localhost/api/obtenerDetallesDeProgreso?idCliente=test&amp;idParametro=1 - null null
+[15:22:37 INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (cliente|empleado)
+[15:22:37 INF] AuthenticationScheme: Bearer was challenged.
+[15:22:37 INF] Request finished HTTP/1.1 GET http://localhost/api/obtenerDetallesDeProgreso?idCliente=test&amp;idParametro=1 - 401 null null 1.2074ms
+[15:22:37 INF] Request starting HTTP/1.1 POST http://localhost/api/autenticar - application/json; charset=utf-8 62
+[15:22:37 INF] Executing endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:37 INF] Route matched with {action = "AutenticarUsuario", controller = "Users"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AutenticarUsuario(DTO.Dtos.UserCredentials) on controller API.Controllers.UsersController (API).
+[15:22:37 INF] Start AutenticarUsuario correo=aaronhl1313@gmail.com
+[15:22:37 INF] Executed DbCommand (1ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+¡La contraseña es correcta! El problema es una configuración de SignInManager.
+¿Hash coincide?: Success
+[15:22:37 INF] Executed DbCommand (3ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+[15:22:37 INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:37 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (Size = 256), @p8='?' (Size = 250), @p9='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [RefreshTokens] ([RefreshTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [ReplacedByTokenId], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+[15:22:37 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:37 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:37 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.DTOLoggedUser, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:37 INF] Executed action API.Controllers.UsersController.AutenticarUsuario (API) in 213.818ms
+[15:22:37 INF] Executed endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:37 INF] Request finished HTTP/1.1 POST http://localhost/api/autenticar - 200 null application/json; charset=utf-8 215.2866ms
+[15:22:37 INF] Request starting HTTP/1.1 GET http://localhost/api/progresoDeUsuario?idUsuario=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - null null
+[15:22:37 INF] Executing endpoint 'API.Controllers.MedidasController.getProgresoDelCliente (API)'
+[15:22:37 INF] Route matched with {action = "getProgresoDelCliente", controller = "Medidas"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] getProgresoDelCliente(System.String) on controller API.Controllers.MedidasController (API).
+[15:22:37 INF] Executed DbCommand (33ms) [Parameters=[p0='?' (Size = 4000)], CommandType='Text', CommandTimeout='30']
+EXEC sp_obtenerUltimasMedidasDelUsuario @idUsuario=@p0
+[15:22:37 INF] Executed DbCommand (16ms) [Parameters=[p0='?' (Size = 4000)], CommandType='Text', CommandTimeout='30']
+EXEC sp_obtenerMetasActualesDelClientePorParametro @idUsuario=@p0
+No se encontró una meta para la medida
+No se encontró una meta para la medida
+[15:22:37 INF] ItemsProgreso: [
+  {
+    "medida": {
+      "medidaId": 25,
+      "fkParametro": 1,
+      "nombreParametro": "peso",
+      "valor": 24.37,
+      "fechaDeCreacion": "2025-01-18T11:16:23.447",
+      "unidadDeMedidaId": 1,
+      "nombreUnidadDeMedida": "kg",
+      "fkEjercicio": null,
+      "nombreEjercicio": null,
+      "urlIconoParametro": "~/img/peso2.svg",
+      "urlIconoEjercicio": null,
+      "fkUsuario": "c7f8eb66-cbd8-43cf-8812-1b369fc84ca5"
+    },
+    "meta": null
+  },
+  {
+    "medida": {
+      "medidaId": 56,
+      "fkParametro": 2,
+      "nombreParametro": "imc",
+      "valor": 24.37,
+      "fechaDeCreacion": "2024-12-30T14:49:53.707",
+      "unidadDeMedidaId": 2,
+      "nombreUnidadDeMedida": "kg/m\u00B2",
+      "fkEjercicio": null,
+      "nombreEjercicio": null,
+      "urlIconoParametro": "~/img/imc.svg",
+      "urlIconoEjercicio": null,
+      "fkUsuario": "c7f8eb66-cbd8-43cf-8812-1b369fc84ca5"
+    },
+    "meta": {
+      "metaId": 7,
+      "intencion": "aumentar",
+      "nombreParametro": "imc",
+      "nombreEjercicio": null,
+      "valorObjetivo": 60.00,
+      "nombreNivelDeLogro": "no conseguida",
+      "fechaDeInicioDeLaMeta": "2025-01-30T12:05:47.31",
+      "fechaLimite": "2025-03-01T12:05:47.31",
+      "fkEjercicio": null,
+      "fkParametro": 2,
+      "fkUsuario": "c7f8eb66-cbd8-43cf-8812-1b369fc84ca5"
+    }
+  },
+  {
+    "medida": {
+      "medidaId": 168,
+      "fkParametro": 3,
+      "nombreParametro": "altura",
+      "valor": 1.70,
+      "fechaDeCreacion": "2026-02-08T18:54:03.48",
+      "unidadDeMedidaId": 3,
+      "nombreUnidadDeMedida": "m",
+      "fkEjercicio": null,
+      "nombreEjercicio": null,
+      "urlIconoParametro": "~/img/altura.svg",
+      "urlIconoEjercicio": null,
+      "fkUsuario": "c7f8eb66-cbd8-43cf-8812-1b369fc84ca5"
+    },
+    "meta": null
+  }
+]
+[15:22:37 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[System.Collections.Generic.List`1[[DTO.Dtos.DTOItemProgreso, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+[15:22:37 INF] Executed action API.Controllers.MedidasController.getProgresoDelCliente (API) in 159.6111ms
+[15:22:37 INF] Executed endpoint 'API.Controllers.MedidasController.getProgresoDelCliente (API)'
+[15:22:37 INF] Request finished HTTP/1.1 GET http://localhost/api/progresoDeUsuario?idUsuario=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - 200 null application/json; charset=utf-8 167.8872ms
+[15:22:37 INF] Request starting HTTP/1.1 POST http://localhost/api/autenticar - application/json; charset=utf-8 54
+[15:22:37 INF] Executing endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:37 INF] Route matched with {action = "AutenticarUsuario", controller = "Users"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AutenticarUsuario(DTO.Dtos.UserCredentials) on controller API.Controllers.UsersController (API).
+[15:22:37 INF] Start AutenticarUsuario correo=uno@gmail.com
+[15:22:37 INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+¡La contraseña es correcta! El problema es una configuración de SignInManager.
+¿Hash coincide?: Success
+[15:22:37 INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+[15:22:37 INF] Executed DbCommand (7ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:37 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (Size = 256), @p8='?' (Size = 250), @p9='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [RefreshTokens] ([RefreshTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [ReplacedByTokenId], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+[15:22:37 INF] Executed DbCommand (11ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:37 INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:37 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.DTOLoggedUser, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:37 INF] Executed action API.Controllers.UsersController.AutenticarUsuario (API) in 458.7635ms
+[15:22:37 INF] Executed endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:37 INF] Request finished HTTP/1.1 POST http://localhost/api/autenticar - 200 null application/json; charset=utf-8 461.0168ms
+[15:22:37 INF] Request starting HTTP/1.1 POST http://localhost/api/RegistrarMedida - application/json; charset=utf-8 125
+[15:22:37 INF] Executing endpoint 'API.Controllers.MedidasController.Index (API)'
+[15:22:37 INF] Route matched with {action = "Index", controller = "Medidas"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index(DTO.Dtos.DTOMedida) on controller API.Controllers.MedidasController (API).
+[15:22:38 INF] Executed DbCommand (7ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int32), @p2='?' (Size = 450), @p3='?' (Precision = 10) (Scale = 2) (DbType = Decimal)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [medidas] ([fkEjercicio], [fkParametro], [fkUsuario], [valor])
+OUTPUT INSERTED.[medidaId], INSERTED.[fechaDeCreacion]
+VALUES (@p0, @p1, @p2, @p3);
+[15:22:38 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.HTTPResponseModelMedida'.
+[15:22:38 INF] Executed action API.Controllers.MedidasController.Index (API) in 144.678ms
+[15:22:38 INF] Executed endpoint 'API.Controllers.MedidasController.Index (API)'
+[15:22:38 INF] Request finished HTTP/1.1 POST http://localhost/api/RegistrarMedida - 200 null application/json; charset=utf-8 161.8969ms
+[15:22:38 INF] Request starting HTTP/1.1 POST http://localhost/api/autenticar - application/json; charset=utf-8 54
+[15:22:38 INF] Executing endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:38 INF] Route matched with {action = "AutenticarUsuario", controller = "Users"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AutenticarUsuario(DTO.Dtos.UserCredentials) on controller API.Controllers.UsersController (API).
+[15:22:38 INF] Start AutenticarUsuario correo=uno@gmail.com
+[15:22:38 INF] Executed DbCommand (3ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+¡La contraseña es correcta! El problema es una configuración de SignInManager.
+¿Hash coincide?: Success
+[15:22:38 INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+[15:22:38 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:38 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (Size = 256), @p8='?' (Size = 250), @p9='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [RefreshTokens] ([RefreshTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [ReplacedByTokenId], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+[15:22:38 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:38 INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:38 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.DTOLoggedUser, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:38 INF] Executed action API.Controllers.UsersController.AutenticarUsuario (API) in 327.8158ms
+[15:22:38 INF] Executed endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:38 INF] Request finished HTTP/1.1 POST http://localhost/api/autenticar - 200 null application/json; charset=utf-8 329.6114ms
+[15:22:38 INF] Request starting HTTP/1.1 GET http://localhost/api/obtenerDetallesDeProgreso?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5&amp;idParametro=1&amp;espaciadoTemporal=individual&amp;tipoDeBusqueda=MES - null null
+[15:22:38 INF] Executing endpoint 'API.Controllers.MedidasController.ObtenerDetallesDeProgresoApi (API)'
+[15:22:38 INF] Route matched with {action = "ObtenerDetallesDeProgresoApi", controller = "Medidas"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[DTO.Dtos.DTOResponse`1[DTO.Dtos.MedidasConMetas]]] ObtenerDetallesDeProgresoApi(System.String, Int32, System.Nullable`1[System.Int32], System.String, System.String, System.Nullable`1[System.DateTime], System.Nullable`1[System.DateTime], Boolean, Int32[], Int32[], System.Nullable`1[System.DateTime]) on controller API.Controllers.MedidasController (API).
+[15:22:38 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.MedidasConMetas, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:38 INF] Executed action API.Controllers.MedidasController.ObtenerDetallesDeProgresoApi (API) in 19.4818ms
+[15:22:38 INF] Executed endpoint 'API.Controllers.MedidasController.ObtenerDetallesDeProgresoApi (API)'
+[15:22:38 INF] Request finished HTTP/1.1 GET http://localhost/api/obtenerDetallesDeProgreso?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5&amp;idParametro=1&amp;espaciadoTemporal=individual&amp;tipoDeBusqueda=MES - 200 null application/json; charset=utf-8 23.348ms
+[15:22:38 INF] Request starting HTTP/1.1 POST http://localhost/api/RegistrarMedida - application/json; charset=utf-8 125
+[15:22:38 INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (empleado)
+[15:22:38 INF] AuthenticationScheme: Bearer was challenged.
+[15:22:38 INF] Request finished HTTP/1.1 POST http://localhost/api/RegistrarMedida - 401 null null 1.4272ms
+[15:22:38 INF] Request starting HTTP/1.1 GET http://localhost/api/progresoDeUsuario?idUsuario=test - null null
+[15:22:38 INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (cliente)
+[15:22:38 INF] AuthenticationScheme: Bearer was challenged.
+[15:22:38 INF] Request finished HTTP/1.1 GET http://localhost/api/progresoDeUsuario?idUsuario=test - 401 null null 1.8049ms
+[15:22:38 INF] Request starting HTTP/1.1 POST http://localhost/api/autenticar - application/json; charset=utf-8 62
+[15:22:38 INF] Executing endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:38 INF] Route matched with {action = "AutenticarUsuario", controller = "Users"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AutenticarUsuario(DTO.Dtos.UserCredentials) on controller API.Controllers.UsersController (API).
+[15:22:38 INF] Start AutenticarUsuario correo=aaronhl1313@gmail.com
+[15:22:38 INF] Executed DbCommand (1ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+¡La contraseña es correcta! El problema es una configuración de SignInManager.
+¿Hash coincide?: Success
+[15:22:38 INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+[15:22:38 INF] Executed DbCommand (8ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:38 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (Size = 256), @p8='?' (Size = 250), @p9='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [RefreshTokens] ([RefreshTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [ReplacedByTokenId], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+[15:22:38 INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:38 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:38 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.DTOLoggedUser, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:38 INF] Executed action API.Controllers.UsersController.AutenticarUsuario (API) in 366.5194ms
+[15:22:38 INF] Executed endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:38 INF] Request finished HTTP/1.1 POST http://localhost/api/autenticar - 200 null application/json; charset=utf-8 371.5208ms
+[15:22:38 INF] Request starting HTTP/1.1 GET http://localhost/api/obtenerEjerciciosYParametros?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - null null
+[15:22:38 INF] Executing endpoint 'API.Controllers.MedidasController.ObtenerDetallesDeProgreso (API)'
+[15:22:38 INF] Route matched with {action = "ObtenerDetallesDeProgreso", controller = "Medidas"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[DTO.Dtos.DTOResponse`1[System.Collections.Generic.List`1[DTO.Dtos.DTOEjerciciosYParametrosDelCliente]]]] ObtenerDetallesDeProgreso(System.String) on controller API.Controllers.MedidasController (API).
+[15:22:38 INF] Executed DbCommand (2ms) [Parameters=[@__p_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[Id] = @__p_0
+[15:22:38 INF] Executed DbCommand (3ms) [Parameters=[p0='?' (Size = 4000)], CommandType='Text', CommandTimeout='30']
+EXEC sp_obtenerEjerciciosYParametrosDelCliente @idCliente=@p0
+[15:22:38 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[System.Collections.Generic.List`1[[DTO.Dtos.DTOEjerciciosYParametrosDelCliente, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.
+[15:22:38 INF] Executed action API.Controllers.MedidasController.ObtenerDetallesDeProgreso (API) in 13.9561ms
+[15:22:38 INF] Executed endpoint 'API.Controllers.MedidasController.ObtenerDetallesDeProgreso (API)'
+[15:22:38 INF] Request finished HTTP/1.1 GET http://localhost/api/obtenerEjerciciosYParametros?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - 200 null application/json; charset=utf-8 19.9214ms
+[15:22:38 INF] Request starting HTTP/1.1 GET http://localhost/api/obtenerAñosConActividadDelCliente?idCliente=test - null null
+[15:22:38 INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (empleado|cliente)
+[15:22:38 INF] AuthenticationScheme: Bearer was challenged.
+[15:22:38 INF] Request finished HTTP/1.1 GET http://localhost/api/obtenerAñosConActividadDelCliente?idCliente=test - 401 null null 4.006ms
+[15:22:38 INF] Request starting HTTP/1.1 POST http://localhost/api/autenticar - application/json; charset=utf-8 62
+[15:22:38 INF] Executing endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:38 INF] Route matched with {action = "AutenticarUsuario", controller = "Users"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AutenticarUsuario(DTO.Dtos.UserCredentials) on controller API.Controllers.UsersController (API).
+[15:22:38 INF] Start AutenticarUsuario correo=aaronhl1313@gmail.com
+[15:22:39 INF] Executed DbCommand (1ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+¡La contraseña es correcta! El problema es una configuración de SignInManager.
+¿Hash coincide?: Success
+[15:22:39 INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+[15:22:39 INF] Executed DbCommand (5ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:39 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (Size = 256), @p8='?' (Size = 250), @p9='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [RefreshTokens] ([RefreshTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [ReplacedByTokenId], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+[15:22:39 INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:39 INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:39 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.DTOLoggedUser, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:39 INF] Executed action API.Controllers.UsersController.AutenticarUsuario (API) in 443.6618ms
+[15:22:39 INF] Executed endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:39 INF] Request finished HTTP/1.1 POST http://localhost/api/autenticar - 200 null application/json; charset=utf-8 447.0233ms
+[15:22:39 INF] Request starting HTTP/1.1 GET http://localhost/api/obtenerAñosConActividadDelCliente?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - null null
+[15:22:39 INF] Executing endpoint 'API.Controllers.MedidasController.getAñosActivo (API)'
+[15:22:39 INF] Route matched with {action = "getAñosActivo", controller = "Medidas"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] getAñosActivo(System.String) on controller API.Controllers.MedidasController (API).
+[15:22:39 INF] Executed DbCommand (5ms) [Parameters=[@__idCliente_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT DISTINCT DATEPART(year, [m].[fechaDeCreacion])
+FROM [medidas] AS [m]
+WHERE [m].[fkUsuario] = @__idCliente_0
+[15:22:39 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.HttpResponseAñosActivo'.
+[15:22:39 INF] Executed action API.Controllers.MedidasController.getAñosActivo (API) in 109.922ms
+[15:22:39 INF] Executed endpoint 'API.Controllers.MedidasController.getAñosActivo (API)'
+[15:22:39 INF] Request finished HTTP/1.1 GET http://localhost/api/obtenerAñosConActividadDelCliente?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - 200 null application/json; charset=utf-8 124.2037ms
+[15:22:39 INF] Request starting HTTP/1.1 GET http://localhost/api/getParametrosDeMedicion?idUsuario=test - null null
+[15:22:39 INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (empleado|cliente)
+[15:22:39 INF] AuthenticationScheme: Bearer was challenged.
+[15:22:39 INF] Request finished HTTP/1.1 GET http://localhost/api/getParametrosDeMedicion?idUsuario=test - 401 null null 1.5407ms
+[15:22:39 INF] Request starting HTTP/1.1 POST http://localhost/api/autenticar - application/json; charset=utf-8 54
+[15:22:39 INF] Executing endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:39 INF] Route matched with {action = "AutenticarUsuario", controller = "Users"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AutenticarUsuario(DTO.Dtos.UserCredentials) on controller API.Controllers.UsersController (API).
+[15:22:39 INF] Start AutenticarUsuario correo=uno@gmail.com
+[15:22:39 INF] Executed DbCommand (1ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+¡La contraseña es correcta! El problema es una configuración de SignInManager.
+¿Hash coincide?: Success
+[15:22:39 INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+[15:22:39 INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:39 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (Size = 256), @p8='?' (Size = 250), @p9='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [RefreshTokens] ([RefreshTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [ReplacedByTokenId], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+[15:22:39 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:39 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:39 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.DTOLoggedUser, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:39 INF] Executed action API.Controllers.UsersController.AutenticarUsuario (API) in 206.0446ms
+[15:22:39 INF] Executed endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:39 INF] Request finished HTTP/1.1 POST http://localhost/api/autenticar - 200 null application/json; charset=utf-8 208.7985ms
+[15:22:39 INF] Request starting HTTP/1.1 GET http://localhost/api/obtenerAñosConActividadDelCliente?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - null null
+[15:22:39 INF] Executing endpoint 'API.Controllers.MedidasController.getAñosActivo (API)'
+[15:22:39 INF] Route matched with {action = "getAñosActivo", controller = "Medidas"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] getAñosActivo(System.String) on controller API.Controllers.MedidasController (API).
+[15:22:39 INF] Executed DbCommand (1ms) [Parameters=[@__idCliente_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT DISTINCT DATEPART(year, [m].[fechaDeCreacion])
+FROM [medidas] AS [m]
+WHERE [m].[fkUsuario] = @__idCliente_0
+[15:22:39 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.HttpResponseAñosActivo'.
+[15:22:39 INF] Executed action API.Controllers.MedidasController.getAñosActivo (API) in 4.1917ms
+[15:22:39 INF] Executed endpoint 'API.Controllers.MedidasController.getAñosActivo (API)'
+[15:22:39 INF] Request finished HTTP/1.1 GET http://localhost/api/obtenerAñosConActividadDelCliente?idCliente=c7f8eb66-cbd8-43cf-8812-1b369fc84ca5 - 200 null application/json; charset=utf-8 5.805ms
+[15:22:39 INF] Request starting HTTP/1.1 POST http://localhost/api/autenticar - application/json; charset=utf-8 62
+[15:22:39 INF] Executing endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:39 INF] Route matched with {action = "AutenticarUsuario", controller = "Users"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] AutenticarUsuario(DTO.Dtos.UserCredentials) on controller API.Controllers.UsersController (API).
+[15:22:39 INF] Start AutenticarUsuario correo=aaronhl1313@gmail.com
+[15:22:39 INF] Executed DbCommand (1ms) [Parameters=[@__normalizedUserName_0='?' (Size = 256)], CommandType='Text', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[Apellido], [a].[ConcurrencyStamp], [a].[Direccion], [a].[Email], [a].[EmailConfirmed], [a].[Estado], [a].[FechaDeNacimiento], [a].[FechaDeRegistro], [a].[IdAntiguo], [a].[IdSecundario], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreCompleto], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[NumeroDeIdentificacion], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+¡La contraseña es correcta! El problema es una configuración de SignInManager.
+¿Hash coincide?: Success
+[15:22:40 INF] Executed DbCommand (1ms) [Parameters=[@__userId_0='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SELECT [a0].[Name]
+FROM [AspNetUserRoles] AS [a]
+INNER JOIN [AspNetRoles] AS [a0] ON [a].[RoleId] = [a0].[Id]
+WHERE [a].[UserId] = @__userId_0
+[15:22:40 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:40 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = Guid), @p6='?' (DbType = DateTime2), @p7='?' (Size = 256), @p8='?' (Size = 250), @p9='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [RefreshTokens] ([RefreshTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [ReplacedByTokenId], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9);
+[15:22:40 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:40 INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Guid), @p1='?' (Size = 100), @p2='?' (DbType = DateTime2), @p3='?' (Size = 50), @p4='?' (DbType = DateTime2), @p5='?' (DbType = DateTime2), @p6='?' (Size = 256), @p7='?' (Size = 250), @p8='?' (Size = 450)], CommandType='Text', CommandTimeout='30']
+SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+INSERT INTO [AccessTokens] ([AccessTokenId], [ClientId], [ExpiresAt], [IpAddress], [IssuedAt], [RevokedAt], [TokenHash], [UserAgent], [UserId])
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8);
+[15:22:40 INF] Executing OkObjectResult, writing value of type 'DTO.Dtos.DTOResponse`1[[DTO.Dtos.DTOLoggedUser, DTO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.
+[15:22:40 INF] Executed action API.Controllers.UsersController.AutenticarUsuario (API) in 205.8199ms
+[15:22:40 INF] Executed endpoint 'API.Controllers.UsersController.AutenticarUsuario (API)'
+[15:22:40 INF] Request finished HTTP/1.1 POST http://localhost/api/autenticar - 200 null application/json; charset=utf-8 207.1044ms
+[15:22:40 INF] Request starting HTTP/1.1 POST http://localhost/api/RegistrarMedida - application/json; charset=utf-8 125
+[15:22:40 INF] Authorization failed. These requirements were not met:
+RolesAuthorizationRequirement:User.IsInRole must be true for one of the following roles: (empleado)
+[15:22:40 INF] AuthenticationScheme: Bearer was forbidden.
+[15:22:40 INF] Request finished HTTP/1.1 POST http://localhost/api/RegistrarMedida - 403 null null 2.9076ms
+[15:22:40 INF] Scheduler QuartzScheduler_$_NON_CLUSTERED shutting down.
+[15:22:40 INF] Scheduler QuartzScheduler_$_NON_CLUSTERED paused.
+[15:22:40 INF] Scheduler QuartzScheduler_$_NON_CLUSTERED Shutdown complete.
+[xUnit.net 00:00:23.77]   Finished:    GymWebApp.Tests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

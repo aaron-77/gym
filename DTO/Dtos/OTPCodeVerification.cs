@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace DTO.Dtos
 {
     public class OTPCodeVerification
     {
+        [Required(ErrorMessage = "El código es requerido")]
         public string codigo { get; set; }
-        public string cel{ get; set; }
-        public string? correo {  get; set; }
+        
+        [Required(ErrorMessage = "El celular es requerido")]
+        public string cel { get; set; }
+        
+        [Required(ErrorMessage = "El correo es requerido")]
+        public string? correo { get; set; }
     }
 }
