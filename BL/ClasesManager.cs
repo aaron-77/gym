@@ -9,9 +9,9 @@ namespace BL
 {
     public class ClasesManager
     {
-        private readonly HttpCustomClient _httpClient;
+        private readonly IHttpCustomClient _httpClient;
 
-        public ClasesManager(HttpCustomClient httpClient)
+        public ClasesManager(IHttpCustomClient httpClient)
         {
             _httpClient = httpClient;
         }

@@ -11,8 +11,8 @@ namespace BL
 {
     public class UsersManager
     {
-        private readonly HttpCustomClient httpClient;
-        public UsersManager(HttpCustomClient _httpClient ){
+        private readonly IHttpCustomClient httpClient;
+        public UsersManager(IHttpCustomClient _httpClient ){
             httpClient = _httpClient;
         }
         public async Task<DTOResponse<DTOLoggedUser>> login(UserCredentials credenciales)

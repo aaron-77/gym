@@ -57,13 +57,13 @@ try
     bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
     Console.WriteLine($"SSL configurado: {useSsl}");
 
-    // Escoge la URL del backend según el valor de UseSsl
+    // Escoge la URL del backend segï¿½n el valor de UseSsl
     string BaseApiUrlForClientHttp = builder.Configuration[
         aspnetcore_urls.Contains("https") ? "EndPoints:api:ssl" : "EndPoints:api:nossl"
     ] ?? "http://localhost:5274";
     Console.WriteLine($"Base API URL: {BaseApiUrlForClientHttp}");
 
-    builder.Services.AddHttpClient<HttpCustomClient>(client =>
+    builder.Services.AddHttpClient<IHttpCustomClient, HttpCustomClient>(client =>
     {
         client.BaseAddress = new Uri(BaseApiUrlForClientHttp);
     }).AddHttpMessageHandler<AuthHeaderHandler>();
@@ -196,10 +196,10 @@ try
 
         Console.WriteLine(new string('-', 60));
         Console.WriteLine("CONFIGURACION ACTIVA:");
-        Console.WriteLine($"  • SSL Habilitado: {useSsl}");
-        Console.WriteLine($"  • Issuer: {jwtSettings?.Issuer}");
-        Console.WriteLine($"  • Audiencia Frontend: {(useSsl ? jwtSettings?.FrontendAudienceSsl : jwtSettings?.FrontAudiencie)}");
-        Console.WriteLine($"  • Expiracion Token: {jwtSettings?.ExpiryMinutes} minutos");
+        Console.WriteLine($"  ï¿½ SSL Habilitado: {useSsl}");
+        Console.WriteLine($"  ï¿½ Issuer: {jwtSettings?.Issuer}");
+        Console.WriteLine($"  ï¿½ Audiencia Frontend: {(useSsl ? jwtSettings?.FrontendAudienceSsl : jwtSettings?.FrontAudiencie)}");
+        Console.WriteLine($"  ï¿½ Expiracion Token: {jwtSettings?.ExpiryMinutes} minutos");
         Console.WriteLine(new string('=', 60) + "\n");
 
         logger.LogInformation("Configuracion JWT cargada correctamente");

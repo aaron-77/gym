@@ -31,7 +31,7 @@ namespace API.Controllers
     public class ClasesController : ControllerBase
     {
         private readonly FitnessCenterDbContext _context;
-        private readonly HttpCustomClient _httpCustomClient;
+        private readonly IHttpCustomClient _httpCustomClient;
         private readonly UserRoleService _userRoleService;
         private readonly ServicioActualizacionesDeHorariosRealTime _servicioActualizaciones;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -41,7 +41,7 @@ namespace API.Controllers
 
         public ClasesController(
             FitnessCenterDbContext context,
-            HttpCustomClient httpCustomClient,
+            IHttpCustomClient httpCustomClient,
             UserRoleService userRoleService,
             ServicioActualizacionesDeHorariosRealTime servicioActualizaciones,
             IClasesService clasesService,

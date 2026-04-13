@@ -44,11 +44,12 @@ public class DetallesDeClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
         await TestContainerHelper.ResetDatabaseAsync();
         
         // Obtener la clase con nombre "HIIT"
-        var idClase = await DatabaseHelper.ExecuteScalarAsync<int?>(
+        int? idClaseNulleable = await DatabaseHelper.ExecuteScalarAsync<int>(
             TestContainerHelper.ConnectionString,
             "SELECT TOP 1 ClaseId FROM Clases WHERE NombreClase = 'HIIT'");
-        
-        idClase.Should().NotBeNull("La clase 'HIIT' debe existir en la base de datos");
+        Assert.NotNull(idClaseNulleable);
+        idClaseNulleable.Should().NotBeNull("La clase 'HIIT' debe existir en la base de datos");
+        int idClase = idClaseNulleable.Value;
 
         // Act
         var response = await _client.GetAsync($"/api/Clases/detallesDeClase?idClase={idClase}");

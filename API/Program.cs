@@ -206,7 +206,7 @@ try
     string baseApiUrl = builder.Configuration[
         aspnetcore_urls.Contains("https") ? "EndPoints:api:ssl" : "EndPoints:api:nossl"
     ] ?? "http://localhost:5274";
-    builder.Services.AddHttpClient<HttpCustomClient>(client =>
+    builder.Services.AddHttpClient<IHttpCustomClient, HttpCustomClient>(client =>
     {
         client.BaseAddress = new Uri(baseApiUrl);
     }).AddHttpMessageHandler<AuthHeaderHandler>();

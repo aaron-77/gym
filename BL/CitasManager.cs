@@ -12,8 +12,8 @@ namespace BL
     public class CitasManager
     {
 
-        private HttpCustomClient httpClient;
-        public CitasManager(HttpCustomClient _httpClient)
+        private IHttpCustomClient httpClient;
+        public CitasManager(IHttpCustomClient _httpClient)
         {
             httpClient = _httpClient;
         }

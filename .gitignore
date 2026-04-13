@@ -39,3 +39,17 @@ BL/bin
 BL/obj
 /build.log
 /nginx.conf
+
+# Nginx E2E
+/nginx/
+/nginx.e2e.conf
+
+# E2E Test Results (Playwright traces)
+test-results/
+test-results/*
+
+# Docker
+.docker/
+
+# Container logs
+container-logs/

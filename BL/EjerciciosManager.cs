@@ -10,8 +10,8 @@ namespace BL
 {
     public class EjerciciosManager
     {
-        private HttpCustomClient httpClient; 
-        public EjerciciosManager(HttpCustomClient _httpClient ){
+        private IHttpCustomClient httpClient; 
+        public EjerciciosManager(IHttpCustomClient _httpClient ){
             httpClient = _httpClient;
         }
         public async Task<DTOResponse<List<Ejercicio>>> obtenerEjercicios()

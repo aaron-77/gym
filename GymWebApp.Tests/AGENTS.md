@@ -91,7 +91,10 @@ GymWebApp.Tests/
 | **xunit-dotnet** | "Cuando se escriben tests unitarios para .NET" | Patrones de unit testing |
 | **xunit-integration** | "Cuando se escriben tests de integración para .NET" | Patrones de integración |
 | **sqlserver-dbtesting** | "Cuando se testing SQL Server stored procedures y functions" | Tests de lógica en BD |
-| **playwright-dotnet** | "Cuando se escriben E2E tests para ASP.NET Core" | E2E y componentes |
+| **dotnet-playwright** | "Cuando se escriben E2E tests para ASP.NET Core con Playwright" | E2E y componentes |
+| **dotnet-ui-testing-core** | "Cuando se necesita Page Object Model, selectores estables o wait strategies" | Patrones de mantenimiento de tests UI |
+| **dotnet-testing-strategy** | "Cuando se necesita decidir qué tipo de test usar (Unit/Integration/E2E)" | Estrategia de testing |
+| **dotnet-add-testing** | "Cuando se necesita crear un nuevo proyecto de tests" | Scaffold de proyectos de test |
 
 ## HelpersBasicos
 

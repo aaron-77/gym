@@ -25,7 +25,7 @@ namespace GymWebApp.Tests.Unit.Clases;
 public class InscribirAClaseUnitTests
 {
     private readonly FitnessCenterDbContext _mockContext;
-    private readonly HttpCustomClient _mockHttpClient;
+    private readonly IHttpCustomClient _mockHttpClient;
     private readonly UserRoleService _mockUserRoleService;
     private readonly ServicioActualizacionesDeHorariosRealTime _mockServicioActualizaciones;
     private readonly IClasesService _mockClasesService;
@@ -37,7 +37,7 @@ public class InscribirAClaseUnitTests
     {
         // Arrange - Setup Substitutes (mocks)
         _mockContext = Substitute.For<FitnessCenterDbContext>();
-        _mockHttpClient = Substitute.For<HttpCustomClient>(new HttpClient());
+        _mockHttpClient = Substitute.For<IHttpCustomClient>();
         _mockUserRoleService = Substitute.For<UserRoleService>(_mockContext, null!);
         _mockServicioActualizaciones = Substitute.For<ServicioActualizacionesDeHorariosRealTime>(_mockContext, null!, null!);
         _mockClasesService = Substitute.For<IClasesService>();

@@ -9,7 +9,7 @@ using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection; // Add this for IHttpClientFactory
 namespace BL
 {
-    public class HttpCustomClient
+    public class HttpCustomClient : IHttpCustomClient
     {
         private readonly EndPointsManager emanager;
         //private  HttpClient client;
@@ -43,8 +43,8 @@ namespace BL
             }
             catch (HttpRequestException e)
             {
-                string logMessage = $"[ERROR] Método: post (HttpCustomClient) - HttpRequestException | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(e, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: post (HttpCustomClient) - HttpRequestException | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(e, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {e.GetType().Name} - {e.Message} | " +
                     $"EndPointUrl: {endPointUrl} | " +
                     $"Stack Trace: {e.StackTrace}";
@@ -54,8 +54,8 @@ namespace BL
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: post (HttpCustomClient) - Excepción no prevista | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: post (HttpCustomClient) - Excepciï¿½n no prevista | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"EndPointUrl: {endPointUrl} | " +
                     $"Stack Trace: {ex.StackTrace}";
@@ -76,8 +76,8 @@ namespace BL
             }
             catch (HttpRequestException e)
             {
-                string logMessage = $"[ERROR] Método: put (HttpCustomClient) - HttpRequestException | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(e, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: put (HttpCustomClient) - HttpRequestException | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(e, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {e.GetType().Name} - {e.Message} | " +
                     $"EndPointUrl: {endPointUrl} | " +
                     $"Stack Trace: {e.StackTrace}";
@@ -87,8 +87,8 @@ namespace BL
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: put (HttpCustomClient) - Excepción no prevista | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: put (HttpCustomClient) - Excepciï¿½n no prevista | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"EndPointUrl: {endPointUrl} | " +
                     $"Stack Trace: {ex.StackTrace}";
@@ -118,8 +118,8 @@ namespace BL
             }
             catch (HttpRequestException e)
             {
-                string logMessage = $"[ERROR] Método: get (HttpCustomClient) - HttpRequestException | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(e, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: get (HttpCustomClient) - HttpRequestException | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(e, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {e.GetType().Name} - {e.Message} | " +
                     $"EndPointUrl: {endPointUrl} | " +
                     $"Stack Trace: {e.StackTrace}";
@@ -129,8 +129,8 @@ namespace BL
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: get (HttpCustomClient) - Excepción no prevista | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: get (HttpCustomClient) - Excepciï¿½n no prevista | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"EndPointUrl: {endPointUrl} | " +
                     $"Stack Trace: {ex.StackTrace}";

@@ -9,9 +9,9 @@ namespace BL
 {
     public class HorariosManager
     {
-        private readonly HttpCustomClient _httpClient;
+        private readonly IHttpCustomClient _httpClient;
 
-        public HorariosManager(HttpCustomClient httpClient)
+        public HorariosManager(IHttpCustomClient httpClient)
         {
             _httpClient = httpClient;
         }

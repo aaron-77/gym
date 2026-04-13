@@ -8,7 +8,10 @@ IMPORTANT: When you detect any of these contexts, IMMEDIATELY read the correspon
 |---------|------------|
 | xUnit Unit Tests | [.opencode/skills/xunit-dotnet/SKILL.md](.opencode/skills/xunit-dotnet/SKILL.md) |
 | xUnit Integration Tests | [.opencode/skills/xunit-integration/SKILL.md](.opencode/skills/xunit-integration/SKILL.md) |
-| Playwright E2E (.NET) | [.opencode/skills/playwright-dotnet/SKILL.md](.opencode/skills/playwright-dotnet/SKILL.md) |
+| Playwright E2E (.NET) | [/home/aaron/.config/opencode/skills/dotnet-playwright/SKILL.md](/home/aaron/.config/opencode/skills/dotnet-playwright/SKILL.md) |
+| .NET UI Testing Core | [/home/aaron/.config/opencode/skills/dotnet-ui-testing-core/SKILL.md](/home/aaron/.config/opencode/skills/dotnet-ui-testing-core/SKILL.md) | Page Object Model, selectores, wait strategies |
+| .NET Testing Strategy | [/home/aaron/.config/opencode/skills/dotnet-testing-strategy/SKILL.md](/home/aaron/.config/opencode/skills/dotnet-testing-strategy/SKILL.md) | Unit vs Integration vs E2E decision tree |
+| .NET Add Testing | [/home/aaron/.config/opencode/skills/dotnet-add-testing/SKILL.md](/home/aaron/.config/opencode/skills/dotnet-add-testing/SKILL.md) | Test project scaffolding |
 | SQL Server DB Testing | [.opencode/skills/sqlserver-dbtesting/SKILL.md](.opencode/skills/sqlserver-dbtesting/SKILL.md) |
 | React | [.opencode/skills/react-19/SKILL.md](.opencode/skills/react-19/SKILL.md) |
 | Next.js | [.opencode/skills/nextjs-15/SKILL.md](.opencode/skills/nextjs-15/SKILL.md) |

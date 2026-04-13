@@ -9,8 +9,11 @@ using FluentAssertions;
 using GymWebApp.Tests.Integration.Factories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using Moq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -19,7 +22,7 @@ namespace GymWebApp.Tests.Unit.Clases;
 public class ReagendarInscripcionAClaseUnitTests
 {
     private readonly FitnessCenterDbContext _mockContext;
-    private readonly HttpCustomClient _mockHttpClient;
+    private readonly IHttpCustomClient _mockHttpClient;
     private readonly UserRoleService _mockUserRoleService;
     private readonly ServicioActualizacionesDeHorariosRealTime _mockServicioActualizaciones;
     private readonly IClasesService _mockClasesService;
@@ -29,16 +32,36 @@ public class ReagendarInscripcionAClaseUnitTests
 
     public ReagendarInscripcionAClaseUnitTests()
     {
-        // Arrange - Setup Substitutes (mocks)
-        _mockContext = Substitute.For<FitnessCenterDbContext>();
-        _mockHttpClient = Substitute.For<HttpCustomClient>(new HttpClient());
+        // Arrange - Setup Substitutes with NSubstitute and Moq
+        
+        // DbContext (concrete class with constructors) - debe crearse primero
+        var mockContext = new Mock<FitnessCenterDbContext>(
+            new DbContextOptionsBuilder<FitnessCenterDbContext>()
+                .UseSqlServer("TestConnection").Options);
+        _mockContext = mockContext.Object;
+
+        // IHttpCustomClient - usa NSubstitute para la interfaz
+        _mockHttpClient = Substitute.For<IHttpCustomClient>();
+
+        // UserRoleService - espera FitnessCenterDbContext y UserManager<ApplicationUser>
         _mockUserRoleService = Substitute.For<UserRoleService>(_mockContext, null!);
-        _mockServicioActualizaciones = Substitute.For<ServicioActualizacionesDeHorariosRealTime>(_mockContext, null!, null!);
-        _mockClasesService = Substitute.For<IClasesService>();
-        _mockLogger = Substitute.For<ILogger<ClasesController>>();
+        
+        // HorariosService - necesita FitnessCenterDbContext en constructor
+        var mockHorariosService = new Mock<HorariosService>(_mockContext);
+        
+        // ServicioActualizacionesDeHorariosRealTime - espera FitnessCenterDbContext, IHubContext<ReservacionesHub>, HorariosService
+        var mockHubContext = new Mock<IHubContext<ReservacionesHub>>();
+        _mockServicioActualizaciones = Substitute.For<ServicioActualizacionesDeHorariosRealTime>(
+            _mockContext,
+            mockHubContext.Object,
+            mockHorariosService.Object);
+
+        _mockClasesService = new Mock<IClasesService>().Object;
+        _mockLogger = new Mock<ILogger<ClasesController>>().Object;
+        // UserManager<ApplicationUser> - usa NSubstitute (no Moq)
         _mockUserManager = Substitute.For<UserManager<ApplicationUser>>(
             Substitute.For<IUserStore<ApplicationUser>>(),
-            null!, null!, null!, null!, null!, null!, null!, null!, null!);
+            null!, null!, null!, null!, null!, null!, null!, null!);
 
         _sut = new ClasesController(
             _mockContext,

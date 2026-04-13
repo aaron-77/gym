@@ -15,9 +15,9 @@ namespace GymFrontend.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _config;
-        private readonly HttpCustomClient client;
+        private readonly IHttpCustomClient client;
 
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration,HttpCustomClient httpClient)
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IHttpCustomClient httpClient)
         {
             _logger = logger;
             _config = configuration;
@@ -121,10 +121,10 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: DetalleDeClase | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: DetalleDeClase | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
-                    $"Parámetro - IdClase: {idClase} | " +
+                    $"Parï¿½metro - IdClase: {idClase} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 

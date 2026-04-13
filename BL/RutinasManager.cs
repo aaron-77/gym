@@ -12,8 +12,8 @@ namespace BL
     public class RutinasManager
     {
 
-        private HttpCustomClient httpClient; 
-        public RutinasManager(HttpCustomClient _httpClient ){
+        private IHttpCustomClient httpClient; 
+        public RutinasManager(IHttpCustomClient _httpClient ){
             httpClient = _httpClient;
         }
         public async Task<HttpResponseRutina> registrarRutina(DTO.Dtos.Rutina rutina)

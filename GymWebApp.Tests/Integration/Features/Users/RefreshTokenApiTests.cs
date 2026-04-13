@@ -67,6 +67,7 @@ public class RefreshTokenApiTests : IClassFixture<CitasApiWebApplicationFactory<
         };
 
         // Act
+        SetAuthHeader(originalAccessToken);
         var response = await _client.PostAsJsonAsync("/api/refresh", refreshRequest);
 
         // Assert

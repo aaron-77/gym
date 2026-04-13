@@ -12,8 +12,8 @@ namespace BL
 {
     public class MedidasManager
     {
-        private HttpCustomClient httpClient;
-        public MedidasManager(HttpCustomClient _httpClient)
+        private IHttpCustomClient httpClient;
+        public MedidasManager(IHttpCustomClient _httpClient)
         {
             httpClient = _httpClient;
         }
