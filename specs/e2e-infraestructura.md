@@ -26,8 +26,8 @@ The project MUST provide a helper class to manage test containers.
 - WHEN the test environment starts
 - THEN the following containers MUST be started:
   - SQL Server (Testcontainers.MsSql) on port 1433 (internal)
-  - API on port 5274 (internal)
-  - Frontend on port 5062 (internal)
+  - API (aaron77/fitnessgymapi:v17) on port 5274 (internal)
+  - Frontend (aaron77/fitnessgymfrontend:v17) on port 5062 (internal)
   - Nginx reverse proxy on port 5080 (external mapped)
 - AND a Docker network MUST be created for inter-container communication
 
@@ -109,12 +109,12 @@ GymWebApp.Tests/
 
 ### Port Configuration
 
-| Service  | Internal Port | External (Host) | Description            |
-|----------|--------------|-----------------|----------------------|
-| Nginx    | 80           | 5080            | Reverse proxy         |
-| API      | 5274         | 5274            | ASP.NET Core API    |
-| Frontend  | 5062         | 5062            | Blazor Server      |
-| SQL Server| 1433         | -               | Database         |
+| Service   | Docker Image | Internal Port | External (Host) | Description        |
+|-----------|--------------|---------------|-----------------|---------------------|
+| Nginx     | nginx:alpine | 80            | 5080            | Reverse proxy       |
+| API       | aaron77/fitnessgymapi:v17 | 5274      | 5274            | ASP.NET Core API    |
+| Frontend  | aaron77/fitnessgymfrontend:v17 | 5062  | 5062            | Blazor Server      |
+| SQL Server| mcr.microsoft.com/mssql/server:2022-latest | 1433 | -               | Database            |
 
 ### Nginx Configuration
 
