@@ -27,6 +27,18 @@ Context files referenced in this document are stored in [extraContext/](extraCon
 - **code-style/**: Naming conventions, imports order, best practices, logging, database, configuration
 - **ejemplosArquitecturaYCodigoGenerales/**: Code pattern examples (async/await, error handling, response pattern, etc.)
 - **build-commands.md**: Build and test commands
+- **nginx/**: Nginx reverse proxy configuration (symlink to external location)
+
+## Nginx Configuration
+
+The Nginx reverse proxy configuration for the project is located at:
+- **Local path**: [nginx/nginxconfln](nginx/nginxconfln) (symlink)
+- **Actual path**: `/home/aaron/archivosl/estudio/proyectos/fitnessgymreverseproxy/nginx.conf`
+
+This configuration is used for:
+- Routing requests between Frontend and API
+- Port and endpoint configuration
+- Local development with reverse proxy
 
 ## Rules
 
