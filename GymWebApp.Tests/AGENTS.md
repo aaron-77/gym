@@ -48,6 +48,32 @@ GymWebApp.Tests/
 - **Alcance**: Cubren casos como 404, 500, validaciones fallidas y lógica condicional compleja.
 - **Ubicación**: `Unit/{Dominio}/`.
 
+### Tests E2E
+- **Propósito**: Verificar flujos críticos del usuario a través de toda la pila (browser → Nginx → API → BD → Frontend → browser).
+- **Alcance**: Solo rutas críticas de usuario. Autenticación, navegación, flujos completos de UI.
+- **Ubicación**: `E2E/Features/{FeatureName}E2ETests.cs`.
+- **Infraestructura**: Playwright .NET + Testcontainers (SQL Server + API + Frontend + Nginx).
+- **Especificaciones**: `specs/e2e-infraestructura.md` (infraestructura) y `specs/e2e-tests.md` (escenarios).
+- **Principio**: Más tests unitarios, menos tests de integración, mínimos tests E2E.
+- **Ver specs de E2E para**: arquitectura de contenedores, configuración de Nginx, estrategia de seeding, patrones de aserción, y escenarios aprobados.
+
+## Reglas de Implementación de Tests
+
+- **ESTRICTAMENTE SEGÚN SPEC**: Solo se deben implementar las pruebas definidas explícitamente en la especificación. No se acepta ninguna prueba que no esté documentada en el spec al momento de la implementación.
+- **PROHIBIDO TESTS DERIVADOS**: Bajo ninguna circunstancia se deben implementar pruebas secundarias, adicionales o "casos que se te ocurran" sin preguntar.
+- **CONSULTA OBLIGATORIA**: Si identificás la necesidad de cubrir un escenario extra, debés proponerlo primero y esperar la confirmación del usuario antes de implementar.
+- **NO HELPERS EN TESTS**: No escribir lógica de helper dentro de las clases de prueba. Usar clases helper existentes (DatabaseHelper, TestContainerHelper) o crear nuevas en GymWebApp.Tests/Integration/Helpers/ y llamarlas desde los tests.
+- **CONSULTAR ESQUEMA DE BD**: Antes de escribir queries SQL, verificar los nombres de columnas
+  en bd/scripsOrdenadosParaMigrarBd/3tablas/tablas.sql. El esquema es la fuente de verdad.
+
+### Reglas específicas para Tests E2E
+
+- **TODOS los tests E2E DEBEN heredar de `PlaywrightTestBase`** — Esto garantiza que los contenedores estén inicializados. Tests que solo necesitan HTTP (sin browser) deben ser tests de integración, no E2E.
+- **Las credenciales de prueba DEBEN venir de `appsettings.Testing.json`** — NUNCA hardcodear email/password en los archivos de test. Usar `TestUser` (empleado) o `TestUserCliente` (cliente).
+- **Las aserciones DEBEN verificar contenido real, no solo existencia** — DO: `Expect(heading).ToHaveTextAsync(new Regex("Clases"))`. DON'T: solo `WaitForAsync` sin verificar texto.
+- **Naming convention E2E**: `{Feature}_{Action}_{ExpectedResult}` (ej: `Login_ValidCredentials_RedirectsToHomepage`).
+- **Aislamiento**: Todos los tests E2E comparten la misma base de datos. Los tests NO deben depender del orden de ejecución entre clases.
+
 ## Reglas de Implementación de Tests
 
 - **ESTRICTAMENTE SEGÚN SPEC**: Solo se deben implementar las pruebas definidas explícitamente en la especificación. No se acepta ninguna prueba que no esté documentada en el spec al momento de la implementación.
@@ -63,6 +89,8 @@ GymWebApp.Tests/
 |------------|-------------|
 | `specs/` | Especificaciones de integración (Happy Path). |
 | `specs/unit/` | Especificaciones unitarias (lógica, errores, edge cases). |
+| `specs/e2e-infraestructura.md` | Especificación de infraestructura E2E (contenedores, Nginx, seeding). |
+| `specs/e2e-tests.md` | Especificación de escenarios E2E (flujos de usuario aprobados). |
 
 ## Directorios de Pruebas (Código)
 
@@ -70,6 +98,7 @@ GymWebApp.Tests/
 |------------|-------------|
 | `GymWebApp.Tests/Integration/Features/{Dominio}/` | Tests de integración (Happy Path). |
 | `GymWebApp.Tests/Unit/{Dominio}/` | Tests unitarios (lógica, errores). |
+| `GymWebApp.Tests/E2E/Features/{FeatureName}E2ETests.cs` | Tests E2E (flujos críticos de usuario). |
 
 ## Carpetas y responsabilidades
 
@@ -80,6 +109,8 @@ GymWebApp.Tests/
 | `Integration/Features/` | Tests de integración por dominio |
 | `Integration/Factories/` | Generadores de datos con Bogus |
 | `Integration/TestData/` | Datos estáticos (JSON) |
+| `E2E/Common/` | Infraestructura E2E (contenedores, Playwright base, Nginx config) |
+| `E2E/Features/` | Tests E2E por feature |
 
 ## Skills disponibles
 
@@ -95,6 +126,8 @@ GymWebApp.Tests/
 | **dotnet-ui-testing-core** | "Cuando se necesita Page Object Model, selectores estables o wait strategies" | Patrones de mantenimiento de tests UI |
 | **dotnet-testing-strategy** | "Cuando se necesita decidir qué tipo de test usar (Unit/Integration/E2E)" | Estrategia de testing |
 | **dotnet-add-testing** | "Cuando se necesita crear un nuevo proyecto de tests" | Scaffold de proyectos de test |
+| **testcontainers** | "Cuando se usa Testcontainers para correr BD o servicios en Docker" | Contenedores Docker para tests |
+| **testcontainers-wait-strategies** | "Cuando se configuran Testcontainers para esperar que contenedores estén listos" | Wait strategies HTTP y TCP |
 
 ## HelpersBasicos
 
@@ -106,6 +139,8 @@ Helpers base disponibles en el proyecto de tests para todas las pruebas:
 | **DatabaseHelper** | `Integration/Common/` | Obtener conexiones y DbContext |
 | **RespawnHelper** | `Integration/Common/` | Limpieza de BD entre tests |
 | **TestContainerHelper** | `Integration/Common/` | Gestión de Docker/SQL Server |
+| **E2eContainerHelper** | `E2E/Common/` | Gestión de contenedores E2E (SQL Server + API + Frontend + Nginx) |
+| **PlaywrightTestBase** | `E2E/Common/` | Clase base para tests E2E con Playwright (browser lifecycle) |
 
 ## Patron de dependencia de arquitectura de pruebas
 
@@ -196,6 +231,9 @@ dotnet test
 
 # Ejecutar tests de integración
 dotnet test --filter "FullyQualifiedName~Integration"
+
+# Ejecutar tests E2E
+dotnet test --filter "FullyQualifiedName~E2E"
 
 # Ejecutar un test específico
 dotnet test --filter "FullyQualifiedName~Namespace.Clase.Metodo"
