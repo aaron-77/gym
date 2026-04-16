@@ -1,8 +1,8 @@
 ## Testcontainers Setup
 
-Use Testcontainers to run a real database instance in Docker instead of using in-memory or real databases.
+**Referencia**: Ver skill **[testcontainers](../testcontainers/SKILL.md)** para configuración de contenedores Docker.
 
-### MsSqlContainer Setup
+### Resumen Rápido
 
 ```csharp
 using Testcontainers.MsSql;
@@ -12,54 +12,26 @@ public class DatabaseFixture : IAsyncLifetime
     private static readonly MsSqlContainer _msSqlContainer = new MsSqlBuilder()
         .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
         .WithPassword("YourStrong@Passw0rd")
-        .WithReuse(true)  // Reuse container to save CPU resources
+        .WithReuse(true)
         .Build();
 
     public string ConnectionString => _msSqlContainer.GetConnectionString();
 
-    public async Task InitializeAsync()
-    {
-        await _msSqlContainer.StartAsync();
-    }
-
-    public async Task DisposeAsync()
-    {
-        await _msSqlContainer.DisposeAsync();
-    }
+    public async Task InitializeAsync() => await _msSqlContainer.StartAsync();
+    public async Task DisposeAsync() => await _msSqlContainer.DisposeAsync();
 }
 ```
 
-### PostgreSqlContainer Setup
+### Para E2E con Múltiples Contenedores
 
-```csharp
-using Testcontainers.PostgreSql;
+Ver [testcontainers skill - assets/01-testcontainers-setup.md](../testcontainers/assets/01-testcontainers-setup.md)
 
-public class DatabaseFixture : IAsyncLifetime
-{
-    private static readonly PostgreSqlContainer _postgreSqlContainer = new PostgreSqlBuilder()
-        .WithImage("postgres:15")
-        .WithDatabase("testdb")
-        .WithUsername("testuser")
-        .WithPassword("testpass")
-        .WithReuse(true)  // Reuse container to save CPU resources
-        .Build();
+### Wait Strategies
 
-    public string ConnectionString => _postgreSqlContainer.GetConnectionString();
+Ver skill **[testcontainers-wait-strategies](../testcontainers-wait-strategies/SKILL.md)**
 
-    public async Task InitializeAsync()
-    {
-        await _postgreSqlContainer.StartAsync();
-    }
+### Puntos Clave
 
-    public async Task DisposeAsync()
-    {
-        await _postgreSqlContainer.DisposeAsync();
-    }
-}
-```
-
-### Key Points
-
-- Use static field to keep container alive across tests
-- `.WithReuse(true)` prevents container restart, saving CPU on i5 processors
-- Connection string is obtained dynamically via `container.GetConnectionString()`
+- Usar campo estático para mantener el contenedor vivo entre tests
+- `.WithReuse(true)` evita reinicio del contenedor
+- Connection string se obtiene dinámicamente via `container.GetConnectionString()`

@@ -24,7 +24,7 @@ metadata:
 
 Use `MsSqlBuilder` to spin up SQL Server container with reuse optimization.
 
-See [assets/01-testcontainers-infrastructure.md](assets/01-testcontainers-infrastructure.md) for examples.
+See [testcontainers skill](../testcontainers/SKILL.md) for setup and [testcontainers-wait-strategies skill](../testcontainers-wait-strategies/SKILL.md) for wait strategies.
 
 ### Database State Management (Respawn)
 

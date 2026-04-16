@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using BL;
 using BL.EnPointsLogic;
 using BL.Utils;
@@ -9,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 try
 {
@@ -17,6 +21,23 @@ try
     Console.WriteLine("========================================");
 
     var builder = WebApplication.CreateBuilder(args);
+
+    // Rate limiting para health check - 100 req/min
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.AddPolicy("HealthPolicy", context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: "health",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 100,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit = 0
+                }));
+    });
+
+    builder.Services.AddHealthChecks();
     if (builder.Environment.IsProduction())
     {
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -238,6 +259,16 @@ try
 
     app.UseAuthorization();
     Console.WriteLine("Authorization middleware agregado");
+
+    app.MapHealthChecks("/health", new HealthCheckOptions
+    {
+        ResponseWriter = async (context, report) =>
+        {
+            context.Response.ContentType = "application/json";
+            var result = new { status = report.Status.ToString() };
+            await JsonSerializer.SerializeAsync(context.Response.Body, result);
+        }
+    }).RequireRateLimiting("HealthPolicy");
 
     app.MapControllerRoute(
         name: "default",

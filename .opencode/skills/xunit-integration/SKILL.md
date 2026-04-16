@@ -24,7 +24,7 @@ metadata:
 
 Use real database containers instead of in-memory databases. Configure for reuse to save CPU resources.
 
-See [assets/01-testcontainers-testsetup.md](assets/01-testcontainers-testsetup.md) for examples.
+See [testcontainers skill](../testcontainers/SKILL.md) for setup and [testcontainers-wait-strategies skill](../testcontainers-wait-strategies/SKILL.md) for wait strategies.
 
 ### Database Fixture (IAsyncLifetime)
 

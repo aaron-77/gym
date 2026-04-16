@@ -23,8 +23,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Serilog;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using System.Diagnostics;
 using System.Threading.RateLimiting;
+using System.Text.Json;
 
 
 try
@@ -34,6 +36,23 @@ try
     Console.WriteLine("========================================");
 
     var builder = WebApplication.CreateBuilder(args);
+
+    // Rate limiting para health check - 100 req/min
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.AddPolicy("HealthPolicy", context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: "health",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 100,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                    QueueLimit = 0
+                }));
+    });
+
+    builder.Services.AddHealthChecks();
     // Configure Serilog
     Log.Logger = new LoggerConfiguration()
         .ReadFrom.Configuration(builder.Configuration)
@@ -334,6 +353,16 @@ try
 
     app.MapHub<ReservacionesHub>("/reservacionesHub");
     Console.WriteLine("SignalR Hub mapeado");
+
+    app.MapHealthChecks("/health", new HealthCheckOptions
+    {
+        ResponseWriter = async (context, report) =>
+        {
+            context.Response.ContentType = "application/json";
+            var result = new { status = report.Status.ToString() };
+            await JsonSerializer.SerializeAsync(context.Response.Body, result);
+        }
+    }).RequireRateLimiting("HealthPolicy");
 
     app.MapControllers();
     Console.WriteLine("Controllers mapeados");
