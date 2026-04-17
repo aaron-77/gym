@@ -363,6 +363,7 @@ try
             await JsonSerializer.SerializeAsync(context.Response.Body, result);
         }
     }).RequireRateLimiting("HealthPolicy");
+    Console.WriteLine("Health check endpoint configurado en /health con rate limiting (100 req/min)");
 
     app.MapControllers();
     Console.WriteLine("Controllers mapeados");
