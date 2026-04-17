@@ -32,9 +32,9 @@ public class HealthCheckApiIntegrationTests : IClassFixture<CitasApiWebApplicati
     public async Task HealthCheck_GetHealth_Returns200OkWithHealthyStatus()
     {
         // Given: API is running via WebApplicationFactory
-        // When: GET request is made to /health
+        // When: GET request is made to /api/health
         // Then: Returns 200 OK with {"status":"Healthy"}
-        var response = await _client.GetAsync("/health");
+        var response = await _client.GetAsync("/api/health");
         
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         

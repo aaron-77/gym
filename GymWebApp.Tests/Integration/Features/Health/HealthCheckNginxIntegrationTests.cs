@@ -12,12 +12,12 @@ public class HealthCheckNginxIntegrationTests : IAsyncLifetime
     [Fact]
     public async Task HealthCheck_GetViaNginxToApi_Returns200OkWithHealthyStatus()
     {
-        // Given: Nginx (port 5080) forwards /api/* to API
-        // When: GET request is made to http://localhost:5080/api/health
+        // Given: Nginx forwards /api/* to API
+        // When: GET request is made via Nginx to /api/health
         // Then: Returns 200 OK with {"status":"Healthy"}
         
         using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync($"{E2eContainerHelper.FrontendBaseUrl}/api/health");
+        var response = await httpClient.GetAsync($"{E2eContainerHelper.NginxBaseUrl}/api/health");
         
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
@@ -30,12 +30,12 @@ public class HealthCheckNginxIntegrationTests : IAsyncLifetime
     [Fact]
     public async Task HealthCheck_GetViaNginxToFrontend_Returns200OkWithHealthyStatus()
     {
-        // Given: Nginx (port 5080) forwards /health to Frontend
-        // When: GET request is made to http://localhost:5080/health
+        // Given: Nginx forwards /health to Frontend
+        // When: GET request is made via Nginx to /health
         // Then: Returns 200 OK with {"status":"Healthy"}
         
         using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync($"{E2eContainerHelper.FrontendBaseUrl}/health");
+        var response = await httpClient.GetAsync($"{E2eContainerHelper.NginxBaseUrl}/health");
         
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         

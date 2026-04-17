@@ -24,16 +24,23 @@ public static class E2eContainerHelper
     private const int ApiInternalPort = 5274;
     private const int FrontendInternalPort = 5062;
     private const int SqlServerInternalPort = 1433;
+    private const int NginxInternalPort = 80;
 
     // Puertos externos dinámicos
     private static int _apiExternalPort;
+    private static int _nginxExternalPort;
+    private static int _frontendExternalPort;
 
     // Backup configuration
     private const string BackupHostPath = "/mnt/archivos/estudio/proyectos/gym/bd/respaldosbd";
     private const string BackupFileName = "FitnessCenterDB20260331.bak";
 
-    public static string FrontendBaseUrl => $"http://localhost:{NginxExternalPort}";
+    // Nginx configuration
+    private const string NginxConfPath = "/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/E2E/Common/nginx.conf";
+
+    public static string FrontendBaseUrl => $"http://localhost:{_frontendExternalPort}";
     public static string ApiBaseUrl => $"http://localhost:{_apiExternalPort}";
+    public static string NginxBaseUrl => $"http://localhost:{_nginxExternalPort}";
     public static string? ConnectionString { get; private set; }
 
     public static async Task InitializeAsync()
@@ -79,7 +86,8 @@ public static class E2eContainerHelper
 
             // 3. Iniciar API (placeholder - requiere imagen real del proyecto)
             _apiContainer = new ContainerBuilder()
-                .WithImage("aaron77/fitnessgymapi:v17")
+                .WithImage("fitnessgymapi:latest")
+                .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
                 .WithEnvironment(new Dictionary<string, string>
                 {
                     ["ASPNETCORE_URLS"] = $"http://+:{ApiInternalPort}",
@@ -91,8 +99,8 @@ public static class E2eContainerHelper
 .WithPortBinding(ApiInternalPort, true)
                 .WithNetwork(_network)
                 .WithNetworkAliases("api")
-                .WithWaitStrategy(Wait.ForUnixContainer()
-                    .UntilHttpRequestIsSucceeded(r => r.ForPath("/health")))
+                //.WithWaitStrategy(Wait.ForUnixContainer()
+                 //   .UntilHttpRequestIsSucceeded(r => r.ForPath("/health")))
                 .Build();
 
             await _apiContainer.StartAsync();
@@ -101,7 +109,7 @@ public static class E2eContainerHelper
 
             // 4. Iniciar Frontend (Blazor Server - placeholder requiere imagen real del proyecto)
             _frontendContainer = new ContainerBuilder()
-                .WithImage("aaron77/fitnessgymfrontend:v17")
+                .WithImage("fitnessgymfrontend:latest")
                 .WithOutputConsumer(Consume.RedirectStdoutAndStderrToConsole())
                 .WithEnvironment(new Dictionary<string, string>
                 {
@@ -112,23 +120,29 @@ public static class E2eContainerHelper
                 .WithPortBinding(FrontendInternalPort, true)
                 .WithNetwork(_network)
                 .WithNetworkAliases("frontend")
-              //  .WithWaitStrategy(Wait.ForUnixContainer()
-              //      .UntilPortIsAvailable(FrontendInternalPort)
-              //      .UntilHttpRequestIsSucceeded(r => r.ForPath("/")))
+                .WithWaitStrategy(Wait.ForUnixContainer()
+                    .UntilPortIsAvailable(FrontendInternalPort)
+                    //.UntilHttpRequestIsSucceeded(r => r.ForPath("/health"))
+                )
                 .Build();
 
             await _frontendContainer.StartAsync();
+            _frontendExternalPort = _frontendContainer.GetMappedPublicPort(FrontendInternalPort);
+            Console.WriteLine($"[E2E] Frontend container started on port {_frontendExternalPort}");
 
             // 5. Iniciar Nginx como reverse proxy
             _nginxContainer = new ContainerBuilder()
                 .WithImage("nginx:alpine")
-                .WithPortBinding(NginxExternalPort, true)
+                .WithPortBinding(NginxInternalPort, true)
                 .WithNetwork(_network)
                 .WithNetworkAliases("nginx")
+                .WithBindMount(NginxConfPath, "/etc/nginx/nginx.conf")
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(80))
                 .Build();
 
             await _nginxContainer.StartAsync();
+            _nginxExternalPort = _nginxContainer.GetMappedPublicPort(NginxInternalPort);
+            Console.WriteLine($"[E2E] Nginx container started on port {_nginxExternalPort}");
 
             _isInitialized = true;
         }
