@@ -354,7 +354,7 @@ try
     app.MapHub<ReservacionesHub>("/reservacionesHub");
     Console.WriteLine("SignalR Hub mapeado");
 
-    app.MapHealthChecks("/health", new HealthCheckOptions
+    app.MapHealthChecks("/api/health", new HealthCheckOptions
     {
         ResponseWriter = async (context, report) =>
         {
@@ -363,7 +363,7 @@ try
             await JsonSerializer.SerializeAsync(context.Response.Body, result);
         }
     }).RequireRateLimiting("HealthPolicy");
-    Console.WriteLine("Health check endpoint configurado en /health con rate limiting (100 req/min)");
+    Console.WriteLine("Health check endpoint configurado en /api/health con rate limiting (100 req/min)");
 
     app.MapControllers();
     Console.WriteLine("Controllers mapeados");
