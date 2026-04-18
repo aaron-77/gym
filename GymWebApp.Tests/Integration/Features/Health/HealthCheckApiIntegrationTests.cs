@@ -35,7 +35,7 @@ public class HealthCheckApiIntegrationTests : IClassFixture<CitasApiWebApplicati
         // When: GET request is made to /api/health
         // Then: Returns 200 OK with {"status":"Healthy"}
         var response = await _client.GetAsync("/api/health");
-        
+        Console.WriteLine("URL BASE: "+_client.BaseAddress);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
         var body = await response.Content.ReadAsStringAsync();

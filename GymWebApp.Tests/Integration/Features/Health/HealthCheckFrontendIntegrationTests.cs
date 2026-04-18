@@ -7,12 +7,12 @@ using Xunit;
 namespace GymWebApp.Tests.Integration.Features.Health;
 
 [Collection("HealthFrontendIntegrationTests")]
-public class HealthCheckFrontendIntegrationTests : IClassFixture<GymFrontendWebApplicationFactory<Program>>, IAsyncLifetime
-{
-    private readonly GymFrontendWebApplicationFactory<Program> _factory;
+public class HealthCheckFrontendIntegrationTests : IClassFixture<GymFrontendWebApplicationFactory<GymFrontend.Program>>, IAsyncLifetime
+{                                                   
+    private readonly GymFrontendWebApplicationFactory<GymFrontend.Program> _factory;
     private readonly HttpClient _client;
 
-    public HealthCheckFrontendIntegrationTests(GymFrontendWebApplicationFactory<Program> factory)
+    public HealthCheckFrontendIntegrationTests(GymFrontendWebApplicationFactory<GymFrontend.Program> factory)
     {
         _factory = factory;
         _client = factory.CreateClient();
@@ -35,7 +35,7 @@ public class HealthCheckFrontendIntegrationTests : IClassFixture<GymFrontendWebA
         // When: GET request is made to /health
         // Then: Returns 200 OK with {"status":"Healthy"}
         var response = await _client.GetAsync("/health");
-        
+        Console.WriteLine("URL BASE: "+_client.BaseAddress);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
         var body = await response.Content.ReadAsStringAsync();
