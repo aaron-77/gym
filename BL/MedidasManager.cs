@@ -1,4 +1,4 @@
-﻿using BL.Utils;
+using BL.Utils;
 using DTO.Dtos;
 using System;
 using System.Collections.Generic;
@@ -49,14 +49,14 @@ namespace BL
             }
 
         }
-        public async Task<DTOResponse<List<DTOParametroDeMedicion>>> obtenerParametrosDeMedicion()
+        public async Task<DTOResponse<List<DTOParametroDeMedicion>>> obtenerParametrosDeMedicion(string idUsuario)
         {
 
 
             try
             {
                 
-                string parametrosDeMedicionResponse = await httpClient.get("api/getParametrosDeMedicion");
+                string parametrosDeMedicionResponse = await httpClient.get($"api/getParametrosDeMedicion?idUsuario={idUsuario}");
                 DTOResponse<List<DTOParametroDeMedicion>> response = JsonSerializer.Deserialize<DTOResponse<List<DTOParametroDeMedicion>>>(parametrosDeMedicionResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return response;
             }

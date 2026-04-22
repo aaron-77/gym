@@ -1,4 +1,4 @@
-﻿using BL;
+using BL;
 using BL.Utils;
 using DataAccess.EntityFramework;
 using DTO.Dtos;
@@ -288,7 +288,7 @@ namespace GymFrontend.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var respuestaUsuarios = await manager.obtenerUsuarios();
                 List<ExistingUser> usuarios = respuestaUsuarios.payload;
-               var respuestaParametros = await medidasManager.obtenerParametrosDeMedicion();
+               var respuestaParametros = await medidasManager.obtenerParametrosDeMedicion(userId);
                 List<DTOUnidadDeMedida> unidadDeMedida = ExtractDataManager.extractMeasurementUnitData(
                     respuestaParametros.payload
                 );
