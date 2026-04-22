@@ -40,8 +40,8 @@ public static class E2eContainerHelper
 
     public static string FrontendBaseUrl => $"http://localhost:{_frontendExternalPort}";
     public static string ApiBaseUrl => $"http://localhost:{_apiExternalPort}";
-    public static string NginxBaseUrl => $"http://localhost:{_nginxExternalPort}";
     public static string? ConnectionString { get; private set; }
+    public static string NginxBaseUrl => $"http://localhost:{_nginxExternalPort}";
 
     public static async Task InitializeAsync()
     {
@@ -91,14 +91,14 @@ public static class E2eContainerHelper
                 .WithEnvironment(new Dictionary<string, string>
                 {
                     ["ASPNETCORE_URLS"] = $"http://+:{ApiInternalPort}",
-                    ["ConnectionStrings:FitnessCenterDB"] = ConnectionString,
-                    ["Jwt:Key"] = "SuperSecretKey12345678901234567890123456789012",
+                    ["DB_CONNECTION_STRING"] = ConnectionString,
+                    ["SECRET_TOKEN_KEY"] = "SuperSecretKey12345678901234567890123456789012",
                     ["Jwt:Issuer"] = "FitnessGym",
                     ["Jwt:Audience"] = "FitnessGymUsers"
                 })
 .WithPortBinding(ApiInternalPort, true)
                 .WithNetwork(_network)
-                .WithNetworkAliases("api")
+                .WithNetworkAliases("fitnessgym_api")
                 //.WithWaitStrategy(Wait.ForUnixContainer()
                  //   .UntilHttpRequestIsSucceeded(r => r.ForPath("/health")))
                 .Build();
@@ -119,7 +119,7 @@ public static class E2eContainerHelper
                 })
                 .WithPortBinding(FrontendInternalPort, true)
                 .WithNetwork(_network)
-                .WithNetworkAliases("frontend")
+                .WithNetworkAliases("fitnessgym_frontend")
                 .WithWaitStrategy(Wait.ForUnixContainer()
                     .UntilPortIsAvailable(FrontendInternalPort)
                     //.UntilHttpRequestIsSucceeded(r => r.ForPath("/health"))
