@@ -298,6 +298,29 @@ public class PlaywrightFixture : IAsyncLifetime
 }
 ```
 
+### Verificar Elementos Visibles Después de Acciones
+
+Para verificar que una página se cargó correctamente después de una acción (como login), usa `Assertions.Expect` con el locator del elemento esperado:
+
+```csharp
+using Microsoft.Playwright;
+using Microsoft.Playwright.Assertions;
+
+// Verificar que el sidebar está visible después de login
+await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
+
+// Verificar que un formulario está presente
+await Assertions.Expect(Page.Locator("form, #formGestionRutinas")).ToBeVisibleAsync();
+
+// Verificar que una tabla está visible
+await Assertions.Expect(Page.Locator("table, .table")).ToBeVisibleAsync();
+
+// Verificar elementos específicos de la página
+await Assertions.Expect(Page.Locator(".medidas-section, h1")).ToBeVisibleAsync();
+```
+
+**No usar** `WaitForLoadStateAsync(LoadState.DOMContentLoaded)` - es genérico y no verifica que los elementos específicos de la página estén renderizados.
+
 ### Key Points
 
 - Use `IClassFixture<PlaywrightFixture>` for shared browser lifecycle
