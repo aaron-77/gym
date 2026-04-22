@@ -69,7 +69,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.ClickAsync("button.sign");
 
         // Then: Redirige a página de login o muestra mensaje de éxito
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("input[name='correo']")).ToBeVisibleAsync();
 
         // Verificar que redirigió a signIn o muestra mensaje de éxito
         var currentUrl = Page.Url;
@@ -99,11 +99,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='contrasena']", _clientPassword);
         await Page.ClickAsync("button.sign");
         
-        // espera a que cargue la pagina de inicio del cliente
-        await Page.WaitForURLAsync($"{BaseUrl}/clientes");
-        
-        // Then: Redirige a /clientes
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        // Then: espera a que este visible la barra de menu latera
+        await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
             var currentUrl = Page.Url;
         Assert.True(
@@ -123,13 +120,13 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _clientEmail);
         await Page.FillAsync("input[name='contrasena']", _clientPassword);
         await Page.ClickAsync("button.sign");
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator(".medidas-section, h1")).ToBeVisibleAsync();
 
         // When: Navega a /detallesDeProgreso
         await Page.GotoAsync($"{BaseUrl}/detallesDeProgreso");
 
         // Then: Página carga correctamente con gráfico de medidas
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator(".medidas-section, h1")).ToBeVisibleAsync();
 
         var pageContent = await Page.ContentAsync();
         var chartLoaded = pageContent.Contains("chart") ||
@@ -156,9 +153,9 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _clientEmail);
         await Page.FillAsync("input[name='contrasena']", _clientPassword);
         await Page.ClickAsync("button.sign");
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator(".medidas-section, select")).ToBeVisibleAsync();
         await Page.GotoAsync($"{BaseUrl}/detallesDeProgreso");
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator(".medidas-section, select")).ToBeVisibleAsync();
 
         // When: Selecciona filtros (meses/años) y aplica
         // Buscar selector de filtro (puede ser un select con id que contenga "Filter", "Month", "Year", etc.)
@@ -167,7 +164,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         {
             await filterSelect.SelectOptionAsync(new SelectOptionValue { Index = 1 });
             await Page.ClickAsync("button:has-text('Aplicar'), button:has-text('Filtrar'), button.sign");
-            await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+            await Assertions.Expect(Page.Locator(".medidas-section, select")).ToBeVisibleAsync();
         }
 
         // Then: Gráfico se actualiza con los datos filtrados
@@ -213,7 +210,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, #formGestionRutinas")).ToBeVisibleAsync();
 
         // When: Completa formulario de medidas y envía
         await Page.GotoAsync($"{BaseUrl}/registrarMedida");
@@ -222,7 +219,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.ClickAsync("button.sign");
 
         // Then: Medida registrada exitosamente, aparece en la lista
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, #formGestionRutinas")).ToBeVisibleAsync();
 
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("éxito") ||
@@ -247,7 +244,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, .form-container")).ToBeVisibleAsync();
 
         // When: Completa formulario con datos de duración y envía
         await Page.GotoAsync($"{BaseUrl}/duracionCitasMedicionPage");
@@ -256,7 +253,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.ClickAsync("button:has-text('Guardar'), button:has-text('Registrar')");
 
         // Then: Duración registrada exitosamente
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, .form-container")).ToBeVisibleAsync();
 
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("éxito") ||
@@ -282,7 +279,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, table")).ToBeVisibleAsync();
 
         // When: Programa fecha/hora de clase y envía
         await Page.GotoAsync($"{BaseUrl}/registroClasesProgramadas");
@@ -290,7 +287,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.ClickAsync("button.sign");
 
         // Then: Clase programada exitosamente
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, table")).ToBeVisibleAsync();
 
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("éxito") ||
@@ -315,7 +312,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, select, table")).ToBeVisibleAsync();
 
         // When: Selecciona cliente y clase, confirma inscripción
         await Page.GotoAsync($"{BaseUrl}/inscripcionAClases");
@@ -337,7 +334,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.ClickAsync("button.sign");
 
         // Then: Cliente inscrito exitosamente
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, select, table")).ToBeVisibleAsync();
 
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("éxito") ||
@@ -362,7 +359,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, #formGestionRutinas")).ToBeVisibleAsync();
 
         // When: Completa formulario de cita y envía
         await Page.GotoAsync($"{BaseUrl}/registrarCita");
@@ -371,7 +368,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.ClickAsync("button.sign");
 
         // Then: Cita registrada exitosamente
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, #formGestionRutinas")).ToBeVisibleAsync();
 
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("éxito") ||
@@ -396,7 +393,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("table, .table")).ToBeVisibleAsync();
 
         // When: Modifica datos de cita y guarda
         await Page.GotoAsync($"{BaseUrl}/modificarCita");
@@ -406,7 +403,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         if (editarButton != null)
         {
             await editarButton.ClickAsync();
-            await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+            await Assertions.Expect(Page.Locator("table, .table")).ToBeVisibleAsync();
 
             // Modificar algún campo
             var notesField = await Page.QuerySelectorAsync("textarea[id*='Notes'], textarea[id*='Notas']");
@@ -416,7 +413,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
             }
 
             await Page.ClickAsync("button:has-text('Guardar'), button.sign");
-            await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+            await Assertions.Expect(Page.Locator("table, .table")).ToBeVisibleAsync();
         }
 
         // Then: Cita modificada exitosamente
@@ -444,7 +441,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, #formGestionRutinas")).ToBeVisibleAsync();
 
         // When: Crea/editar rutina y guarda
         await Page.GotoAsync($"{BaseUrl}/gestionRutinas");
@@ -453,7 +450,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.ClickAsync("button.sign");
 
         // Then: Rutina guardada exitosamente
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, #formGestionRutinas")).ToBeVisibleAsync();
 
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("éxito") ||
@@ -479,7 +476,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, select, table")).ToBeVisibleAsync();
 
         // When: Selecciona ejercicios y los asigna a una rutina
         await Page.GotoAsync($"{BaseUrl}/AsignacionEjercicios");
@@ -488,7 +485,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.ClickAsync("button.sign");
 
         // Then: Ejercicios asignados exitosamente a la rutina
-        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+        await Assertions.Expect(Page.Locator("form, select, table")).ToBeVisibleAsync();
 
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("éxito") ||
