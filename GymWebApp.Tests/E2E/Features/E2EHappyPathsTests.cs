@@ -173,7 +173,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await tipoSelect.SelectOptionAsync("año");
         
         var yearCheckbox = Page.Locator("input#year2024");
-        await yearCheckbox.ClickAsync();
+        await yearCheckbox.CheckAsync();
         
         var consultarBtn = Page.Locator("input#submitButton");
         await consultarBtn.ClickAsync();
