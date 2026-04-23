@@ -148,30 +148,42 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
     [Fact]
     public async Task Cliente_FiltrarMedidasEnGrafico()
     {
-        // Given: Cliente en página de detalles de progreso
+        // Given: Cliente logueado en dashboard /clientes
         await Page.GotoAsync($"{BaseUrl}/signIn");
         await Page.FillAsync("input[name='correo']", _clientEmail);
         await Page.FillAsync("input[name='contrasena']", _clientPassword);
         await Page.ClickAsync("button.sign");
-        await Assertions.Expect(Page.Locator(".medidas-section, select")).ToBeVisibleAsync();
-        await Page.GotoAsync($"{BaseUrl}/detallesDeProgreso");
-        await Assertions.Expect(Page.Locator(".medidas-section, select")).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
+        
+        // When: Navega a detalles de progreso haciendo click en primer botón de detalles
+        var detailsButton = Page.Locator("img.details-button").Nth(0);
+        await detailsButton.ClickAsync();
+        
+        // Then: Verificar navegación a detalles de progreso y formulario visible
+        await Assertions.Expect(Page.Locator("#chartForm")).ToBeVisibleAsync();
 
-        // When: Selecciona filtros (meses/años) y aplica
-        // Buscar selector de filtro (puede ser un select con id que contenga "Filter", "Month", "Year", etc.)
-        var filterSelect = await Page.QuerySelectorAsync("select[id*='Filter'], select[id*='Month'], select[id*='Year'], select[id*='Period']");
-        if (filterSelect != null)
-        {
-            await filterSelect.SelectOptionAsync(new SelectOptionValue { Index = 1 });
-            await Page.ClickAsync("button:has-text('Aplicar'), button:has-text('Filtrar'), button.sign");
-            await Assertions.Expect(Page.Locator(".medidas-section, select")).ToBeVisibleAsync();
-        }
+        // When: Seleccionar parámetros de filtro usando locator pattern
+        var parametroSelect = Page.Locator("select#inputParametro");
+        await parametroSelect.SelectOptionAsync("peso");
+        
+        var espaciadoSelect = Page.Locator("select#espaciadoTemporal");
+        await espaciadoSelect.SelectOptionAsync("individual");
+        
+        var tipoSelect = Page.Locator("select#tipoDeBusqueda");
+        await tipoSelect.SelectOptionAsync("año");
+        
+        var yearCheckbox = Page.Locator("input#year2024");
+        await yearCheckbox.ClickAsync();
+        
+        var consultarBtn = Page.Locator("input#submitButton");
+        await consultarBtn.ClickAsync();
 
-        // Then: Gráfico se actualiza con los datos filtrados
-        var pageContent = await Page.ContentAsync();
+        // Then: Verificar que el gráfico se mostró (errorMessageContainer vacío)
+        await Page.WaitForTimeoutAsync(2000); // Esperar respuesta AJAX
+        var errorMessage = await Page.Locator("#errorMessageContainer").InnerTextAsync();
         Assert.True(
-            !string.IsNullOrEmpty(pageContent),
-            "La página debería mantener el contenido después de aplicar filtros");
+            string.IsNullOrWhiteSpace(errorMessage),
+            $"Se esperaba gráfico visible (errorMessage vacío). Mensaje: {errorMessage}");
     }
 
     #endregion
