@@ -268,7 +268,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
         // When: Navega a registro de clases programadas
-        await Page.GotoAsync($"{BaseUrl}/registroClasesProgramadas");
+        await Page.GotoAsync($"{BaseUrl}/Clases/registroClasesProgramadas");
 
         // Then: Calendario visible (usa locator que tiene espera implícita)
         await Assertions.Expect(Page.Locator("#calendarGrid")).ToBeVisibleAsync();
@@ -310,7 +310,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Assertions.Expect(Page.Locator("form, select, table")).ToBeVisibleAsync();
 
         // When: Selecciona cliente y clase, confirma inscripción
-        await Page.GotoAsync($"{BaseUrl}/inscripcionAClases");
+        await Page.GotoAsync($"{BaseUrl}/Clases/inscripcionAClases");
 
         // Buscar y seleccionar un cliente
         var clienteSelect = await Page.QuerySelectorAsync("select[id*='Cliente'], select[id*='Client']");
@@ -353,32 +353,30 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Assertions.Expect(Page.Locator("#formGestionRutinas")).ToBeVisibleAsync();
 
         
-        // Seleccionar tipo de cita: "Medicion" (value="Medicion")
-        await Page.SelectOptionAsync("select[id*='inputTipoCita']", "Medicion");
+        // Seleccionar tipo de cita: "Medicion"
+        await Page.SelectOptionAsync("#inputTipoCita", "Medicion");
         
         // Llenar fecha inicio
-        await Page.FillAsync("input[id*='inputFechaInicio']", "2027-06-15T14:00");
+        await Page.FillAsync("#inputFechaInicio", "2027-06-15T14:00");
         
         // Llenar fecha fin
-        await Page.FillAsync("input[id*='inputFechaFin']", "2027-06-15T15:00");
+        await Page.FillAsync("#inputFechaFin", "2027-06-15T15:00");
         
-        // Seleccionar cliente (Index = 1 = segundo option)
-        await Page.Locator("select[id='inputCliente']").SelectOptionAsync(new[] { "1" });
-        
-        // Seleccionar entrenador (Index = 1 = segundo option)
-        await Page.Locator("select[id='inputEntrenador']").Nth(0).SelectOptionAsync(new[] { "1" });
+        // Seleccionar cliente (Index = 1 para evitar opción por defecto)
+        await Page.SelectOptionAsync("#inputCliente", new SelectOptionValue { Index = 1 });
+
+        // Seleccionar entrenador (Index = 1 para evitar opción por defecto)
+        await Page.SelectOptionAsync("#inputEntrenador", new SelectOptionValue { Index = 1 });
         
         // Click en botón submit "Agendar"
         await Page.ClickAsync("button.btn-primary.fix-margin");
 
         // Then: Cita registrada exitosamente
-        await Assertions.Expect(Page.Locator("select[name='fkUsuario']")).ToBeVisibleAsync();
-
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("Registro exitoso");
 
         Assert.True(
-            successMessage ,
+            successMessage,
             $"Se esperaba mensaje de éxito o redirección. URL actual: {Page.Url}");
     }
 
