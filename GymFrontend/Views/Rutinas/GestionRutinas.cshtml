@@ -46,7 +46,7 @@ Layout = "_LayoutSeccionAdministracion";
                 </select>
                 <span asp-validation-for="@Model.UsuarioID" class="validation-error"></span>
                 <label for="inputEntrenador" class="form-label">Entrenador</label>
-                <select itemid="inputEntrenador" class="form-select empleados-main-page-input" name="EntrenadorID" aria-label="Default select example">
+                <select id="inputEntrenador" class="form-select empleados-main-page-input" name="EntrenadorID" aria-label="Default select example">
                     <option class="fix-fontColor-option" selected>selecciona entrenador </option>
                     @foreach (var user in listadoEntrenadores)
                     {
