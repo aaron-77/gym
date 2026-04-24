@@ -187,23 +187,37 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Assertions.Expect(Page.Locator("form, #formGestionRutinas")).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
-        // When: Completa formulario de medidas y envía
-        await Page.GotoAsync($"{BaseUrl}/registrarMedida");
-        await Page.FillAsync("input[id*='Weight'], input[id*='Peso']", "75.5");
-        await Page.FillAsync("input[id*='Height'], input[id*='Altura']", "175");
-        await Page.ClickAsync("button.sign");
+        
 
-        // Then: Medida registrada exitosamente, aparece en la lista
-        await Assertions.Expect(Page.Locator("form, #formGestionRutinas")).ToBeVisibleAsync();
+        // Then: Formulario de empleados visible
+        await Assertions.Expect(Page.Locator("select[name='unidadDeMedidaId']")).ToBeVisibleAsync();
 
-        var pageContent = await Page.ContentAsync();
-        var successMessage = pageContent.Contains("Registro exitoso");
+        // When: Completa formulario de medidas
+        await Page.Locator("select[name='fkUsuario']").SelectOptionAsync(new SelectOptionValue { Index = 1 });
+        await Page.Locator("select[name='fkParametro']").SelectOptionAsync(new SelectOptionValue { Index = 1 });
+        await Page.Locator("select[name='unidadDeMedidaId']").SelectOptionAsync(new SelectOptionValue { Index = 1 });
+        await Page.Locator("input[name='valor']").FillAsync("75.5");
+
+        // And: Envía formulario
+        await Page.Locator("button.btn-primary[type='submit']").ClickAsync();
+
+        // Then: Verificar reset del formulario (volvió a valores por defecto)
+        var usuarioText = await Page.Locator("select[name='fkUsuario'] option[selected]").InnerTextAsync();
+        var parametroText = await Page.Locator("select[name='fkParametro'] option[selected]").InnerTextAsync();
+        var unidadText = await Page.Locator("select[name='unidadDeMedidaId'] option[selected]").InnerTextAsync();
+        var valor = await Page.Locator("input[name='valor']").InputValueAsync();
 
         Assert.True(
-            successMessage || Page.Url.Contains("empleados"),
-            $"Se esperaba mensaje de éxito o redirección. URL actual: {Page.Url}");
+            usuarioText.Contains("selecciona un usuario") &&
+            parametroText.Contains("selecciona un parametro") &&
+            unidadText.Contains("Selecciona una Unidad de medida") &&
+            string.IsNullOrEmpty(valor),
+            "Se esperaba que los campos volvieran a su estado inicial");
+
+        
+        
     }
 
     #endregion
@@ -334,63 +348,77 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Assertions.Expect(Page.Locator("form, #formGestionRutinas")).ToBeVisibleAsync();
-
         // When: Completa formulario de cita y envía
         await Page.GotoAsync($"{BaseUrl}/registrarCita");
-        await Page.FillAsync("input[id*='Date'], input[type='datetime-local']", "2027-06-15T14:00");
-        await Page.FillAsync("textarea[id*='Notes'], textarea[id*='Notas']", "Cita de prueba E2E");
-        await Page.ClickAsync("button.sign");
+        await Assertions.Expect(Page.Locator("#formGestionRutinas")).ToBeVisibleAsync();
+
+        
+        // Seleccionar tipo de cita: "Medicion" (value="Medicion")
+        await Page.SelectOptionAsync("select[id*='inputTipoCita']", "Medicion");
+        
+        // Llenar fecha inicio
+        await Page.FillAsync("input[id*='inputFechaInicio']", "2027-06-15T14:00");
+        
+        // Llenar fecha fin
+        await Page.FillAsync("input[id*='inputFechaFin']", "2027-06-15T15:00");
+        
+        // Seleccionar cliente (Index = 1 = segundo option)
+        await Page.Locator("select[id*='inputCliente']").Nth(0).SelectOptionAsync(new[] { "1" });
+        
+        // Seleccionar entrenador (Index = 1 = segundo option)
+        await Page.Locator("select[id*='inputEntrenador']").Nth(0).SelectOptionAsync(new[] { "1" });
+        
+        // Click en botón submit "Agendar"
+        await Page.ClickAsync("button.btn-primary.fix-margin");
 
         // Then: Cita registrada exitosamente
-        await Assertions.Expect(Page.Locator("form, #formGestionRutinas")).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("select[name='fkUsuario']")).ToBeVisibleAsync();
 
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("Registro exitoso");
 
         Assert.True(
-            successMessage || Page.Url.Contains("empleados") || Page.Url.Contains("cita"),
+            successMessage ,
             $"Se esperaba mensaje de éxito o redirección. URL actual: {Page.Url}");
     }
 
     [Fact]
     public async Task Empleado_ModificarCita()
     {
-        // Given: Empleado logueado, navega a /modificarCita
+        // Given: Empleado logueado
         await Page.GotoAsync($"{BaseUrl}/signIn");
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Assertions.Expect(Page.Locator("table, .table")).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
-        // When: Modifica datos de cita y guarda
+        // When: Navega a modificar cita
         await Page.GotoAsync($"{BaseUrl}/modificarCita");
 
-        // Intentar modificar la primera cita encontrada
-        var editarButton = await Page.QuerySelectorAsync("button:has-text('Editar'), a:has-text('Editar')");
-        if (editarButton != null)
-        {
-            await editarButton.ClickAsync();
-            await Assertions.Expect(Page.Locator("table, .table")).ToBeVisibleAsync();
+        // Then: Formulario visible
+        await Assertions.Expect(Page.Locator("#formGestionRutinas")).ToBeVisibleAsync();
 
-            // Modificar algún campo
-            var notesField = await Page.QuerySelectorAsync("textarea[id*='Notes'], textarea[id*='Notas']");
-            if (notesField != null)
-            {
-                await notesField.FillAsync("Cita modificada desde E2E test");
-            }
+        // When: Selecciona cliente
+        await Page.Locator("#inputCliente").SelectOptionAsync(new SelectOptionValue { Index = 1 });
 
-            await Page.ClickAsync("button:has-text('Guardar'), button.sign");
-            await Assertions.Expect(Page.Locator("table, .table")).ToBeVisibleAsync();
-        }
+        // Then: Input de cita se habilita, seleccionarlo
+        await Assertions.Expect(Page.Locator("#inputCita")).ToBeEnabledAsync();
+        await Page.Locator("#inputCita").SelectOptionAsync(new SelectOptionValue { Index = 1 });
 
-        // Then: Cita modificada exitosamente
-        var pageContent = await Page.ContentAsync();
-        var successMessage = pageContent.Contains("Modificacion exitosa");
+        // Then: Campos se habilitan, modificar fecha
+        await Assertions.Expect(Page.Locator("#inputFechaInicio")).ToBeEnabledAsync();
+        await Page.Locator("#inputFechaInicio").FillAsync("2027-06-20T10:00");
 
-        Assert.True(
-            successMessage || Page.Url.Contains("empleados") || Page.Url.Contains("cita"),
-            $"Se esperaba mensaje de éxito o redirección. URL actual: {Page.Url}");
+        // And: Modificar fecha fin
+        await Page.Locator("#inputFechaFin").FillAsync("2027-06-20T11:00");
+
+        // And: Envía formulario
+        await Page.Locator("button.btn-primary[type='submit']").ClickAsync();
+
+        // Then: Mensaje de éxito visible
+        await Assertions.Expect(
+            Page.Locator("text=/Consulta exitosa/i")
+        ).ToBeVisibleAsync();
     }
 
     [Fact]
