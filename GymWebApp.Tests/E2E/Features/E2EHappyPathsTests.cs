@@ -363,10 +363,10 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[id*='inputFechaFin']", "2027-06-15T15:00");
         
         // Seleccionar cliente (Index = 1 = segundo option)
-        await Page.Locator("select[id*='inputCliente']").Nth(0).SelectOptionAsync(new[] { "1" });
+        await Page.Locator("select[id='inputCliente']").SelectOptionAsync(new[] { "1" });
         
         // Seleccionar entrenador (Index = 1 = segundo option)
-        await Page.Locator("select[id*='inputEntrenador']").Nth(0).SelectOptionAsync(new[] { "1" });
+        await Page.Locator("select[id='inputEntrenador']").Nth(0).SelectOptionAsync(new[] { "1" });
         
         // Click en botón submit "Agendar"
         await Page.ClickAsync("button.btn-primary.fix-margin");
@@ -398,12 +398,14 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         // Then: Formulario visible
         await Assertions.Expect(Page.Locator("#formGestionRutinas")).ToBeVisibleAsync();
 
-        // When: Selecciona cliente
-        await Page.Locator("#inputCliente").SelectOptionAsync(new SelectOptionValue { Index = 1 });
+        // When: Selecciona cliente (primero obtener el valor del primer option real)
+        var valorCliente = await Page.Locator("#inputCliente option").Nth(1).GetAttributeAsync("value");
+        await Page.Locator("#inputCliente").SelectOptionAsync(valorCliente);
 
         // Then: Input de cita se habilita, seleccionarlo
         await Assertions.Expect(Page.Locator("#inputCita")).ToBeEnabledAsync();
-        await Page.Locator("#inputCita").SelectOptionAsync(new SelectOptionValue { Index = 1 });
+        var valorCita = await Page.Locator("#inputCita option").Nth(1).GetAttributeAsync("value");
+        await Page.Locator("#inputCita").SelectOptionAsync(valorCita);
 
         // Then: Campos se habilitan, modificar fecha
         await Assertions.Expect(Page.Locator("#inputFechaInicio")).ToBeEnabledAsync();
