@@ -5,7 +5,7 @@ using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Networks;
 using Testcontainers;
 using Testcontainers.MsSql;
-using GymWebApp.Tests.Integration.Common;
+using GymWebApp.Tests.SharedHelpers;
 
 namespace GymWebApp.Tests.E2E.Common;
 
@@ -41,6 +41,7 @@ public static class E2eContainerHelper
     public static string FrontendBaseUrl => $"http://localhost:{_frontendExternalPort}";
     public static string ApiBaseUrl => $"http://localhost:{_apiExternalPort}";
     public static string? ConnectionString { get; private set; }
+    public static string? ExternalConnectionString { get; set; }
     public static string NginxBaseUrl => $"http://localhost:{_nginxExternalPort}";
 
     public static async Task InitializeAsync()
@@ -81,7 +82,8 @@ public static class E2eContainerHelper
             await RestoreDatabaseFromBackupAsync(masterConnectionString, sqlPassword);
             Console.WriteLine("[E2E] Database restored from backup");
 
-            // Connection string para FitnessCenterDB (usando alias de red)
+            // Connection string para host usando puerto expuesto del contenedor SQL
+            ExternalConnectionString = $"Server=localhost,{sqlMappedPort};Database=FitnessCenterDB;User Id=sa;Password={sqlPassword};TrustServerCertificate=true;";
             ConnectionString = $"Server=sqlserver,{SqlServerInternalPort};Database=FitnessCenterDB;User Id=sa;Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
 
             // 3. Iniciar API (placeholder - requiere imagen real del proyecto)
@@ -96,11 +98,11 @@ public static class E2eContainerHelper
                     ["Jwt:Issuer"] = "FitnessGym",
                     ["Jwt:Audience"] = "FitnessGymUsers"
                 })
-.WithPortBinding(ApiInternalPort, true)
+                .WithPortBinding(ApiInternalPort, true)
                 .WithNetwork(_network)
                 .WithNetworkAliases("fitnessgym_api")
                 //.WithWaitStrategy(Wait.ForUnixContainer()
-                 //   .UntilHttpRequestIsSucceeded(r => r.ForPath("/health")))
+                //   .UntilHttpRequestIsSucceeded(r => r.ForPath("/health")))
                 .Build();
 
             await _apiContainer.StartAsync();

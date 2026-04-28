@@ -1,4 +1,5 @@
 using GymWebApp.Tests.E2E.Common;
+using GymWebApp.Tests.SharedHelpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 
@@ -290,54 +291,78 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Assertions.Expect(horarioDisponible).ToBeVisibleAsync();
         await horarioDisponible.ClickAsync();
 
-        // And: Envía formulario
-        await Page.Locator("button[type='submit']").ClickAsync();
+        // Esperar y cerrar modal de advertencia SweetAlert2
+        await Assertions.Expect(Page.Locator("div.swal2-icon-warning.swal2-show")).ToBeVisibleAsync();
+        await Page.Locator(".swal2-confirm.swal2-styled")
+            .GetByText("Aceptar").ClickAsync();
 
-        // Then: Mensaje de éxito visible en la UI
-        await Assertions.Expect(
-            Page.Locator("text=/exitosamente/i")
-        ).ToBeVisibleAsync();
+        // And: Envía formulario
+        await Page.Locator("button.btn-primary[type='submit']").ClickAsync();
+
+        // Then: Validar icono de éxito SweetAlert2
+        await Assertions.Expect(Page.Locator("div.swal2-popup.swal2-modal.swal2-icon-success.swal2-show")).ToBeVisibleAsync();
     }
 
     [Fact]
     public async Task Empleado_InscribirClienteAClase()
     {
-        // Given: Empleado logueado, navega a /inscripcionAClases
+        // Given: Empleado logueado
         await Page.GotoAsync($"{BaseUrl}/signIn");
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Assertions.Expect(Page.Locator("form, select, table")).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
-        // When: Selecciona cliente y clase, confirma inscripción
+        // Seed: Registrar una clase programada para garantizar que haya datos disponibles
+        // IMPORTANTE: Usar ExternalConnectionString para que el Host pueda escribir en la BD del contenedor
+        var connectionString = E2eContainerHelper.ExternalConnectionString;
+        var datos = await ClasesProgramadasHelper.GenerarClaseProgramadaObject(connectionString!);
+        var registeredDatos = await ClasesProgramadasHelper.RegistrarClaseProgramada(connectionString!, datos);
+        Console.WriteLine($"FECHA DE LA CLASE REGISTRADA APARA PRUEBA {registeredDatos.fechaDeLaClase}");
+        // When: Navega a inscripción a clases
         await Page.GotoAsync($"{BaseUrl}/Clases/inscripcionAClases");
 
-        // Buscar y seleccionar un cliente
-        var clienteSelect = await Page.QuerySelectorAsync("select[id*='Cliente'], select[id*='Client']");
-        if (clienteSelect != null)
-        {
-            await clienteSelect.SelectOptionAsync(new SelectOptionValue { Index = 1 });
-        }
+        // Then: Formulario visible
+        await Assertions.Expect(Page.Locator("#formInscripcionClase")).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("#comboClases")).ToBeVisibleAsync();
 
-        // Buscar y seleccionar una clase
-        var claseSelect = await Page.QuerySelectorAsync("select[id*='Clase'], select[id*='Class']");
-        if (claseSelect != null)
-        {
-            await claseSelect.SelectOptionAsync(new SelectOptionValue { Index = 1 });
-        }
+        // Paso 1: Seleccionar directamente la clase registrada por su ID
+        var claseId = registeredDatos.fkClase!.Value.ToString();
+        await Page.SelectOptionAsync("#comboClases", claseId);
 
-        await Page.ClickAsync("button.sign");
+        // Then: Calendario visible (carga dinámica)
+        await Assertions.Expect(Page.Locator("#calendarGrid")).ToBeVisibleAsync();
 
-        // Then: Cliente inscrito exitosamente
-        await Assertions.Expect(Page.Locator("form, select, table")).ToBeVisibleAsync();
+        // Paso 2: Seleccionar el día exacto de la clase registrada
+        var dia = registeredDatos.fechaDeLaClase!.Value.Day.ToString();
+        var diaCalendario = Page.Locator($".calendar-cell:not(.calendar-cell--disabled):has-text('{dia}')");
+        await Assertions.Expect(diaCalendario).ToBeVisibleAsync();
+        await diaCalendario.ClickAsync();
 
-        var pageContent = await Page.ContentAsync();
-        var successMessage = pageContent.Contains("exitosa") ||
-                          pageContent.Contains("Inscripción exitosa");
+        // Then: ScheduleViewer se renderiza con horarios disponibles
+        await Assertions.Expect(Page.Locator(".schedule-viewer__item").First).ToBeVisibleAsync();
 
-        Assert.True(
-            successMessage || Page.Url.Contains("empleados") || Page.Url.Contains("clase"),
-            $"Se esperaba mensaje de éxito o redirección. URL actual: {Page.Url}");
+        // Paso 3: Seleccionar primer horario disponible
+        var horarioDisponible = Page.Locator(".schedule-viewer__item").First;
+        await Assertions.Expect(horarioDisponible).ToBeVisibleAsync();
+        await horarioDisponible.ClickAsync();
+
+        // Then: Combo cliente se habilita
+        await Assertions.Expect(Page.Locator("#comboCliente")).ToBeVisibleAsync();
+
+        // Paso 4: Seleccionar cliente
+        var primerCliente = Page.Locator("#comboCliente option").Nth(1);
+        var valorCliente = await primerCliente.GetAttributeAsync("value");
+        await Page.SelectOptionAsync("#comboCliente", valorCliente);
+
+        // Then: Botón de inscribir habilitado
+        await Assertions.Expect(Page.Locator("#botonInscribir")).ToBeVisibleAsync();
+
+        // Paso 5: Hacer clic en botón Inscribir
+        await Page.ClickAsync("#botonInscribir");
+
+        // Then: Validar icono de éxito SweetAlert2
+        await Assertions.Expect(Page.Locator("div.swal2-popup.swal2-modal.swal2-icon-success.swal2-show")).ToBeVisibleAsync();
     }
 
     [Fact]
