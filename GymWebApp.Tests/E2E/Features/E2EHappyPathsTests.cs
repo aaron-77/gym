@@ -53,10 +53,10 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
     #region 1. Público - Registro de Cuenta
 
     [Fact]
-    public async Task Register_ConDatosValidos_CreaCuenta()
+    public async Task CrearCuenta()
     {
         // Given: Usuario en página de registro /crearCuenta
-        await Page.GotoAsync($"{BaseUrl}/crearCuenta");
+        await Page.GotoAsync($"{BaseUrl}/signUp");
 
         // When: Completa formulario con email, contraseña y datos requeridos, envía formulario
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -64,24 +64,23 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
 
         await Page.FillAsync("input[name='correo']", newEmail);
         await Page.FillAsync("input[name='contrasena']", "Test1234*");
-        await Page.FillAsync("input[id*='ConfirmPassword']", "Test1234*");
-        await Page.FillAsync("input[id*='Name']", "Test");
-        await Page.FillAsync("input[id*='LastName']", "User");
-        await Page.ClickAsync("button.sign");
+        await Page.FillAsync("input[name='ContrasenaConfirmacion']", "Test1234*");
+        await Page.FillAsync("input[name='nombre']", "Test");
+        await Page.FillAsync("input[name='apellido']", "User");
+        await Page.FillAsync("input[name='fechaDeNacimiento']", "2000-01-01");
+        await Page.FillAsync("input[name='direccion']", "Calle Falsa 123");
+        await Page.FillAsync("input[name='numeroDeIdentificacion']", "123456789");
+        await Page.FillAsync("input[name='telefono']", "123456789");
+        await Page.ClickAsync("button.sign.fix-margin-button-crear-cuenta");
 
         // Then: Redirige a página de login o muestra mensaje de éxito
         await Assertions.Expect(Page.Locator("input[name='correo']")).ToBeVisibleAsync();
 
-        // Verificar que redirigió a signIn o muestra mensaje de éxito
         var currentUrl = Page.Url;
         var pageContent = await Page.ContentAsync();
 
         Assert.True(
-            currentUrl.Contains("signIn") ||
-            pageContent.Contains("éxito") ||
-            pageContent.Contains("exito") ||
-            pageContent.Contains("success") ||
-            currentUrl.Contains("login"),
+            pageContent.Contains("exitosamente"),
             $"Se esperaba redirección a login o mensaje de éxito. URL actual: {currentUrl}");
     }
 
