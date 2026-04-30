@@ -53,6 +53,7 @@ public static class TestContainerHelper
             _msSqlContainer = new MsSqlBuilder()
                 .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
                 .WithPassword(sqlPassword)
+                .WithEnvironment("TZ", "America/Mexico_City")
                 //.WithReuse(true)
                 .WithBindMount(backupHostPath, "/backup")
                 .Build();
