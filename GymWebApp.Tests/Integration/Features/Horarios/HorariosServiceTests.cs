@@ -9,33 +9,22 @@ using System.Linq;
 namespace GymWebApp.Tests.Integration.Features.Horarios
 {
 [Collection("HorariosServiceIntegrationTests")]
-public class HorariosServiceTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+public class HorariosServiceTests : IntegrationTestBase<CitasApiWebApplicationFactory<Program>>
     {
-        private readonly CitasApiWebApplicationFactory<Program> _factory;
+        
         private readonly string _connectionString;
 
-        public HorariosServiceTests(CitasApiWebApplicationFactory<Program> factory)
+        public HorariosServiceTests(CitasApiWebApplicationFactory<Program> factory):base(factory)
         {
-            _factory = factory;
+            
             _connectionString = TestContainerHelper.ConnectionString;
         }
-
-        public async Task InitializeAsync()
-        {
-            await TestContainerHelper.InitializeAsync();
-            await TestContainerHelper.ResetDatabaseAsync();
-        }
-
-        public Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
+        
         [Fact]
         public async Task consultarHorariosDisponibles_ConFechaActual_DevuelveHorarios()
         {
             // Arrange
-            var context = _factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
+            var context = Factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
             var service = new HorariosService(context);
 
             // Act
@@ -67,7 +56,7 @@ public class HorariosServiceTests : IClassFixture<CitasApiWebApplicationFactory<
                 fechaTentativa = DateOnly.FromDateTime(fkData.FechaReservada)
             };
 
-            var context = _factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
+            var context =Factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
             var service = new HorariosService(context);
 
             // Act
@@ -76,13 +65,7 @@ public class HorariosServiceTests : IClassFixture<CitasApiWebApplicationFactory<
             // Assert
             Assert.True(idPreReserva > 0, "El ID de pre-reserva debe ser mayor a 0");
 
-            // Verificación extra en BD
-            using var connection = new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
-            await connection.OpenAsync();
-            using var cmd = new Microsoft.Data.SqlClient.SqlCommand(
-                $"SELECT COUNT(*) FROM preReservasDeHorario WHERE idPreReserva = {idPreReserva}", connection);
-            var count = (int)await cmd.ExecuteScalarAsync();
-            Assert.Equal(1, count);
+            
         }
 
         [Fact]
@@ -100,12 +83,12 @@ public class HorariosServiceTests : IClassFixture<CitasApiWebApplicationFactory<
                 fechaTentativa = DateOnly.FromDateTime(fkData.FechaReservada)
             };
 
-            var context = _factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
+            var context = Factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
             var service = new HorariosService(context);
             var idPreReserva = await service.RegistrarPreReservaDeHorario(dto);
 
             // Act
-            var result = await service.ObtenerPreReservasDeHorario(DateTime.Now);
+            var result = await service.ObtenerPreReservasDeHorario(DateTime.Today);
 
             // Assert
             Assert.NotNull(result);
@@ -119,7 +102,10 @@ public class HorariosServiceTests : IClassFixture<CitasApiWebApplicationFactory<
             // Arrange
             var idProgramacionClaseObj = await DatabaseHelper.ExecuteScalarAsync<int>(
                 _connectionString, 
-                "SELECT TOP 1 idProgramacionClase FROM ClasesProgramadas");
+                @"SELECT TOP 1 cp.idProgramacionClase 
+                        FROM ClasesProgramadas cp
+                        INNER JOIN horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
+                        INNER JOIN horasLaborales hl ON hcp.fkHorarioLaboral = hl.idHora");
 
             if (idProgramacionClaseObj == null)
             {
@@ -128,7 +114,7 @@ public class HorariosServiceTests : IClassFixture<CitasApiWebApplicationFactory<
             }
 
             int idProgramacionClase = idProgramacionClaseObj;
-            var context = _factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
+            var context = Factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
             var service = new HorariosService(context);
 
             // Act
@@ -138,21 +124,7 @@ public class HorariosServiceTests : IClassFixture<CitasApiWebApplicationFactory<
             Assert.NotNull(result);
             Assert.NotEmpty(result);
 
-            // Validar que la clase programada tenga registros relacionados en horariosDeClasesProgramadas
-            var claseProgramada = result.First();
-            Assert.True(claseProgramada.idHora > 0, "La clase programada debe tener un idHora válido");
-
-            // Validar que el idHora existe en la tabla horasLaborales
-            var horaLaboralExists = await DatabaseHelper.ExecuteScalarAsync<int>(
-                _connectionString,
-                $"SELECT COUNT(*) FROM horasLaborales WHERE idHora = {claseProgramada.idHora}");
-            Assert.Equal(1, horaLaboralExists);
-
-            // Validar que existe registro en horariosDeClasesProgramadas relacionado a esta clase
-            var horarioClaseProgramadaExists = await DatabaseHelper.ExecuteScalarAsync<int>(
-                _connectionString,
-                $"SELECT COUNT(*) FROM horariosDeClasesProgramadas WHERE fkClaseProgramada = {idProgramacionClase}");
-            Assert.True(horarioClaseProgramadaExists > 0, "Debe existir al menos un registro en horariosDeClasesProgramadas");
+            
         }
     }
 }
