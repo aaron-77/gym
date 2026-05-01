@@ -10,6 +10,6 @@ namespace DTO.Dtos
         public int idHoraLaboral { get; set; }
         // Nuevos campos requeridos por los cambios en los procedimientos almacenados
         public int? idClase { get; set; }
-        public string idEntrenador { get; set; }
+        public string? idEntrenador { get; set; }
     }
 } 

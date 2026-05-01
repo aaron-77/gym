@@ -42,7 +42,10 @@ namespace API.Services
                     fechaDisponible = h.fechaReservada,
                     horaInicio = h.horaInicio,
                     horaFin = h.horaFin,
-                    tipoDeDia = h.fechaReservada.DayOfWeek == DayOfWeek.Saturday || h.fechaReservada.DayOfWeek == DayOfWeek.Sunday ? "Fin de semana" : "Laboral"
+                    tipoDeDia = h.fechaReservada.DayOfWeek == DayOfWeek.Saturday || h.fechaReservada.DayOfWeek == DayOfWeek.Sunday ? "Fin de semana" : "Laboral",
+                    idUsuarioQueReserva = h.idUsuarioQueReserva,
+                    fechaReservada = h.fechaReservada,
+                    fechaDeExpiracionDeLaReserva = h.fechaDeExpiracionDeLaReserva
                 }).ToList();
 
                 return horariosVisualizacion; // Devolver solo la lista
