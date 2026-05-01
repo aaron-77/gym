@@ -2,23 +2,24 @@ using Microsoft.AspNetCore.SignalR;
 using API.Services;
 using DataAccess.EntityFramework;
 using DTO.Dtos;
+using Microsoft.Extensions.Logging;
+
 namespace API.Hubs
 {
     public class ReservacionesHub : Hub
     {
         
         private readonly HorariosService _horariosService;
-        /* public async Task enviarHorariosDisponiblesActualizados(string userId)
-        {
-            return await Task.CompletedTask;
-            //await Clients.All.SendAsync("actualizarHorariosDisponibles",  horariosDisponibles);
-        } */
-        public ReservacionesHub(HorariosService horariosService){
+        private readonly ILogger<ReservacionesHub> _logger;
+        
+        public ReservacionesHub(HorariosService horariosService, ILogger<ReservacionesHub> logger){
             this._horariosService = horariosService;
+            this._logger = logger;
         } 
 
-        public async Task enviarPreReservasActualizadas(int userId)
+        public async Task enviarPreReservasActualizadas(string userId)
         {
+            _logger.LogInformation("Iniciando envio de pre-reservas actualizadas para userId={UserId}", userId);
             
             try
             {
@@ -34,6 +35,7 @@ namespace API.Hubs
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error al actualizar pre-reservas para userId={UserId}", userId);
                 DTOResponse<List<DTOHorarioVisualizacion>> respuesta = new DTOResponse<List<DTOHorarioVisualizacion>>{
                 success=false,
                 httpCode= 500,
@@ -48,8 +50,10 @@ namespace API.Hubs
             
         }
         
-        public async Task enviarHorariosDisponiblesActualizados(int userId)
+        public async Task enviarHorariosDisponiblesActualizados(string userId)
         {
+            _logger.LogInformation("Iniciando envio de horarios disponibles para userId={UserId}", userId);
+            
             try
             {
                 // Llamar al método consultarHorariosDisponibles del servicio
@@ -67,10 +71,12 @@ namespace API.Hubs
 
                 // Enviar la respuesta a todos los clientes conectados
                 await Clients.All.SendAsync("actualizarHorariosDisponibles", respuesta);
+                _logger.LogInformation("Horarios disponibles enviados exitosamente, count={Count}", horariosDisponibles.Count);
             }
             catch (Exception ex)
             {
                 // Manejo de excepciones
+                _logger.LogError(ex, "Error al enviar horarios disponibles para userId={UserId}", userId);
                 DTOResponse<List<DTOHorarioVisualizacion>> respuesta = new DTOResponse<List<DTOHorarioVisualizacion>>
                 {
                     success = false,
@@ -86,6 +92,25 @@ namespace API.Hubs
                 // Enviar la respuesta de error
                 await Clients.All.SendAsync("actualizarHorariosDisponibles", respuesta);
             }
+        }
+
+        public override async Task OnConnectedAsync()
+        {
+            _logger.LogInformation("Cliente conectado al Hub de Reservaciones: {ConnectionId}", Context.ConnectionId);
+            await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            if (exception != null)
+            {
+                _logger.LogWarning(exception, "Cliente desconectado del Hub de Reservaciones con excepción: {ConnectionId}", Context.ConnectionId);
+            }
+            else
+            {
+                _logger.LogInformation("Cliente desconectado del Hub de Reservaciones: {ConnectionId}", Context.ConnectionId);
+            }
+            await base.OnDisconnectedAsync(exception);
         }
     }
 }

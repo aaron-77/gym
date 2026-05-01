@@ -12,5 +12,8 @@ namespace DTO.Dtos
         public TimeSpan horaInicio { get; set; }  // Hora de inicio
         public TimeSpan horaFin { get; set; }     // Hora de fin
         public string tipoDeDia { get; set; }     // Tipo de día (por ejemplo, "Laboral", "Fin de semana", etc.)
+        public string? idUsuarioQueReserva { get; set; }  // ID del usuario que reservó
+        public DateTime fechaReservada { get; set; }  // Fecha cuando se reservó
+        public DateTime fechaDeExpiracionDeLaReserva { get; set; }  // Fecha de expiración de la reserva
     }
 }
