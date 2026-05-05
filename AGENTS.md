@@ -180,6 +180,10 @@ Use DataAnnotations and custom `ValidationAttribute`:
 
 See [extraContext/ejemplosArquitecturaYCodigoGenerales/validation.md](extraContext/ejemplosArquitecturaYCodigoGenerales/validation.md) for example.
 
+### Frontend Form Validation
+
+All frontend forms use Bootstrap 5.3 native validation. See [extraContext/bootstrap-validation.md](extraContext/bootstrap-validation.md) for the standard pattern.
+
 ## Controller Pattern
 
 See [extraContext/ejemplosArquitecturaYCodigoGenerales/controller-pattern.md](extraContext/ejemplosArquitecturaYCodigoGenerales/controller-pattern.md) for example.

@@ -1,3 +1,4 @@
+import { showMessage, iconTypes } from './messageManager.mjs';
 let clients = [];
 let entrenadores = [];
 let duracionCita = null;
@@ -6,6 +7,107 @@ let clientId = null;
 let rutinaId = null;
 let exercideId = null;
 let $inputTipoCita = null;
+
+export async function enviarFormularioRegistrarCita(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    if (!form.checkValidity()) {
+        event.stopPropagation();
+        form.classList.add('was-validated');
+        return;
+    }
+
+    const formData = new FormData(form);
+
+    try {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+
+        const path = "/registrarCita";
+        const response = await fetch(path, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al procesar la solicitud');
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            await showMessage(iconTypes.success, data.message || 'Cita registrada correctamente');
+            form.reset();
+            form.classList.remove('was-validated');
+            // Disable dependent fields
+            const desactivableElements = document.querySelectorAll('.desactivable');
+            for (let element of desactivableElements) {
+                element.disabled = true;
+            }
+        } else {
+            await showMessage(iconTypes.error, data.message || 'Error al registrar la cita');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        await showMessage(iconTypes.error, error.message || 'Error al registrar la cita');
+    } finally {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Agendar';
+        }
+    }
+}
+
+export async function enviarFormularioDuracionCitas(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    if (!form.checkValidity()) {
+        event.stopPropagation();
+        form.classList.add('was-validated');
+        return;
+    }
+
+    const formData = new FormData(form);
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+
+    try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+
+        const path = "/duracionCitasMedicionPage";
+        const response = await fetch(path, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al procesar la solicitud');
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            await showMessage(iconTypes.success, data.message || 'Duracion guardada correctamente');
+            form.classList.remove('was-validated');
+        } else {
+            await showMessage(iconTypes.error, data.message || 'Error al guardar la duracion');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        await showMessage(iconTypes.error, error.message || 'Error al guardar la duracion');
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    }
+}
 
 
 const formatearFecha = (fecha) => {
@@ -79,7 +181,7 @@ const getEntrenaoresDisponibles = async () => {
     const jsonResponse = await response.json();
     if (!jsonResponse.success) { // MODIFICADO: Usar success
         if (jsonResponse.payload.length == 0) { // MODIFICADO: Usar payload
-            alert("No hay entrenadores disponibles, elige otra fecha");
+            await showMessage(iconTypes.warning, 'No hay trainers disponibles, elige otra fecha');
         }
         console.log(jsonResponse.message);
         return;
@@ -163,9 +265,20 @@ addEventListener("DOMContentLoaded", async () => {
     //disableElements();
     $inputTipoCita = document.getElementById("inputTipoCita");
     const $fechaInicio = document.getElementById("inputFechaInicio");
-    $inputTipoCita.addEventListener('change', handleSelectedAction);
-    $fechaInicio.addEventListener('change', handleSelectedAction);
+    $inputTipoCita?.addEventListener('change', handleSelectedAction);
+    $fechaInicio?.addEventListener('change', handleSelectedAction);
     
+    // Agregar listeners para los formularios
+    const formularioRegistrarCita = document.getElementById("formRegistrarCita");
+    if (formularioRegistrarCita) {
+        formularioRegistrarCita.addEventListener('submit', enviarFormularioRegistrarCita);
+    }
+    
+    const formularioDuracionCitas = document.getElementById("formDuracionCitas");
+    if (formularioDuracionCitas) {
+        formularioDuracionCitas.addEventListener('submit', enviarFormularioDuracionCitas);
+    }
+
     // ELIMINADO: Llamada y llenado de clientes (ya se carga en la vista)
     // await getClientes(); 
     // fillComboClients(); 

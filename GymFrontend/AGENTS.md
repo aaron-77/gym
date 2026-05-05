@@ -255,6 +255,17 @@ Razor Views return with models:
 }
 ```
 
+## Form Validation
+
+All forms use Bootstrap 5.3 native validation. See [extraContext/bootstrap-validation.md](../../extraContext/bootstrap-validation.md) for the standard pattern.
+
+Key points:
+- `<form class="needs-validation novalidate">`
+- Input attributes: `required`, `min="1"`, `pattern`, etc.
+- Each field: input + `<div class="invalid-feedback">Mensaje</div>` + empty `<div class="valid-feedback">`
+- JS: only add `was-validated` class on invalid submit
+- No custom `.validation-error` CSS — Bootstrap handles feedback display
+
 ## Authentication
 
 - JWT tokens stored in cookies via `CookieService`

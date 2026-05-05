@@ -22,22 +22,28 @@ Layout = "_LayoutSeccionAdministracion";
 
 <section class="section medidas-section">
 
-    <form id="formGestionRutinas" class="formulario" action="duracionCitasMedicionPage" method="post">
+    <form id="formDuracionCitas" class="formulario needs-validation" action="duracionCitasMedicionPage" method="post" novalidate>
 
         <span id="validationSumary" class="validation-error">@ViewBag.message</span>
 
         <input id="inputIdDuracion" value="@Model.Id" type="hidden" name="Id"
             class="form-control empleados-main-page-input desactivable">
 
-        <label for="inputDuracion" class="form-label">Duracion de la cita en horas</label>
-        <input id="inputDuracion" value="@Model.duracion" type="number" name="duracion"
-            class="form-control empleados-main-page-input desactivable">
-        <span asp-validation-for="@Model.duracion" class="validation-error"></span>
+        <div>
+            <label for="inputDuracion" class="form-label">Duracion de la cita en horas</label>
+            <input id="inputDuracion" value="@Model.duracion" type="number" name="duracion"
+                class="form-control empleados-main-page-input desactivable" required min="1">
+            <div class="invalid-feedback">Campo obligatorio</div>
+            <div class="valid-feedback"></div>
+        </div>
 
-        <label for="inputFrecuencia" class="form-label">Frecuencia de notificaciones en dias</label>
-        <input id="inputFrecuencia" value="@Model.frecuenciaNotificaciones" type="number"
-            name="frecuenciaNotificaciones" class="form-control empleados-main-page-input desactivable">
-        <span asp-validation-for="@Model.frecuenciaNotificaciones" class="validation-error"></span>
+        <div>
+            <label for="inputFrecuencia" class="form-label">Frecuencia de notificaciones en dias</label>
+            <input id="inputFrecuencia" value="@Model.frecuenciaNotificaciones" type="number"
+                name="frecuenciaNotificaciones" class="form-control empleados-main-page-input desactivable" required min="1">
+            <div class="invalid-feedback">Campo obligatorio</div>
+            <div class="valid-feedback"></div>
+        </div>
 
         @if (Model.Id > 0)
         {
@@ -54,5 +60,7 @@ Layout = "_LayoutSeccionAdministracion";
 </section>
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
         class="bi bi-arrow-up-short"></i></a>
-<!-- Vendor JS Files -->
-<script src="~/js/registroCitas.js" asp-append-version="true"></script>
+
+@section Scripts {
+    <script src="~/js/registroCitas.js" type="module" asp-append-version="true"></script>
+}
