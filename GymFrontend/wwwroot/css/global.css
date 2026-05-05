@@ -176,10 +176,6 @@ body {
     padding-bottom:3%;
 	background-image: url('/content/fondologin.jpg');
 }
-.validation-error {
-    color: #FF0000;
-}
-
 .create-user-root-wrapper {
     width:100%;
     display:flex;
