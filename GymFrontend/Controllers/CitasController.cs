@@ -52,35 +52,30 @@ namespace GymFrontend.Controllers
                 var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
                 ViewBag.clientes = respuestaClientes.payload;
                 cita.estado = "Agendada";
-                if (!ModelState.IsValid)
+if (!ModelState.IsValid)
                 {
-                    return View("RegistrarCita", cita);
+                    return Json(new { success = false, message = "Datos inválidos. Por favor verifica los campos." });
                 }
 
-                DTOResponse<Cita> respuesta = await citasManager.registrarCita(cita); // MODIFICADO: Usar DTOResponse y await
+                DTOResponse<Cita> respuesta = await citasManager.registrarCita(cita);
                 if (respuesta == null)
                 {
-                    ViewBag.message = "Error al registrar la cita.";
-                    return View("RegistrarCita", cita);
+                    return Json(new { success = false, message = "Error al registrar la cita." });
                 }
-                if (respuesta.success == false) // MODIFICADO: Usar success
+                if (respuesta.success == false)
                 {
-                    ViewBag.message = respuesta.message;
-                    return View("RegistrarCita", cita);
+                    return Json(new { success = false, message = respuesta.message });
                 }
-                ViewBag.message = respuesta.message;
-                return View("RegistrarCita", cita);
+                return Json(new { success = true, message = respuesta.message });
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: registrarCita (CitasController) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 _logger?.LogError(ex, "Error registrarCita (CitasController)");
-                ViewBag.message = "Ocurrió un error al registrar la cita.";
-                return View("RegistrarCita", cita);
+                return Json(new { success = false, message = "Ocurrió un error al registrar la cita." });
             }
         }
-
 
 
         [Authorize(Roles = "empleado")]
@@ -122,32 +117,28 @@ namespace GymFrontend.Controllers
                 ViewBag.clientes = respuestaClientes.payload;
                 if (!ModelState.IsValid)
                 {
-                    return View("ModificarCita", cita);
+                    return Json(new { success = false, message = "Datos inválidos. Por favor verifica los campos." });
                 }
 
-                var respuestaCita = await citasManager.modificarCita(cita); // MODIFICADO: Usar await
+                var respuestaCita = await citasManager.modificarCita(cita);
 
                 if (respuestaCita == null)
                 {
-                    ViewBag.message = "Error al modificar la cita.";
-                    return View("ModificarCita", cita);
+                    return Json(new { success = false, message = "Error al modificar la cita." });
                 }
 
-                if (respuestaCita.success == false) // MODIFICADO: Usar success
+                if (respuestaCita.success == false)
                 {
-                    ViewBag.message = respuestaClientes.message;
-                    return View("ModificarCita", cita);
+                    return Json(new { success = false, message = respuestaClientes.message });
                 }
-                ViewBag.message = respuestaCita.message;
-                return View("ModificarCita", cita);
+                return Json(new { success = true, message = respuestaCita.message });
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: modificarCitaPost (POST) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 _logger?.LogError(ex, "Error modificarCitaPost (CitasController) POST");
-                ViewBag.message = "Ocurrió un error al modificar la cita.";
-                return View("ModificarCita", cita);
+                return Json(new { success = false, message = "Ocurrió un error al modificar la cita." });
             }
         }
 
@@ -183,37 +174,37 @@ namespace GymFrontend.Controllers
 
         [HttpPost]
         [Route("duracionCitasMedicionPage")]
-        public async Task<IActionResult> gestionarDuracionCitasMedicion(DuracionCitasMedicion duracionParam) // MODIFICADO: async Task
+        public async Task<IActionResult> gestionarDuracionCitasMedicion(DuracionCitasMedicion duracionParam)
         {
             try
             {
                 _logger?.LogInformation("Start CitasController.gestionarDuracionCitasMedicion");
-                DTOResponse<DuracionCitasMedicion> responsePost = await citasManager.registrarDuracionCitasMedicion(duracionParam); // MODIFICADO: Usar DTOResponse y await
-                DTOResponse<DuracionCitasMedicion> response = await citasManager.obtenerDuracionCitasMedicion(); // MODIFICADO: Usar DTOResponse y await
-                DuracionCitasMedicion duracionExistente = response.payload; // MODIFICADO: Usar payload
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ResponseManager.BuildResponse<object>(false, 400, "Datos inválidos. Por favor verifica los campos.", null, null));
+                }
+                DTOResponse<DuracionCitasMedicion> responsePost = await citasManager.registrarDuracionCitasMedicion(duracionParam);
+                DTOResponse<DuracionCitasMedicion> response = await citasManager.obtenerDuracionCitasMedicion();
+                DuracionCitasMedicion duracionExistente = response.payload;
                 ViewBag.duracion = duracionExistente;
                 if (responsePost == null) {
-                    ViewBag.message = "Error al registrar la duracion de la cita";
-                    return View("DuracionCitasMedicion", duracionParam);
+                    return BadRequest(ResponseManager.BuildResponse<object>(false, 400, "Error al registrar la duracion de la cita", null, null));
                 }
                 if (duracionExistente == null)
                 {
-                    ViewBag.message = "No tienes configuracion de duracion de citas de medicion aun, registra una ";
-                    return View("DuracionCitasMedicion", duracionParam);
+                    return BadRequest(ResponseManager.BuildResponse<object>(false, 400, "No tienes configuracion de duracion de citas de medicion aun, registra una", null, null));
                 }
                 duracionParam.Id = duracionExistente.Id;
                 duracionParam.duracion = duracionExistente.duracion;
                 duracionParam.frecuenciaNotificaciones = duracionExistente.frecuenciaNotificaciones;
-                ViewBag.message = responsePost.message;
-                return View("DuracionCitasMedicion", duracionParam);
+                return Ok(ResponseManager.BuildResponse<DuracionCitasMedicion>(true, 200, responsePost.message, null, duracionExistente));
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: gestionarDuracionCitasMedicion | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 _logger?.LogError(ex, "Error gestionarDuracionCitasMedicion (CitasController)");
-                ViewBag.message = "Ocurrió un error al guardar la duración de las citas.";
-                return View("DuracionCitasMedicion", duracionParam);
+                return BadRequest(ResponseManager.BuildResponse<object>(false, 500, "Ocurrió un error al guardar la duración de las citas.", null, null));
             }
         }
 

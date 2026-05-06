@@ -32,7 +32,7 @@ IMPORTANT: When you detect any of these contexts, IMMEDIATELY read the correspon
 | GitHub PR | [.opencode/skills/github-pr/SKILL.md](.opencode/skills/github-pr/SKILL.md) |
 | Skill Creator | [.opencode/skills/skill-creator/SKILL.md](.opencode/skills/skill-creator/SKILL.md) |
 | Bogus Factory | [.opencode/skills/bogus-factory/SKILL.md](.opencode/skills/bogus-factory/SKILL.md) |
-| Integration Test Base | [.opencode/skills/integration-test-base/SKILL.md](.opencode/skills/integration-test-base/SKILL.md) |
+| Integration Test Base | [.opencode/skills/integration-test-base/SKILL.md](.opencode/skills/integration-test-base/SKILL.md) | Clases base para tests de integración .NET 8. Tipado explícito con `IntegrationTestBase<CitasApiWebApplicationFactory<Program>>`. Incluye soporte para SignalR Hubs con dos enfoques (WithStatefulReconnect o HttpMessageHandler manual). **DEBE REVISARSE para cualquier prueba de integración.** |
 | Test Helper | [.opencode/skills/test-helper/SKILL.md](.opencode/skills/test-helper/SKILL.md) |
 
 ### How to use skills

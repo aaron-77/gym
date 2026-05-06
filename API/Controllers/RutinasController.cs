@@ -66,13 +66,11 @@ namespace API.Controllers
 
         public async Task<IActionResult> asignarEjercicioARutina([FromBody] DTO.Dtos.AsignacionDeEjercicio asignacionDeEjercicio)
         {
-            HttpResponseAsignacion respuesta = new HttpResponseAsignacion();
-            
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
-            
+
             try
             {
                 var resultado = await _db.Database.
@@ -86,20 +84,15 @@ namespace API.Controllers
                         @repeticiones = {asignacionDeEjercicio.Repeticiones},
                         @metaRepeticiones={asignacionDeEjercicio.MetaRepeticiones}
                     ");
-                respuesta.ok = true;
-                respuesta.data = asignacionDeEjercicio;
-                respuesta.errors = null;
-                respuesta.message = "Registro exitoso";
+
+                var respuesta = ResponseManager.BuildResponse<AsignacionDeEjercicio>(true, 200, "Registro exitoso", null, asignacionDeEjercicio);
+                return Ok(respuesta);
             }
             catch (Exception ex)
             {
-                respuesta.ok = false;
-                respuesta.data = null;
-                respuesta.errors.Add(new ErrorModel() { propiedad = null, message = ex.Message });
-                respuesta.message = "Error al asignar el ejercicio";
+                var respuesta = ResponseManager.BuildResponse<DTO.Dtos.AsignacionDeEjercicio>(false, 500, "Error al asignar el ejercicio", new List<ErrorModel> { new ErrorModel { message = ex.Message, propiedad = null } }, null);
                 return StatusCode(500, respuesta);
             }
-            return Ok(respuesta);
         }
 
         [Authorize(Roles = "empleado")]

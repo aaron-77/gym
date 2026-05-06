@@ -95,9 +95,10 @@ public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Prog
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<HttpResponseAsignacion>();
+        var result = await response.Content.ReadFromJsonAsync<DTOResponse<AsignacionDeEjercicio>>();
         result.Should().NotBeNull();
-        result!.ok.Should().BeTrue();
+        result!.success.Should().BeTrue();
+        result.httpCode.Should().Be(200);
         result.message.Should().Contain("Registro exitoso");
     }
 

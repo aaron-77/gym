@@ -1,9 +1,118 @@
+import { showMessage, iconTypes } from './messageManager.mjs';
+
 let clients = [];
 let rutinas = [];
 let ejercicios = [];
 let clientId = null;
 let rutinaId = null;
 let exercideId = null;
+
+export async function enviarFormularioRutina(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    if (!form.checkValidity()) {
+        event.stopPropagation();
+        form.classList.add('was-validated');
+        return;
+    }
+
+    const formData = new FormData(form);
+
+    try {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+
+        const path = "/gestionRutinas";
+        const response = await fetch(path, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al procesar la solicitud');
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            await showMessage(iconTypes.success, data.message || 'Rutina registrada correctamente');
+            form.reset();
+            form.classList.remove('was-validated');
+        } else {
+            await showMessage(iconTypes.error, data.message || 'Error al registrar la rutina');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        await showMessage(iconTypes.error, error.message || 'Error al registrar la rutina');
+    } finally {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Registrar';
+        }
+    }
+}
+
+export async function enviarFormularioAsignacionEjercicio(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    if (!form.checkValidity()) {
+        event.stopPropagation();
+        form.classList.add('was-validated');
+        return;
+    }
+
+    const formData = new FormData(form);
+
+    try {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+
+        const path = "/asignarEjercicios";
+        const response = await fetch(path, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al procesar la solicitud');
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            await showMessage(iconTypes.success, data.message || 'Ejercicio asignado correctamente');
+            form.reset();
+            form.classList.remove('was-validated');
+            // Disable dependent fields again
+            const desactivables = document.querySelectorAll('.desactivable');
+            for (let element of desactivables) {
+                element.disabled = true;
+            }
+            const desctivableElementsG = document.querySelectorAll('.desactivable-g');
+            for (let item of desctivableElementsG) {
+                item.disabled = true;
+            }
+        } else {
+            await showMessage(iconTypes.error, data.message || 'Error al asignar ejercicio');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        await showMessage(iconTypes.error, error.message || 'Error al asignar ejercicio');
+    } finally {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Asignar';
+        }
+    }
+}
+
 const handleSelectedAction = async (ev) => {
     const comboSelected = ev.currentTarget;
     enableElements(comboSelected.id);
@@ -90,6 +199,7 @@ function fillComboClients() {
         option.text = client.nombre + " " + client.apellido;
         select.appendChild(option);
     });
+    
 }
 function fillCitasAgendadas() {
     let select = document.getElementById('inputRutina');
@@ -125,8 +235,27 @@ addEventListener("DOMContentLoaded", async () => {
     const comboCliente = document.getElementById("inputCliente");
     const comboRutina = document.getElementById("inputRutina");
     const comboEjercicios = document.getElementById("inputEjercicio");
-    comboCliente.addEventListener('change', handleSelectedAction);
-    comboRutina.addEventListener('change', handleSelectedAction);
-    comboEjercicios.addEventListener('change', handleSelectedAction);
+   if(comboCliente ){
+       
+       comboCliente.addEventListener('change', handleSelectedAction);
+       comboRutina.addEventListener('change', handleSelectedAction);
+       comboEjercicios.addEventListener('change', handleSelectedAction);
+       
+   }
     
+    
+    // Agregar listeners para los formularios
+    
+    const formularioRutina = document.getElementById("formGestionRutinas");
+    if (formularioRutina) {
+        // Verificar si es el formulario de rutinas o de asignación de ejercicios por el action
+  
+        const action = formularioRutina.getAttribute('action');
+        if (action === 'gestionRutinas') {
+            formularioRutina.addEventListener('submit', enviarFormularioRutina);
+            
+        } else if (action === 'asignarEjercicios') {
+            formularioRutina.addEventListener('submit', enviarFormularioAsignacionEjercicio);
+        }
+    }
 })

@@ -117,7 +117,7 @@ GymWebApp.Tests/
 | Skill | Trigger | Propósito |
 |-------|---------|-----------|
 | **bogus-factory** | "Cuando cualquier prueba necesite crear objetos/datos de prueba" | Generar datos de prueba |
-| **integration-test-base** | "Cuando se necesitan tests de integración con WebApplicationFactory" | Clases base |
+| **integration-test-base** | "Cuando se necesitan tests de integración con WebApplicationFactory" | Clases base - **DEBE REVISARSE PARA TODOS LOS TESTS DE INTEGRACIÓN** |
 | **test-helper** | "Cuando se necesitan métodos reutilizables en tests de integración" | Helpers con métodos estáticos |
 | **xunit-dotnet** | "Cuando se escriben tests unitarios para .NET" | Patrones de unit testing |
 | **xunit-integration** | "Cuando se escriben tests de integración para .NET" | Patrones de integración |
@@ -128,6 +128,8 @@ GymWebApp.Tests/
 | **dotnet-add-testing** | "Cuando se necesita crear un nuevo proyecto de tests" | Scaffold de proyectos de test |
 | **testcontainers** | "Cuando se usa Testcontainers para correr BD o servicios en Docker" | Contenedores Docker para tests |
 | **testcontainers-wait-strategies** | "Cuando se configuran Testcontainers para esperar que contenedores estén listos" | Wait strategies HTTP y TCP |
+
+> **IMPORTANTE**: El skill `integration-test-base` DEBE revisarse para CUALQUIER test de integración, incluyendo SignalR Hubs. Ver [signalRIntegrationTestStrategy.md](../extraContext/ejemplosArquitecturaYCodigoGenerales/signalRIntegrationTestStrategy.md) para tests de SignalR.
 
 ## HelpersBasicos
 
@@ -218,6 +220,40 @@ public async Task WhenUsuarioIDIsNull_ReturnsBadRequest()
 ### Referencia:
 - **Ejemplo completo:** `GymWebApp.Tests/Unit/Rutinas/ConsultarRutinasValidationTests.cs`
 - **Patrón base:** `GymWebApp.Tests/Unit/Clases/InscribirAClaseUnitTests.cs` (líneas 72-73)
+
+## SignalR Hub Testing
+
+Para tests de integración de SignalR Hubs, se utiliza el patrón `SignalRIntegrationTestBase` con tipado correcto.
+
+> **Nota importante**: Los ejemplos en esta sección son **conceptuales**, no literales. Adaptar según las necesidades específicas del test.
+
+### Archivos de Referencia
+
+| Archivo | Descripción |
+|---------|-------------|
+| [signalRIntegrationTestStrategy.md](../extraContext/ejemplosArquitecturaYCodigoGenerales/signalRIntegrationTestStrategy.md) | Guía completa de testing de SignalR Hubs |
+| [signalRHubTestExample.md](../extraContext/ejemplosArquitecturaYCodigoGenerales/signalRHubTestExample.md) | Ejemplo completo de test class SignalR |
+| [SignalRIntegrationTestBase.cs](../GymWebApp.Tests/Integration/Common/SignalRIntegrationTestBase.cs) | Implementación real de la clase base |
+
+### Typing Correcto
+
+Ver [signalRIntegrationTestStrategy.md](../extraContext/ejemplosArquitecturaYCodigoGenerales/signalRIntegrationTestStrategy.md) para el patrón correcto de tipado.
+
+### Requisitos para Tests de SignalR
+
+1. **Heredar de `SignalRIntegrationTestBase`** - Proporciona métodos para crear conexiones Hub
+2. **Usar `CitasApiWebApplicationFactory<Program>`** - Tipado explícito con la clase Program
+3. **Inicializar servidor antes de acceder a Server**: `_factory.CreateClient()` antes de `_factory.Server`
+4. **IAsyncLifetime ya implementado**: `IntegrationTestBase` ya implementa `IAsyncLifetime`, no duplicar en clases derivadas
+5. **Implementar `GetHubName()`**: Cada clase de test debe especificar su nombre de hub
+
+### Estructura de un Test de SignalR
+
+Ver [signalRHubTestExample.md](../extraContext/ejemplosArquitecturaYCodigoGenerales/signalRHubTestExample.md) para un ejemplo completo de test class.
+
+### InvokeAsync Pattern
+
+Ver [signalRHubTestExample.md](../extraContext/ejemplosArquitecturaYCodigoGenerales/signalRHubTestExample.md#invokeasync-pattern) para el patrón de invocación de métodos del hub.
 
 ## Ejemplo de relaciones
 

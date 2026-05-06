@@ -1,0 +1,110 @@
+# SignalRIntegrationTestBase Template
+
+This is a markdown reference copy of the current `SignalRIntegrationTestBase.cs` implementation.
+
+## Source Code
+
+```csharp
+using System.Net.Http;
+using Microsoft.AspNetCore.SignalR.Client;
+
+namespace GymWebApp.Tests.Integration.Common;
+
+/// <summary>
+/// Base class for SignalR Hub integration tests.
+/// Uses StartConnectionAsync approach with HttpMessageHandler for manual Hub connection setup.
+/// </summary>
+/// <remarks>
+/// Note: IAsyncLifetime is already implemented by IntegrationTestBase, so it's not implemented here.
+/// Each test class must implement GetHubName() to specify which hub to connect to.
+/// </remarks>
+public abstract class SignalRIntegrationTestBase : IntegrationTestBase<CitasApiWebApplicationFactory<Program>>
+{
+    protected HubConnection? _hubConnection;
+
+    protected SignalRIntegrationTestBase(CitasApiWebApplicationFactory<Program> factory) : base(factory)
+    {
+    }
+
+    /// <summary>
+    /// Creates a HubConnection using the HttpMessageHandler approach.
+    /// Uses StartConnectionAsync for manual HttpMessageHandler setup.
+    /// </summary>
+    /// <param name="handler">The HttpMessageHandler from the test server.</param>
+    /// <param name="hubName">The name of the hub (e.g., "reservaciones").</param>
+    /// <returns>A started HubConnection.</returns>
+    private static async Task<HubConnection> StartConnectionAsync(HttpMessageHandler handler, string hubName)
+    {
+        var hubConnection = new HubConnectionBuilder()
+            .WithUrl($"ws://localhost/hubs/{hubName}", o =>
+            {
+                o.HttpMessageHandlerFactory = _ => handler;
+            })
+            .Build();
+
+        await hubConnection.StartAsync();
+        return hubConnection;
+    }
+
+    public override async Task InitializeAsync()
+    {
+        await base.InitializeAsync();
+
+        // CRITICAL: CreateClient must be called before accessing Server property
+        Factory.CreateClient();
+        var server = Factory.Server;
+        var handler = server.CreateHandler();
+
+        _hubConnection = await StartConnectionAsync(handler, GetHubName());
+
+        // Closed handler with reconnection logic
+        _hubConnection.Closed += async error =>
+        {
+            await Task.Delay(new Random().Next(0, 5) * 1000);
+            await _hubConnection.StartAsync();
+        };
+    }
+
+    /// <summary>
+    /// Returns the name of the SignalR hub to connect to.
+    /// Each test class must implement this to specify its hub (e.g., "reservaciones", "clases").
+    /// </summary>
+    /// <returns>The hub name without prefix (e.g., "reservaciones").</returns>
+    protected abstract string GetHubName();
+
+    public override async Task DisposeAsync()
+    {
+        if (_hubConnection != null)
+        {
+            await _hubConnection.StopAsync();
+            await _hubConnection.DisposeAsync();
+        }
+
+        await base.DisposeAsync();
+    }
+}
+```
+
+## Key Points
+
+1. **Inherits from**: `IntegrationTestBase<CitasApiWebApplicationFactory<Program>>`
+2. **Provides**: `_hubConnection` protected field
+3. **Requires**: Each test class to implement `GetHubName()` method
+4. **Uses**: `StartConnectionAsync` with HttpMessageHandler approach
+5. **Includes**: Closed handler with reconnection logic
+
+## Usage
+
+```csharp
+public class ReservacionesHubTests : SignalRIntegrationTestBase
+{
+    public ReservacionesHubTests(CitasApiWebApplicationFactory<Program> factory)
+        : base(factory)
+    {
+    }
+
+    protected override string GetHubName() => "reservaciones";
+
+    // Tests go here...
+}
+```

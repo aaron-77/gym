@@ -1,3 +1,5 @@
+import { showMessage, iconTypes } from './messageManager.mjs';
+
 let clients = [];
 let citas = [];
 let entrenadores = [];
@@ -11,6 +13,53 @@ let $inputClientes = null;
 let $inputCitas = null;
 let $inputFechaInicio = null;
 let $inputFechaFin = null;
+
+export async function enviarFormularioModificarCita(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    if (!form.checkValidity()) {
+        event.stopPropagation();
+        form.classList.add('was-validated');
+        return;
+    }
+
+    const formData = new FormData(form);
+
+    try {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+
+        const path = "/modificarCita";
+        const response = await fetch(path, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Error al procesar la solicitud');
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+            await showMessage(iconTypes.success, data.message || 'Cita modificada correctamente');
+            form.classList.remove('was-validated');
+        } else {
+            await showMessage(iconTypes.error, data.message || 'Error al modificar la cita');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        await showMessage(iconTypes.error, error.message || 'Error al modificar la cita');
+    } finally {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Modificar';
+        }
+    }
+}
 
 
 const formatearFecha = (fecha) => {
@@ -118,7 +167,7 @@ const getEntrenadoresDisponibles = async () => {
     const jsonResponse = await response.json();
     if (!jsonResponse.success) {
         if (jsonResponse.payload.length == 0) {
-            alert("No hay entrenadores disponibles, elige otra fecha");
+            await showMessage(iconTypes.warning, 'No hay trainers disponibles, elige otra fecha');
         }
         console.log(jsonResponse.message);
         return;
@@ -200,5 +249,11 @@ addEventListener("DOMContentLoaded", async () => {
     $inputClientes.addEventListener('change', handleSelectedAction);
     $inputCitas.addEventListener('change', handleSelectedAction);
     $inputFechaInicio.addEventListener('change', handleSelectedAction);
+
+    // Agregar listener para el formulario de modificar cita
+    const formularioModificarCita = document.getElementById("formModificarCita");
+    if (formularioModificarCita) {
+        formularioModificarCita.addEventListener('submit', enviarFormularioModificarCita);
+    }
 
 });

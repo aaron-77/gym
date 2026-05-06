@@ -25,42 +25,53 @@ Layout = "_LayoutSeccionAdministracion";
 
 <section class="section medidas-section">
 
-    <form class="formulario" action="registrar" method="post">
-        <span id="validationSumary" class="validation-error">@ViewBag.message</span>
-        <label for="inputPeso" class="form-label">Usuario</label>
-        <select class="form-select empleados-main-page-input" name="fkUsuario" aria-label="Default select example">
-            <option class="fix-fontColor-option" selected>selecciona un usuario </option>
-            @foreach (var user in listadoUsuarios)
-            {
-                <option value="@user.Id" class="fix-fontColor-option">@user.NombreCompleto @user.Apellido</option>
-            }
-        </select>
-        <span asp-validation-for="@Model.fkUsuario" class="validation-error"></span>
+    <form id="formCitaMedicion" class="formulario needs-validation novalidate" action="registrar" method="post">
+        <div>
+            <label for="inputPeso" class="form-label">Usuario</label>
+            <select id="inputPeso" class="form-select empleados-main-page-input" name="fkUsuario" aria-label="Default select example" required>
+                <option class="fix-fontColor-option" selected>selecciona un usuario </option>
+                @foreach (var user in listadoUsuarios)
+                {
+                    <option value="@user.Id" class="fix-fontColor-option">@user.NombreCompleto @user.Apellido</option>
+                }
+            </select>
+            <div class="invalid-feedback">Selecciona un usuario</div>
+            <div class="valid-feedback"></div>
+        </div>
 
-        <label for="inputParametro" class="form-label">Parametro</label>
-        <select class="form-select empleados-main-page-input" name="fkParametro" aria-label="Default select example">
-            <option class="fix-fontColor-option" selected>selecciona un parametro </option>
-            @foreach (var parametro in listadoParametros)
-            {
-                <option value="@parametro.parametroMedicionId" class="fix-fontColor-option">@parametro.nombre</option>
-            }
-        </select>
-        <span asp-validation-for="@Model.fkParametro" class="validation-error"></span>
+        <div>
+            <label for="inputParametro" class="form-label">Parametro</label>
+            <select id="inputParametro" class="form-select empleados-main-page-input" name="fkParametro" aria-label="Default select example" required>
+                <option class="fix-fontColor-option" selected>selecciona un parametro </option>
+                @foreach (var parametro in listadoParametros)
+                {
+                    <option value="@parametro.parametroMedicionId" class="fix-fontColor-option">@parametro.nombre</option>
+                }
+            </select>
+            <div class="invalid-feedback">Selecciona un parametro</div>
+            <div class="valid-feedback"></div>
+        </div>
 
-        <label for="inputUnidadDeMedida" class="form-label">Unidad de medida</label>
-        <select class="form-select empleados-main-page-input" name="unidadDeMedidaId" aria-label="Unidad de medida">
-            <option class="fix-fontColor-option" selected>Selecciona una Unidad de medida </option>
-            @foreach (var unidadDeMedida in listadoUnidadesDeMedida)
-            {
-                <option value="@unidadDeMedida.UnidadDeMedidaId" class="fix-fontColor-option">@unidadDeMedida.Nombre
-                </option>
-            }
-        </select>
-        <span asp-validation-for="@Model.unidadDeMedidaId" class="validation-error"></span>
+        <div>
+            <label for="inputUnidadDeMedida" class="form-label">Unidad de medida</label>
+            <select id="inputUnidadDeMedida" class="form-select empleados-main-page-input" name="unidadDeMedidaId" aria-label="Unidad de medida" required>
+                <option class="fix-fontColor-option" selected>Selecciona una Unidad de medida </option>
+                @foreach (var unidadDeMedida in listadoUnidadesDeMedida)
+                {
+                    <option value="@unidadDeMedida.UnidadDeMedidaId" class="fix-fontColor-option">@unidadDeMedida.Nombre
+                    </option>
+                }
+            </select>
+            <div class="invalid-feedback">Selecciona una unidad de medida</div>
+            <div class="valid-feedback"></div>
+        </div>
 
-        <label for="inputValor" class="form-label">valor</label>
-        <input id="inputValor" type="text" name="valor" step="0.01" class="form-control empleados-main-page-input" >
-        <span asp-validation-for="@Model.valor" class="validation-error"></span>
+        <div>
+            <label for="inputValor" class="form-label">valor</label>
+            <input id="inputValor" type="text" name="valor" step="0.01" class="form-control empleados-main-page-input" required>
+            <div class="invalid-feedback">Ingresa un valor</div>
+            <div class="valid-feedback"></div>
+        </div>
 
         <button type="submit" class="btn btn-primary fix-margin">Submit</button>
     </form>
@@ -69,6 +80,7 @@ Layout = "_LayoutSeccionAdministracion";
 @section Scripts {
     
     <script type="module" src="~/js/messageManager.mjs"></script>
+    <script src="~/js/registroMedidaLogic.js" asp-append-version="true"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
 }

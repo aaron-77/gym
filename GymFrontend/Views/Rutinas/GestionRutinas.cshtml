@@ -32,32 +32,41 @@ Layout = "_LayoutSeccionAdministracion";
         </div><!-- End Page Title -->
 
         <section class="section medidas-section">
-            <form id="formGestionRutinas" class="formulario" action="gestionRutinas" method="post">
-                
-                <span id="validationSumary" class="validation-error">@ViewBag.message</span>
+            <form id="formGestionRutinas" class="formulario needs-validation novalidate" action="gestionRutinas" method="post">
 
-                <label for="inputUsuario" class="form-label">Cliente</label>
-                <select id="inputUsuario" class="form-select empleados-main-page-input" name="UsuarioID" aria-label="Default select example">
-                    <option class="fix-fontColor-option" selected>selecciona un cliente </option>
-                    @foreach (var user in listadoClientes)
-                    {
-                        <option value="@user.UsuarioID" class="fix-fontColor-option">@user.Nombre @user.Apellido</option>
-                    }
-                </select>
-                <span asp-validation-for="@Model.UsuarioID" class="validation-error"></span>
-                <label for="inputEntrenador" class="form-label">Entrenador</label>
-                <select id="inputEntrenador" class="form-select empleados-main-page-input" name="EntrenadorID" aria-label="Default select example">
-                    <option class="fix-fontColor-option" selected>selecciona entrenador </option>
-                    @foreach (var user in listadoEntrenadores)
-                    {
-                        <option value="@user.UsuarioID" class="fix-fontColor-option">@user.Nombre @user.Apellido</option>
-                    }
-                </select>
-                <span asp-validation-for="@Model.EntrenadorID" class="validation-error"></span>
+                <div>
+                    <label for="inputUsuario" class="form-label">Cliente</label>
+                    <select id="inputUsuario" class="form-select empleados-main-page-input" name="UsuarioID" aria-label="Default select example" required>
+                        <option class="fix-fontColor-option" selected>selecciona un cliente </option>
+                        @foreach (var user in listadoClientes)
+                        {
+                            <option value="@user.UsuarioID" class="fix-fontColor-option">@user.Nombre @user.Apellido</option>
+                        }
+                    </select>
+                    <div class="invalid-feedback">Selecciona un cliente</div>
+                    <div class="valid-feedback"></div>
+                </div>
 
-                <label for="inputObservaciones" class="form-label">Observaciones</label>
-                <input type="text" name="Observaciones" class="form-control empleados-main-page-input" id="inputObservaciones">
-                <span asp-validation-for="@Model.Observaciones" class="validation-error"></span>
+                <div>
+                    <label for="inputEntrenador" class="form-label">Entrenador</label>
+                    <select id="inputEntrenador" class="form-select empleados-main-page-input" name="EntrenadorID" aria-label="Default select example" required>
+                        <option class="fix-fontColor-option" selected>selecciona entrenador </option>
+                        @foreach (var user in listadoEntrenadores)
+                        {
+                            <option value="@user.UsuarioID" class="fix-fontColor-option">@user.Nombre @user.Apellido</option>
+                        }
+                    </select>
+                    <div class="invalid-feedback">Selecciona un entrenador</div>
+                    <div class="valid-feedback"></div>
+                </div>
+
+                <div>
+                    <label for="inputObservaciones" class="form-label">Observaciones</label>
+                    <input type="text" name="Observaciones" class="form-control empleados-main-page-input" id="inputObservaciones">
+                    <div class="invalid-feedback"></div>
+                    <div class="valid-feedback"></div>
+                </div>
+
                 <button type="submit" class="btn btn-primary fix-margin">Registrar</button>
             </form>
         </section>
@@ -65,7 +74,7 @@ Layout = "_LayoutSeccionAdministracion";
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
 @section Scripts {
-    <script src="~/js/gestionRutinas.js" asp-append-version="true"></script>
+    <script src="~/js/gestionRutinas.js" type="module" asp-append-version="true"></script>
 }
 
 

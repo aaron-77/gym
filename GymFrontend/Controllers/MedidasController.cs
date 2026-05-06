@@ -26,39 +26,31 @@ namespace GymFrontend.Controllers
             try
             {
                 _logger?.LogInformation("Start MedidasController.registrarMedida");
-                var respuesta = await usersManager.obtenerUsuarios();
 
-                List<ExistingUser> usuarios = respuesta.payload;
-                if (usuarios == null) { 
-                    usuarios = new List<ExistingUser>();
-                }
-                ViewBag.usuarios = usuarios;
                 if (!ModelState.IsValid)
-                {   
-                    return Redirect("empleados");
+                {
+                    return Json(new { success = false, message = "Datos inválidos" });
                 }
+
                 if (medidaCorporal == null)
                 {
-                    medidaCorporal = new DTOMedida();
+                    return Json(new { success = false, message = "Datos de medida inválidos" });
                 }
-                
 
                 var response = await medidasManager.registrarMedida(medidaCorporal);
                 if (response == null)
                 {
-                    ViewBag.message = "Error al registrar la medida";
-                    return Redirect("empleados");
+                    return Json(new { success = false, message = "Error al registrar la medida" });
                 }
-                ViewBag.message = response.message;
-                return Redirect("empleados");
+
+                return Json(new { success = true, message = response.message ?? "Medida registrada correctamente" });
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: registrarMedida | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 _logger?.LogError(ex, "Error registrarMedida (MedidasController)");
-                ViewBag.message = "Ocurrió un error al registrar la medida.";
-                return Redirect("empleados");
+                return Json(new { success = false, message = "Ocurrió un error al registrar la medida." });
             }
         }
 
