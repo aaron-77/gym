@@ -10,25 +10,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;
 
-[Collection("RegistrarClaseProgramadaApiIntegrationTests")]
-public class RegistrarClaseProgramadaTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class RegistrarClaseProgramadaTests : IntegrationTestBase
 {
-    private readonly ClasesApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-    
-    
-    
-    
-    
-                        
-
-    public RegistrarClaseProgramadaTests(ClasesApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        TestContainerHelper.InitializeAsync().GetAwaiter().GetResult();
-        TestContainerHelper.ResetDatabaseAsync().GetAwaiter().GetResult();
-    }
+    public RegistrarClaseProgramadaTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     #region Happy Path Tests
 
@@ -36,8 +22,8 @@ public class RegistrarClaseProgramadaTests : IClassFixture<ClasesApiWebApplicati
     public async Task RegistrarRClaseProgramada_WithValidData_ReturnsOk()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing users from seed data
         var (clienteId, entrenadorId) = await GetExistingUserIdsAsync();
@@ -76,7 +62,7 @@ public class RegistrarClaseProgramadaTests : IClassFixture<ClasesApiWebApplicati
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/registrarClaseProgramada", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/Clases/registrarClaseProgramada", requestDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -105,8 +91,7 @@ public class RegistrarClaseProgramadaTests : IClassFixture<ClasesApiWebApplicati
     public async Task RegistrarClaseProgramada_WithoutAuthentication_ReturnsUnauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         var requestDto = new DTODatosClaseProgramada
         {
@@ -120,7 +105,7 @@ public class RegistrarClaseProgramadaTests : IClassFixture<ClasesApiWebApplicati
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/registrarClaseProgramada", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/Clases/registrarClaseProgramada", requestDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

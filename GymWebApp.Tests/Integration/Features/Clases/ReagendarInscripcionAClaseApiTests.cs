@@ -10,19 +10,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;
 
-[Collection("ReagendarInscripcionAClaseApiIntegrationTests")]
-public class ReagendarInscripcionAClaseApiTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class ReagendarInscripcionAClaseApiTests : IntegrationTestBase
 {
-    private readonly ClasesApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public ReagendarInscripcionAClaseApiTests(ClasesApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        TestContainerHelper.InitializeAsync().GetAwaiter().GetResult();
-        TestContainerHelper.ResetDatabaseAsync().GetAwaiter().GetResult();
-    }
+    public ReagendarInscripcionAClaseApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     #region Happy Path Tests
 
@@ -30,8 +22,8 @@ public class ReagendarInscripcionAClaseApiTests : IClassFixture<ClasesApiWebAppl
     public async Task ReagendarInscripcionAClase_WithValidData_ReturnsOk()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing users from seed data
         var (clienteId, _) = await GetExistingUserIdsAsync();
@@ -128,7 +120,7 @@ public class ReagendarInscripcionAClaseApiTests : IClassFixture<ClasesApiWebAppl
 
         
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/reagendacionDeInscripcionAClase", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/Clases/reagendacionDeInscripcionAClase", requestDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -176,13 +168,12 @@ public class ReagendarInscripcionAClaseApiTests : IClassFixture<ClasesApiWebAppl
     public async Task ReagendarInscripcionAClase_WithoutAuthentication_ReturnsUnauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         var requestDto = ReagendacionInscripcionFactory.Crear();
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/reagendacionDeInscripcionAClase", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/Clases/reagendacionDeInscripcionAClase", requestDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

@@ -5,24 +5,26 @@ using FluentAssertions;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;
 
-[Collection("PreviewRateLimitTests")]
-public class PreviewRateLimitTests : IClassFixture<ClasesApiProductionWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class PreviewRateLimitTests : IClassFixture<ClasesApiProductionWebApplicationFactory<Program>>, IAsyncLifetime
 {
     private readonly ClasesApiProductionWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
+    private readonly HttpClient Client;
+    private readonly TestContainerHelper _testContainerHelper;
 
-    public PreviewRateLimitTests(ClasesApiProductionWebApplicationFactory<Program> factory)
+    public PreviewRateLimitTests(ClasesApiProductionWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
     {
         _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
+        _testContainerHelper = testContainerHelper;
+        Client = factory.CreateClient();
     }
 
-    private async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
+        await _testContainerHelper.ResetDatabaseAsync();
     }
+
+    public Task DisposeAsync() => Task.CompletedTask;
 
     /// <summary>
     /// Scenario 3: Rate limit applies in Production environment
@@ -36,7 +38,7 @@ public class PreviewRateLimitTests : IClassFixture<ClasesApiProductionWebApplica
     public async Task RateLimitExceeded_Returns429()
     {
         // Arrange - seed data for the endpoint to return OK
-        var connectionString = TestContainerHelper.ConnectionString;
+        var connectionString = _testContainerHelper.ConnectionString;
         
         var clase = ClaseFactory.CrearClaseActiva();
         var saved = await DatabaseHelper.NonQueryAsyncTyped(connectionString, "Clases", clase);
@@ -49,7 +51,7 @@ public class PreviewRateLimitTests : IClassFixture<ClasesApiProductionWebApplica
         // 16th should return 429 Too Many Requests
         for (int i = 1; i <= 16; i++)
         {
-            var response = await _client.GetAsync("/api/Clases/preview");
+            var response = await Client.GetAsync("/api/Clases/preview");
             
             if (i <= 15)
             {
@@ -72,24 +74,11 @@ public class PreviewRateLimitTests : IClassFixture<ClasesApiProductionWebApplica
 /// 
 /// Spec: specs/04-preview-clases.md - Scenario 4
 /// </summary>
-[Collection("PreviewRateLimitDevelopmentTests")]
-public class PreviewRateLimitDevelopmentTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class PreviewRateLimitDevelopmentTests : IntegrationTestBase
 {
-    private readonly ClasesApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public PreviewRateLimitDevelopmentTests(ClasesApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-    }
+    public PreviewRateLimitDevelopmentTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     /// <summary>
     /// Scenario 4: Rate limit bypassed in Development environment
@@ -114,7 +103,7 @@ public class PreviewRateLimitDevelopmentTests : IClassFixture<ClasesApiWebApplic
         // Act & Assert - 20 requests, all should be 200 OK
         for (int i = 1; i <= 20; i++)
         {
-            var response = await _client.GetAsync("/api/Clases/preview");
+            var response = await Client.GetAsync("/api/Clases/preview");
             response.StatusCode.Should().Be(HttpStatusCode.OK, 
                 $"Request #{i} should succeed in Development (no rate limiting)");
         }

@@ -5,20 +5,11 @@ using DataAccess.EntityFramework;
 
 namespace GymWebApp.Tests.Integration.Features.Common;
 
-[Collection("DatabaseHelperNonQueryAsyncTypedTests")]
-public class DatabaseHelperNonQueryAsyncTypedTests
+[Collection("IntegrationTests")]
+public class DatabaseHelperNonQueryAsyncTypedTests : IntegrationTestBase
 {
-    public DatabaseHelperNonQueryAsyncTypedTests()
-    {
-        ConfigHelper.RegisterConfig("appsettings.Testing.json");
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-    }
+    public DatabaseHelperNonQueryAsyncTypedTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     [Fact]
     public async Task NonQueryAsyncTyped_InsertSimpleEntity_ReturnsEntityWithGeneratedId()

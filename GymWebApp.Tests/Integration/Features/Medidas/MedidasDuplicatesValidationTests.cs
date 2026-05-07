@@ -12,19 +12,11 @@ namespace GymWebApp.Tests.Integration.Features.Medidas;
 /// <summary>
 /// Integration tests para validar que los endpoints de Medidas no retornan datos duplicados
 /// </summary>
-[Collection("MedidasApiIntegrationTests")]
-public class MedidasDuplicatesValidationTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class MedidasDuplicatesValidationTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public MedidasDuplicatesValidationTests(CitasApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        TestContainerHelper.InitializeAsync().GetAwaiter().GetResult();
-        TestContainerHelper.ResetDatabaseAsync().GetAwaiter().GetResult();
-    }
+    public MedidasDuplicatesValidationTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
     #region GET /api/getParametrosDeMedicion - No Duplicate Ids
 
@@ -37,8 +29,8 @@ public class MedidasDuplicatesValidationTests : IClassFixture<CitasApiWebApplica
     public async Task GetParametrosDeMedicion_ReturnsNoDuplicateParameterIds()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         
         // Get existing cliente from seed data
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -48,7 +40,7 @@ public class MedidasDuplicatesValidationTests : IClassFixture<CitasApiWebApplica
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/getParametrosDeMedicion?idUsuario={clienteId}");
+        var response = await Client.GetAsync($"/api/getParametrosDeMedicion?idUsuario={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -81,8 +73,8 @@ public class MedidasDuplicatesValidationTests : IClassFixture<CitasApiWebApplica
     public async Task GetProgresoDeUsuario_ReturnsNoDuplicateParametroIds()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsClienteAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsClienteAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -92,7 +84,7 @@ public class MedidasDuplicatesValidationTests : IClassFixture<CitasApiWebApplica
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/progresoDeUsuario?idUsuario={clienteId}");
+        var response = await Client.GetAsync($"/api/progresoDeUsuario?idUsuario={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -131,8 +123,8 @@ public class MedidasDuplicatesValidationTests : IClassFixture<CitasApiWebApplica
     public async Task ObtenerAñosConActividadDelCliente_ReturnsNoDuplicateYears()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -142,7 +134,7 @@ public class MedidasDuplicatesValidationTests : IClassFixture<CitasApiWebApplica
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/obtenerAñosConActividadDelCliente?idCliente={clienteId}");
+        var response = await Client.GetAsync($"/api/obtenerAñosConActividadDelCliente?idCliente={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -170,8 +162,8 @@ public class MedidasDuplicatesValidationTests : IClassFixture<CitasApiWebApplica
     public async Task ObtenerEjerciciosYParametros_ReturnsNoDuplicateItems()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -181,7 +173,7 @@ public class MedidasDuplicatesValidationTests : IClassFixture<CitasApiWebApplica
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/obtenerEjerciciosYParametros?idCliente={clienteId}");
+        var response = await Client.GetAsync($"/api/obtenerEjerciciosYParametros?idCliente={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

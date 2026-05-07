@@ -8,10 +8,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Horarios;
 
-[Collection("PreReservarHorarioApiIntegrationTests")]
-public class PreReservarHorarioApiTests : IntegrationTestBase<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class PreReservarHorarioApiTests : IntegrationTestBase
 {
-    public PreReservarHorarioApiTests(CitasApiWebApplicationFactory<Program> factory) : base(factory) { }
+    public PreReservarHorarioApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
     #region Happy Paths (Integration)
 
@@ -29,7 +30,6 @@ public class PreReservarHorarioApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task PreReservarHorario_WithValidDataAndAuthenticatedUser_CreatesPreReservation()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         // Get valid idHoraLaboral from database
@@ -75,7 +75,6 @@ public class PreReservarHorarioApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task PreReservarHorario_WithIdClaseAndAuthenticatedUser_CreatesPreReservationWithClass()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         // Get valid idHoraLaboral
@@ -128,7 +127,6 @@ public class PreReservarHorarioApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task PreReservarHorario_WithIdEntrenadorAndAuthenticatedUser_CreatesPreReservationWithTrainer()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         // Get valid idHoraLaboral
@@ -184,7 +182,6 @@ public class PreReservarHorarioApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task PreReservarHorario_WithCompleteDataAndAuthenticatedUser_CreatesFullPreReservation()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         // Get valid idHoraLaboral
@@ -249,7 +246,6 @@ public class PreReservarHorarioApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task PreReservarHorario_WithoutAuthentication_Returns401()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         ClearAuthHeader();
 
         var preReserva = new DTOPreReservaDeHorario
@@ -281,7 +277,6 @@ public class PreReservarHorarioApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task PreReservarHorario_WithDuplicateClassAndTrainer_ReturnsError()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         // Get valid ids
@@ -370,7 +365,6 @@ public class PreReservarHorarioApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task PreReservarHorario_WithDuplicateClassOnly_ReturnsError()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         var horaResult = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -442,7 +436,6 @@ public class PreReservarHorarioApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task PreReservarHorario_WithDuplicateTrainerOnly_ReturnsError()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         var horaResult = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -517,7 +510,6 @@ public class PreReservarHorarioApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task PreReservarHorario_WithDuplicateMinimalData_ReturnsError()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         var horaResult = await DatabaseHelper.ExecuteQuerySingleAsync(

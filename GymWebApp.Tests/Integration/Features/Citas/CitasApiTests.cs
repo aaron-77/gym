@@ -8,33 +8,16 @@ using CitaRequest = DTO.Dtos.Cita;
 
 namespace GymWebApp.Tests.Integration;
 
-[Collection("CitaApiIntegrationTests")]
-public class CitasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class CitasApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-    private string? _authToken;
+    public CitasApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
-    public CitasApiTests(CitasApiWebApplicationFactory<Program> factory)
+    public override async Task InitializeAsync()
     {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        _authToken = await _factory.AuthenticateAsync(_client);
-    }
-
-    private void SetAuthHeader()
-    {
-        if (string.IsNullOrEmpty(_authToken))
-            throw new InvalidOperationException("Auth token not available");
-        
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
+        await base.InitializeAsync();
+        await SetAuthHeaderAsync();
     }
 
     #region Happy Paths (Integration)
@@ -42,10 +25,6 @@ public class CitasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program
     [Fact]
     public async Task RegistrarCita_WithValidData_ReturnsOk()
     {
-        await TestContainerHelper.ResetDatabaseAsync();
-        
-        SetAuthHeader();
-        
         var (clienteId, entrenadorId) = await GetExistingUserIdsAsync();
 
         var cita = new CitaRequest
@@ -58,7 +37,7 @@ public class CitasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program
             estado = "Agendada"
         };
 
-        var response = await _client.PostAsJsonAsync("/api/RegistrarCita", cita);
+        var response = await Client.PostAsJsonAsync("/api/RegistrarCita", cita);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
@@ -81,10 +60,6 @@ public class CitasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program
     [Fact]
     public async Task ModificarCita_WithValidData_ReturnsOk()
     {
-        await TestContainerHelper.ResetDatabaseAsync();
-        
-        SetAuthHeader();
-
         var (clienteId, trainerId) = await GetExistingUserIdsAsync();
         
         var fechaInicioNueva = DateTime.Now.AddDays(1).Date.AddHours(10);
@@ -100,7 +75,7 @@ public class CitasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program
             estado = "Agendada"
         };
 
-        var crearResponse = await _client.PostAsJsonAsync("/api/RegistrarCita", citaNueva);
+        var crearResponse = await Client.PostAsJsonAsync("/api/RegistrarCita", citaNueva);
         crearResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var citaCreada = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -128,7 +103,7 @@ public class CitasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program
             estado = nuevoEstado
         };
 
-        var response = await _client.PutAsJsonAsync("/api/RegistrarCita", citaEdit);
+        var response = await Client.PutAsJsonAsync("/api/RegistrarCita", citaEdit);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -151,17 +126,13 @@ public class CitasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program
     [Fact]
     public async Task RegistrarDuracion_WithValidData_ReturnsOk()
     {
-        await TestContainerHelper.ResetDatabaseAsync();
-        
-        SetAuthHeader();
-
         var duracion = new DuracionCitasMedicion
         {
             duracion = 60,
             frecuenciaNotificaciones = 30
         };
 
-        var response = await _client.PostAsJsonAsync("/api/registrarDuracion", duracion);
+        var response = await Client.PostAsJsonAsync("/api/registrarDuracion", duracion);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -184,10 +155,6 @@ public class CitasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program
     [Fact]
     public async Task RegistrarDuracion_UpdateExisting_ReturnsOk()
     {
-        await TestContainerHelper.ResetDatabaseAsync();
-        
-        SetAuthHeader();
-
         // Paso 1: Obtener la duración existente de la BD
         var existing = await DatabaseHelper.ExecuteQuerySingleAsync(
             TestContainerHelper.ConnectionString,
@@ -209,7 +176,7 @@ public class CitasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program
         };
 
         // Paso 3: Ejecutar actualización
-        var updateResponse = await _client.PostAsJsonAsync("/api/registrarDuracion", duracionUpdate);
+        var updateResponse = await Client.PostAsJsonAsync("/api/registrarDuracion", duracionUpdate);
 
         updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -230,11 +197,7 @@ public class CitasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program
     [Fact]
     public async Task GetDuracionCita_WithAuthenticatedUser_ReturnsOk()
     {
-        await TestContainerHelper.ResetDatabaseAsync();
-        
-        SetAuthHeader();
-
-        var response = await _client.GetAsync("/api/getDuracionCita");
+        var response = await Client.GetAsync("/api/getDuracionCita");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
@@ -254,13 +217,9 @@ public class CitasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program
     [Fact]
     public async Task GetCitasAgendadas_WithAuth_ReturnsOk()
     {
-        await TestContainerHelper.ResetDatabaseAsync();
-        
-        SetAuthHeader();
-        
         var (clienteId, _) = await GetExistingUserIdsAsync();
 
-        var response = await _client.GetAsync($"/api/getCitasAgendadas?idUsuario={clienteId}");
+        var response = await Client.GetAsync($"/api/getCitasAgendadas?idUsuario={clienteId}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         

@@ -8,17 +8,16 @@ using System.Linq;
 
 namespace GymWebApp.Tests.Integration.Features.Horarios
 {
-[Collection("HorariosServiceIntegrationTests")]
-public class HorariosServiceTests : IntegrationTestBase<CitasApiWebApplicationFactory<Program>>
-    {
-        
-        private readonly string _connectionString;
+[Collection("IntegrationTests")]
+public class HorariosServiceTests : IntegrationTestBase
+{
+    private readonly string _connectionString;
 
-        public HorariosServiceTests(CitasApiWebApplicationFactory<Program> factory):base(factory)
-        {
-            
-            _connectionString = TestContainerHelper.ConnectionString;
-        }
+    public HorariosServiceTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper)
+    {
+        _connectionString = TestContainerHelper.ConnectionString;
+    }
         
         [Fact]
         public async Task consultarHorariosDisponibles_ConFechaActual_DevuelveHorarios()

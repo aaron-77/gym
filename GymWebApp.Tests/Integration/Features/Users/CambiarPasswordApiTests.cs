@@ -7,24 +7,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Users;
 
-[Collection("CambiarPasswordApiIntegrationTests")]
-public class CambiarPasswordApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class CambiarPasswordApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public CambiarPasswordApiTests(CitasApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-    }
+    public CambiarPasswordApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
     #region Happy Paths (HP)
 
@@ -35,8 +22,6 @@ public class CambiarPasswordApiTests : IClassFixture<CitasApiWebApplicationFacto
     public async Task CambiarPassword_WithValidEmailAndPasswords_Returns200Ok()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         var changePasswordRequest = new UserPassEdit
         {
             Email = "uno@gmail.com",
@@ -45,7 +30,7 @@ public class CambiarPasswordApiTests : IClassFixture<CitasApiWebApplicationFacto
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/cambiarPassword", changePasswordRequest);
+        var response = await Client.PostAsJsonAsync("/api/cambiarPassword", changePasswordRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -67,8 +52,6 @@ public class CambiarPasswordApiTests : IClassFixture<CitasApiWebApplicationFacto
     public async Task CambiarPassword_WithNonExistentEmail_Returns400BadRequest()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         var changePasswordRequest = new UserPassEdit
         {
             Email = $"nonexistent.{Guid.NewGuid():N}@test.com",
@@ -77,7 +60,7 @@ public class CambiarPasswordApiTests : IClassFixture<CitasApiWebApplicationFacto
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/cambiarPassword", changePasswordRequest);
+        var response = await Client.PostAsJsonAsync("/api/cambiarPassword", changePasswordRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -94,8 +77,6 @@ public class CambiarPasswordApiTests : IClassFixture<CitasApiWebApplicationFacto
     public async Task CambiarPassword_WithInvalidRequest_Returns400BadRequest()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         var changePasswordRequest = new UserPassEdit
         {
             Email = "not-an-email",  // Invalid email format
@@ -104,7 +85,7 @@ public class CambiarPasswordApiTests : IClassFixture<CitasApiWebApplicationFacto
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/cambiarPassword", changePasswordRequest);
+        var response = await Client.PostAsJsonAsync("/api/cambiarPassword", changePasswordRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

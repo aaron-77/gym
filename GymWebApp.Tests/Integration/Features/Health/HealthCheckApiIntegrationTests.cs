@@ -7,24 +7,12 @@ using Xunit;
 namespace GymWebApp.Tests.Integration.Features.Health;
 
 [Collection("HealthApiIntegrationTests")]
-public class HealthCheckApiIntegrationTests : IClassFixture<CitasApiWebApplicationFactory<Program>>, IAsyncLifetime
+public class HealthCheckApiIntegrationTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public HealthCheckApiIntegrationTests(CitasApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-    }
-
-    public async Task InitializeAsync()
-    {
-        // WebApplicationFactory already initializes API in memory
-        // No containers needed for health check
-    }
-
-    public async Task DisposeAsync()
+    public HealthCheckApiIntegrationTests(
+        CitasApiWebApplicationFactory<Program> factory,
+        TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper)
     {
     }
 
@@ -34,8 +22,8 @@ public class HealthCheckApiIntegrationTests : IClassFixture<CitasApiWebApplicati
         // Given: API is running via WebApplicationFactory
         // When: GET request is made to /api/health
         // Then: Returns 200 OK with {"status":"Healthy"}
-        var response = await _client.GetAsync("/api/health");
-        Console.WriteLine("URL BASE: "+_client.BaseAddress);
+        var response = await Client.GetAsync("/api/health");
+        Console.WriteLine("URL BASE: " + Client.BaseAddress);
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
         var body = await response.Content.ReadAsStringAsync();

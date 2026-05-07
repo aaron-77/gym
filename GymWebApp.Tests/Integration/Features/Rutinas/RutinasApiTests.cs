@@ -10,19 +10,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Rutinas;
 
-[Collection("RutinasApiIntegrationTests")]
-public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class RutinasApiTests : IntegrationTestBase
 {
-    private readonly ClasesApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public RutinasApiTests(ClasesApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        TestContainerHelper.InitializeAsync().GetAwaiter().GetResult();
-        TestContainerHelper.ResetDatabaseAsync().GetAwaiter().GetResult();
-    }
+    public RutinasApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     #region Happy Path Tests
 
@@ -30,8 +22,8 @@ public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Prog
     public async Task RegistrarRutina_WithValidData_ReturnsOk()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing users from seed data
         var (clienteId, entrenadorId) = await GetExistingUserIdsAsync();
@@ -42,7 +34,7 @@ public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Prog
             entrenadorId: entrenadorId);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/registrarRutina", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/registrarRutina", requestDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -58,8 +50,8 @@ public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Prog
     public async Task AsignarEjercicio_WithValidData_ReturnsOk()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing user IDs
         var (clienteId, _) = await GetExistingUserIdsAsync();
@@ -70,7 +62,7 @@ public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Prog
             usuarioId: clienteId,
             entrenadorId: trainerId);
 
-        var rutinaResponse = await _client.PostAsJsonAsync("/api/registrarRutina", rutinaRequest);
+        var rutinaResponse = await Client.PostAsJsonAsync("/api/registrarRutina", rutinaRequest);
         rutinaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         
         var rutinaResult = await rutinaResponse.Content.ReadFromJsonAsync<HttpResponseRutina>();
@@ -90,7 +82,7 @@ public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Prog
             ejercicioId: ejercicioId);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/asignarEjercicio", asignacionDto);
+        var response = await Client.PostAsJsonAsync("/api/asignarEjercicio", asignacionDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -106,14 +98,14 @@ public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Prog
     public async Task ConsultarRutinas_WithEmpleadoAuth_ReturnsOk()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing user ID
         var (clienteId, _) = await GetExistingUserIdsAsync();
 
         // Act
-        var response = await _client.GetAsync($"/api/consultarRutinas?UsuarioID={clienteId}");
+        var response = await Client.GetAsync($"/api/consultarRutinas?UsuarioID={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -128,14 +120,14 @@ public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Prog
     public async Task ConsultarRutinas_WithClienteAuth_ReturnsForbidden()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsClienteAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsClienteAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente ID
         var (clienteId, _) = await GetExistingUserIdsAsync();
 
         // Act
-        var response = await _client.GetAsync($"/api/consultarRutinas?UsuarioID={clienteId}");
+        var response = await Client.GetAsync($"/api/consultarRutinas?UsuarioID={clienteId}");
 
         // Assert - The controller only allows "empleado" role, so cliente gets 403
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -149,13 +141,12 @@ public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Prog
     public async Task RegistrarRutina_WithoutAuthentication_ReturnsUnauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         var requestDto = RutinaFactory.CrearRutinaValida();
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/registrarRutina", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/registrarRutina", requestDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -165,13 +156,12 @@ public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Prog
     public async Task AsignarEjercicio_WithoutAuthentication_ReturnsUnauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         var asignacionDto = RutinaFactory.CrearAsignacionValida();
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/asignarEjercicio", asignacionDto);
+        var response = await Client.PostAsJsonAsync("/api/asignarEjercicio", asignacionDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -181,11 +171,10 @@ public class RutinasApiTests : IClassFixture<ClasesApiWebApplicationFactory<Prog
     public async Task ConsultarRutinas_WithoutAuthentication_ReturnsUnauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         // Act
-        var response = await _client.GetAsync("/api/consultarRutinas?UsuarioID=test");
+        var response = await Client.GetAsync("/api/consultarRutinas?UsuarioID=test");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

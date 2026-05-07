@@ -22,19 +22,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Medidas;
 
-[Collection("MedidasApiIntegrationTests")]
-public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class MedidasApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public MedidasApiTests(CitasApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        TestContainerHelper.InitializeAsync().GetAwaiter().GetResult();
-        TestContainerHelper.ResetDatabaseAsync().GetAwaiter().GetResult();
-    }
+    public MedidasApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
     // ============================================================================
     // POST /api/RegistrarMedida
@@ -57,8 +49,8 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task RegistrarMedida_AsEmpleado_Returns200AndInsertsToDb()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (aaronhl1313@gmail.com)
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -71,7 +63,7 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
         var medidaRequest = MedidaFactory.CrearMedidaPeso(clienteId, 75.5m);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/RegistrarMedida", medidaRequest);
+        var response = await Client.PostAsJsonAsync("/api/RegistrarMedida", medidaRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -102,12 +94,12 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task RegistrarMedida_WithoutAuth_Returns401()
     {
         // Arrange
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         var medidaRequest = MedidaFactory.CrearMedidaPeso(Guid.NewGuid().ToString(), 75.5m);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/RegistrarMedida", medidaRequest);
+        var response = await Client.PostAsJsonAsync("/api/RegistrarMedida", medidaRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -122,8 +114,8 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task RegistrarMedida_AsCliente_Returns403()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsClienteAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsClienteAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (aaronhl1313@gmail.com)
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -135,7 +127,7 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
         var medidaRequest = MedidaFactory.CrearMedidaPeso(clienteId, 75.5m);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/RegistrarMedida", medidaRequest);
+        var response = await Client.PostAsJsonAsync("/api/RegistrarMedida", medidaRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
@@ -165,8 +157,8 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task GetParametrosDeMedicion_AsEmpleado_Returns200()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -176,7 +168,7 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/getParametrosDeMedicion?idUsuario={clienteId}");
+        var response = await Client.GetAsync($"/api/getParametrosDeMedicion?idUsuario={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -196,8 +188,8 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task GetParametrosDeMedicion_AsCliente_Returns200()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsClienteAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsClienteAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (itself)
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -207,7 +199,7 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/getParametrosDeMedicion?idUsuario={clienteId}");
+        var response = await Client.GetAsync($"/api/getParametrosDeMedicion?idUsuario={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -227,10 +219,10 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task GetParametrosDeMedicion_WithoutAuth_Returns401()
     {
         // Arrange
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         // Act
-        var response = await _client.GetAsync("/api/getParametrosDeMedicion?idUsuario=test");
+        var response = await Client.GetAsync("/api/getParametrosDeMedicion?idUsuario=test");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -260,8 +252,8 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task ObtenerAñosConActividadDelCliente_AsEmpleado_Returns200()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -271,7 +263,7 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/obtenerAñosConActividadDelCliente?idCliente={clienteId}");
+        var response = await Client.GetAsync($"/api/obtenerAñosConActividadDelCliente?idCliente={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -291,8 +283,8 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task ObtenerAñosConActividadDelCliente_AsCliente_Returns200()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsClienteAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsClienteAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (itself)
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -302,7 +294,7 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/obtenerAñosConActividadDelCliente?idCliente={clienteId}");
+        var response = await Client.GetAsync($"/api/obtenerAñosConActividadDelCliente?idCliente={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -322,10 +314,10 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task ObtenerAñosConActividadDelCliente_WithoutAuth_Returns401()
     {
         // Arrange
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         // Act
-        var response = await _client.GetAsync("/api/obtenerAñosConActividadDelCliente?idCliente=test");
+        var response = await Client.GetAsync("/api/obtenerAñosConActividadDelCliente?idCliente=test");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -355,8 +347,8 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task ObtenerEjerciciosYParametros_AsEmpleado_Returns200()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -366,7 +358,7 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/obtenerEjerciciosYParametros?idCliente={clienteId}");
+        var response = await Client.GetAsync($"/api/obtenerEjerciciosYParametros?idCliente={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -386,8 +378,8 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task ObtenerEjerciciosYParametros_AsCliente_Returns200()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsClienteAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsClienteAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (itself)
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -397,7 +389,7 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/obtenerEjerciciosYParametros?idCliente={clienteId}");
+        var response = await Client.GetAsync($"/api/obtenerEjerciciosYParametros?idCliente={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -417,10 +409,10 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task ObtenerEjerciciosYParametros_WithoutAuth_Returns401()
     {
         // Arrange
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         // Act
-        var response = await _client.GetAsync("/api/obtenerEjerciciosYParametros?idCliente=test");
+        var response = await Client.GetAsync("/api/obtenerEjerciciosYParametros?idCliente=test");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -450,8 +442,8 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task ObtenerDetallesDeProgreso_AsEmpleado_Returns200()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -461,7 +453,7 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/obtenerDetallesDeProgreso?idCliente={clienteId}&idParametro=1&espaciadoTemporal=individual&tipoDeBusqueda=MES");
+        var response = await Client.GetAsync($"/api/obtenerDetallesDeProgreso?idCliente={clienteId}&idParametro=1&espaciadoTemporal=individual&tipoDeBusqueda=MES");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -481,8 +473,8 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task ObtenerDetallesDeProgreso_AsCliente_Returns200()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsClienteAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsClienteAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (itself)
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -492,7 +484,7 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/obtenerDetallesDeProgreso?idCliente={clienteId}&idParametro=1&espaciadoTemporal=individual&tipoDeBusqueda=MES");
+        var response = await Client.GetAsync($"/api/obtenerDetallesDeProgreso?idCliente={clienteId}&idParametro=1&espaciadoTemporal=individual&tipoDeBusqueda=MES");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -512,10 +504,10 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task ObtenerDetallesDeProgreso_WithoutAuth_Returns401()
     {
         // Arrange
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         // Act
-        var response = await _client.GetAsync("/api/obtenerDetallesDeProgreso?idCliente=test&idParametro=1");
+        var response = await Client.GetAsync("/api/obtenerDetallesDeProgreso?idCliente=test&idParametro=1");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -544,8 +536,8 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task GetProgresoDeUsuario_AsCliente_Returns200()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsClienteAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsClienteAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (itself)
         var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -555,7 +547,7 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
         var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
 
         // Act
-        var response = await _client.GetAsync($"/api/progresoDeUsuario?idUsuario={clienteId}");
+        var response = await Client.GetAsync($"/api/progresoDeUsuario?idUsuario={clienteId}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -575,10 +567,10 @@ public class MedidasApiTests : IClassFixture<CitasApiWebApplicationFactory<Progr
     public async Task GetProgresoDeUsuario_WithoutAuth_Returns401()
     {
         // Arrange
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         // Act
-        var response = await _client.GetAsync("/api/progresoDeUsuario?idUsuario=test");
+        var response = await Client.GetAsync("/api/progresoDeUsuario?idUsuario=test");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

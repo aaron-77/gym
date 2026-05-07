@@ -8,13 +8,14 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Users;
 
-[Collection("RefreshTokenApiIntegrationTests")]
-public class RefreshTokenApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class RefreshTokenApiTests : IntegrationTestBase
 {
     private readonly CitasApiWebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
-    public RefreshTokenApiTests(CitasApiWebApplicationFactory<Program> factory)
+    public RefreshTokenApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper)
     {
         _factory = factory;
         _client = factory.CreateClient();
@@ -35,10 +36,6 @@ public class RefreshTokenApiTests : IClassFixture<CitasApiWebApplicationFactory<
     [Fact]
     public async Task RefreshToken_WithValidRefreshToken_Returns200Ok()
     {
-        // Arrange
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         // First authenticate to get the refresh token
         var loginResponse = await _client.PostAsJsonAsync("/api/autenticar", new UserCredentials
         {
@@ -96,8 +93,6 @@ public class RefreshTokenApiTests : IClassFixture<CitasApiWebApplicationFactory<
     public async Task RefreshToken_WithoutToken_Returns401Unauthorized()
     {
         // Arrange
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
         SetAuthHeader(null);
 
         var refreshRequest = new RefreshTokenRequest

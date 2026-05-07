@@ -11,7 +11,7 @@ namespace GymWebApp.Tests.Integration.Features.Horarios;
 [Collection("ReservacionesHubIntegrationTests")]
 public class ReservacionesHubIntegrationTests : SignalRIntegrationTestBase
 {
-    public ReservacionesHubIntegrationTests(CitasApiWebApplicationFactory<Program> factory) : base(factory)
+    public ReservacionesHubIntegrationTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) : base(factory, testContainerHelper)
     {
     }
 

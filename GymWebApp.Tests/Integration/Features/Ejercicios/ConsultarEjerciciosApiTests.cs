@@ -8,38 +8,16 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Ejercicios;
 
-[Collection("ConsultarEjerciciosApiIntegrationTests")]
-public class ConsultarEjerciciosApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class ConsultarEjerciciosApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-    private string? _authToken;
+    public ConsultarEjerciciosApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
-    public ConsultarEjerciciosApiTests(CitasApiWebApplicationFactory<Program> factory)
+    public override async Task InitializeAsync()
     {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        _authToken = await _factory.AuthenticateAsync(_client);
-    }
-
-    private void SetAuthHeader()
-    {
-        if (string.IsNullOrEmpty(_authToken))
-            throw new InvalidOperationException("Auth token not available");
-        
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
-    }
-
-    private void ClearAuthHeader()
-    {
-        _client.DefaultRequestHeaders.Authorization = null;
+        await base.InitializeAsync();
+        await SetAuthHeaderAsync();
     }
 
     #region Happy Paths (Integration)
@@ -56,12 +34,8 @@ public class ConsultarEjerciciosApiTests : IClassFixture<CitasApiWebApplicationF
     [Fact]
     public async Task ConsultarEjercicios_WithAuthenticatedUser_ReturnsExercisesFromDatabase()
     {
-        // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        SetAuthHeader();
-
         // Act
-        var response = await _client.GetAsync("/api/consultarEjercicios");
+        var response = await Client.GetAsync("/api/consultarEjercicios");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -95,11 +69,10 @@ public class ConsultarEjerciciosApiTests : IClassFixture<CitasApiWebApplicationF
     public async Task ConsultarEjercicios_WithoutAuthentication_Returns401Unauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         ClearAuthHeader();
 
         // Act
-        var response = await _client.GetAsync("/api/consultarEjercicios");
+        var response = await Client.GetAsync("/api/consultarEjercicios");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

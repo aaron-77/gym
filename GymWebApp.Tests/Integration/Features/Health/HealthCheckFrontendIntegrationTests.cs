@@ -11,10 +11,14 @@ public class HealthCheckFrontendIntegrationTests : IClassFixture<GymFrontendWebA
 {                                                   
     private readonly GymFrontendWebApplicationFactory<GymFrontend.Program> _factory;
     private readonly HttpClient _client;
+    private readonly TestContainerHelper _testContainerHelper;
 
-    public HealthCheckFrontendIntegrationTests(GymFrontendWebApplicationFactory<GymFrontend.Program> factory)
+    public HealthCheckFrontendIntegrationTests(
+        GymFrontendWebApplicationFactory<GymFrontend.Program> factory,
+        TestContainerHelper testContainerHelper)
     {
         _factory = factory;
+        _testContainerHelper = testContainerHelper;
         _client = factory.CreateClient();
     }
 

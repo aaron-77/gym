@@ -10,19 +10,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;
 
-[Collection("InscribirAClaseApiIntegrationTests")]
-public class InscribirAClaseApiTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class InscribirAClaseApiTests : IntegrationTestBase
 {
-    private readonly ClasesApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public InscribirAClaseApiTests(ClasesApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        TestContainerHelper.InitializeAsync().GetAwaiter().GetResult();
-        TestContainerHelper.ResetDatabaseAsync().GetAwaiter().GetResult();
-    }
+    public InscribirAClaseApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     #region Happy Path Tests
 
@@ -30,8 +22,8 @@ public class InscribirAClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
     public async Task InscribirAClase_WithValidData_RegistersInscription_ReturnsOk()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing client from seed data (rebeca@gmail.com)
         var (clienteId, _) = await GetExistingUserIdsAsync();
@@ -86,7 +78,7 @@ public class InscribirAClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/inscribirAClase", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/Clases/inscribirAClase", requestDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -114,8 +106,7 @@ public class InscribirAClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
     public async Task InscribirAClase_WithoutAuthentication_ReturnsUnauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         var requestDto = new DTOInscripcionAClase
         {
@@ -124,7 +115,7 @@ public class InscribirAClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/inscribirAClase", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/Clases/inscribirAClase", requestDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -134,8 +125,8 @@ public class InscribirAClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
     public async Task InscribirAClase_WithNoAvailableSpots_ReturnsBadRequest()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing client from seed data (rebeca@gmail.com)
         var (clienteId, _) = await GetExistingUserIdsAsync();
@@ -184,7 +175,7 @@ public class InscribirAClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/inscribirAClase", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/Clases/inscribirAClase", requestDto);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -200,8 +191,8 @@ public class InscribirAClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
     public async Task InscribirAClase_WithNonExistentClassProgram_ReturnsError()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing client from seed data (rebeca@gmail.com)
         var (clienteId, _) = await GetExistingUserIdsAsync();
@@ -213,7 +204,7 @@ public class InscribirAClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/inscribirAClase", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/Clases/inscribirAClase", requestDto);
 
         // Assert
         // The stored procedure might return 0 (no inscription) or 500 depending on implementation
@@ -229,8 +220,8 @@ public class InscribirAClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
     public async Task InscribirAClase_WithNonExistentClient_ReturnsError()
     {
         // Arrange
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get EstadoClaseProgramada for creating a valid class
         var estadoClaseProgramada = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -279,7 +270,7 @@ public class InscribirAClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/inscribirAClase", requestDto);
+        var response = await Client.PostAsJsonAsync("/api/Clases/inscribirAClase", requestDto);
 
         // Assert
         // The stored procedure should fail because client doesn't exist

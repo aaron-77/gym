@@ -1,4 +1,5 @@
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,12 +15,13 @@ namespace GymWebApp.Tests.Integration.Common;
 /// Note: IAsyncLifetime is already implemented by IntegrationTestBase, so it's not implemented here.
 /// Each test class must implement GetHubName() to specify which hub to connect to.
 /// </remarks>
-public abstract class SignalRIntegrationTestBase : IntegrationTestBase<CitasApiWebApplicationFactory<Program>>
+public abstract class SignalRIntegrationTestBase : IntegrationTestBase
 {
     protected HubConnection? _hubConnection;
     private readonly ILogger<SignalRIntegrationTestBase> _logger;
 
-    protected SignalRIntegrationTestBase(CitasApiWebApplicationFactory<Program> factory) : base(factory)
+    protected SignalRIntegrationTestBase(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper)
     {
         _logger = factory.Services.GetRequiredService<ILogger<SignalRIntegrationTestBase>>();
     }

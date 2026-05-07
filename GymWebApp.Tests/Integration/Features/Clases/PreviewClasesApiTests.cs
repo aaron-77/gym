@@ -7,24 +7,11 @@ using FluentAssertions;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;
 
-[Collection("PreviewClasesApiIntegrationTests")]
-public class PreviewClasesApiTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class PreviewClasesApiTests : IntegrationTestBase
 {
-    private readonly ClasesApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public PreviewClasesApiTests(ClasesApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-    }
+    public PreviewClasesApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     [Fact]
     public async Task PreviewClases_WithoutAuthentication_ReturnsOkWithActiveClasses()
@@ -44,7 +31,7 @@ public class PreviewClasesApiTests : IClassFixture<ClasesApiWebApplicationFactor
             await DatabaseHelper.NonQueryAsyncTyped(connectionString, "ImagesForClases", imagen);
         }
 
-        var response = await _client.GetAsync("/api/Clases/preview");
+        var response = await Client.GetAsync("/api/Clases/preview");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
@@ -79,7 +66,7 @@ public class PreviewClasesApiTests : IClassFixture<ClasesApiWebApplicationFactor
         var imagenInactiva = ClaseFactory.CrearImagenParaBanner(savedInactiva.ClaseId);
         await DatabaseHelper.NonQueryAsyncTyped(connectionString, "ImagesForClases", imagenInactiva);
 
-        var response = await _client.GetAsync("/api/Clases/preview");
+        var response = await Client.GetAsync("/api/Clases/preview");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 

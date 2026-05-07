@@ -11,27 +11,14 @@ namespace GymWebApp.Tests.Integration.Features.Clases;
 /// 
 /// Tests verify that the public CORS policy allows any origin to access the endpoint.
 /// </summary>
-[Collection("PreviewClasesCorsIntegrationTests")]
-public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class PreviewCorsTests : IntegrationTestBase
 {
-    private readonly ClasesApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-    
     // With EnableCors("public"), any origin is allowed
     private const string AnyOrigin = "http://any-origin.com";
 
-    public PreviewCorsTests(ClasesApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-    }
+    public PreviewCorsTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     /// <summary>
     /// Creates HttpClient that simulates a request with Origin header.
@@ -39,10 +26,10 @@ public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Pro
     /// </summary>
     private HttpClient CreateClientWithOrigin(string origin)
     {
-        var handler = new TestCorsDelegatingHandler(_factory.Server.CreateHandler(), origin);
+        var handler = new TestCorsDelegatingHandler(Factory.Server.CreateHandler(), origin);
         var client = new HttpClient(handler)
         {
-            BaseAddress = _factory.Server.BaseAddress
+            BaseAddress = Factory.Server.BaseAddress
         };
         return client;
     }
@@ -113,7 +100,7 @@ public class PreviewCorsTests : IClassFixture<ClasesApiWebApplicationFactory<Pro
         await DatabaseHelper.NonQueryAsyncTyped(connectionString, "Clases", clase);
 
         // Act - request WITHOUT Origin header
-        var response = await _client.GetAsync("/api/Clases/preview");
+        var response = await Client.GetAsync("/api/Clases/preview");
 
         
         // Assert - No CORS headers expected when no Origin in request

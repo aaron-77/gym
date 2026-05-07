@@ -8,24 +8,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Users;
 
-[Collection("AutenticarUsuarioApiIntegrationTests")]
-public class AutenticarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class AutenticarUsuarioApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public AutenticarUsuarioApiTests(CitasApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-    }
+    public AutenticarUsuarioApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
     #region Happy Paths (HP)
 
@@ -36,8 +23,6 @@ public class AutenticarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFac
     public async Task Autenticar_WithValidCredentials_Returns200OkAndDTOLoggedUser()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         var loginRequest = new UserCredentials
         {
             correo = "uno@gmail.com",
@@ -45,7 +30,7 @@ public class AutenticarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFac
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/autenticar", loginRequest);
+        var response = await Client.PostAsJsonAsync("/api/autenticar", loginRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -72,8 +57,6 @@ public class AutenticarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFac
     public async Task Autenticar_WithInvalidCredentials_Returns401Unauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         var loginRequest = new UserCredentials
         {
             correo = "uno@gmail.com",
@@ -81,7 +64,7 @@ public class AutenticarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFac
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/autenticar", loginRequest);
+        var response = await Client.PostAsJsonAsync("/api/autenticar", loginRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

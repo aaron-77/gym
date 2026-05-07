@@ -7,33 +7,16 @@ using FluentAssertions;
 
 namespace GymWebApp.Tests.Integration.Features.Entrenadores;
 
-[Collection("EntrenadoresApiIntegrationTests")]
-public class ObtenerEntrenadoresDisponiblesApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class ObtenerEntrenadoresDisponiblesApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-    private string? _authToken;
+    public ObtenerEntrenadoresDisponiblesApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
-    public ObtenerEntrenadoresDisponiblesApiTests(CitasApiWebApplicationFactory<Program> factory)
+    public override async Task InitializeAsync()
     {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        _authToken = await _factory.AuthenticateAsync(_client);
-    }
-
-    private void SetAuthHeader()
-    {
-        if (string.IsNullOrEmpty(_authToken))
-            throw new InvalidOperationException("Auth token not available");
-        
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
+        await base.InitializeAsync();
+        await SetAuthHeaderAsync();
     }
 
     #region Happy Path (Integration)
@@ -41,12 +24,8 @@ public class ObtenerEntrenadoresDisponiblesApiTests : IClassFixture<CitasApiWebA
     [Fact]
     public async Task ObtenerEntrenadoresDisponibles_WithAuthAndValidDate_ReturnsNonEmptyList()
     {
-        await TestContainerHelper.ResetDatabaseAsync();
-        
-        SetAuthHeader();
-
         var fechaHoy = DateTime.Now.ToString("yyyy-MM-dd");
-        var response = await _client.GetAsync($"/api/obtenerEntrenadoresDisponibles?fechaInicio={fechaHoy}");
+        var response = await Client.GetAsync($"/api/obtenerEntrenadoresDisponibles?fechaInicio={fechaHoy}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 

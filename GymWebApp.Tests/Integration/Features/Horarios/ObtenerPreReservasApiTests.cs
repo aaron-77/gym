@@ -8,10 +8,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Horarios;
 
-[Collection("ObtenerPreReservasApiIntegrationTests")]
-public class ObtenerPreReservasApiTests : IntegrationTestBase<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class ObtenerPreReservasApiTests : IntegrationTestBase
 {
-    public ObtenerPreReservasApiTests(CitasApiWebApplicationFactory<Program> factory) : base(factory) { }
+    public ObtenerPreReservasApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
     #region Happy Paths (Integration)
 
@@ -30,7 +31,6 @@ public class ObtenerPreReservasApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task ObtenerPreReservas_WithAuthenticatedUser_ReturnsPreReservedSlots()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         // Act
@@ -66,7 +66,6 @@ public class ObtenerPreReservasApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task ObtenerPreReservas_WithSpecificDateAndAuthenticatedUser_ReturnsFilteredSlots()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         // 1. Definir fecha de prueba controlada
@@ -158,7 +157,6 @@ public class ObtenerPreReservasApiTests : IntegrationTestBase<CitasApiWebApplica
     public async Task ObtenerPreReservas_WithoutAuthentication_Returns401()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         ClearAuthHeader();
 
         // Act

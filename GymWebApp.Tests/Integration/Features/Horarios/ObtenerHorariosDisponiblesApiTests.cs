@@ -8,10 +8,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Horarios;
 
-[Collection("ObtenerHorariosDisponiblesApiIntegrationTests")]
-public class ObtenerHorariosDisponiblesApiTests : IntegrationTestBase<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class ObtenerHorariosDisponiblesApiTests : IntegrationTestBase
 {
-    public ObtenerHorariosDisponiblesApiTests(CitasApiWebApplicationFactory<Program> factory) : base(factory) { }
+    public ObtenerHorariosDisponiblesApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
     #region Happy Paths (Integration)
 
@@ -30,7 +31,6 @@ public class ObtenerHorariosDisponiblesApiTests : IntegrationTestBase<CitasApiWe
     public async Task ObtenerHorariosDisponibles_WithAuthenticatedUser_ReturnsAvailableSlots()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         // Act
@@ -64,7 +64,6 @@ public class ObtenerHorariosDisponiblesApiTests : IntegrationTestBase<CitasApiWe
     public async Task ObtenerHorariosDisponibles_WithSpecificDateAndAuthenticatedUser_ReturnsFilteredSlots()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         // Use a date from existing seed data
@@ -110,7 +109,6 @@ public class ObtenerHorariosDisponiblesApiTests : IntegrationTestBase<CitasApiWe
     public async Task ObtenerHorariosDisponibles_WithoutAuthentication_Returns401()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         ClearAuthHeader();
 
         // Act

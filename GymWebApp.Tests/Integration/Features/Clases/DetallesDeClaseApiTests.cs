@@ -7,24 +7,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;
 
-[Collection("ClasesApiIntegrationTests")]
-public class DetallesDeClaseApiTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class DetallesDeClaseApiTests : IntegrationTestBase
 {
-    private readonly ClasesApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public DetallesDeClaseApiTests(ClasesApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-    }
+    public DetallesDeClaseApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     #region REQUISITO: Successful Class Retrieval (Integration - Happy Path)
 
@@ -40,9 +27,6 @@ public class DetallesDeClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
     [Fact]
     public async Task ConsultarDetallesDeClase_WithExistingId_ReturnsOkAndFullDetails()
     {
-        // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         // Obtener la clase con nombre "HIIT"
         int? idClaseNulleable = await DatabaseHelper.ExecuteScalarAsync<int>(
             TestContainerHelper.ConnectionString,
@@ -52,7 +36,7 @@ public class DetallesDeClaseApiTests : IClassFixture<ClasesApiWebApplicationFact
         int idClase = idClaseNulleable.Value;
 
         // Act
-        var response = await _client.GetAsync($"/api/Clases/detallesDeClase?idClase={idClase}");
+        var response = await Client.GetAsync($"/api/Clases/detallesDeClase?idClase={idClase}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

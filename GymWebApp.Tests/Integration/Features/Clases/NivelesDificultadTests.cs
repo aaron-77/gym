@@ -18,28 +18,20 @@ namespace GymWebApp.Tests.Integration.Features.Clases;
 /// CURRENT STATE: Endpoint lacks [Authorize] attribute, so tests WILL FAIL.
 /// After implementing [Authorize], tests should pass (GREEN phase).
 /// </summary>
-[Collection("NivelesDificultadIntegrationTests")]
-public class NivelesDificultadTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class NivelesDificultadTests : IntegrationTestBase
 {
-    private readonly ClasesApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
     private string? _authToken;
 
-    public NivelesDificultadTests(ClasesApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
+    public NivelesDificultadTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
-    private async Task InitializeAsync()
+    public override async Task InitializeAsync()
     {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
+        await base.InitializeAsync();
         
         // Get authentication token for authenticated tests
-        var citaFactory = new CitasApiWebApplicationFactory<Program>();
-        _authToken = await citaFactory.AuthenticateAsync(_client);
+        _authToken = await Factory.AuthenticateAsync(Client);
     }
 
     private void SetAuthHeader()
@@ -47,12 +39,12 @@ public class NivelesDificultadTests : IClassFixture<ClasesApiWebApplicationFacto
         if (string.IsNullOrEmpty(_authToken))
             throw new InvalidOperationException("Auth token not available");
         
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
     }
 
     private void ClearAuthHeader()
     {
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
     }
 
     #region Happy Path Tests
@@ -72,11 +64,10 @@ public class NivelesDificultadTests : IClassFixture<ClasesApiWebApplicationFacto
     public async Task ObtenerNivelesDificultad_WithAuthenticatedUser_ReturnsOk()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         SetAuthHeader();
 
         // Act
-        var response = await _client.GetAsync("/api/Clases/nivelesDeDificultad");
+        var response = await Client.GetAsync("/api/Clases/nivelesDeDificultad");
 
         // Assert - Response should be OK
         response.StatusCode.Should().Be(HttpStatusCode.OK,
@@ -123,11 +114,10 @@ public class NivelesDificultadTests : IClassFixture<ClasesApiWebApplicationFacto
     public async Task ObtenerNivelesDificultad_ResponseStructure_IsValid()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         SetAuthHeader();
 
         // Act
-        var response = await _client.GetAsync("/api/Clases/nivelesDeDificultad");
+        var response = await Client.GetAsync("/api/Clases/nivelesDeDificultad");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -166,11 +156,10 @@ public class NivelesDificultadTests : IClassFixture<ClasesApiWebApplicationFacto
     public async Task ObtenerNivelesDificultad_WithoutAuthentication_ReturnsUnauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         ClearAuthHeader(); // Ensure no token is sent
 
         // Act
-        var response = await _client.GetAsync("/api/Clases/nivelesDeDificultad");
+        var response = await Client.GetAsync("/api/Clases/nivelesDeDificultad");
 
         // Assert - Should be Unauthorized (401)
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized,
@@ -186,11 +175,10 @@ public class NivelesDificultadTests : IClassFixture<ClasesApiWebApplicationFacto
     public async Task ObtenerNivelesDificultad_WithInvalidToken_ReturnsUnauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "invalid-token-xyz");
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "invalid-token-xyz");
 
         // Act
-        var response = await _client.GetAsync("/api/Clases/nivelesDeDificultad");
+        var response = await Client.GetAsync("/api/Clases/nivelesDeDificultad");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized,

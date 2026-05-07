@@ -8,25 +8,24 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Users;
 
-[Collection("ObtenerUsuariosApiIntegrationTests")]
-public class ObtenerUsuariosApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class ObtenerUsuariosApiTests : IntegrationTestBase
 {
     private readonly CitasApiWebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
     private string? _authTokenEmpleado;
     private string? _authTokenCliente;
 
-    public ObtenerUsuariosApiTests(CitasApiWebApplicationFactory<Program> factory)
+    public ObtenerUsuariosApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper)
     {
         _factory = factory;
         _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
     }
 
-    private async Task InitializeAsync()
+    public override async Task InitializeAsync()
     {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
+        await base.InitializeAsync();
         
         // Authenticate FIRST before database operations that require it
         _authTokenEmpleado = await _factory.AuthenticateAsync(_client);
@@ -48,8 +47,7 @@ public class ObtenerUsuariosApiTests : IClassFixture<CitasApiWebApplicationFacto
     [Fact]
     public async Task ObtenerUsuarios_WithValidEmpleadoToken_Returns200OkAndUserList()
     {
-        // Arrange - reset db and set auth
-        await TestContainerHelper.ResetDatabaseAsync();
+        // Arrange - set auth
         SetAuthHeader(_authTokenEmpleado);
 
         // Act
@@ -84,7 +82,6 @@ public class ObtenerUsuariosApiTests : IClassFixture<CitasApiWebApplicationFacto
     public async Task ObtenerUsuarios_WithoutToken_Returns401Unauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         SetAuthHeader(null); // No token
 
         // Act
@@ -101,7 +98,6 @@ public class ObtenerUsuariosApiTests : IClassFixture<CitasApiWebApplicationFacto
     public async Task ObtenerUsuarios_WithClienteToken_Returns403Forbidden()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         SetAuthHeader(_authTokenCliente);
 
         // Act

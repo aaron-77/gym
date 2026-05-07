@@ -8,22 +8,16 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Users;
 
-[Collection("LogoutApiIntegrationTests")]
-public class LogoutApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class LogoutApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public LogoutApiTests(CitasApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-    }
+    public LogoutApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     private void SetAuthHeader(string? token)
     {
-        _client.DefaultRequestHeaders.Authorization = token != null 
-            ? new AuthenticationHeaderValue("Bearer", token) 
+        Client.DefaultRequestHeaders.Authorization = token != null
+            ? new AuthenticationHeaderValue("Bearer", token)
             : null;
     }
 
@@ -35,19 +29,15 @@ public class LogoutApiTests : IClassFixture<CitasApiWebApplicationFactory<Progra
     [Fact]
     public async Task Logout_WithValidToken_Returns200Ok()
     {
-        // Arrange
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         // First authenticate to get the refresh token
-        var loginResponse = await _client.PostAsJsonAsync("/api/autenticar", new UserCredentials
+        var loginResponse = await Client.PostAsJsonAsync("/api/autenticar", new UserCredentials
         {
             correo = "uno@gmail.com",
             contrasena = "Password123*"
         });
-        
+
         var loginResult = await loginResponse.Content.ReadFromJsonAsync<DTOResponse<DTOLoggedUser>>();
-        
+
         // Assert - verify we got a valid response with refresh token
         loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         loginResult.Should().NotBeNull();
@@ -55,7 +45,7 @@ public class LogoutApiTests : IClassFixture<CitasApiWebApplicationFactory<Progra
         loginResult.payload.Should().NotBeNull();
         var refreshToken = loginResult.payload!.RefreshToken;
         refreshToken.Should().NotBeEmpty("Refresh token should be provided on login");
-        
+
         // Get access token for auth header
         var authToken = loginResult.payload.AccessToken;
         SetAuthHeader(authToken);
@@ -66,11 +56,11 @@ public class LogoutApiTests : IClassFixture<CitasApiWebApplicationFactory<Progra
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/logout", logoutRequest);
+        var response = await Client.PostAsJsonAsync("/api/logout", logoutRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
+
         var result = await response.Content.ReadFromJsonAsync<DTOResponse<object>>();
         result.Should().NotBeNull();
         result!.success.Should().BeTrue();
@@ -88,8 +78,6 @@ public class LogoutApiTests : IClassFixture<CitasApiWebApplicationFactory<Progra
     public async Task Logout_WithoutToken_Returns401Unauthorized()
     {
         // Arrange
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
         SetAuthHeader(null);
 
         var logoutRequest = new LogoutRequest
@@ -98,7 +86,7 @@ public class LogoutApiTests : IClassFixture<CitasApiWebApplicationFactory<Progra
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/logout", logoutRequest);
+        var response = await Client.PostAsJsonAsync("/api/logout", logoutRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

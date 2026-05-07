@@ -8,13 +8,12 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;
 
-[Collection("RegistrarClaseApiIntegrationTests")]
-public class RegistrarClaseTests : IntegrationTestBase<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class RegistrarClaseTests : IntegrationTestBase
 {
-    public RegistrarClaseTests(ClasesApiWebApplicationFactory<Program> factory)
-        : base(factory)
+    public RegistrarClaseTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper)
     {
-        // Auth token is obtained lazily in SetAuthHeaderAsync() when needed
     }
 
     #region Happy Path Tests
@@ -23,7 +22,6 @@ public class RegistrarClaseTests : IntegrationTestBase<ClasesApiWebApplicationFa
     public async Task RegistrarClase_WithAuthenticatedEmpleado_ReturnsOk()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         var claseValida = ClaseFactory.CrearDTOClaseValida();
@@ -73,7 +71,6 @@ public class RegistrarClaseTests : IntegrationTestBase<ClasesApiWebApplicationFa
     public async Task RegistrarClase_WithoutAuthentication_ReturnsUnauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         ClearAuthHeader();
 
         var claseValida = ClaseFactory.CrearDTOClaseValida();
@@ -89,7 +86,6 @@ public class RegistrarClaseTests : IntegrationTestBase<ClasesApiWebApplicationFa
     public async Task RegistrarClase_WithDuplicateName_ReturnsBadRequest()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
         await SetAuthHeaderAsync();
 
         var nombreDuplicado = $"Clase Duplicada {Guid.NewGuid():N}";
