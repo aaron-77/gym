@@ -101,12 +101,14 @@ public class JwtTokenGenerator
             {
                 case TokenType.BackendToken:
                     // Agregar claims desde la configuración de BackendTokenClaims
+                    claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
                     claims.Add(new Claim(ClaimTypes.NameIdentifier, userValues.GetValueOrDefault("userId") ?? ""));
                     claims.Add(new Claim(ClaimTypes.Name, userValues.GetValueOrDefault("userName") ?? ""));
                     break;
 
                 case TokenType.FrontendToken:
                     // Agregar claims desde la configuración de FrontendTokenClaims
+                    claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
                     claims.Add(new Claim("sub", userValues.GetValueOrDefault("userId") ?? ""));
                     claims.Add(new Claim("name", userValues.GetValueOrDefault("userName") ?? ""));
                     claims.Add(new Claim("email", userValues.GetValueOrDefault("email") ?? ""));
@@ -117,6 +119,7 @@ public class JwtTokenGenerator
 
                 case TokenType.RefreshToken:
                     // Agregar claims mínimos para RefreshToken
+                    claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
                     claims.Add(new Claim("sub", userValues.GetValueOrDefault("userId") ?? ""));
                     claims.Add(new Claim("name", userValues.GetValueOrDefault("userName") ?? ""));
                     break;
