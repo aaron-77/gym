@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
 using DTO.Dtos;
@@ -21,31 +20,8 @@ namespace GymWebApp.Tests.Integration.Features.Clases;
 [Collection("IntegrationTests")]
 public class NivelesDificultadTests : IntegrationTestBase
 {
-    private string? _authToken;
-
     public NivelesDificultadTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
         : base(factory, testContainerHelper) { }
-
-    public override async Task InitializeAsync()
-    {
-        await base.InitializeAsync();
-        
-        // Get authentication token for authenticated tests
-        _authToken = await Factory.AuthenticateAsync(Client);
-    }
-
-    private void SetAuthHeader()
-    {
-        if (string.IsNullOrEmpty(_authToken))
-            throw new InvalidOperationException("Auth token not available");
-        
-        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
-    }
-
-    private void ClearAuthHeader()
-    {
-        Client.DefaultRequestHeaders.Authorization = null;
-    }
 
     #region Happy Path Tests
 
@@ -64,7 +40,7 @@ public class NivelesDificultadTests : IntegrationTestBase
     public async Task ObtenerNivelesDificultad_WithAuthenticatedUser_ReturnsOk()
     {
         // Arrange
-        SetAuthHeader();
+        await SetAuthHeaderAsync();
 
         // Act
         var response = await Client.GetAsync("/api/Clases/nivelesDeDificultad");
@@ -114,7 +90,7 @@ public class NivelesDificultadTests : IntegrationTestBase
     public async Task ObtenerNivelesDificultad_ResponseStructure_IsValid()
     {
         // Arrange
-        SetAuthHeader();
+        await SetAuthHeaderAsync();
 
         // Act
         var response = await Client.GetAsync("/api/Clases/nivelesDeDificultad");
@@ -175,7 +151,7 @@ public class NivelesDificultadTests : IntegrationTestBase
     public async Task ObtenerNivelesDificultad_WithInvalidToken_ReturnsUnauthorized()
     {
         // Arrange
-        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "invalid-token-xyz");
+        SetAuthHeader("invalid-token-xyz");
 
         // Act
         var response = await Client.GetAsync("/api/Clases/nivelesDeDificultad");

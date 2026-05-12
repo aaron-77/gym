@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
 using DTO.Dtos;
@@ -11,18 +10,8 @@ namespace GymWebApp.Tests.Integration.Features.Clases;
 [Collection("IntegrationTests")]
 public class ObtenerClasesProgramadasPorIdApiTests : IntegrationTestBase
 {
-    private string? _authToken;
-
     public ObtenerClasesProgramadasPorIdApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
         : base(factory, testContainerHelper) { }
-
-    private void SetAuthHeader()
-    {
-        if (string.IsNullOrEmpty(_authToken))
-            throw new InvalidOperationException("Auth token not available");
-        
-        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
-    }
 
     #region Happy Path - Con autenticación válida retorna clases programadas
 
@@ -38,8 +27,7 @@ public class ObtenerClasesProgramadasPorIdApiTests : IntegrationTestBase
     public async Task ObtenerClasesProgramadasPorId_ConAuthValida_ReturnsClasesProgramadas()
     {
         // Arrange
-        _authToken = await Factory.AuthenticateAsync(Client);
-        SetAuthHeader();
+        await SetAuthHeaderAsync();
 
         // Obtener un ID de clase existente
         var idClase = await DatabaseHelper.ExecuteScalarAsync<int>(
@@ -79,10 +67,7 @@ public class ObtenerClasesProgramadasPorIdApiTests : IntegrationTestBase
 public async Task ObtenerClasesProgramadasPorId_SinAuth_ReturnsUnauthorized()
     {
         // Arrange
-
-        // Re-autenticar para cada test
-        _authToken = await Factory.AuthenticateAsync(Client);
-        SetAuthHeader();
+        await SetAuthHeaderAsync();
 
         // Act
         var response = await Client.GetAsync("/api/Clases/obtenerClasesProgramadasPorId?idClase=99999");

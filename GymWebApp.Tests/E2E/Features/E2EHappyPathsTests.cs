@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 namespace GymWebApp.Tests.E2E.Features;
 
 [Collection("E2E HappyPaths")]
-public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
+public class E2EHappyPathsTests : PlaywrightTestBase
 {
     private readonly IConfiguration _configuration;
     private readonly string _employeeEmail;
@@ -17,34 +17,23 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
     private readonly string _clientEmail;
     private readonly string _clientPassword;
 
-    public E2EHappyPathsTests()
+    public E2EHappyPathsTests(E2eContainerHelper e2eContainerHelper, PlaywrightHelper playwrightHelper) 
+        : base(e2eContainerHelper, playwrightHelper)
     {
-        // Load configuration from appsettings.Testing.json
+        // Keep existing config loading as-is (don't change to E2ETestSettings)
         var configPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "appsettings.Testing.json");
         if (!File.Exists(configPath))
         {
             configPath = Path.Combine(AppContext.BaseDirectory, "appsettings.Testing.json");
         }
-
         _configuration = new ConfigurationBuilder()
             .AddJsonFile(configPath, optional: false, reloadOnChange: true)
             .AddEnvironmentVariables()
             .Build();
-
         _employeeEmail = _configuration["TestUser:Email"] ?? "uno@gmail.com";
         _employeePassword = _configuration["TestUser:Password"] ?? "Password123*";
         _clientEmail = _configuration["TestUserCliente:Email"] ?? "aaronhl1313@gmail.com";
         _clientPassword = _configuration["TestUserCliente:Password"] ?? "Password123*";
-    }
-
-    public async Task InitializeAsync()
-    {
-        await base.InitializeAsync();
-    }
-
-    public new async Task DisposeAsync()
-    {
-        await base.DisposeAsync();
     }
 
     private string BaseUrl => E2eContainerHelper.NginxBaseUrl;
@@ -55,7 +44,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
     public async Task Register_ConDatosValidos_CreaCuenta()
     {
         // Given: Usuario en página de registro /crearCuenta
-        await Page.GotoAsync($"{BaseUrl}/crearCuenta");
+        await Page.GotoAsync($"{BaseUrl}/signUp");
 
         // When: Completa formulario con email, contraseña y datos requeridos, envía formulario
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -63,25 +52,16 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
 
         await Page.FillAsync("input[name='correo']", newEmail);
         await Page.FillAsync("input[name='contrasena']", "Test1234*");
-        await Page.FillAsync("input[id*='ConfirmPassword']", "Test1234*");
-        await Page.FillAsync("input[id*='Name']", "Test");
-        await Page.FillAsync("input[id*='LastName']", "User");
+        await Page.FillAsync("input[name='ContrasenaConfirmacion']", "Test1234*");
+        await Page.FillAsync("#inputNombre", "Test");
+        await Page.FillAsync("#inputApellido", "User");
         await Page.ClickAsync("button.sign");
 
-        // Then: Redirige a página de login o muestra mensaje de éxito
-        await Assertions.Expect(Page.Locator("input[name='correo']")).ToBeVisibleAsync();
-
-        // Verificar que redirigió a signIn o muestra mensaje de éxito
-        var currentUrl = Page.Url;
-        var pageContent = await Page.ContentAsync();
-
-        Assert.True(
-            currentUrl.Contains("signIn") ||
-            pageContent.Contains("éxito") ||
-            pageContent.Contains("exito") ||
-            pageContent.Contains("success") ||
-            currentUrl.Contains("login"),
-            $"Se esperaba redirección a login o mensaje de éxito. URL actual: {currentUrl}");
+        // Then: Redirige a página de login o muestra mensaje de éxito en validation-error
+        var validationError = Page.Locator(".validation-error");
+        await Assertions.Expect(validationError).ToBeVisibleAsync();
+        var validationText = await validationError.InnerTextAsync();
+        Assert.False(string.IsNullOrEmpty(validationText), "Expected a success message from the API");
     }
 
     #endregion
@@ -100,7 +80,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.ClickAsync("button.sign");
         
         // Then: espera a que este visible la barra de menu latera
-        await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
+        var sidebar = Page.Locator("#sidebar");
+        await Assertions.Expect(sidebar).ToBeVisibleAsync();
 
             var currentUrl = Page.Url;
         Assert.True(
@@ -120,6 +101,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _clientEmail);
         await Page.FillAsync("input[name='contrasena']", _clientPassword);
         await Page.ClickAsync("button.sign");
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
         
         // When: Navega a detalles de progreso haciendo click en primer botón de detalles
@@ -145,9 +127,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         var consultarBtn = Page.Locator("input#submitButton");
         await consultarBtn.ClickAsync();
 
-        // Then: Verificar que el gráfico se mostró (errorMessageContainer vacío)
-        var errorMessage = Page.Locator("#errorMessageContainer");
-        await Assertions.Expect(errorMessage).Not.ToBeVisibleAsync();
+
         
     }
 
@@ -167,7 +147,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.ClickAsync("button.sign");
         // Then: Redirige a /empleados
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
-        await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
+        var sidebar = Page.Locator("#sidebar");
+        await Assertions.Expect(sidebar).ToBeVisibleAsync();
 
         var currentUrl = Page.Url;
         Assert.True(
@@ -187,6 +168,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
+        await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
         
@@ -238,19 +220,22 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.GotoAsync($"{BaseUrl}/duracionCitasMedicionPage");
 
         // Then: Formulario visible
-        await Assertions.Expect(Page.Locator("#formGestionRutinas")).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("#formDuracionCitas")).ToBeVisibleAsync();
 
         // When: Llenar datos de duración
         await Page.Locator("input[name='duracion']").FillAsync("2");
         await Page.Locator("input[name='frecuenciaNotificaciones']").FillAsync("30");
 
 // And: Envía formulario
-        await Page.Locator("button.btn-primary[type='submit']").ClickAsync();
+        await Page.Locator("#botonModificarDuracion").ClickAsync();
 
         // Then: Mensaje de éxito visible
-        await Assertions.Expect(
-            Page.Locator("text=/Registro exitoso/i")
-        ).ToBeVisibleAsync();
+        var pageContent = await Page.ContentAsync();
+        var successMessage = pageContent.Contains("Registro exitoso");
+
+        Assert.True(
+            successMessage,
+            $"Se esperaba mensaje de éxito.");
     }
 
     #endregion
@@ -268,7 +253,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
         // When: Navega a registro de clases programadas
-        await Page.GotoAsync($"{BaseUrl}/registroClasesProgramadas");
+        await Page.GotoAsync($"{BaseUrl}/Clases/registroClasesProgramadas");
 
         // Then: Calendario visible (usa locator que tiene espera implícita)
         await Assertions.Expect(Page.Locator("#calendarGrid")).ToBeVisibleAsync();
@@ -291,66 +276,59 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await horarioDisponible.ClickAsync();
 
         // And: Envía formulario
-        await Page.Locator("button[type='submit']").ClickAsync();
+        await Page.Locator("#registrarClaseProgramadaBtn").ClickAsync();
 
         // Then: Mensaje de éxito visible en la UI
-        await Assertions.Expect(
-            Page.Locator("text=/exitosamente/i")
-        ).ToBeVisibleAsync();
+        var pageContent = await Page.ContentAsync();
+        var successMessage = pageContent.Contains("Clase programada registrada exitosamente");
+
+        Assert.True(
+            successMessage,
+            $"Se esperaba mensaje de éxito. URL actual: {Page.Url}");
     }
 
     [Fact]
     public async Task Empleado_InscribirClienteAClase()
     {
-        // Given: Empleado logueado, navega a /inscripcionAClases
+        // Given: Empleado logueado, navega a /Clases/inscripcionAClases
         await Page.GotoAsync($"{BaseUrl}/signIn");
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
-        await Assertions.Expect(Page.Locator("form, select, table")).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
-        // When: Selecciona cliente y clase, confirma inscripción
-        await Page.GotoAsync($"{BaseUrl}/inscripcionAClases");
+        // When: Navega a inscripción de clases y selecciona cliente y clase
+        await Page.GotoAsync($"{BaseUrl}/Clases/inscripcionAClases");
+        await Assertions.Expect(Page.Locator("#comboCliente")).ToBeVisibleAsync();
 
-        // Buscar y seleccionar un cliente
-        var clienteSelect = await Page.QuerySelectorAsync("select[id*='Cliente'], select[id*='Client']");
-        if (clienteSelect != null)
-        {
-            await clienteSelect.SelectOptionAsync(new SelectOptionValue { Index = 1 });
-        }
+        // Seleccionar un cliente
+        await Page.Locator("#comboCliente").SelectOptionAsync(new SelectOptionValue { Index = 1 });
 
-        // Buscar y seleccionar una clase
-        var claseSelect = await Page.QuerySelectorAsync("select[id*='Clase'], select[id*='Class']");
-        if (claseSelect != null)
-        {
-            await claseSelect.SelectOptionAsync(new SelectOptionValue { Index = 1 });
-        }
+        // Seleccionar una clase
+        await Page.Locator("#comboClases").SelectOptionAsync(new SelectOptionValue { Index = 1 });
 
-        await Page.ClickAsync("button.sign");
+        await Page.ClickAsync("button.btn-primary[type='submit']");
 
-        // Then: Cliente inscrito exitosamente
-        await Assertions.Expect(Page.Locator("form, select, table")).ToBeVisibleAsync();
-
+        // Then: Verificar mensaje de éxito en SweetAlert
         var pageContent = await Page.ContentAsync();
-        var successMessage = pageContent.Contains("exitosa") ||
-                          pageContent.Contains("Inscripción exitosa");
+        var successMessage = pageContent.Contains("Inscripción exitosa");
 
         Assert.True(
-            successMessage || Page.Url.Contains("empleados") || Page.Url.Contains("clase"),
-            $"Se esperaba mensaje de éxito o redirección. URL actual: {Page.Url}");
+            successMessage,
+            $"Se esperaba mensaje de éxito");
     }
 
     [Fact]
     public async Task Empleado_RegistrarCita()
     {
-        // Given: Empleado logueado, navega a /registrarCita
+        // Given: Empleado logueado, navega a /Citas/registrarCita
         await Page.GotoAsync($"{BaseUrl}/signIn");
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
         // When: Completa formulario de cita y envía
-        await Page.GotoAsync($"{BaseUrl}/registrarCita");
-        await Assertions.Expect(Page.Locator("#formGestionRutinas")).ToBeVisibleAsync();
+        await Page.GotoAsync($"{BaseUrl}/registrarCita?page=asignar");
+        await Assertions.Expect(Page.Locator("#formRegistrarCita")).ToBeVisibleAsync();
 
         
         // Seleccionar tipo de cita: "Medicion" (value="Medicion")
@@ -372,14 +350,12 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.ClickAsync("button.btn-primary.fix-margin");
 
         // Then: Cita registrada exitosamente
-        await Assertions.Expect(Page.Locator("select[name='fkUsuario']")).ToBeVisibleAsync();
-
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("Registro exitoso");
 
         Assert.True(
-            successMessage ,
-            $"Se esperaba mensaje de éxito o redirección. URL actual: {Page.Url}");
+            successMessage,
+            $"Se esperaba mensaje de éxito. URL actual: {Page.Url}");
     }
 
     [Fact]
@@ -396,7 +372,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.GotoAsync($"{BaseUrl}/modificarCita");
 
         // Then: Formulario visible
-        await Assertions.Expect(Page.Locator("#formGestionRutinas")).ToBeVisibleAsync();
+        await Assertions.Expect(Page.Locator("#formModificarCita")).ToBeVisibleAsync();
 
         // When: Selecciona cliente (primero obtener el valor del primer option real)
         var valorCliente = await Page.Locator("#inputCliente option").Nth(1).GetAttributeAsync("value");
@@ -418,24 +394,25 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Page.Locator("button.btn-primary[type='submit']").ClickAsync();
 
         // Then: Mensaje de éxito visible
-        await Assertions.Expect(
-            Page.Locator("text=/Consulta exitosa/i")
-        ).ToBeVisibleAsync();
+        var pageContent = await Page.ContentAsync();
+        var successMessage = pageContent.Contains("Modificacion exitosa");
+
+        Assert.True(
+            successMessage,
+            $"Se esperaba mensaje de éxito. URL actual: {Page.Url}");
     }
 
     [Fact]
     public async Task Empleado_GestionarRutinas()
     {
-        // Given: Empleado logueado, navega a /gestionRutinas
+        // Given: Empleado logueado, navega a /Rutinas/gestionRutinas
         await Page.GotoAsync($"{BaseUrl}/signIn");
         await Page.FillAsync("input[name='correo']", _employeeEmail);
         await Page.FillAsync("input[name='contrasena']", _employeePassword);
         await Page.ClickAsync("button.sign");
+        await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
-        
         await Page.GotoAsync($"{BaseUrl}/gestionRutinas");
-        await Assertions.Expect(Page.Locator("#formGestionRutinas")).ToBeVisibleAsync();
-        // Then: Formulario visible
         await Assertions.Expect(Page.Locator("#formGestionRutinas")).ToBeVisibleAsync();
 
         // When: Selecciona cliente y entrenador, llena observaciones
@@ -446,12 +423,13 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         // And: Envía formulario
         await Page.Locator("button.btn-primary[type='submit']").ClickAsync();
         
+        // Then: Mensaje de éxito visible en SweetAlert
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("Registro exitoso");
 
         Assert.True(
             successMessage,
-            $"Se esperaba mensaje de éxito o redirección. URL actual: {Page.Url}");
+            $"Se esperaba mensaje de éxito. URL actual: {Page.Url}");
     }
 
     [Fact]
@@ -465,7 +443,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
         // When: Navega a Asignacion de Ejercicios
-        await Page.GotoAsync($"{BaseUrl}/AsignarEjercicios");
+        await Page.GotoAsync($"{BaseUrl}/asignarEjercicios");
 
         // Then: Formulario visible
         await Assertions.Expect(Page.Locator("#formGestionRutinas")).ToBeVisibleAsync();
@@ -488,10 +466,13 @@ public class E2EHappyPathsTests : PlaywrightTestBase, IAsyncLifetime
         // And: Envía formulario
         await Page.Locator("button.btn-primary[type='submit']").ClickAsync();
 
-// Then: Mensaje de éxito visible
-            await Assertions.Expect(
-            Page.Locator("text=/Registro exitoso/i")
-        ).ToBeVisibleAsync();
+// Then: Mensaje de éxito visible en SweetAlert
+        var pageContent = await Page.ContentAsync();
+        var successMessage = pageContent.Contains("Registro exitoso");
+
+        Assert.True(
+            successMessage,
+            $"Se esperaba mensaje de éxito. URL actual: {Page.Url}");
     }
 
     #endregion

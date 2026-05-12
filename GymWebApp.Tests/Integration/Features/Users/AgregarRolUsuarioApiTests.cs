@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
 using GymWebApp.Tests.Integration.Factories;
@@ -16,13 +15,6 @@ public class AgregarRolUsuarioApiTests : IntegrationTestBase
     public AgregarRolUsuarioApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
         : base(factory, testContainerHelper) { }
 
-    private void SetAuthHeader(string? token)
-    {
-        Client.DefaultRequestHeaders.Authorization = token != null 
-            ? new AuthenticationHeaderValue("Bearer", token) 
-            : null;
-    }
-
     #region Happy Paths (HP)
 
     /// <summary>
@@ -31,11 +23,7 @@ public class AgregarRolUsuarioApiTests : IntegrationTestBase
     [Fact]
     public async Task AgregarRolUsuario_WithValidEmpleadoToken_Returns200Ok()
     {
-        // Arrange
-        var authToken = await Factory.AuthenticateAsync(Client);
-        SetAuthHeader(authToken);
-
-        // Get a user with 'empleado' role (they typically don't have 'cliente' role)
+        await SetAuthHeaderAsync();
         var existingUserId = await UserHelper.GetUserIdByRoleAsync(TestContainerHelper.ConnectionString, "empleado");
         
         // Add 'cliente' role (which they shouldn't have)
@@ -68,7 +56,7 @@ public class AgregarRolUsuarioApiTests : IntegrationTestBase
     public async Task AgregarRolUsuario_WithoutToken_Returns401Unauthorized()
     {
         // Arrange
-        SetAuthHeader(null);
+        ClearAuthHeader();
 
         // NO need DB query - any string works for this test
         var addRoleRequest = AgregarRolFactory.Crear("any-user-id", "cliente");
@@ -87,12 +75,11 @@ public class AgregarRolUsuarioApiTests : IntegrationTestBase
     public async Task AgregarRolUsuario_WithClienteToken_Returns403Forbidden()
     {
         // Arrange
-        var existingUserId = await UserHelper.GetAnyUserIdAsync(TestContainerHelper.ConnectionString);
+        var existingUserId = await UserHelper.GetUserIdByRoleAsync(TestContainerHelper.ConnectionString, "cliente");
         
-        var clienteToken = await Factory.AuthenticateAsClienteAsync(Client);
-        SetAuthHeader(clienteToken);
+        await SetAuthHeaderAsClienteAsync();
 
-        var addRoleRequest = AgregarRolFactory.Crear(existingUserId, "cliente");
+        var addRoleRequest = AgregarRolFactory.Crear(existingUserId, "empleado");
 
         // Act
         var response = await Client.PostAsJsonAsync("/api/AgregarRolUsuario", addRoleRequest);

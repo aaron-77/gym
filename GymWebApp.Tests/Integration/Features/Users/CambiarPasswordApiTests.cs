@@ -10,8 +10,13 @@ namespace GymWebApp.Tests.Integration.Features.Users;
 [Collection("IntegrationTests")]
 public class CambiarPasswordApiTests : IntegrationTestBase
 {
+    private readonly string _connectionString;
+
     public CambiarPasswordApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
-        : base(factory, testContainerHelper) { }
+        : base(factory, testContainerHelper)
+    {
+        _connectionString = testContainerHelper.ConnectionString;
+    }
 
     #region Happy Paths (HP)
 
@@ -29,16 +34,38 @@ public class CambiarPasswordApiTests : IntegrationTestBase
             ConfirmPassword = "NewPassword123!"
         };
 
-        // Act
-        var response = await Client.PostAsJsonAsync("/api/cambiarPassword", changePasswordRequest);
+        var originalHash = await DatabaseHelper.ExecuteScalarAsync<string>(
+            _connectionString,
+            "SELECT PasswordHash FROM AspNetUsers WHERE Email = @Email",
+            new Dictionary<string, object?> { { "@Email", "uno@gmail.com" } });
 
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
-        var result = await response.Content.ReadFromJsonAsync<DTOResponse<string>>();
-        result.Should().NotBeNull();
-        result!.success.Should().BeTrue();
-        result.httpCode.Should().Be(200);
+        try
+        {
+            // Act
+            var response = await Client.PostAsJsonAsync("/api/cambiarPassword", changePasswordRequest);
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            
+            var result = await response.Content.ReadFromJsonAsync<DTOResponse<string>>();
+            result.Should().NotBeNull();
+            result!.success.Should().BeTrue();
+            result.httpCode.Should().Be(200);
+        }
+        finally
+        {
+            if (originalHash != null)
+            {
+                await DatabaseHelper.ExecuteNonQueryAsync(
+                    _connectionString,
+                    "UPDATE AspNetUsers SET PasswordHash = @Hash WHERE Email = @Email",
+                    new Dictionary<string, object?>
+                    {
+                        { "@Hash", originalHash },
+                        { "@Email", "uno@gmail.com" }
+                    });
+            }
+        }
     }
 
     #endregion

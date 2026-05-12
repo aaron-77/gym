@@ -23,13 +23,13 @@
             <form class="form" method="post" action="signUp">
                 <span id="validationSummary" class="validation-error">@ViewBag.message</span>
                 <div class="input-group">
-                    <label  for="username">Nombre</label>
-                    <input asp-for="@Model.Nombre" type="text" name="nombre" id="username" placeholder="">
+                    <label  for="inputNombre">Nombre</label>
+                    <input asp-for="@Model.Nombre" type="text" name="nombre" id="inputNombre" placeholder="">
                     <span asp-validation-for="@Model.Nombre" class="validation-error"></span>
                 </div>
                 <div class="input-group">
-                    <label for="apellido">Apellido</label>
-                    <input asp-for="@Model.Apellido" type="text" name="apellido" id="username" placeholder="">
+                    <label for="inputApellido">Apellido</label>
+                    <input asp-for="@Model.Apellido" type="text" name="apellido" id="inputApellido" placeholder="">
                     <span asp-validation-for="@Model.Apellido" class="validation-error"></span>
                 </div>
                 <div class="input-group">
@@ -43,18 +43,18 @@
                     <span asp-validation-for="@Model.Direccion" class="validation-error"></span>
                 </div>
                 <div class="input-group">
-                    <label for="username">N° Identificacion</label>
-                    <input asp-for="@Model.NumeroDeIdentificacion" type="text" name="numeroDeIdentificacion" id="username" placeholder="">
+                    <label for="inputNumeroDeIdentificacion">N° Identificacion</label>
+                    <input asp-for="@Model.NumeroDeIdentificacion" type="text" name="numeroDeIdentificacion" id="inputNumeroDeIdentificacion" placeholder="">
                     <span asp-validation-for="@Model.NumeroDeIdentificacion" class="validation-error"></span>
                 </div>
                 <div class="input-group">
-                    <label for="username">Correo electronico</label>
-                    <input asp-for="@Model.Correo" type="email" name="correo" id="username" placeholder="">
+                    <label for="inputCorreo">Correo electronico</label>
+                    <input asp-for="@Model.Correo" type="email" name="correo" id="inputCorreo" placeholder="">
                     <span asp-validation-for="@Model.Correo" class="validation-error"></span>
                 </div>
                 <div class="input-group">
-                    <label for="username">Telefono</label>
-                    <input asp-for="@Model.Telefono" type="tel" name="telefono" id="username" placeholder="">
+                    <label for="inputTelefono">Telefono</label>
+                    <input asp-for="@Model.Telefono" type="tel" name="telefono" id="inputTelefono" placeholder="">
                     <span asp-validation-for="@Model.Telefono" class="validation-error"></span>
                 </div>
                 <div class="input-group">

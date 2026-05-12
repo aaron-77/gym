@@ -5,9 +5,13 @@ using Xunit;
 
 namespace GymWebApp.Tests.E2E.Features;
 
-[Collection("E2E Tests")]
-public class HomepageE2ETests : PlaywrightTestBase, IAsyncLifetime
+[Collection("E2E HappyPaths")]
+public class HomepageE2ETests : PlaywrightTestBase
 {
+    public HomepageE2ETests(E2eContainerHelper e2eContainerHelper, PlaywrightHelper playwrightHelper) 
+        : base(e2eContainerHelper, playwrightHelper)
+    {
+    }
     /// <summary>
     /// Verifies that the homepage loads successfully with a valid page title.
     /// Scenario: Homepage accessibility - page loads and displays title
@@ -17,7 +21,7 @@ public class HomepageE2ETests : PlaywrightTestBase, IAsyncLifetime
     {
         // GIVEN: aplicación corriendo
         // WHEN: navegar a /
-        await Page.GotoAsync(E2eContainerHelper.FrontendBaseUrl);
+        await Page.GotoAsync(E2eContainerHelper.Instance.FrontendBaseUrl);
 
         // THEN: página carga con título que contiene texto relacionado a Fitness o Home
         var title = await Page.TitleAsync();
@@ -33,7 +37,7 @@ public class HomepageE2ETests : PlaywrightTestBase, IAsyncLifetime
     public async Task Homepage_ShowsScheduledClasses()
     {
         // GIVEN: aplicación corriendo
-        await Page.GotoAsync(E2eContainerHelper.FrontendBaseUrl);
+        await Page.GotoAsync(E2eContainerHelper.Instance.FrontendBaseUrl);
 
         // THEN: heading H1 visible con texto relacionado a clases programadas
         var heading = Page.GetByRole(AriaRole.Heading, new() { Level = 1 });
@@ -51,7 +55,7 @@ public class HomepageE2ETests : PlaywrightTestBase, IAsyncLifetime
     public async Task Homepage_NavigationMenuIsVisible()
     {
         // GIVEN: aplicación corriendo
-        await Page.GotoAsync(E2eContainerHelper.FrontendBaseUrl);
+        await Page.GotoAsync(E2eContainerHelper.Instance.FrontendBaseUrl);
 
         // THEN: menu navegación visible
         var navMenu = Page.Locator("nav");

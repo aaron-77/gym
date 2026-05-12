@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
 using DTO.Dtos;
@@ -14,13 +13,6 @@ public class LogoutApiTests : IntegrationTestBase
     public LogoutApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
         : base(factory, testContainerHelper) { }
 
-    private void SetAuthHeader(string? token)
-    {
-        Client.DefaultRequestHeaders.Authorization = token != null
-            ? new AuthenticationHeaderValue("Bearer", token)
-            : null;
-    }
-
     #region Happy Paths (HP)
 
     /// <summary>
@@ -30,6 +22,7 @@ public class LogoutApiTests : IntegrationTestBase
     public async Task Logout_WithValidToken_Returns200Ok()
     {
         // First authenticate to get the refresh token
+        await SetAuthHeaderAsync();
         var loginResponse = await Client.PostAsJsonAsync("/api/autenticar", new UserCredentials
         {
             correo = "uno@gmail.com",
@@ -78,7 +71,7 @@ public class LogoutApiTests : IntegrationTestBase
     public async Task Logout_WithoutToken_Returns401Unauthorized()
     {
         // Arrange
-        SetAuthHeader(null);
+        ClearAuthHeader();
 
         var logoutRequest = new LogoutRequest
         {

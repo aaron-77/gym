@@ -17,7 +17,7 @@ public class HealthCheckNginxIntegrationTests : IAsyncLifetime
         // Then: Returns 200 OK with {"status":"Healthy"}
         
         using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync($"{E2eContainerHelper.NginxBaseUrl}/api/health");
+        var response = await httpClient.GetAsync($"{E2eContainerHelper.Instance.NginxBaseUrl}/api/health");
         
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
@@ -35,7 +35,7 @@ public class HealthCheckNginxIntegrationTests : IAsyncLifetime
         // Then: Returns 200 OK with {"status":"Healthy"}
         
         using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync($"{E2eContainerHelper.NginxBaseUrl}/health");
+        var response = await httpClient.GetAsync($"{E2eContainerHelper.Instance.NginxBaseUrl}/health");
         
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
@@ -47,11 +47,11 @@ public class HealthCheckNginxIntegrationTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        await E2eContainerHelper.InitializeAsync();
+        await ((IAsyncLifetime)E2eContainerHelper.Instance).InitializeAsync();
     }
 
     public async Task DisposeAsync()
     {
-        await E2eContainerHelper.DisposeAsync();
+        await ((IAsyncLifetime)E2eContainerHelper.Instance).DisposeAsync();
     }
 }

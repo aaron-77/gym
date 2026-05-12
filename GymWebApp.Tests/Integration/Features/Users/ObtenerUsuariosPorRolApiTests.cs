@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
 using DTO.Dtos;
@@ -14,13 +13,6 @@ public class ObtenerUsuariosPorRolApiTests : IntegrationTestBase
     public ObtenerUsuariosPorRolApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
         : base(factory, testContainerHelper) { }
 
-    private void SetAuthHeader(string? token)
-    {
-        Client.DefaultRequestHeaders.Authorization = token != null 
-            ? new AuthenticationHeaderValue("Bearer", token) 
-            : null;
-    }
-
     #region Happy Paths (HP)
 
     /// <summary>
@@ -30,8 +22,7 @@ public class ObtenerUsuariosPorRolApiTests : IntegrationTestBase
     public async Task ObtenerUsuariosPorRol_WithEmpleadoTokenAndRolCliente_Returns200Ok()
     {
         // Arrange
-        var authToken = await Factory.AuthenticateAsync(Client);
-        SetAuthHeader(authToken);
+        await SetAuthHeaderAsync();
 
         // Act
         var response = await Client.GetAsync("/api/obtenerUsuariosPorRol?rol=cliente");
@@ -57,7 +48,7 @@ public class ObtenerUsuariosPorRolApiTests : IntegrationTestBase
     public async Task ObtenerUsuariosPorRol_WithoutToken_Returns401Unauthorized()
     {
         // Arrange
-        SetAuthHeader(null);
+        ClearAuthHeader();
 
         // Act
         var response = await Client.GetAsync("/api/obtenerUsuariosPorRol?rol=cliente");
@@ -73,8 +64,7 @@ public class ObtenerUsuariosPorRolApiTests : IntegrationTestBase
     public async Task ObtenerUsuariosPorRol_WithClienteToken_Returns403Forbidden()
     {
         // Arrange
-        var clienteToken = await Factory.AuthenticateAsClienteAsync(Client);
-        SetAuthHeader(clienteToken);
+        await SetAuthHeaderAsClienteAsync();
 
         // Act
         var response = await Client.GetAsync("/api/obtenerUsuariosPorRol?rol=cliente");
