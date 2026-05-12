@@ -96,36 +96,31 @@ namespace GymFrontend.Controllers
 
                 var respuestaClientes = await manager.ObtenerUsuariosPorRol("cliente", "activo");
                 var respuestaEntrenadores = await manager.ObtenerUsuariosPorRol("empleado", "activo");
-                ViewBag.clientes 
-    = respuestaClientes.payload;
+                ViewBag.clientes = respuestaClientes.payload;
                 ViewBag.entrenadores = respuestaEntrenadores.payload;
                 if (!ModelState.IsValid)
                 {
-                    return View("GestionRutinas", rutina);
+                    return Json(new { success = false, message = "Datos inválidos. Por favor verifica los campos." });
                 }
                 
-                
+
                 HttpResponseRutina respuesta = rutinasManager.registrarRutina(rutina).Result;
                 if (respuesta == null)
                 {
-                    ViewBag.message = "Error al registrar la rutina.";
-                    return View("GestionRutinas", rutina);
+                    return Json(new { success = false, message = "Error al registrar la rutina." });
                 }
                 if (respuesta.ok == false)
                 {
-                    ViewBag.message = respuesta.message;
-                    return View("GestionRutinas");
+                    return Json(new { success = false, message = respuesta.message });
                 }
-                ViewBag.message = respuesta.message;
-                return View("GestionRutinas");
+                return Json(new { success = true, message = respuesta.message });
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: gestionarRutinas | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | UsuarioID: {rutina?.UsuarioID} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 _logger?.LogError(ex, "Error gestionarRutinas (RutinasController)");
-                ViewBag.message = "Ocurrió un error al gestionar rutinas.";
-                return View("GestionRutinas", rutina);
+                return Json(new { success = false, message = "Ocurrió un error al gestionar rutinas." });
             }
         }
 
@@ -141,30 +136,22 @@ namespace GymFrontend.Controllers
                 ViewBag.clientes = respuestaClientes.payload;
                 if (!ModelState.IsValid)
                 {
-                    return View("AsignacionEjercicios", asignacion);
+                    return Json(new { success = false, message = "Datos inválidos. Por favor verifica los campos." });
                 }
 
                 var respuesta = await rutinasManager.asignarEjercicioARutina(asignacion);
                 if (respuesta == null)
                 {
-                    ViewBag.message = "Error al asignar ejercicio a la rutina.";
-                    return View("AsignacionEjercicios", asignacion);
+                    return BadRequest(ResponseManager.BuildResponse<object>(false, 400, "Error al asignar ejercicio a la rutina.", null, null));
                 }
-                if (respuesta.success == false)
-                {
-                    ViewBag.message = respuesta.message;
-                    return View("AsignacionEjercicios",asignacion);
-                }
-                ViewBag.message = respuesta.message;
-                return View("AsignacionEjercicios",asignacion);
+                return Ok(respuesta);  // Devuelve la respuesta directa del manager
             }
             catch (Exception ex)
             {
                 string logMessage = $"[ERROR] Método: asignarRutina | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | UsuarioID: {asignacion?.UsuarioID} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 _logger?.LogError(ex, "Error asignarRutina (RutinasController)");
-                ViewBag.message = "Ocurrió un error al asignar ejercicios a la rutina.";
-                return View("AsignacionEjercicios", asignacion);
+                return BadRequest(ResponseManager.BuildResponse<object>(false, 500, "Ocurrió un error al asignar ejercicios a la rutina.", null, null));
             }
         }
 

@@ -6,45 +6,36 @@ namespace GymWebApp.Tests.E2E.Common;
 
 public abstract class PlaywrightTestBase : IAsyncLifetime
 {
-    private static bool _isInitialized;
-    protected IPlaywright? _playwright;
-    protected IBrowser? _browser;
-    protected IBrowserContext? _context;
-    protected IPage? _page;
+    protected E2eContainerHelper E2eContainerHelper { get; }
+    protected PlaywrightHelper PlaywrightHelper { get; }
 
-    protected IPage Page => _page!;
+    private IBrowserContext? _context;
+    private IPage? _page;
+
+    protected IPage Page => _page 
+        ?? throw new InvalidOperationException("Page not initialized. Call InitializeAsync first.");
+
+    protected PlaywrightTestBase(E2eContainerHelper e2eContainerHelper, PlaywrightHelper playwrightHelper)
+    {
+        E2eContainerHelper = e2eContainerHelper;
+        PlaywrightHelper = playwrightHelper;
+    }
 
     public async Task InitializeAsync()
     {
-        // Ensure containers are initialized before any test runs
-        // This uses IAsyncLifetime pattern which xUnit calls properly
-        if (!_isInitialized)
-        {
-            await E2eContainerHelper.InitializeAsync();
-            _isInitialized = true;
-        }
+        var (context, page) = await PlaywrightHelper.CreateNewContextAndPageAsync();
+        _context = context;
+        _page = page;
 
-        _playwright = await Playwright.CreateAsync();
-        _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-        {
-            Headless = false
-        });
-        _context = await _browser.NewContextAsync();
-        _page = await _context.NewPageAsync();
+        await E2eContainerHelper.ResetDatabaseAsync();
     }
 
     public async Task DisposeAsync()
     {
-        if (_page != null) await _page.CloseAsync();
-        if (_context != null) await _context.CloseAsync();
-        if (_browser != null) await _browser.CloseAsync();
-        _playwright?.Dispose();
-
-        if (_isInitialized)
-        {
-            await E2eContainerHelper.DisposeAsync();
-            _isInitialized = false;
-        }
+        if (_page != null)
+            await _page.CloseAsync();
+        if (_context != null)
+            await _context.CloseAsync();
     }
 
     /// <summary>

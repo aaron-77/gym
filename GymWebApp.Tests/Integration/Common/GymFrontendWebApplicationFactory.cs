@@ -11,8 +11,7 @@ public class GymFrontendWebApplicationFactory<TProgram> : WebApplicationFactory<
 
     public GymFrontendWebApplicationFactory()
     {
-        ConfigHelper.RegisterConfig("appsettings.Testing.json");
-        _connectionString = TestContainerHelper.ConnectionString;
+        _connectionString = TestContainerHelper.Instance.ConnectionString;
         
         Environment.SetEnvironmentVariable("DB_CONNECTION_STRING", _connectionString);
         Environment.SetEnvironmentVariable("SECRET_TOKEN_KEY", "__development_secret_key_replace_for_production__");

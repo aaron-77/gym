@@ -7,86 +7,69 @@ using FitnessCenterDbContext = DataAccess.EntityFramework.FitnessCenterDbContext
 
 namespace GymWebApp.Tests.Integration.Common;
 
-public static class TestContainerHelper
+public class TestContainerHelper : IAsyncLifetime
 {
-    private static MsSqlContainer? _msSqlContainer;
-    private static Respawner? _respawner;
-    private static string? _connectionString;
-    private static bool _isInitialized;
-    private static readonly SemaphoreSlim _initLock = new(1, 1);
+    private MsSqlContainer? _msSqlContainer;
+    private Respawner? _respawner;
+    private string? _connectionString;
 
-    public static string ConnectionString
+    public static TestContainerHelper Instance { get; private set; } = null!;
+
+    public string ConnectionString
     {
         get
         {
             if (string.IsNullOrEmpty(_connectionString))
             {
-                InitializeAsync().GetAwaiter().GetResult();
-                Thread.Sleep(2000);
+                throw new InvalidOperationException("TestContainerHelper not initialized. Ensure ICollectionFixture<TestContainerHelper> is used.");
             }
             return _connectionString!;
         }
     }
 
-    public static async Task InitializeAsync()
+    public async Task InitializeImplAsync()
     {
-        if (_isInitialized)
-            return;
+        ConfigHelper.RegisterConfig("appsettings.Testing.json");
+        Instance = this;
 
-        await _initLock.WaitAsync();
-        try
+        var sqlPassword = ConfigHelper.GetProperty("SqlServer:Password");
+
+        var backupHostPath = "/mnt/archivos/estudio/proyectos/gym/bd/respaldosbd";
+
+        if (_msSqlContainer != null)
         {
-            if (_isInitialized)
-                return;
-
-            var sqlPassword = ConfigHelper.GetProperty("SqlServer:Password");
-
-            var backupHostPath = "/mnt/archivos/estudio/proyectos/gym/bd/respaldosbd";
-
-            // Forzar recrear el container para aplicar el bind mount
-            if (_msSqlContainer != null)
-            {
-                try { await _msSqlContainer.DisposeAsync(); } catch { }
-                _msSqlContainer = null;
-            }
-
-            _msSqlContainer = new MsSqlBuilder()
-                .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
-                .WithPassword(sqlPassword)
-                .WithEnvironment("TZ", "America/Mexico_City")
-                //.WithReuse(true)
-                .WithBindMount(backupHostPath, "/backup")
-                .Build();
-
-            await _msSqlContainer.StartAsync();
-
-            await WaitForContainerReady();
-
-            // Extraer solo el Server (host:puerto) del connection string original
-            var fullConnectionString = _msSqlContainer.GetConnectionString();
-            var serverPart = fullConnectionString.Split(';')[0]; // "Server=localhost,xxxxx"
-
-            // Construir connection string limpio para master (restaurar backup)
-            var masterConnectionString = $"{serverPart};Database=master;User Id=sa;Password={sqlPassword};TrustServerCertificate=True";
-
-            await using var masterConnection = DatabaseHelper.GetSqlConnection(masterConnectionString);
-            await masterConnection.OpenAsync();
-            await RestoreDatabaseFromBackupAsync(masterConnection);
-
-            // Construir connection string limpio para FitnessCenterDB (uso normal en tests)
-            _connectionString = $"{serverPart};Database=FitnessCenterDB;User Id=sa;Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
-
-            await InitializeRespawnAsync();
-
-            _isInitialized = true;
+            try { await _msSqlContainer.DisposeAsync(); } catch { }
+            _msSqlContainer = null;
         }
-        finally
-        {
-            _initLock.Release();
-        }
+
+        _msSqlContainer = new MsSqlBuilder()
+            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+            .WithPassword(sqlPassword)
+            .WithEnvironment("TZ", "America/Mexico_City")
+            .WithBindMount(backupHostPath, "/backup")
+            .Build();
+
+        await _msSqlContainer.StartAsync();
+
+        await WaitForContainerReady();
+
+        var fullConnectionString = _msSqlContainer.GetConnectionString();
+        var serverPart = fullConnectionString.Split(';')[0];
+
+        var masterConnectionString = $"{serverPart};Database=master;User Id=sa;Password={sqlPassword};TrustServerCertificate=True";
+
+        await using var masterConnection = DatabaseHelper.GetSqlConnection(masterConnectionString);
+        await masterConnection.OpenAsync();
+        await RestoreDatabaseFromBackupAsync(masterConnection);
+
+        _connectionString = $"{serverPart};Database=FitnessCenterDB;User Id=sa;Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
+
+        await InitializeRespawnAsync();
     }
 
-    private static async Task WaitForContainerReady()
+    Task IAsyncLifetime.InitializeAsync() => InitializeImplAsync();
+
+    private async Task WaitForContainerReady()
     {
         var maxRetries = 30;
         var delay = TimeSpan.FromSeconds(1);
@@ -108,7 +91,7 @@ public static class TestContainerHelper
         throw new Exception("SQL Server container failed to start");
     }
 
-    private static async Task InitializeRespawnAsync()
+    private async Task InitializeRespawnAsync()
     {
         await using var connection = DatabaseHelper.GetSqlConnection(_connectionString!);
         await connection.OpenAsync();
@@ -172,9 +155,6 @@ public static class TestContainerHelper
                 new Table("inscripcionesDeClases"),
                 new Table("clasesProgramadas"),
                 new Table("horariosDeClasesProgramadas"),
-                // new Table("preReservasDeHorario"), // Se limpia
-                // new Table("RegistrosEntrenamiento"), // Se limpia
-                // new Table("DetalleEntrenamiento"), // Se limpia
                 new Table("RutinaEjercicios"),
                 new Table("LogErrores"),
                 new Table("AccessTokens"),
@@ -184,26 +164,26 @@ public static class TestContainerHelper
         });
     }
 
-    private static async Task RestoreDatabaseFromBackupAsync(SqlConnection connection)
+    private async Task RestoreDatabaseFromBackupAsync(SqlConnection connection)
     {
-        var backupPath = "/backup/FitnessCenterDB20260331.bak";
+        var backupPath = "/backup/FitnessGymBackupV820260507.bak";
         var databaseName = "FitnessCenterDB";
 
         var fileListSql = "RESTORE FILELISTONLY FROM DISK = @BackupPath";
-        
+
         List<string> moveStatements = new();
-        
+
         await using (var fileListCommand = connection.CreateCommand())
         {
             fileListCommand.CommandText = fileListSql;
             fileListCommand.Parameters.AddWithValue("@BackupPath", backupPath);
-            
+
             await using var reader = await fileListCommand.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
                 var logicalName = reader.GetString(0);
                 var type = reader.GetString(2);
-                
+
                 var extension = type == "L" ? ".ldf" : ".mdf";
                 var newPath = $"/var/opt/mssql/data/{databaseName}{extension}";
                 moveStatements.Add($"MOVE '{logicalName}' TO '{newPath}'");
@@ -211,7 +191,7 @@ public static class TestContainerHelper
         }
 
         var moveClause = string.Join(", ", moveStatements);
-        
+
         var sql = $@"
             BEGIN TRY
                 RESTORE DATABASE [{databaseName}] FROM DISK = @BackupPath WITH REPLACE, RECOVERY, {moveClause};
@@ -228,7 +208,7 @@ public static class TestContainerHelper
         await command.ExecuteNonQueryAsync();
     }
 
-    public static async Task ResetDatabaseAsync()
+    public async Task ResetDatabaseAsync()
     {
         if (_respawner == null)
             throw new InvalidOperationException("Respawner not initialized. Call InitializeAsync first.");
@@ -239,26 +219,18 @@ public static class TestContainerHelper
         await using var connection = DatabaseHelper.GetSqlConnection(_connectionString);
         await connection.OpenAsync();
         await _respawner.ResetAsync(connection);
-
-        // Reseed identities for tables that are ignored by Respawn but need fresh seeds
-        //await ReseedIdentitiesAsync(connection);
     }
 
-    private static async Task ReseedIdentitiesAsync(SqlConnection connection)
+    public async Task DisposeImplAsync()
     {
-        // Reseed identity columns for tables that have seed data
-        var reseedCommands = new[]
+        if (_msSqlContainer != null)
         {
-            "DBCC CHECKIDENT ('inscripcionesDeClases', RESEED, 0)",
-            "DBCC CHECKIDENT ('clasesProgramadas', RESEED, 0)",
-            "DBCC CHECKIDENT ('horariosDeClasesProgramadas', RESEED, 0)"
-        };
-
-        foreach (var command in reseedCommands)
-        {
-            await using var cmd = connection.CreateCommand();
-            cmd.CommandText = command;
-            await cmd.ExecuteNonQueryAsync();
+            await _msSqlContainer.DisposeAsync();
+            _msSqlContainer = null;
         }
+        _respawner = null;
+        _connectionString = null;
     }
+
+    Task IAsyncLifetime.DisposeAsync() => DisposeImplAsync();
 }

@@ -5,9 +5,13 @@ using Xunit;
 
 namespace GymWebApp.Tests.E2E.Features;
 
-[Collection("E2E Tests")]
-public class LoginE2ETests : PlaywrightTestBase, IAsyncLifetime
+[Collection("E2E HappyPaths")]
+public class LoginE2ETests : PlaywrightTestBase
 {
+    public LoginE2ETests(E2eContainerHelper e2eContainerHelper, PlaywrightHelper playwrightHelper) 
+        : base(e2eContainerHelper, playwrightHelper)
+    {
+    }
     /// <summary>
     /// Verifies that a user can log in with valid credentials and is redirected to the homepage.
     /// Scenario: Happy path login - valid credentials redirect to homepage
@@ -17,7 +21,7 @@ public class LoginE2ETests : PlaywrightTestBase, IAsyncLifetime
     {
         // GIVEN: usuario registrado existe en la base de datos (seeded data)
         // WHEN: navegar a /signIn + completar form + submit
-        await Page.GotoAsync($"{E2eContainerHelper.FrontendBaseUrl}/signIn");
+        await Page.GotoAsync($"{E2eContainerHelper.Instance.FrontendBaseUrl}/signIn");
 
         var emailInput = Page.GetByLabel("Email");
         var passwordInput = Page.GetByLabel("Password");
@@ -44,7 +48,7 @@ public class LoginE2ETests : PlaywrightTestBase, IAsyncLifetime
     public async Task Login_InvalidCredentials_ShowsError()
     {
         // GIVEN: usuario registrado existe en la base de datos
-        await Page.GotoAsync($"{E2eContainerHelper.FrontendBaseUrl}/signIn");
+        await Page.GotoAsync($"{E2eContainerHelper.Instance.FrontendBaseUrl}/signIn");
 
         // WHEN: completar form con credenciales inválidas + submit
         var emailInput = Page.GetByLabel("Email");

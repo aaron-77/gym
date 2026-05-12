@@ -7,24 +7,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Users;
 
-[Collection("RegistrarUsuarioApiIntegrationTests")]
-public class RegistrarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class RegistrarUsuarioApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public RegistrarUsuarioApiTests(CitasApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-    }
+    public RegistrarUsuarioApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
     #region Happy Paths (HP)
 
@@ -35,8 +22,6 @@ public class RegistrarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFact
     public async Task RegistrarUsuario_WithValidData_Returns200OkAndDTOCreatedUser()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         var registerRequest = new NewUser(
             nombre: "John",
             fechaDeNacimiento: new DateTime(1990, 1, 1),
@@ -51,7 +36,7 @@ public class RegistrarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFact
         );
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/RegistrarUsuario", registerRequest);
+        var response = await Client.PostAsJsonAsync("/api/RegistrarUsuario", registerRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -78,8 +63,6 @@ public class RegistrarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFact
     public async Task RegistrarUsuario_WithDuplicateEmail_Returns500InternalServerError()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         // Create the object ONCE with unique email
         var duplicateEmail = $"duplicate.{Guid.NewGuid():N}@test.com";
         var registerRequest = new NewUser(
@@ -96,10 +79,10 @@ public class RegistrarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFact
         );
 
         // First registration should succeed - same instance
-        await _client.PostAsJsonAsync("/api/RegistrarUsuario", registerRequest);
+        await Client.PostAsJsonAsync("/api/RegistrarUsuario", registerRequest);
 
         // Act - same instance second time
-        var response = await _client.PostAsJsonAsync("/api/RegistrarUsuario", registerRequest);
+        var response = await Client.PostAsJsonAsync("/api/RegistrarUsuario", registerRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
@@ -126,8 +109,6 @@ public class RegistrarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFact
     public async Task RegistrarUsuario_WithInvalidData_Returns400BadRequest()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         var registerRequest = new NewUser(
             nombre: "",  // Invalid - empty
             fechaDeNacimiento: new DateTime(1990, 1, 1),
@@ -142,7 +123,7 @@ public class RegistrarUsuarioApiTests : IClassFixture<CitasApiWebApplicationFact
         );
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/RegistrarUsuario", registerRequest);
+        var response = await Client.PostAsJsonAsync("/api/RegistrarUsuario", registerRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

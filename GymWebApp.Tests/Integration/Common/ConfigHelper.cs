@@ -5,14 +5,19 @@ namespace GymWebApp.Tests.Integration.Common;
 public static class ConfigHelper
 {
     private static IConfiguration? _configuration;
+    private static bool _isRegistered;
 
     public static void RegisterConfig(string jsonFileName)
     {
+        if (_isRegistered)
+            return; // already registered, skip rebuild
+
         var configBuilder = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile(jsonFileName, optional: false, reloadOnChange: true);
         
         _configuration = configBuilder.Build();
+        _isRegistered = true;
     }
 
     public static string GetProperty(string key)

@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
 using DTO.Dtos;
@@ -8,36 +7,16 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Users;
 
-[Collection("ObtenerUsuariosApiIntegrationTests")]
-public class ObtenerUsuariosApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class ObtenerUsuariosApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-    private string? _authTokenEmpleado;
-    private string? _authTokenCliente;
+    public ObtenerUsuariosApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
-    public ObtenerUsuariosApiTests(CitasApiWebApplicationFactory<Program> factory)
+    public override async Task InitializeAsync()
     {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        
-        // Authenticate FIRST before database operations that require it
-        _authTokenEmpleado = await _factory.AuthenticateAsync(_client);
-        _authTokenCliente = await _factory.AuthenticateAsClienteAsync(_client);
-    }
-
-    private void SetAuthHeader(string? token)
-    {
-        _client.DefaultRequestHeaders.Authorization = token != null 
-            ? new AuthenticationHeaderValue("Bearer", token) 
-            : null;
+        await base.InitializeAsync();
+        await SetAuthHeaderAsync();
     }
 
     #region Happy Paths (HP)
@@ -48,12 +27,11 @@ public class ObtenerUsuariosApiTests : IClassFixture<CitasApiWebApplicationFacto
     [Fact]
     public async Task ObtenerUsuarios_WithValidEmpleadoToken_Returns200OkAndUserList()
     {
-        // Arrange - reset db and set auth
-        await TestContainerHelper.ResetDatabaseAsync();
-        SetAuthHeader(_authTokenEmpleado);
+        // Arrange - set auth
+        await SetAuthHeaderAsync();
 
         // Act
-        var response = await _client.GetAsync("/api/obtenerUsuarios");
+        var response = await Client.GetAsync("/api/obtenerUsuarios");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -84,11 +62,10 @@ public class ObtenerUsuariosApiTests : IClassFixture<CitasApiWebApplicationFacto
     public async Task ObtenerUsuarios_WithoutToken_Returns401Unauthorized()
     {
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        SetAuthHeader(null); // No token
+        ClearAuthHeader();
 
         // Act
-        var response = await _client.GetAsync("/api/obtenerUsuarios");
+        var response = await Client.GetAsync("/api/obtenerUsuarios");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -100,12 +77,12 @@ public class ObtenerUsuariosApiTests : IClassFixture<CitasApiWebApplicationFacto
     [Fact]
     public async Task ObtenerUsuarios_WithClienteToken_Returns403Forbidden()
     {
+        ClearAuthHeader();
         // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        SetAuthHeader(_authTokenCliente);
+        await SetAuthHeaderAsClienteAsync();
 
         // Act
-        var response = await _client.GetAsync("/api/obtenerUsuarios");
+        var response = await Client.GetAsync("/api/obtenerUsuarios");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);

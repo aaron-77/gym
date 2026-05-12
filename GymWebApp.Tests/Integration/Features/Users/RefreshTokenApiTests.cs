@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
 using DTO.Dtos;
@@ -8,24 +7,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Users;
 
-[Collection("RefreshTokenApiIntegrationTests")]
-public class RefreshTokenApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class RefreshTokenApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public RefreshTokenApiTests(CitasApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-    }
-
-    private void SetAuthHeader(string? token)
-    {
-        _client.DefaultRequestHeaders.Authorization = token != null 
-            ? new AuthenticationHeaderValue("Bearer", token) 
-            : null;
-    }
+    public RefreshTokenApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     #region Happy Paths (HP)
 
@@ -35,12 +21,9 @@ public class RefreshTokenApiTests : IClassFixture<CitasApiWebApplicationFactory<
     [Fact]
     public async Task RefreshToken_WithValidRefreshToken_Returns200Ok()
     {
-        // Arrange
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        
         // First authenticate to get the refresh token
-        var loginResponse = await _client.PostAsJsonAsync("/api/autenticar", new UserCredentials
+        await SetAuthHeaderAsync();
+        var loginResponse = await Client.PostAsJsonAsync("/api/autenticar", new UserCredentials
         {
             correo = "uno@gmail.com",
             contrasena = "Password123*"
@@ -68,7 +51,7 @@ public class RefreshTokenApiTests : IClassFixture<CitasApiWebApplicationFactory<
 
         // Act
         SetAuthHeader(originalAccessToken);
-        var response = await _client.PostAsJsonAsync("/api/refresh", refreshRequest);
+        var response = await Client.PostAsJsonAsync("/api/refresh", refreshRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -96,9 +79,7 @@ public class RefreshTokenApiTests : IClassFixture<CitasApiWebApplicationFactory<
     public async Task RefreshToken_WithoutToken_Returns401Unauthorized()
     {
         // Arrange
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        SetAuthHeader(null);
+        ClearAuthHeader();
 
         var refreshRequest = new RefreshTokenRequest
         {
@@ -106,7 +87,7 @@ public class RefreshTokenApiTests : IClassFixture<CitasApiWebApplicationFactory<
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/refresh", refreshRequest);
+        var response = await Client.PostAsJsonAsync("/api/refresh", refreshRequest);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

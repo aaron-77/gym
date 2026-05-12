@@ -7,11 +7,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;
 
-[Collection("ObtenerEstadosDeClasesIntegrationTests")]
-public class ObtenerEstadosDeClasesTests : IntegrationTestBase<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class ObtenerEstadosDeClasesTests : IntegrationTestBase
 {
-    public ObtenerEstadosDeClasesTests(ClasesApiWebApplicationFactory<Program> factory)
-        : base(factory)
+    public ObtenerEstadosDeClasesTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper)
     {
     }
 

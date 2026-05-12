@@ -8,19 +8,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;
 
-[Collection("EliminarPrereservaDeClaseProgramadaTests")]
-public class EliminarPrereservaDeClaseProgramadaTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class EliminarPrereservaDeClaseProgramadaTests : IntegrationTestBase
 {
-    private readonly ClasesApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public EliminarPrereservaDeClaseProgramadaTests(ClasesApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        TestContainerHelper.InitializeAsync().GetAwaiter().GetResult();
-        TestContainerHelper.ResetDatabaseAsync().GetAwaiter().GetResult();
-    }
+    public EliminarPrereservaDeClaseProgramadaTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     #region Happy Path Tests
 
@@ -28,8 +20,8 @@ public class EliminarPrereservaDeClaseProgramadaTests : IClassFixture<ClasesApiW
     public async Task EliminarPrereservaDeClaseProgramada_WithValidData_ReturnsOkAndDeletesRecord()
     {
         // Arrange: Authenticate as empleado
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get a valid fkHoraLaboral
         var horaLaboral = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -60,7 +52,7 @@ public class EliminarPrereservaDeClaseProgramadaTests : IClassFixture<ClasesApiW
         var idPreReserva = Convert.ToInt32(createdRecord["idPreReserva"]);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/eliminarPrereservaDeClaseProgramada", idPreReserva);
+        var response = await Client.PostAsJsonAsync("/api/Clases/eliminarPrereservaDeClaseProgramada", idPreReserva);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -89,10 +81,10 @@ public class EliminarPrereservaDeClaseProgramadaTests : IClassFixture<ClasesApiW
     public async Task EliminarPrereservaDeClaseProgramada_WithoutAuthentication_ReturnsUnauthorized()
     {
         // Arrange: No auth header
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/eliminarPrereservaDeClaseProgramada", 1);
+        var response = await Client.PostAsJsonAsync("/api/Clases/eliminarPrereservaDeClaseProgramada", 1);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

@@ -9,19 +9,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;
 
-[Collection("CancelarClasesProgramadasTests")]
-public class CancelarClasesProgramadasTests : IClassFixture<ClasesApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class CancelarClasesProgramadasTests : IntegrationTestBase
 {
-    private readonly ClasesApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public CancelarClasesProgramadasTests(ClasesApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-        TestContainerHelper.InitializeAsync().GetAwaiter().GetResult();
-        TestContainerHelper.ResetDatabaseAsync().GetAwaiter().GetResult();
-    }
+    public CancelarClasesProgramadasTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper)
+        : base(factory, testContainerHelper) { }
 
     #region Happy Path Tests
 
@@ -31,8 +23,8 @@ public class CancelarClasesProgramadasTests : IClassFixture<ClasesApiWebApplicat
         
         // Arrange: Create reservation directly in DB (endpoint has known issues)
         
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing users
         var (clienteId, entrenadorId) = await GetExistingUserIdsAsync();
@@ -121,7 +113,7 @@ public class CancelarClasesProgramadasTests : IClassFixture<ClasesApiWebApplicat
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/cancelarClasesProgramadas", requestList);
+        var response = await Client.PostAsJsonAsync("/api/Clases/cancelarClasesProgramadas", requestList);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -140,7 +132,7 @@ public class CancelarClasesProgramadasTests : IClassFixture<ClasesApiWebApplicat
     public async Task CancelarClasesProgramadas_WithoutAuthentication_ReturnsUnauthorized()
     {
         // Arrange: Empty auth header
-        _client.DefaultRequestHeaders.Authorization = null;
+        Client.DefaultRequestHeaders.Authorization = null;
 
         var requestList = new List<DTOClaseCancelada>
         {
@@ -159,7 +151,7 @@ public class CancelarClasesProgramadasTests : IClassFixture<ClasesApiWebApplicat
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/cancelarClasesProgramadas", requestList);
+        var response = await Client.PostAsJsonAsync("/api/Clases/cancelarClasesProgramadas", requestList);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -169,8 +161,8 @@ public class CancelarClasesProgramadasTests : IClassFixture<ClasesApiWebApplicat
     public async Task CancelarClasesProgramadas_WithInvalidReagendacion_ReturnsOkWithErrorMessage()
     {
         // Arrange: Create reservation first using API
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var (clienteId, entrenadorId) = await GetExistingUserIdsAsync();
 
@@ -202,7 +194,7 @@ public class CancelarClasesProgramadasTests : IClassFixture<ClasesApiWebApplicat
             fkHoraLaboral = fkHoraLaboral
         };
 
-        var registerResponse = await _client.PostAsJsonAsync("/api/Clases/registrarClaseProgramada", requestDto);
+        var registerResponse = await Client.PostAsJsonAsync("/api/Clases/registrarClaseProgramada", requestDto);
         var registerResult = await registerResponse.Content.ReadFromJsonAsync<DTOResponse<int?>>();
         var idProgramacionClase = registerResult!.payload!.Value;
 
@@ -233,7 +225,7 @@ public class CancelarClasesProgramadasTests : IClassFixture<ClasesApiWebApplicat
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/cancelarClasesProgramadas", requestList);
+        var response = await Client.PostAsJsonAsync("/api/Clases/cancelarClasesProgramadas", requestList);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -248,8 +240,8 @@ public class CancelarClasesProgramadasTests : IClassFixture<ClasesApiWebApplicat
     {
         // Arrange: Create reservation first using API
 
-        var token = await _factory.AuthenticateAsync(_client);
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = await Factory.AuthenticateAsync(Client);
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         var (clienteId, entrenadorId) = await GetExistingUserIdsAsync();
 
@@ -281,7 +273,7 @@ public class CancelarClasesProgramadasTests : IClassFixture<ClasesApiWebApplicat
             fkHoraLaboral = fkHoraLaboral
         };
 
-        var registerResponse = await _client.PostAsJsonAsync("/api/Clases/registrarClaseProgramada", requestDto);
+        var registerResponse = await Client.PostAsJsonAsync("/api/Clases/registrarClaseProgramada", requestDto);
         var registerResult = await registerResponse.Content.ReadFromJsonAsync<DTOResponse<int?>>();
         var idProgramacionClase = registerResult!.payload!.Value;
 
@@ -303,7 +295,7 @@ public class CancelarClasesProgramadasTests : IClassFixture<ClasesApiWebApplicat
         };
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/Clases/cancelarClasesProgramadas", requestList);
+        var response = await Client.PostAsJsonAsync("/api/Clases/cancelarClasesProgramadas", requestList);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

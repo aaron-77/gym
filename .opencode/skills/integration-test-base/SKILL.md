@@ -43,3 +43,46 @@ public class CitasApiTests : IntegrationTestBase<CitasApiWebApplicationFactory<P
     }
 }
 ```
+
+## SignalR Hub Testing
+
+Ver [assets/SignalRIntegrationTestBase.md.template](assets/SignalRIntegrationTestBase.md.template) para la plantilla de la clase base.
+
+Ver [signalRHubTestExample.md](../extraContext/ejemplosArquitecturaYCodigoGenerales/signalRHubTestExample.md) para un ejemplo completo de test class con el patrón InvokeAsync.
+
+### Ejemplo de SignalR Test
+
+```csharp
+public class ReservacionesHubTests : SignalRIntegrationTestBase
+{
+    public ReservacionesHubTests(CitasApiWebApplicationFactory<Program> factory)
+        : base(factory)
+    {
+    }
+
+    protected override string GetHubName() => "reservaciones";
+
+    [Fact]
+    public async Task SendMessage_ShouldBroadcastToClients()
+    {
+        // Arrange - Setup listener
+        var receivedMessages = new List<string>();
+        _hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            receivedMessages.Add($"{user}: {message}");
+        });
+
+        // Act - Invoke hub method
+        await _hubConnection.InvokeAsync("SendMessage", "super_user", "Hello World!!");
+
+        // Assert
+        receivedMessages.Should().Contain("super_user: Hello World!!");
+    }
+}
+```
+
+### InvokeAsync Pattern
+
+```csharp
+await _hubConnection.InvokeAsync("MethodName", arg1, arg2);
+```

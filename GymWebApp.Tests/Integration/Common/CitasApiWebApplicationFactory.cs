@@ -17,13 +17,10 @@ public class CitasApiWebApplicationFactory<TProgram> : WebApplicationFactory<TPr
 
     public CitasApiWebApplicationFactory()
     {
-        ConfigHelper.RegisterConfig("appsettings.Testing.json");
-        _connectionString = TestContainerHelper.ConnectionString;
-        Console.WriteLine($"[FACTORY] Connection string: {_connectionString}");
+        _connectionString = TestContainerHelper.Instance.ConnectionString;
         
         // Set environment variables before the API starts
         Environment.SetEnvironmentVariable("DB_CONNECTION_STRING", _connectionString);
-        Console.WriteLine($"[FACTORY] DB_CONNECTION_STRING env var: {Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")}");
         Environment.SetEnvironmentVariable("SECRET_TOKEN_KEY", "__development_secret_key_replace_for_production__");
     }
 

@@ -1,4 +1,43 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { realizarPeticionAPI } from './httpClient.js';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export class ScheduleViewerInscripciones {
   constructor(containerId) {
     this.container = document.getElementById(containerId)

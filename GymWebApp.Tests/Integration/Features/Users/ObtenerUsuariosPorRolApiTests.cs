@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
 using DTO.Dtos;
@@ -8,24 +7,11 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Users;
 
-[Collection("ObtenerUsuariosPorRolApiIntegrationTests")]
-public class ObtenerUsuariosPorRolApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class ObtenerUsuariosPorRolApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-
-    public ObtenerUsuariosPorRolApiTests(CitasApiWebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-        _client = factory.CreateClient();
-    }
-
-    private void SetAuthHeader(string? token)
-    {
-        _client.DefaultRequestHeaders.Authorization = token != null 
-            ? new AuthenticationHeaderValue("Bearer", token) 
-            : null;
-    }
+    public ObtenerUsuariosPorRolApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
     #region Happy Paths (HP)
 
@@ -36,13 +22,10 @@ public class ObtenerUsuariosPorRolApiTests : IClassFixture<CitasApiWebApplicatio
     public async Task ObtenerUsuariosPorRol_WithEmpleadoTokenAndRolCliente_Returns200Ok()
     {
         // Arrange
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        var authToken = await _factory.AuthenticateAsync(_client);
-        SetAuthHeader(authToken);
+        await SetAuthHeaderAsync();
 
         // Act
-        var response = await _client.GetAsync("/api/obtenerUsuariosPorRol?rol=cliente");
+        var response = await Client.GetAsync("/api/obtenerUsuariosPorRol?rol=cliente");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -65,12 +48,10 @@ public class ObtenerUsuariosPorRolApiTests : IClassFixture<CitasApiWebApplicatio
     public async Task ObtenerUsuariosPorRol_WithoutToken_Returns401Unauthorized()
     {
         // Arrange
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        SetAuthHeader(null);
+        ClearAuthHeader();
 
         // Act
-        var response = await _client.GetAsync("/api/obtenerUsuariosPorRol?rol=cliente");
+        var response = await Client.GetAsync("/api/obtenerUsuariosPorRol?rol=cliente");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -83,13 +64,10 @@ public class ObtenerUsuariosPorRolApiTests : IClassFixture<CitasApiWebApplicatio
     public async Task ObtenerUsuariosPorRol_WithClienteToken_Returns403Forbidden()
     {
         // Arrange
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        var clienteToken = await _factory.AuthenticateAsClienteAsync(_client);
-        SetAuthHeader(clienteToken);
+        await SetAuthHeaderAsClienteAsync();
 
         // Act
-        var response = await _client.GetAsync("/api/obtenerUsuariosPorRol?rol=cliente");
+        var response = await Client.GetAsync("/api/obtenerUsuariosPorRol?rol=cliente");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);

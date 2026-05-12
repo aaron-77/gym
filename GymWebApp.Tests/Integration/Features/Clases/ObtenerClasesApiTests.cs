@@ -8,33 +8,16 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Clases;
 
-[Collection("ObtenerClasesApiIntegrationTests")]
-public class ObtenerClasesApiTests : IClassFixture<CitasApiWebApplicationFactory<Program>>
+[Collection("IntegrationTests")]
+public class ObtenerClasesApiTests : IntegrationTestBase
 {
-    private readonly CitasApiWebApplicationFactory<Program> _factory;
-    private readonly HttpClient _client;
-    private string? _authToken;
+    public ObtenerClasesApiTests(CitasApiWebApplicationFactory<Program> factory, TestContainerHelper testContainerHelper) 
+        : base(factory, testContainerHelper) { }
 
-    public ObtenerClasesApiTests(CitasApiWebApplicationFactory<Program> factory)
+    public override async Task InitializeAsync()
     {
-        _factory = factory;
-        _client = factory.CreateClient();
-        InitializeAsync().GetAwaiter().GetResult();
-    }
-
-    private async Task InitializeAsync()
-    {
-        await TestContainerHelper.InitializeAsync();
-        await TestContainerHelper.ResetDatabaseAsync();
-        _authToken = await _factory.AuthenticateAsync(_client);
-    }
-
-    private void SetAuthHeader()
-    {
-        if (string.IsNullOrEmpty(_authToken))
-            throw new InvalidOperationException("Auth token not available");
-        
-        _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _authToken);
+        await base.InitializeAsync();
+        await SetAuthHeaderAsync();
     }
 
     #region Happy Paths (Integration)
@@ -50,12 +33,8 @@ public class ObtenerClasesApiTests : IClassFixture<CitasApiWebApplicationFactory
     [Fact]
     public async Task ObtenerClases_WithActivaTrueAndAuthenticatedUser_ReturnsActiveClasses()
     {
-        // Arrange
-        await TestContainerHelper.ResetDatabaseAsync();
-        SetAuthHeader();
-
         // Act
-        var response = await _client.GetAsync("/api/Clases/obtenerClases?activa=true");
+        var response = await Client.GetAsync("/api/Clases/obtenerClases?activa=true");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);

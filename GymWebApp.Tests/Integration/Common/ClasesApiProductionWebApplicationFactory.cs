@@ -14,8 +14,7 @@ public class ClasesApiProductionWebApplicationFactory<TProgram> : WebApplication
 
     public ClasesApiProductionWebApplicationFactory()
     {
-        ConfigHelper.RegisterConfig("appsettings.Testing.json");
-        _connectionString = TestContainerHelper.ConnectionString;
+        _connectionString = TestContainerHelper.Instance.ConnectionString;
         
         Environment.SetEnvironmentVariable("SECRET_TOKEN_KEY", "__development_secret_key_replace_for_production__");
     }

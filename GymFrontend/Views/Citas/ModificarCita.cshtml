@@ -34,54 +34,65 @@ Layout = "_LayoutSeccionAdministracion";
 </div><!-- End Page Title -->
 
 <section class="section medidas-section">
-    <form id="formGestionRutinas" class="formulario" action="modificarCita" method="post">
-        <span id="validationSumary" class="validation-error">@ViewBag.message</span>
-        <label for="inputCliente" class="form-label">Cliente</label>
-        <select id="inputCliente" class="form-select empleados-main-page-input" name=""
-            aria-label="Default select example">
-            <option value="">Seleccciona un cliente</option>
-            @foreach (var cliente in listadoClientes)
-            {
-                <option value="@cliente.UsuarioID">@cliente.Nombre @cliente.Apellido</option>
-            }
-        </select>
+    <form id="formModificarCita" class="formulario needs-validation novalidate" action="modificarCita" method="post">
+        <div>
+            <label for="inputCliente" class="form-label">Cliente</label>
+            <select id="inputCliente" class="form-select empleados-main-page-input" name=""
+                aria-label="Default select example">
+                <option value="">Seleccciona un cliente</option>
+                @foreach (var cliente in listadoClientes)
+                {
+                    <option value="@cliente.UsuarioID">@cliente.Nombre @cliente.Apellido</option>
+                }
+            </select>
+            <div class="invalid-feedback"></div>
+            <div class="valid-feedback"></div>
+        </div>
 
+        <div>
+            <label for="inputCita" class="form-label">Cita</label>
+            <select id="inputCita" class="form-select empleados-main-page-input desactivable" name="Id"
+                aria-label="Default select example" required>
+                <option value="">Seleccciona una cita</option>
+            </select>
+            <div class="invalid-feedback">Selecciona una cita</div>
+            <div class="valid-feedback"></div>
+        </div>
 
+        <div>
+            <label for="inputFechaInicio" class="form-label">Fecha inicio</label>
+            <input type="datetime-local" name="fechaInicioCita" class="form-control empleados-main-page-input desactivable"
+                id="inputFechaInicio" required>
+            <div class="invalid-feedback">Selecciona la fecha de inicio</div>
+            <div class="valid-feedback"></div>
+        </div>
 
-        <label for="inputCita" class="form-label">Cita</label>
-        <select id="inputCita" class="form-select empleados-main-page-input desactivable" name="Id"
-            aria-label="Default select example">
-            <option value="">Seleccciona una cita</option>
+        <div>
+            <label for="inputFechaFin" class="form-label">Fecha fin</label>
+            <input type="datetime-local" name="fechaFinCita" class="form-control empleados-main-page-input desactivable"
+                id="inputFechaFin" required>
+            <div class="invalid-feedback">Selecciona la fecha de fin</div>
+            <div class="valid-feedback"></div>
+        </div>
 
-        </select>
-        <span asp-validation-for="Id" class="validation-error"></span>
+        <div>
+            <label for="inputEntrenador" class="form-label">Entrenador</label>
+            <select id="inputEntrenador" class="form-select empleados-main-page-input desactivable" name="fkEntrenador"
+                aria-label="Default select example" required>
+                <option value="">Seleccciona un entrenador</option>
+            </select>
+            <div class="invalid-feedback">Selecciona un entrenador</div>
+            <div class="valid-feedback"></div>
+        </div>
 
-        <label for="inputFechaInicio" class="form-label">Fecha inicio</label>
-        <input type="datetime-local" name="fechaInicioCita" class="form-control empleados-main-page-input desactivable"
-            id="inputFechaInicio">
-        <span asp-validation-for="fechaInicioCita" class="validation-error"></span>
-
-        <label for="inputFechaFin" class="form-label">Fecha fin</label>
-        <input type="datetime-local" name="fechaFinCita" class="form-control empleados-main-page-input desactivable"
-            id="inputFechaFin">
-        <span asp-validation-for="fechaFinCita" class="validation-error"></span>
-
-
-        <label for="inputEntrenador" class="form-label">Entrenador</label>
-        <select id="inputEntrenador" class="form-select empleados-main-page-input desactivable" name="fkEntrenador"
-            aria-label="Default select example">
-            <option value="">Seleccciona un entrenador</option>
-        </select>
-        <span asp-validation-for="fkEntrenador" class="validation-error"></span>
-
-        <label for="inputEstado" class="form-label">Estado</label>
-        <select id="inputEstado" class="form-select empleados-main-page-input desactivable" name="estado"
-            aria-label="Default select example">
-
-
-        </select>
-        <span asp-validation-for="estado" class="validation-error"></span>
-
+        <div>
+            <label for="inputEstado" class="form-label">Estado</label>
+            <select id="inputEstado" class="form-select empleados-main-page-input desactivable" name="estado"
+                aria-label="Default select example" required>
+            </select>
+            <div class="invalid-feedback">Selecciona el estado</div>
+            <div class="valid-feedback"></div>
+        </div>
 
         <button type="submit" class="btn btn-primary fix-margin">Modificar</button>
     </form>
