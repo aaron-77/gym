@@ -122,7 +122,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         var tipoSelect = Page.Locator("select#tipoDeBusqueda");
         await tipoSelect.SelectOptionAsync("año");
         
-        var yearCheckbox = Page.Locator("input#year2025");
+        var yearCheckbox = Page.Locator("year2025");
         await yearCheckbox.CheckAsync();
         
         var consultarBtn = Page.Locator("input#submitButton");
