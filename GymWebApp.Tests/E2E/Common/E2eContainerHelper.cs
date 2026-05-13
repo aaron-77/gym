@@ -3,11 +3,12 @@ using Microsoft.Data.SqlClient;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Networks;
+using GymWebApp.Tests.Integration.Common;
 using Respawn;
 using Respawn.Graph;
 using Testcontainers;
 using Testcontainers.MsSql;
-using GymWebApp.Tests.SharedHelpers;
+using DatabaseHelper = GymWebApp.Tests.SharedHelpers.DatabaseHelper;
 
 namespace GymWebApp.Tests.E2E.Common;
 
