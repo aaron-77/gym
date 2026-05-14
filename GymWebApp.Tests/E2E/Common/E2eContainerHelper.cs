@@ -101,8 +101,8 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
             .WithPortBinding(ApiInternalPort, true)
             .WithNetwork(_network)
             .WithNetworkAliases("fitnessgym_api")
-            //.WithWaitStrategy(Wait.ForUnixContainer()
-            //   .UntilHttpRequestIsSucceeded(r => r.ForPath("/health")))
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilPortIsAvailable(ApiInternalPort))
             .Build();
 
         await _apiContainer.StartAsync();
@@ -122,10 +122,6 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
             .WithPortBinding(FrontendInternalPort, true)
             .WithNetwork(_network)
             .WithNetworkAliases("fitnessgym_frontend")
-            .WithWaitStrategy(Wait.ForUnixContainer()
-                .UntilPortIsAvailable(FrontendInternalPort)
-                //.UntilHttpRequestIsSucceeded(r => r.ForPath("/health"))
-            )
             .Build();
 
         await _frontendContainer.StartAsync();

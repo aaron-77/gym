@@ -37,67 +37,35 @@ namespace API.Controllers
         [Authorize(Roles = "empleado")]
         [HttpPost]
         [Route("api/RegistrarMedida")]
-
-        
-        public IActionResult Index([FromBody] DTO.Dtos.DTOMedida medida)
+        public IActionResult RegistrarMedida([FromBody] DTOMedida medida)
         {
-            HTTPResponseModelMedida respuesta = new HTTPResponseModelMedida();
             if (!ModelState.IsValid)
             {
-                List<string> nombresCampos = new List<string>() { "peso", "altura", "edad", "imc", "genero" };
-                foreach (var item in ModelState.Values)
-                {
-                    foreach (var item1 in item.Errors)
-                    {
-                        ErrorModel error = new ErrorModel();
-                        string nombreCampo = nombresCampos.Where(c => item1.ErrorMessage.Contains(c)).FirstOrDefault();
-                        error.propiedad = nombreCampo;
-                        error.message = item1.ErrorMessage;
-                        respuesta.errors.Add(error);
-                    }
-
-                }
-                ;
-                respuesta.ok = false;
-                respuesta.message = "Error al registrar las medidas";
-                return BadRequest(respuesta);
+                var errores = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => new ErrorModel { message = e.ErrorMessage })
+                    .ToList();
+                return BadRequest(ResponseManager.BuildResponse<DTOMedida>(false, 400, "Error al registrar las medidas", errores, null));
             }
-
-            
 
             if (medida == null)
             {
-
-                return null;
+                return BadRequest(ResponseManager.BuildResponse<DTOMedida>(false, 400, "Medida no proporcionada", null, null));
             }
-            Medida newUserDB = new Medida()
-            {
 
-                FkUsuario = medida.fkUsuario,
-                FkParametro = medida.fkParametro,
-                Valor = medida.valor
-            };
             try
             {
-                _db.Add(newUserDB);
+                var newMedida = new Medida { FkUsuario = medida.fkUsuario, FkParametro = medida.fkParametro, Valor = medida.valor };
+                _db.Add(newMedida);
                 _db.SaveChanges();
-                respuesta.ok = true;
-                respuesta.data = medida;
-                respuesta.errors = null;
-                respuesta.message = "Registro exitoso";
+                return Ok(ResponseManager.BuildResponse(true, 200, "Registro exitoso", null, medida));
             }
             catch (Exception ex)
             {
-                respuesta.ok = false;
-                respuesta.data = null;
-                ErrorModel error = new ErrorModel();
-                error.message = ex.Message;
-                respuesta.message = "No se han podido registrar las medidas";
-                respuesta.errors.Add(error);
-                return BadRequest(respuesta);
+                _logger.LogError(ex, "Error in RegistrarMedida fkUsuario={FkUsuario}", medida?.fkUsuario);
+                return BadRequest(ResponseManager.BuildResponse<DTOMedida>(false, 500, "No se han podido registrar las medidas", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null));
             }
-                return Ok(respuesta);
-            }
+        }
 
 
         [Authorize(Roles = "empleado,cliente")]
@@ -191,10 +159,6 @@ namespace API.Controllers
         [Route("api/obtenerAñosConActividadDelCliente")]
         public async Task<IActionResult> getAñosActivo([FromQuery][ValidGuid] string idCliente)
         {
-            
-            HttpResponseAñosActivo respuesta = new HttpResponseAñosActivo();
-            List<int> añosActivo = new List<int>();
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ResponseManager.BuildResponse<List<int>>(
@@ -215,21 +179,14 @@ namespace API.Controllers
 
             try
             {
-                añosActivo = await _db.Medidas.Where(m => m.FkUsuario == idCliente).Select(m => m.FechaDeCreacion.Value.Year).Distinct().ToListAsync();
-                respuesta.ok = true;
-                respuesta.message = "consulta exitosa";
-                respuesta.errors = null;
-                respuesta.data = añosActivo;
+                var añosActivo = await _db.Medidas.Where(m => m.FkUsuario == idCliente).Select(m => m.FechaDeCreacion.Value.Year).Distinct().ToListAsync();
+                return Ok(ResponseManager.BuildResponse(true, 200, "consulta exitosa", null, añosActivo));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in getAñosActivo idCliente={IdCliente}", idCliente);
-                respuesta.ok = false;
-                respuesta.message = "Error al consultar los parametros de medicion";
-                respuesta.errors = null;
-                respuesta.data = añosActivo;
+                return StatusCode(500, ResponseManager.BuildResponse<List<int>>(false, 500, "Error al consultar los años con actividad", new List<ErrorModel> { new ErrorModel { message = ex.Message } }, null));
             }
-            return Ok(respuesta);
         }
 
 

@@ -120,13 +120,12 @@ namespace BL
 
         }
 
-        public async Task<HttpResponseAñosActivo> obtenerAñosActivosDelCliente(string idUsuario)
+        public async Task<DTOResponse<List<int>>?> obtenerAñosActivosDelCliente(string idUsuario)
         {
             try
             {
-                
                 string añosMedidasRegistradas = await httpClient.get($"api/obtenerAñosConActividadDelCliente?idCliente={idUsuario}");
-                HttpResponseAñosActivo response = JsonSerializer.Deserialize<HttpResponseAñosActivo>(añosMedidasRegistradas, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                DTOResponse<List<int>>? response = JsonSerializer.Deserialize<DTOResponse<List<int>>>(añosMedidasRegistradas, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 return response;
             }
             catch (ArgumentNullException ex)
@@ -137,7 +136,7 @@ namespace BL
                     $"IdUsuario: {idUsuario} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
-                
+
                 return null;
             }
             catch (Exception ex)
@@ -148,7 +147,7 @@ namespace BL
                     $"IdUsuario: {idUsuario} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
-                
+
                 return null;
             }
 

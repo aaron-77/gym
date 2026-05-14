@@ -265,8 +265,8 @@ namespace GymFrontend.Controllers
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                HttpResponseAñosActivo responseAñosActivo = await medidasManager.obtenerAñosActivosDelCliente(userId);
-                ViewBag.anosActivo = responseAñosActivo.data;
+                var responseAñosActivo = await medidasManager.obtenerAñosActivosDelCliente(userId);
+                ViewBag.anosActivo = responseAñosActivo?.payload;
                 ViewBag.userId = userId;
                 return View("DetallesDeProgreso");
             }

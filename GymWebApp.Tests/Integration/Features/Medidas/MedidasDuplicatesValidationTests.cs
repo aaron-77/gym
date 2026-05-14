@@ -139,13 +139,13 @@ public class MedidasDuplicatesValidationTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<HttpResponseAñosActivo>();
+        var result = await response.Content.ReadFromJsonAsync<DTOResponse<List<int>>>();
         result.Should().NotBeNull();
 
         // Si hay datos, verificar que no hay años duplicados
-        if (result!.data != null && result.data.Any())
+        if (result!.payload != null && result.payload.Any())
         {
-            result.data.Should().OnlyHaveUniqueItems("Los años con actividad no deben estar duplicados");
+            result.payload.Should().OnlyHaveUniqueItems("Los años con actividad no deben estar duplicados");
         }
     }
 

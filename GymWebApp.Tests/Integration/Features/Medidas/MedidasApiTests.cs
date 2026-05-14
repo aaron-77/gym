@@ -68,9 +68,9 @@ public class MedidasApiTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<HTTPResponseModelMedida>();
+        var result = await response.Content.ReadFromJsonAsync<DTOResponse<DTOMedida>>();
         result.Should().NotBeNull();
-        result!.ok.Should().BeTrue();
+        result!.success.Should().BeTrue();
         result.message.Should().Contain("Registro exitoso");
 
         // Verify DB insert
@@ -268,10 +268,10 @@ public class MedidasApiTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<HttpResponseAñosActivo>();
+        var result = await response.Content.ReadFromJsonAsync<DTOResponse<List<int>>>();
         result.Should().NotBeNull();
-        result!.ok.Should().BeTrue();
-        result.data.Should().NotBeNull();
+        result!.success.Should().BeTrue();
+        result.payload.Should().NotBeNull();
     }
 
     /// <summary>
@@ -299,10 +299,10 @@ public class MedidasApiTests : IntegrationTestBase
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        var result = await response.Content.ReadFromJsonAsync<HttpResponseAñosActivo>();
+        var result = await response.Content.ReadFromJsonAsync<DTOResponse<List<int>>>();
         result.Should().NotBeNull();
-        result!.ok.Should().BeTrue();
-        result.data.Should().NotBeNull();
+        result!.success.Should().BeTrue();
+        result.payload.Should().NotBeNull();
     }
 
     /// <summary>
