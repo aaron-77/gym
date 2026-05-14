@@ -124,14 +124,14 @@ if (!ModelState.IsValid)
 
                 if (respuestaCita == null)
                 {
-                    return Json(new { success = false, message = "Error al modificar la cita." });
+                    return BadRequest(ResponseManager.BuildResponse<CitaEdit>(false, 400, "Error al modificar la cita.", null, null));
                 }
 
                 if (respuestaCita.success == false)
                 {
-                    return Json(new { success = false, message = respuestaClientes.message });
+                    return BadRequest(respuestaCita);
                 }
-                return Json(new { success = true, message = respuestaCita.message });
+                return Ok(respuestaCita);
             }
             catch (Exception ex)
             {
