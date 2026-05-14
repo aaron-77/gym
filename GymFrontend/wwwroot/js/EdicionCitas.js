@@ -27,14 +27,8 @@ export async function enviarFormularioModificarCita(event) {
 
     const formData = new FormData(form);
 
-    // Convertir FormData a objeto JSON
-    const citaData = {
-        Id: formData.get('Id'),
-        fechaInicioCita: formData.get('fechaInicioCita'),
-        fechaFinCita: formData.get('fechaFinCita'),
-        fkEntrenador: formData.get('fkEntrenador'),
-        estado: formData.get('estado')
-    };
+    // Convertir FormData a objeto JSON directamente
+    const citaData = Object.fromEntries(formData.entries());
 
     try {
         const submitBtn = form.querySelector('button[type="submit"]');
