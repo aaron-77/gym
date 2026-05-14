@@ -1,4 +1,5 @@
 import { showMessage, iconTypes } from './messageManager.mjs';
+import { getNginxBaseUrl } from './httpClient.js';
 
 let clients = [];
 let citas = [];
@@ -26,23 +27,33 @@ export async function enviarFormularioModificarCita(event) {
 
     const formData = new FormData(form);
 
+    // Convertir FormData a objeto JSON
+    const citaData = {
+        Id: formData.get('Id'),
+        fechaInicioCita: formData.get('fechaInicioCita'),
+        fechaFinCita: formData.get('fechaFinCita'),
+        fkEntrenador: formData.get('fkEntrenador'),
+        estado: formData.get('estado')
+    };
+
     try {
         const submitBtn = form.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
-        const path = "/modificarCita";
-        const response = await fetch(path, {
-            method: 'POST',
-            body: formData
+        // Usar fetch directo con PUT y endpoint correcto del API
+        const baseUrl = getNginxBaseUrl();
+        const response = await fetch(`${baseUrl}/api/RegistrarCita`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(citaData)
         });
-
-        if (!response.ok) {
-            throw new Error('Error al procesar la solicitud');
-        }
 
         const data = await response.json();
 
+        // El API devuelve DTOResponse, verificar success
         if (data.success) {
             await showMessage(iconTypes.success, data.message || 'Cita modificada correctamente');
             form.classList.remove('was-validated');
