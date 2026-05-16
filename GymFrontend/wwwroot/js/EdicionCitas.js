@@ -1,5 +1,5 @@
 import { showMessage, iconTypes } from './messageManager.mjs';
-import { getNginxBaseUrl } from './httpClient.js';
+import { getNginxBaseUrl, realizarPeticionAPI } from './httpClient.js';
 
 let clients = [];
 let citas = [];
@@ -35,17 +35,7 @@ export async function enviarFormularioModificarCita(event) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
-        // Usar fetch directo con PUT y endpoint correcto del API
-        const baseUrl = getNginxBaseUrl();
-        const response = await fetch(`${baseUrl}/api/RegistrarCita`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(citaData)
-        });
-
-        const data = await response.json();
+        const data = await realizarPeticionAPI('/modificarCita', citaData);
 
         // El API devuelve DTOResponse, verificar success
         if (data.success) {
@@ -112,7 +102,7 @@ const handleSelectedAction = async (ev) => {
         await getEntrenadoresDisponibles();
         fillComboEntrenadores();
         for (let estadoOption of document.getElementById("inputEntrenador").children) {
-            if (estadoOption.value == citaSelected.fkEntrenador) {
+            if (estadoOption.value.toLowerCase() == citaSelected.fkEntrenador.toLowerCase()) {
                 estadoOption.selected = true;
             }
         }

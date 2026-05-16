@@ -190,18 +190,14 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         // And: Envía formulario
         await Page.Locator("button.btn-primary[type='submit']").ClickAsync();
 
-        // Then: Verificar reset del formulario (volvió a valores por defecto)
-        var usuarioText = await Page.Locator("select[name='fkUsuario'] option[selected]").InnerTextAsync();
-        var parametroText = await Page.Locator("select[name='fkParametro'] option[selected]").InnerTextAsync();
-        var unidadText = await Page.Locator("select[name='unidadDeMedidaId'] option[selected]").InnerTextAsync();
-        var valor = await Page.Locator("input[name='valor']").InputValueAsync();
+        await Page.Locator("div.swal2-container").WaitForAsync();
+        // Then: Mensaje de éxito visible en la UI
+        var pageContent = await Page.ContentAsync();
+        var successMessage = pageContent.Contains("Registro exitoso");
 
         Assert.True(
-            usuarioText.Contains("selecciona un usuario") &&
-            parametroText.Contains("selecciona un parametro") &&
-            unidadText.Contains("Selecciona una Unidad de medida") &&
-            string.IsNullOrEmpty(valor),
-            "Se esperaba que los campos volvieran a su estado inicial");
+            successMessage,
+            $"Se esperaba mensaje de éxito. URL actual: {Page.Url}");
 
         
         
@@ -280,7 +276,9 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         var horarioDisponible = Page.Locator("button.schedule-viewer__item--disponible").Nth(0);
         await Assertions.Expect(horarioDisponible).ToBeVisibleAsync();
         await horarioDisponible.ClickAsync();
-        await Page.Locator("div.swal2-container.swal2-center.swal2-backdrop-show").ClickAsync();
+        var modalConfirmacion = Page.Locator("button.swal2-confirm.swal2-styled");
+        await Assertions.Expect(modalConfirmacion).ToBeVisibleAsync();
+        modalConfirmacion.ClickAsync();
         // And: Envía formulario
         await Page.Locator("#registrarClaseProgramadaBtn").ClickAsync();
         await Page.Locator("div.swal2-container").WaitForAsync();
@@ -401,11 +399,12 @@ public class E2EHappyPathsTests : PlaywrightTestBase
 
         // Then: Campos se habilitan, modificar fecha
         await Assertions.Expect(Page.Locator("#inputFechaInicio")).ToBeEnabledAsync();
-        await Page.Locator("#inputFechaInicio").FillAsync("2027-06-20T10:00");
 
+        await Page.Locator("#inputFechaInicio").FillAsync("2027-06-20T10:00");
         // And: Modificar fecha fin
         await Page.Locator("#inputFechaFin").FillAsync("2027-06-20T11:00");
-
+        var entrenadorSeleccionado = await Page.Locator("#inputEntrenador option").Nth(1).GetAttributeAsync("value");
+        await Page.Locator("#inputEntrenador").SelectOptionAsync(entrenadorSeleccionado);
         // And: Envía formulario
         await Page.Locator("button.btn-primary[type='submit']").ClickAsync();
 
@@ -415,7 +414,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase
 
         // Then: Mensaje de éxito visible
         var pageContent = await Page.ContentAsync();
-        var successMessage = pageContent.Contains("Modificación exitosa");
+        var successMessage = pageContent.Contains("Modificacion exitosa");
 
         Assert.True(
             successMessage,

@@ -14,7 +14,7 @@ COPY BL/ BL/
 COPY DTO/ DTO/
 COPY DataAccess/ DataAccess/
 RUN echo "=== Contenido de DIRECTORIO source EN API CONTAINER DESPUES DE PUBLISH/ ===" && ls -laR .
-RUN dotnet publish API/API.csproj -c release -o app
+RUN dotnet publish API/API.csproj -c release -o app 
 RUN echo "=== Contenido de DIRECTORIO APP EN API CONTAINER DESPUES DE PUBLISH/ ===" && ls -laR app
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0

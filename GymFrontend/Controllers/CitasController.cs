@@ -108,15 +108,17 @@ if (!ModelState.IsValid)
 
         [HttpPost]
         [Route("modificarCita")]
-        public async Task<IActionResult> modificarCitaPost(CitaEdit cita)
+        public async Task<IActionResult> modificarCitaPost([FromBody]CitaEdit cita)
         {
             try
             {
                 _logger?.LogInformation("Start CitasController.modificarCitaPost");
                 var respuestaClientes = await managerUsers.ObtenerUsuariosPorRol("cliente", "activo");
                 ViewBag.clientes = respuestaClientes.payload;
+                
                 if (!ModelState.IsValid)
                 {
+                    
                     return Json(new { success = false, message = "Datos inválidos. Por favor verifica los campos." });
                 }
 
