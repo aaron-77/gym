@@ -5,6 +5,7 @@ using DTO.Dtos;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
@@ -110,19 +111,35 @@ public class ObtenerAñosConActividadValidationTests
     /// <summary>
     /// GIVEN: idCliente es un GUID válido
     /// WHEN: Se llama a getAñosActivo
-    /// THEN: Retorna Ok (la consulta se ejecuta)
+    /// THEN: Retorna Ok con lista de años (sin ejecutar BD real)
     /// </summary>
-    [Fact]
+[Fact]
     public async Task GetAñosActivo_WhenIdClienteIsValidGuid_ReturnsOk()
     {
-        // Arrange
+        // Arrange - usar InMemoryDatabase para testing
+        var options = new DbContextOptionsBuilder<FitnessCenterDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+        
+        using var context = new FitnessCenterDbContext(options);
+        
+        var controller = new MedidasController(
+            context,
+            _mockUserManager,
+            _mockLogger
+        );
+
         string idCliente = Guid.NewGuid().ToString();
 
         // Act
-        var result = await _sut.getAñosActivo(idCliente);
+        var result = await controller.getAñosActivo(idCliente);
 
         // Assert
-        result.Should().BeOfType<OkObjectResult>();
+        var objectResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var response = objectResult.Value.Should().BeOfType<DTOResponse<List<int>>>().Subject;
+        
+        response.success.Should().BeTrue();
+        response.httpCode.Should().Be(200);
     }
 
     #endregion

@@ -6,9 +6,17 @@ using Xunit;
 
 namespace GymWebApp.Tests.Integration.Features.Health;
 
-[Collection("HealthNginxIntegrationTests")]
-public class HealthCheckNginxIntegrationTests : IAsyncLifetime
+
+[Collection("E2E HappyPaths")]
+public class HealthCheckNginxIntegrationTests
 {
+    private readonly E2eContainerHelper _e2eContainerHelper;
+
+    public HealthCheckNginxIntegrationTests(E2eContainerHelper e2eContainerHelper)
+    {
+        _e2eContainerHelper = e2eContainerHelper;
+    }
+
     [Fact]
     public async Task HealthCheck_GetViaNginxToApi_Returns200OkWithHealthyStatus()
     {
@@ -43,15 +51,5 @@ public class HealthCheckNginxIntegrationTests : IAsyncLifetime
         var json = JsonSerializer.Deserialize<JsonElement>(body);
         
         json.GetProperty("status").GetString().Should().Be("Healthy");
-    }
-
-    public async Task InitializeAsync()
-    {
-        await ((IAsyncLifetime)E2eContainerHelper.Instance).InitializeAsync();
-    }
-
-    public async Task DisposeAsync()
-    {
-        await ((IAsyncLifetime)E2eContainerHelper.Instance).DisposeAsync();
     }
 }
