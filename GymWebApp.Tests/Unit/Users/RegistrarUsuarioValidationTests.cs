@@ -95,7 +95,7 @@ public class RegistrarUsuarioValidationTests
             nombre: null!,
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: "Calle 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "test@test.com",
             telefono: "1234567890",
             apellido: "Test",
@@ -118,7 +118,7 @@ public class RegistrarUsuarioValidationTests
             nombre: "",
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: "Calle 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "test@test.com",
             telefono: "1234567890",
             apellido: "Test",
@@ -141,7 +141,7 @@ public class RegistrarUsuarioValidationTests
             nombre: "Juan",
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: "Calle 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "test@test.com",
             telefono: "1234567890",
             apellido: null!,
@@ -164,7 +164,7 @@ public class RegistrarUsuarioValidationTests
             nombre: "Juan",
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: "Calle 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "test@test.com",
             telefono: "1234567890",
             apellido: "",
@@ -187,7 +187,7 @@ public class RegistrarUsuarioValidationTests
             nombre: "Juan",
             fechaDeNacimiento: default,
             direccion: "Calle 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "test@test.com",
             telefono: "1234567890",
             apellido: "Perez",
@@ -210,7 +210,7 @@ public class RegistrarUsuarioValidationTests
             nombre: "Juan",
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: null!,
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "test@test.com",
             telefono: "1234567890",
             apellido: "Perez",
@@ -226,20 +226,20 @@ public class RegistrarUsuarioValidationTests
     }
 
     [Fact]
-    public async Task WhenNumeroDeIdentificacionIsNull_ReturnsBadRequest()
+    public async Task WhenCurpIsNull_ReturnsBadRequest()
     {
         // Arrange
         var usuario = new NewUser(
             nombre: "Juan",
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: "Calle 123",
-            numeroDeIdentificacion: null!,
+            curp: null!,
             correo: "test@test.com",
             telefono: "1234567890",
             apellido: "Perez",
             contrasena: "Password123"
         );
-        _sut.ModelState.AddModelError("NumeroDeIdentificacion", "Ingresa tu numero de identificacion");
+        _sut.ModelState.AddModelError("Curp", "Ingresa tu CURP");
 
         // Act
         var result = await _sut.RegistrarUsuario(usuario);
@@ -256,7 +256,7 @@ public class RegistrarUsuarioValidationTests
             nombre: "Juan",
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: "Calle 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: null!,
             telefono: "1234567890",
             apellido: "Perez",
@@ -279,7 +279,7 @@ public class RegistrarUsuarioValidationTests
             nombre: "Juan",
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: "Calle 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "invalid-email",
             telefono: "1234567890",
             apellido: "Perez",
@@ -302,7 +302,7 @@ public class RegistrarUsuarioValidationTests
             nombre: "Juan",
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: "Calle 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "test@test.com",
             telefono: null!,
             apellido: "Perez",
@@ -325,7 +325,7 @@ public class RegistrarUsuarioValidationTests
             nombre: "Juan",
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: "Calle 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "test@test.com",
             telefono: "1234567890",
             apellido: "Perez",
@@ -348,7 +348,7 @@ public class RegistrarUsuarioValidationTests
             nombre: "Juan",
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: "Calle 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "test@test.com",
             telefono: "1234567890",
             apellido: "Perez",
@@ -372,7 +372,7 @@ public class RegistrarUsuarioValidationTests
             nombre: "Juan",
             fechaDeNacimiento: DateTime.Now.AddYears(-20),
             direccion: "Calle 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "test@test.com",
             telefono: "1234567890",
             apellido: "Perez",

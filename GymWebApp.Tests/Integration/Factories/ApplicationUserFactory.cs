@@ -11,7 +11,7 @@ public static class ApplicationUserFactory
         string? email = null,
         string? nombreCompleto = null,
         string? apellido = null,
-        string? numeroDeIdentificacion = null,
+        string? curp = null,
         string? direccion = null,
         DateTime? fechaDeNacimiento = null,
         string? estado = null)
@@ -24,7 +24,7 @@ public static class ApplicationUserFactory
             .RuleFor(u => u.NormalizedEmail, (f, u) => u.Email?.ToUpperInvariant())
             .RuleFor(u => u.NombreCompleto, (f, u) => nombreCompleto ?? f.Name.FullName())
             .RuleFor(u => u.Apellido, (f, u) => apellido ?? f.Name.LastName())
-            .RuleFor(u => u.NumeroDeIdentificacion, (f, u) => numeroDeIdentificacion ?? f.Random.Replace("###########"))
+            .RuleFor(u => u.Curp, (f, u) => curp ?? f.Random.Replace("###########"))
             .RuleFor(u => u.Direccion, (f, u) => direccion ?? f.Address.FullAddress())
             .RuleFor(u => u.FechaDeNacimiento, (f, u) => fechaDeNacimiento ?? f.Date.Past(30, DateTime.Today.AddYears(-18)))
             .RuleFor(u => u.FechaDeRegistro, f => f.Date.Recent(30))
@@ -50,7 +50,7 @@ public static class ApplicationUserFactory
             .RuleFor(u => u.NormalizedEmail, (f, u) => u.Email?.ToUpperInvariant())
             .RuleFor(u => u.NombreCompleto, f => f.Name.FullName())
             .RuleFor(u => u.Apellido, f => f.Name.LastName())
-            .RuleFor(u => u.NumeroDeIdentificacion, f => f.Random.Replace("###########"))
+            .RuleFor(u => u.Curp, f => f.Random.Replace("###########"))
             .RuleFor(u => u.Direccion, f => f.Address.FullAddress())
             .RuleFor(u => u.FechaDeNacimiento, f => f.Date.Past(30, DateTime.Today.AddYears(-18)))
             .RuleFor(u => u.FechaDeRegistro, f => f.Date.Recent(30))

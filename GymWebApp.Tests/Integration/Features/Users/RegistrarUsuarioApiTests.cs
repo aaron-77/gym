@@ -26,7 +26,7 @@ public class RegistrarUsuarioApiTests : IntegrationTestBase
             nombre: "John",
             fechaDeNacimiento: new DateTime(1990, 1, 1),
             direccion: "Calle Falsa 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: $"john.doe.{Guid.NewGuid():N}@test.com",
             telefono: "+1234567890",
             apellido: "Doe",
@@ -69,7 +69,7 @@ public class RegistrarUsuarioApiTests : IntegrationTestBase
             nombre: "John",
             fechaDeNacimiento: new DateTime(1990, 1, 1),
             direccion: "Calle Falsa 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: duplicateEmail,
             telefono: "+1234567890",
             apellido: "Doe",
@@ -113,7 +113,7 @@ public class RegistrarUsuarioApiTests : IntegrationTestBase
             nombre: "",  // Invalid - empty
             fechaDeNacimiento: new DateTime(1990, 1, 1),
             direccion: "Calle Falsa 123",
-            numeroDeIdentificacion: "12345678",
+            curp: "ABCD123456HMBCDN09",
             correo: "not-an-email",  // Invalid email format
             telefono: "+1234567890",
             apellido: "",

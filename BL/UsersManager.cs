@@ -89,7 +89,7 @@ namespace BL
             NewUser userForBody = new NewUser(newUser.Nombre,
                                                        newUser.FechaDeNacimiento,
                                                        newUser.Direccion,
-                                                       newUser.NumeroDeIdentificacion,
+                                                        newUser.Curp,
                                                        newUser.Correo,
                                                        newUser.Telefono,
                                                        newUser.Apellido,

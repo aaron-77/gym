@@ -20,7 +20,7 @@ Para simular el comportamiento de validación en tests unitarios, SE DEBE usar `
 | 4 | WhenApellidoIsEmpty_ReturnsBadRequest | usuario.Apellido = "" + ModelState.AddModelError | Se llama a RegistrarUsuario | Retorna BadRequestObjectResult |
 | 5 | WhenFechaDeNacimientoIsDefault_ReturnsBadRequest | usuario.FechaDeNacimiento = default + ModelState.AddModelError | Se llama a RegistrarUsuario | Retorna BadRequestObjectResult |
 | 6 | WhenDireccionIsNull_ReturnsBadRequest | usuario.Direccion = null + ModelState.AddModelError | Se llama a RegistrarUsuario | Retorna BadRequestObjectResult |
-| 7 | WhenNumeroDeIdentificacionIsNull_ReturnsBadRequest | usuario.NumeroDeIdentificacion = null + ModelState.AddModelError | Se llama a RegistrarUsuario | Retorna BadRequestObjectResult |
+| 7 | WhenCurpIsNull_ReturnsBadRequest | usuario.Curp = null + ModelState.AddModelError | Se llama a RegistrarUsuario | Retorna BadRequestObjectResult |
 | 8 | WhenCorreoIsNull_ReturnsBadRequest | usuario.Correo = null + ModelState.AddModelError | Se llama a RegistrarUsuario | Retorna BadRequestObjectResult |
 | 9 | WhenCorreoIsInvalidFormat_ReturnsBadRequest | usuario.Correo = "invalid-email" + ModelState.AddModelError | Se llama a RegistrarUsuario | Retorna BadRequestObjectResult |
 | 10 | WhenTelefonoIsNull_ReturnsBadRequest | usuario.Telefono = null + ModelState.AddModelError | Se llama a RegistrarUsuario | Retorna BadRequestObjectResult |

@@ -166,7 +166,7 @@ public class TestContainerHelper : IAsyncLifetime
 
     private async Task RestoreDatabaseFromBackupAsync(SqlConnection connection)
     {
-        var backupPath = "/backup/FitnessGymBackupV820260507.bak";
+        var backupPath = "/backup/FitnessGymBackup20260520.bak";
         var databaseName = "FitnessCenterDB";
 
         var fileListSql = "RESTORE FILELISTONLY FROM DISK = @BackupPath";

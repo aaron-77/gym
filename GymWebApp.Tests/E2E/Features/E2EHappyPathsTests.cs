@@ -58,7 +58,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         await Page.FillAsync("input[name='apellido']", "User");
         await Page.FillAsync("input[name='fechaDeNacimiento']", "2000-01-15");
         await Page.FillAsync("input[name='direccion']", "Calle Test 123");
-        await Page.FillAsync("input[name='numeroDeIdentificacion']", "ID123456");
+        await Page.FillAsync("input[name='curp']", "ABCD123456HMBCDN09");
         await Page.FillAsync("input[name='telefono']", "5551234567");
         await Page.ClickAsync("button.sign");
 

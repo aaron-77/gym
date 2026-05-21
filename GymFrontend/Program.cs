@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -27,6 +28,15 @@ namespace GymFrontend
                 Console.WriteLine("========================================");
 
                 var builder = WebApplication.CreateBuilder(args);
+                // se añade serilog
+                Log.Logger = new LoggerConfiguration()
+                    .ReadFrom.Configuration(builder.Configuration)
+                    .Enrich.FromLogContext()
+                    .WriteTo.Console()
+                    .WriteTo.File("logs/frontendlogs-.log", rollingInterval: RollingInterval.Day)
+                    
+                    .CreateLogger();
+                builder.Host.UseSerilog();
 
                 // Rate limiting para health check - 100 req/min
                 builder.Services.AddRateLimiter(options =>

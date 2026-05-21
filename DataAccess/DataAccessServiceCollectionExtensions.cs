@@ -7,11 +7,14 @@ namespace DataAccess
     {
         public static IServiceCollection AddDataAccess(this IServiceCollection services)
         {
-            var DB_CONNECTION_STRING = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+            var connString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
             services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
             {
-                options.UseSqlServer(DB_CONNECTION_STRING);
+                var cs = connString ?? throw new InvalidOperationException(
+                    "La variable de entorno 'DB_CONNECTION_STRING' no est� configurada. " +
+                    "Config�rala antes de ejecutar comandos de EF Core o iniciar la API.");
+                options.UseSqlServer(cs);
             });
             
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

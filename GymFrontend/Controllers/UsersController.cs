@@ -206,6 +206,12 @@ namespace GymFrontend.Controllers
                 _logger?.LogInformation("Start UsersController.postCrearCuenta");
                 ResponseHttp respuesta = manager.registrarUsuario(usuario).Result;
                 ViewBag.message = respuesta.message;
+                if (!respuesta.ok)
+                {
+                    _logger?.LogError($"Error en backend al intentar regostrar la cuenta: {respuesta.message}");
+                    ViewBag.message = "Ha ocurrido un error intenta mas tarde";
+                }
+
                 return View("CrearCuenta");
             }
             catch (Exception ex)
@@ -215,8 +221,8 @@ namespace GymFrontend.Controllers
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
-                _logger?.LogError(ex, "Error postCrearCuenta (UsersController)");
-                ViewBag.message = "Ocurrió un error al registrar el usuario: " + ex.Message;
+                _logger?.LogError(ex, logMessage);
+                ViewBag.message = "Ocurrió un error al registrar el usuario: ";
                 return View("CrearCuenta", usuario);
             }
         }

@@ -149,7 +149,7 @@ namespace API.Controllers
                     "direccion",
                     "correo",
                     "contrasena",
-                    "identificacion",
+                    "curp",
                     "fecha",
                     "telefono",
                 };

@@ -16,7 +16,10 @@ public class ApplicationUser : IdentityUser
     [MaxLength(50)]
     public string Apellido { get; set; }
 
-    public string NumeroDeIdentificacion { get; set; }
+    [RegularExpression(
+        @"^[A-Z]{4}\d{6}[HM][A-Z][B-DF-HJ-NP-TV-Z]{3}[A-Z0-9]\d$",
+        ErrorMessage = "La CURP no tiene un formato válido")]
+    public string Curp { get; set; }
     public string Direccion { get; set; }
     public DateTime FechaDeNacimiento { get; set; }
     public DateTime FechaDeRegistro { get; set; }

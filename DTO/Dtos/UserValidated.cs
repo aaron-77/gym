@@ -16,7 +16,7 @@ namespace DTO.Dtos
 		
 		public string Direccion { get; set; }
 		
-		public string NumeroDeIdentificacion { get; set; }
+		public string Curp { get; set; }
 		
 		public string Correo { get; set; }
 		

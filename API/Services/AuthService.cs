@@ -100,7 +100,8 @@ namespace API.Services
                     Correo = user.Email,
                     FechaDeNacimiento = user.FechaDeNacimiento,
                     Telefono = user.PhoneNumber,
-                    NumeroDeIdentificacion = user.NumeroDeIdentificacion,
+                    Curp = user.Curp,
+
                     NombreCompleto = user.NombreCompleto,
                     AccessToken = accessToken,
                     IdToken = idToken,
@@ -155,7 +156,7 @@ namespace API.Services
                 Correo = user.Email,
                 FechaDeNacimiento = user.FechaDeNacimiento,
                 Telefono = user.PhoneNumber,
-                NumeroDeIdentificacion = user.NumeroDeIdentificacion,
+                Curp = user.Curp,
                 NombreCompleto = user.NombreCompleto,
                 AccessToken = newAccessToken,
                 IdToken = newIdToken,
@@ -209,7 +210,7 @@ namespace API.Services
                     EmailConfirmed = true,
                     Direccion = model.Direccion,
                     FechaDeNacimiento = model.FechaDeNacimiento,
-                    NumeroDeIdentificacion = model.NumeroDeIdentificacion,
+                    Curp = model.Curp,
                     IdSecundario= null
 
                     // Cambiar a true si no requieres confirmación por email
@@ -228,7 +229,7 @@ namespace API.Services
                         NombreCompleto = user.NombreCompleto,
                         FechaDeNacimiento = model.FechaDeNacimiento,
                         Direccion = model.Direccion,
-                        NumeroDeIdentificacion = model.NumeroDeIdentificacion,
+                    Curp = model.Curp,
                         Correo = model.Correo,
                         Telefono = model.Telefono
                     };

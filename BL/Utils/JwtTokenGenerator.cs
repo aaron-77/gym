@@ -43,7 +43,7 @@ public class JwtTokenGenerator
     /// </summary>
     /// <param name="tokenType">Tipo de token a generar (FrontendToken, BackendToken, RefreshToken)</param>
     /// <param name="ssl">Si es true, usa las audiencias SSL; si es false, usa las audiencias estándar</param>
-    /// <param name="userValues">Diccionario con los valores del usuario (userId, userName, email, nombreCompleto, numeroDeIdentificacion)</param>
+    /// <param name="userValues">Diccionario con los valores del usuario (userId, userName, email, nombreCompleto, curp)</param>
     /// <param name="roles">Lista de roles del usuario</param>
     /// <returns>JwtSecurityToken configurado</returns>
     public JwtSecurityToken CreateTokenWithConfig(
@@ -114,7 +114,7 @@ public class JwtTokenGenerator
                     claims.Add(new Claim("email", userValues.GetValueOrDefault("email") ?? ""));
                     claims.Add(new Claim("preferred_username", userValues.GetValueOrDefault("userName") ?? ""));
                     claims.Add(new Claim("given_name", userValues.GetValueOrDefault("nombreCompleto") ?? ""));
-                    claims.Add(new Claim("family_name", userValues.GetValueOrDefault("numeroDeIdentificacion") ?? ""));
+                    claims.Add(new Claim("family_name", userValues.GetValueOrDefault("curp") ?? ""));
                     break;
 
                 case TokenType.RefreshToken:
@@ -220,7 +220,7 @@ public class JwtTokenGenerator
                 { "userName", user.UserName! },
                 { "email", user.Email! },
                 { "nombreCompleto", user.NombreCompleto },
-                { "numeroDeIdentificacion", user.NumeroDeIdentificacion }
+                { "curp", user.Curp }
             };
             string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
             bool useSsl = aspnetcore_urls.StartsWith("https", StringComparison.OrdinalIgnoreCase);

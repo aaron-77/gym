@@ -14,8 +14,11 @@ namespace DTO.Dtos
         public DateTime FechaDeNacimiento { get; set; }  // Usamos DateTime para representar una fecha
         [Required(ErrorMessage = "Ingresa tu direccion")]
         public string Direccion { get; set; }
-        [Required(ErrorMessage = "Ingresa tu numero de identificacion")]
-        public string NumeroDeIdentificacion { get; set; }
+        [Required(ErrorMessage = "Ingresa tu CURP")]
+        [RegularExpression(
+            @"^[A-Z]{4}\d{6}[HM][A-Z]{2}[B-DF-HJ-NP-TV-Z]{3}[A-Z0-9]\d$",
+            ErrorMessage = "La CURP no tiene un formato válido")]
+        public string Curp { get; set; }
 
         [Required(ErrorMessage = "Ingresa tu correo")]
         [EmailAddress(ErrorMessage = "Correo no válido")]

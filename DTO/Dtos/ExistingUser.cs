@@ -19,8 +19,8 @@ namespace DTO.Dtos
         public DateTime FechaDeNacimiento { get; set; }  // Usamos DateTime para representar una fecha
         [Required(ErrorMessage = "Ingresa tu direccion")]
         public string Direccion { get; set; }
-        [Required(ErrorMessage = "Ingresa tu numero de identificacion")]
-        public string NumeroDeIdentificacion { get; set; }
+        [Required(ErrorMessage = "Ingresa tu CURP")]
+        public string Curp { get; set; }
 
         [Required(ErrorMessage = "Ingresa tu correo")]
         [EmailAddress(ErrorMessage = "Correo no válido")]
@@ -35,7 +35,7 @@ namespace DTO.Dtos
         string nombreCompleto,
         DateTime fechaDeNacimiento,
         string direccion,
-        string numeroDeIdentificacion,
+        string curp,
         string correo,
         string telefono,
         string contrasena)
@@ -44,7 +44,7 @@ namespace DTO.Dtos
             NombreCompleto = nombreCompleto;
             FechaDeNacimiento = fechaDeNacimiento;
             Direccion = direccion;
-            NumeroDeIdentificacion = numeroDeIdentificacion;
+            Curp = curp;
             Correo = correo;
             Telefono = telefono;
             Contrasena = contrasena;
@@ -53,7 +53,7 @@ namespace DTO.Dtos
         string nombreCompleto,
         DateTime fechaDeNacimiento,
         string direccion,
-        string numeroDeIdentificacion,
+        string curp,
         string correo,
         string telefono,
         string contrasena)
@@ -61,7 +61,7 @@ namespace DTO.Dtos
             NombreCompleto = nombreCompleto;
             FechaDeNacimiento = fechaDeNacimiento;
             Direccion = direccion;
-            NumeroDeIdentificacion = numeroDeIdentificacion;
+            Curp = curp;
             Correo = correo;
             Telefono = telefono;
             Contrasena = contrasena;
