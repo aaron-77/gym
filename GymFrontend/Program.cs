@@ -8,6 +8,7 @@ using DataAccess;
 using DTO.Dtos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
@@ -190,6 +191,14 @@ namespace GymFrontend
 
                 builder.Services.AddAuthorization();
                 Console.WriteLine("Authorization agregado");
+
+                // Connection String para el DbContext
+                var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
+                    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+
+                builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
+                    options.UseSqlServer(dbConnectionString));
+                Console.WriteLine("DbContext configurado");
 
                 builder.Services.AddRazorPages();
                 Console.WriteLine("Razor Pages agregado");

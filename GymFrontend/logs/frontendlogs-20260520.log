@@ -1,0 +1,382 @@
+2026-05-20 15:27:52.454 -06:00 [INF] User profile is available. Using '/home/aaron/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-05-20 15:27:52.886 -06:00 [INF] Now listening on: http://localhost:5062
+2026-05-20 15:27:52.890 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-20 15:27:52.891 -06:00 [INF] Hosting environment: Development
+2026-05-20 15:27:52.892 -06:00 [INF] Content root path: /mnt/archivos/estudio/proyectos/gym/GymFrontend
+2026-05-20 15:27:52.898 -06:00 [INF] Escuchando en: http://localhost:5062
+2026-05-20 15:27:52.902 -06:00 [INF] Configuracion JWT cargada correctamente
+2026-05-20 15:28:15.501 -06:00 [INF] Request starting HTTP/1.1 POST http://localhost:5062/signUp - application/x-www-form-urlencoded 258
+2026-05-20 15:28:16.041 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.UsersController.postCrearCuenta (GymFrontend)'
+2026-05-20 15:28:16.198 -06:00 [INF] Route matched with {action = "postCrearCuenta", controller = "Users"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult postCrearCuenta(DTO.Dtos.User) on controller GymFrontend.Controllers.UsersController (GymFrontend).
+2026-05-20 15:28:17.155 -06:00 [INF] Executing action method GymFrontend.Controllers.UsersController.postCrearCuenta (GymFrontend) - Validation state: "Valid"
+2026-05-20 15:28:17.162 -06:00 [INF] Start UsersController.postCrearCuenta
+2026-05-20 15:28:17.246 -06:00 [INF] Start processing HTTP request POST http://localhost:5274/api/RegistrarUsuario
+2026-05-20 15:28:17.260 -06:00 [INF] Sending HTTP request POST http://localhost:5274/api/RegistrarUsuario
+2026-05-20 15:28:17.438 -06:00 [ERR] [ERROR] Método: postCrearCuenta | Línea: 0 | Causa: AggregateException - One or more errors occurred. (Value cannot be null. (Parameter 'json')) | Stack Trace:    at System.Threading.Tasks.Task.ThrowIfExceptional(Boolean includeTaskCanceledExceptions)
+   at System.Threading.Tasks.Task`1.GetResultCore(Boolean waitCompletionNotification)
+   at GymFrontend.Controllers.UsersController.postCrearCuenta(User usuario) in /mnt/archivos/estudio/proyectos/gym/GymFrontend/Controllers/UsersController.cs:line 207
+System.AggregateException: One or more errors occurred. (Value cannot be null. (Parameter 'json'))
+ ---> System.ArgumentNullException: Value cannot be null. (Parameter 'json')
+   at System.Text.Json.ThrowHelper.ThrowArgumentNullException(String parameterName)
+   at System.Text.Json.JsonSerializer.Deserialize[TValue](String json, JsonSerializerOptions options)
+   at BL.UsersManager.registrarUsuario(User newUser) in /mnt/archivos/estudio/proyectos/gym/BL/UsersManager.cs:line 100
+   --- End of inner exception stack trace ---
+   at System.Threading.Tasks.Task.ThrowIfExceptional(Boolean includeTaskCanceledExceptions)
+   at System.Threading.Tasks.Task`1.GetResultCore(Boolean waitCompletionNotification)
+   at GymFrontend.Controllers.UsersController.postCrearCuenta(User usuario) in /mnt/archivos/estudio/proyectos/gym/GymFrontend/Controllers/UsersController.cs:line 207
+2026-05-20 15:28:17.653 -06:00 [INF] Executed action method GymFrontend.Controllers.UsersController.postCrearCuenta (GymFrontend), returned result Microsoft.AspNetCore.Mvc.ViewResult in 486.6547ms.
+2026-05-20 15:28:17.720 -06:00 [INF] Executing ViewResult, running view CrearCuenta.
+2026-05-20 15:28:18.633 -06:00 [INF] Executed ViewResult - view CrearCuenta executed in 892.6401ms.
+2026-05-20 15:28:18.647 -06:00 [INF] Executed action GymFrontend.Controllers.UsersController.postCrearCuenta (GymFrontend) in 2446.9477ms
+2026-05-20 15:28:18.648 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.UsersController.postCrearCuenta (GymFrontend)'
+2026-05-20 15:28:18.676 -06:00 [INF] Request finished HTTP/1.1 POST http://localhost:5062/signUp - 200 null text/html; charset=utf-8 3221.766ms
+2026-05-20 16:38:33.119 -06:00 [INF] Application is shutting down...
+2026-05-20 18:06:56.682 -06:00 [INF] User profile is available. Using '/home/aaron/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-05-20 18:06:58.159 -06:00 [INF] Now listening on: http://localhost:5062
+2026-05-20 18:06:58.181 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-20 18:06:58.189 -06:00 [INF] Hosting environment: Development
+2026-05-20 18:06:58.191 -06:00 [INF] Content root path: /mnt/archivos/estudio/proyectos/gym/GymFrontend
+2026-05-20 18:06:58.207 -06:00 [INF] Escuchando en: http://localhost:5062
+2026-05-20 18:06:58.216 -06:00 [INF] Configuracion JWT cargada correctamente
+2026-05-20 18:07:04.359 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/ - null null
+2026-05-20 18:07:04.654 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.HomeController.Index (GymFrontend)'
+2026-05-20 18:07:04.752 -06:00 [INF] Route matched with {action = "Index", controller = "Home"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller GymFrontend.Controllers.HomeController (GymFrontend).
+2026-05-20 18:07:04.837 -06:00 [INF] Executing action method GymFrontend.Controllers.HomeController.Index (GymFrontend) - Validation state: "Valid"
+2026-05-20 18:07:04.853 -06:00 [INF] HomeController.Index called
+2026-05-20 18:07:04.880 -06:00 [INF] Executed action method GymFrontend.Controllers.HomeController.Index (GymFrontend), returned result Microsoft.AspNetCore.Mvc.ViewResult in 9.5596ms.
+2026-05-20 18:07:04.965 -06:00 [INF] Executing ViewResult, running view Index.
+2026-05-20 18:07:05.509 -06:00 [INF] Executed ViewResult - view Index executed in 524.4358ms.
+2026-05-20 18:07:05.515 -06:00 [INF] Executed action GymFrontend.Controllers.HomeController.Index (GymFrontend) in 758.1418ms
+2026-05-20 18:07:05.520 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.HomeController.Index (GymFrontend)'
+2026-05-20 18:07:05.541 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/ - 200 null text/html; charset=utf-8 1188.8377ms
+2026-05-20 18:07:08.256 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/signUp - null null
+2026-05-20 18:07:08.287 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend)'
+2026-05-20 18:07:08.301 -06:00 [INF] Route matched with {action = "crearCuenta", controller = "Users"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult crearCuenta() on controller GymFrontend.Controllers.UsersController (GymFrontend).
+2026-05-20 18:07:08.700 -06:00 [INF] Executed action GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend) in 396.1027ms
+2026-05-20 18:07:08.704 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend)'
+2026-05-20 18:07:08.716 -06:00 [ERR] An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: La variable de entorno 'DB_CONNECTION_STRING' no est� configurada. Config�rala antes de ejecutar comandos de EF Core o iniciar la API.
+   at DataAccess.DataAccessServiceCollectionExtensions.<>c__DisplayClass0_0.<AddDataAccess>b__0(DbContextOptionsBuilder options) in /mnt/archivos/estudio/proyectos/gym/DataAccess/DataAccessServiceCollectionExtensions.cs:line 14
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.<>c__DisplayClass1_0`2.<AddDbContext>b__0(IServiceProvider _, DbContextOptionsBuilder b)
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions[TContext](IServiceProvider applicationServiceProvider, Action`2 optionsAction)
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.<>c__DisplayClass17_0`1.<AddCoreServices>b__0(IServiceProvider p)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.<>c__DisplayClass2_0.<RealizeService>b__0(ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)
+   at lambda_method18(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-05-20 18:07:08.853 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/signUp - 500 null text/html; charset=utf-8 596.741ms
+2026-05-20 21:06:12.505 -06:00 [INF] Application is shutting down...
+2026-05-20 21:06:53.678 -06:00 [INF] User profile is available. Using '/home/aaron/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-05-20 21:06:54.739 -06:00 [INF] Now listening on: http://localhost:5062
+2026-05-20 21:06:54.750 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-20 21:06:54.761 -06:00 [INF] Hosting environment: Development
+2026-05-20 21:06:54.766 -06:00 [INF] Content root path: /mnt/archivos/estudio/proyectos/gym/GymFrontend
+2026-05-20 21:06:54.779 -06:00 [INF] Escuchando en: http://localhost:5062
+2026-05-20 21:06:54.781 -06:00 [INF] Configuracion JWT cargada correctamente
+2026-05-20 21:06:59.969 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/ - null null
+2026-05-20 21:07:00.559 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.HomeController.Index (GymFrontend)'
+2026-05-20 21:07:00.655 -06:00 [INF] Route matched with {action = "Index", controller = "Home"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller GymFrontend.Controllers.HomeController (GymFrontend).
+2026-05-20 21:07:00.702 -06:00 [INF] Executing action method GymFrontend.Controllers.HomeController.Index (GymFrontend) - Validation state: "Valid"
+2026-05-20 21:07:00.708 -06:00 [INF] HomeController.Index called
+2026-05-20 21:07:00.736 -06:00 [INF] Executed action method GymFrontend.Controllers.HomeController.Index (GymFrontend), returned result Microsoft.AspNetCore.Mvc.ViewResult in 11.0408ms.
+2026-05-20 21:07:00.835 -06:00 [INF] Executing ViewResult, running view Index.
+2026-05-20 21:07:01.473 -06:00 [INF] Executed ViewResult - view Index executed in 685.0654ms.
+2026-05-20 21:07:01.482 -06:00 [INF] Executed action GymFrontend.Controllers.HomeController.Index (GymFrontend) in 824.3822ms
+2026-05-20 21:07:01.483 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.HomeController.Index (GymFrontend)'
+2026-05-20 21:07:01.529 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/ - 200 null text/html; charset=utf-8 1560.8531ms
+2026-05-20 21:07:03.855 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/signIn - null null
+2026-05-20 21:07:03.959 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.UsersController.Index (GymFrontend)'
+2026-05-20 21:07:03.987 -06:00 [INF] Route matched with {action = "Index", controller = "Users"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller GymFrontend.Controllers.UsersController (GymFrontend).
+2026-05-20 21:07:04.745 -06:00 [INF] Executed action GymFrontend.Controllers.UsersController.Index (GymFrontend) in 757.3191ms
+2026-05-20 21:07:04.749 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.UsersController.Index (GymFrontend)'
+2026-05-20 21:07:04.760 -06:00 [ERR] An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: La variable de entorno 'DB_CONNECTION_STRING' no est� configurada. Config�rala antes de ejecutar comandos de EF Core o iniciar la API.
+   at DataAccess.DataAccessServiceCollectionExtensions.<>c__DisplayClass0_0.<AddDataAccess>b__0(DbContextOptionsBuilder options) in /mnt/archivos/estudio/proyectos/gym/DataAccess/DataAccessServiceCollectionExtensions.cs:line 14
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.<>c__DisplayClass1_0`2.<AddDbContext>b__0(IServiceProvider _, DbContextOptionsBuilder b)
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions[TContext](IServiceProvider applicationServiceProvider, Action`2 optionsAction)
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.<>c__DisplayClass17_0`1.<AddCoreServices>b__0(IServiceProvider p)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.<>c__DisplayClass2_0.<RealizeService>b__0(ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)
+   at lambda_method18(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-05-20 21:07:05.042 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/signIn - 500 null text/html; charset=utf-8 1186.5783ms
+2026-05-20 21:07:08.696 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/signIn - null null
+2026-05-20 21:07:08.737 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.UsersController.Index (GymFrontend)'
+2026-05-20 21:07:08.743 -06:00 [INF] Route matched with {action = "Index", controller = "Users"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller GymFrontend.Controllers.UsersController (GymFrontend).
+2026-05-20 21:07:08.756 -06:00 [INF] Executed action GymFrontend.Controllers.UsersController.Index (GymFrontend) in 7.5306ms
+2026-05-20 21:07:08.759 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.UsersController.Index (GymFrontend)'
+2026-05-20 21:07:08.759 -06:00 [ERR] An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: La variable de entorno 'DB_CONNECTION_STRING' no est� configurada. Config�rala antes de ejecutar comandos de EF Core o iniciar la API.
+   at DataAccess.DataAccessServiceCollectionExtensions.<>c__DisplayClass0_0.<AddDataAccess>b__0(DbContextOptionsBuilder options) in /mnt/archivos/estudio/proyectos/gym/DataAccess/DataAccessServiceCollectionExtensions.cs:line 14
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.<>c__DisplayClass1_0`2.<AddDbContext>b__0(IServiceProvider _, DbContextOptionsBuilder b)
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions[TContext](IServiceProvider applicationServiceProvider, Action`2 optionsAction)
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.<>c__DisplayClass17_0`1.<AddCoreServices>b__0(IServiceProvider p)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.<>c__DisplayClass2_0.<RealizeService>b__0(ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)
+   at lambda_method18(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-05-20 21:07:08.774 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/signIn - 500 null text/html; charset=utf-8 77.216ms
+2026-05-20 21:07:09.340 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/favicon.ico - null null
+2026-05-20 21:07:09.573 -06:00 [INF] Sending file. Request path: '/favicon.ico'. Physical path: '/mnt/archivos/estudio/proyectos/gym/GymFrontend/wwwroot/favicon.ico'
+2026-05-20 21:07:09.578 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/favicon.ico - 200 5430 image/x-icon 237.6519ms
+2026-05-20 21:07:50.791 -06:00 [INF] Application is shutting down...
+2026-05-20 21:08:02.202 -06:00 [INF] User profile is available. Using '/home/aaron/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-05-20 21:08:03.554 -06:00 [INF] Now listening on: http://localhost:5062
+2026-05-20 21:08:03.578 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-20 21:08:03.583 -06:00 [INF] Hosting environment: Development
+2026-05-20 21:08:03.586 -06:00 [INF] Content root path: /mnt/archivos/estudio/proyectos/gym/GymFrontend
+2026-05-20 21:08:03.613 -06:00 [INF] Escuchando en: http://localhost:5062
+2026-05-20 21:08:03.638 -06:00 [INF] Configuracion JWT cargada correctamente
+2026-05-20 21:08:40.790 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/ - null null
+2026-05-20 21:08:40.998 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.HomeController.Index (GymFrontend)'
+2026-05-20 21:08:41.098 -06:00 [INF] Route matched with {action = "Index", controller = "Home"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller GymFrontend.Controllers.HomeController (GymFrontend).
+2026-05-20 21:08:41.153 -06:00 [INF] Executing action method GymFrontend.Controllers.HomeController.Index (GymFrontend) - Validation state: "Valid"
+2026-05-20 21:08:41.159 -06:00 [INF] HomeController.Index called
+2026-05-20 21:08:41.206 -06:00 [INF] Executed action method GymFrontend.Controllers.HomeController.Index (GymFrontend), returned result Microsoft.AspNetCore.Mvc.ViewResult in 23.1072ms.
+2026-05-20 21:08:41.257 -06:00 [INF] Executing ViewResult, running view Index.
+2026-05-20 21:08:41.798 -06:00 [INF] Executed ViewResult - view Index executed in 546.1947ms.
+2026-05-20 21:08:41.804 -06:00 [INF] Executed action GymFrontend.Controllers.HomeController.Index (GymFrontend) in 701.9611ms
+2026-05-20 21:08:41.805 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.HomeController.Index (GymFrontend)'
+2026-05-20 21:08:41.817 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/ - 200 null text/html; charset=utf-8 1030.0102ms
+2026-05-20 21:08:44.263 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/signUp - null null
+2026-05-20 21:08:44.319 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend)'
+2026-05-20 21:08:44.353 -06:00 [INF] Route matched with {action = "crearCuenta", controller = "Users"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult crearCuenta() on controller GymFrontend.Controllers.UsersController (GymFrontend).
+2026-05-20 21:08:45.079 -06:00 [INF] Executed action GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend) in 711.727ms
+2026-05-20 21:08:45.083 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend)'
+2026-05-20 21:08:45.105 -06:00 [ERR] An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: La variable de entorno 'DB_CONNECTION_STRING' no est� configurada. Config�rala antes de ejecutar comandos de EF Core o iniciar la API.
+   at DataAccess.DataAccessServiceCollectionExtensions.<>c__DisplayClass0_0.<AddDataAccess>b__0(DbContextOptionsBuilder options) in /mnt/archivos/estudio/proyectos/gym/DataAccess/DataAccessServiceCollectionExtensions.cs:line 14
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.<>c__DisplayClass1_0`2.<AddDbContext>b__0(IServiceProvider _, DbContextOptionsBuilder b)
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions[TContext](IServiceProvider applicationServiceProvider, Action`2 optionsAction)
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.<>c__DisplayClass17_0`1.<AddCoreServices>b__0(IServiceProvider p)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.<>c__DisplayClass2_0.<RealizeService>b__0(ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)
+   at lambda_method18(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-05-20 21:08:45.445 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/signUp - 500 null text/html; charset=utf-8 1182.5913ms
+2026-05-20 21:12:03.340 -06:00 [INF] Application is shutting down...
+2026-05-20 21:28:14.136 -06:00 [INF] User profile is available. Using '/home/aaron/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-05-20 21:28:16.026 -06:00 [INF] Now listening on: http://localhost:5062
+2026-05-20 21:28:16.040 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-20 21:28:16.046 -06:00 [INF] Hosting environment: Development
+2026-05-20 21:28:16.047 -06:00 [INF] Content root path: /mnt/archivos/estudio/proyectos/gym/GymFrontend
+2026-05-20 21:28:16.074 -06:00 [INF] Escuchando en: http://localhost:5062
+2026-05-20 21:28:16.086 -06:00 [INF] Configuracion JWT cargada correctamente
+2026-05-20 21:28:48.525 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/ - null null
+2026-05-20 21:28:48.860 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.HomeController.Index (GymFrontend)'
+2026-05-20 21:28:48.991 -06:00 [INF] Route matched with {action = "Index", controller = "Home"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller GymFrontend.Controllers.HomeController (GymFrontend).
+2026-05-20 21:28:49.045 -06:00 [INF] Executing action method GymFrontend.Controllers.HomeController.Index (GymFrontend) - Validation state: "Valid"
+2026-05-20 21:28:49.050 -06:00 [INF] HomeController.Index called
+2026-05-20 21:28:49.065 -06:00 [INF] Executed action method GymFrontend.Controllers.HomeController.Index (GymFrontend), returned result Microsoft.AspNetCore.Mvc.ViewResult in 4.7437ms.
+2026-05-20 21:28:49.145 -06:00 [INF] Executing ViewResult, running view Index.
+2026-05-20 21:28:49.854 -06:00 [INF] Executed ViewResult - view Index executed in 713.1498ms.
+2026-05-20 21:28:49.857 -06:00 [INF] Executed action GymFrontend.Controllers.HomeController.Index (GymFrontend) in 863.3417ms
+2026-05-20 21:28:49.860 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.HomeController.Index (GymFrontend)'
+2026-05-20 21:28:49.887 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/ - 200 null text/html; charset=utf-8 1368.1024ms
+2026-05-20 21:28:55.512 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/signUp - null null
+2026-05-20 21:28:55.577 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend)'
+2026-05-20 21:28:55.607 -06:00 [INF] Route matched with {action = "crearCuenta", controller = "Users"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult crearCuenta() on controller GymFrontend.Controllers.UsersController (GymFrontend).
+2026-05-20 21:28:56.288 -06:00 [INF] Executed action GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend) in 663.9698ms
+2026-05-20 21:28:56.298 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend)'
+2026-05-20 21:28:56.318 -06:00 [ERR] An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: La variable de entorno 'DB_CONNECTION_STRING' no est� configurada. Config�rala antes de ejecutar comandos de EF Core o iniciar la API.
+   at DataAccess.DataAccessServiceCollectionExtensions.<>c__DisplayClass0_0.<AddDataAccess>b__0(DbContextOptionsBuilder options) in /mnt/archivos/estudio/proyectos/gym/DataAccess/DataAccessServiceCollectionExtensions.cs:line 14
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.<>c__DisplayClass1_0`2.<AddDbContext>b__0(IServiceProvider _, DbContextOptionsBuilder b)
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions[TContext](IServiceProvider applicationServiceProvider, Action`2 optionsAction)
+   at Microsoft.Extensions.DependencyInjection.EntityFrameworkServiceCollectionExtensions.<>c__DisplayClass17_0`1.<AddCoreServices>b__0(IServiceProvider p)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitCache(ServiceCallSite callSite, RuntimeResolverContext context, ServiceProviderEngineScope serviceProviderEngine, RuntimeResolverLock lockType)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitScopeCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.DynamicServiceProviderEngine.<>c__DisplayClass2_0.<RealizeService>b__0(ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)
+   at lambda_method18(Closure, IServiceProvider, Object[])
+   at Microsoft.AspNetCore.Mvc.Controllers.ControllerFactoryProvider.<>c__DisplayClass6_0.<CreateControllerFactory>g__CreateController|0(ControllerContext controllerContext)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ControllerActionInvoker.InvokeInnerFilterAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeFilterPipelineAsync()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Logged|17_1(ResourceInvoker invoker)
+   at Microsoft.AspNetCore.Routing.EndpointMiddleware.<Invoke>g__AwaitRequestTask|7_0(Endpoint endpoint, Task requestTask, ILogger logger)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2026-05-20 21:28:56.612 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/signUp - 500 null text/html; charset=utf-8 1103.3902ms
+2026-05-20 21:32:46.217 -06:00 [INF] Application is shutting down...
+2026-05-20 22:10:45.512 -06:00 [INF] User profile is available. Using '/home/aaron/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-05-20 22:10:48.329 -06:00 [INF] Now listening on: http://localhost:5062
+2026-05-20 22:10:48.334 -06:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-05-20 22:10:48.336 -06:00 [INF] Hosting environment: Development
+2026-05-20 22:10:48.338 -06:00 [INF] Content root path: /mnt/archivos/estudio/proyectos/gym/GymFrontend
+2026-05-20 22:10:48.366 -06:00 [INF] Escuchando en: http://localhost:5062
+2026-05-20 22:10:48.379 -06:00 [INF] Configuracion JWT cargada correctamente
+2026-05-20 22:12:20.972 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/ - null null
+2026-05-20 22:12:21.142 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.HomeController.Index (GymFrontend)'
+2026-05-20 22:12:21.199 -06:00 [INF] Route matched with {action = "Index", controller = "Home"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult Index() on controller GymFrontend.Controllers.HomeController (GymFrontend).
+2026-05-20 22:12:21.244 -06:00 [INF] Executing action method GymFrontend.Controllers.HomeController.Index (GymFrontend) - Validation state: "Valid"
+2026-05-20 22:12:21.256 -06:00 [INF] HomeController.Index called
+2026-05-20 22:12:21.279 -06:00 [INF] Executed action method GymFrontend.Controllers.HomeController.Index (GymFrontend), returned result Microsoft.AspNetCore.Mvc.ViewResult in 7.2758ms.
+2026-05-20 22:12:21.362 -06:00 [INF] Executing ViewResult, running view Index.
+2026-05-20 22:12:21.743 -06:00 [INF] Executed ViewResult - view Index executed in 398.5013ms.
+2026-05-20 22:12:21.746 -06:00 [INF] Executed action GymFrontend.Controllers.HomeController.Index (GymFrontend) in 538.4587ms
+2026-05-20 22:12:21.747 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.HomeController.Index (GymFrontend)'
+2026-05-20 22:12:21.758 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/ - 200 null text/html; charset=utf-8 790.3524ms
+2026-05-20 22:12:23.945 -06:00 [INF] Request starting HTTP/1.1 GET http://localhost:5062/signUp - null null
+2026-05-20 22:12:23.991 -06:00 [INF] Executing endpoint 'GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend)'
+2026-05-20 22:12:24.014 -06:00 [INF] Route matched with {action = "crearCuenta", controller = "Users"}. Executing controller action with signature Microsoft.AspNetCore.Mvc.IActionResult crearCuenta() on controller GymFrontend.Controllers.UsersController (GymFrontend).
+2026-05-20 22:12:24.527 -06:00 [INF] Executing action method GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend) - Validation state: "Valid"
+2026-05-20 22:12:24.534 -06:00 [INF] Start UsersController.crearCuenta
+2026-05-20 22:12:24.536 -06:00 [INF] Executed action method GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend), returned result Microsoft.AspNetCore.Mvc.ViewResult in 8.2759ms.
+2026-05-20 22:12:24.540 -06:00 [INF] Executing ViewResult, running view crearCuenta.
+2026-05-20 22:12:24.868 -06:00 [INF] Executed ViewResult - view crearCuenta executed in 331.1419ms.
+2026-05-20 22:12:24.869 -06:00 [INF] Executed action GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend) in 854.0869ms
+2026-05-20 22:12:24.870 -06:00 [INF] Executed endpoint 'GymFrontend.Controllers.UsersController.crearCuenta (GymFrontend)'
+2026-05-20 22:12:24.875 -06:00 [INF] Request finished HTTP/1.1 GET http://localhost:5062/signUp - 200 null text/html; charset=utf-8 930.5912ms
+2026-05-20 22:16:06.610 -06:00 [INF] Application is shutting down...

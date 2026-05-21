@@ -22,19 +22,11 @@ public class LoginE2ETests : PlaywrightTestBase
         // GIVEN: usuario registrado existe en la base de datos (seeded data)
         // WHEN: navegar a /signIn + completar form + submit
         await Page.GotoAsync($"{E2eContainerHelper.Instance.FrontendBaseUrl}/signIn");
-
-        var emailInput = Page.GetByLabel("Email");
-        var passwordInput = Page.GetByLabel("Password");
-        var submitButton = Page.GetByRole(AriaRole.Button, new() { Name = "Iniciar Sesión" });
-
-        // Leer credenciales de configuración (NO hardcodear)
-        await emailInput.FillAsync(E2ETestSettings.TestUserEmail);
-        await passwordInput.FillAsync(E2ETestSettings.TestUserPassword);
-        await submitButton.ClickAsync();
-
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserPassword);
+        await Page.ClickAsync("button.sign");
         // THEN: redirect a homepage
         await Page.WaitForURLAsync(new Regex(".*(/|/?home|/?Index)", RegexOptions.IgnoreCase));
-
         // AND: verificar que la página cargó con contenido real
         var title = await Page.TitleAsync();
         Assert.True(!string.IsNullOrWhiteSpace(title), "Page title should not be empty after login");
@@ -51,16 +43,12 @@ public class LoginE2ETests : PlaywrightTestBase
         await Page.GotoAsync($"{E2eContainerHelper.Instance.FrontendBaseUrl}/signIn");
 
         // WHEN: completar form con credenciales inválidas + submit
-        var emailInput = Page.GetByLabel("Email");
-        var passwordInput = Page.GetByLabel("Password");
-        var submitButton = Page.GetByRole(AriaRole.Button, new() { Name = "Iniciar Sesión" });
-
-        await emailInput.FillAsync(E2ETestSettings.TestUserEmail);
-        await passwordInput.FillAsync("WrongPassword123!");
-        await submitButton.ClickAsync();
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserEmail);
+        await Page.FillAsync("input[name='contrasena']", "WrongPassword123!");
+        await Page.ClickAsync("button.sign");
 
         // THEN: muestra mensaje de error
-        var errorMessage = Page.GetByText(new Regex("credenciales inválidas|incorrectas|error|inválid", RegexOptions.IgnoreCase));
+        var errorMessage = Page.GetByText(new Regex("credenciales inválidas|incorrectos|error|inválid", RegexOptions.IgnoreCase));
         await errorMessage.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
 
         // AND: la URL permanece en /signIn (no hay redirect)

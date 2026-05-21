@@ -62,7 +62,9 @@ public class HomepageE2ETests : PlaywrightTestBase
         await navMenu.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
 
         // Verificar link de navegación "Clase"
-        var clasesLink = Page.GetByRole(AriaRole.Link, new() { Name = "Clase" });
+        var clasesLink = Page.GetByRole(AriaRole.Link, new() { Name = "Clase" })
+            .First;
+         
         await clasesLink.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible });
     }
 }

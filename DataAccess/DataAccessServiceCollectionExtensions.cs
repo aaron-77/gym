@@ -7,6 +7,7 @@ namespace DataAccess
     {
         public static IServiceCollection AddDataAccess(this IServiceCollection services)
         {
+            /*
             var connString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
             services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
@@ -16,7 +17,7 @@ namespace DataAccess
                     "Config�rala antes de ejecutar comandos de EF Core o iniciar la API.");
                 options.UseSqlServer(cs);
             });
-            
+            */
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IAccessTokenRepository, AccessTokenRepository>();
             services.AddScoped<IClasesRepository, ClasesRepository>();
