@@ -107,7 +107,7 @@ E2E tests cover **critical user paths only**. They are the slowest and most brit
 
 | # | Test Name | GIVEN | WHEN | THEN |
 |---|-----------|-------|------|------|
-| 6 | `Navigation_ClickOnClasesLink_LoadsClasesPage` | User is on homepage | Click link with text "Clases" or "Clase" | Page URL matches pattern `.*/clases.*` (case insensitive), AND page contains class-related content |
+| 6 | `Navigation_ClickOnClasesLink_LoadsClasesPage` | User is on homepage | Click link with text "Clases" or "Clase" | Page URL matches pattern `.*/#clases.*` (case insensitive), AND page contains class-related content |
 
 ### Scenario: Click on Horarios link loads schedules page
 
@@ -119,7 +119,7 @@ E2E tests cover **critical user paths only**. They are the slowest and most brit
 
 | # | Test Name | GIVEN | WHEN | THEN |
 |---|-----------|-------|------|------|
-| 8 | `Navigation_ClickOnHomeLink_ReturnsToHomepage` | User is on `/clases` page | Click link with text "Home" or "Inicio" | Page URL matches pattern `.*(/|/?home|/?Index)` (case insensitive) |
+| 8 | `Navigation_ClickOnHomeLink_ReturnsToHomepage` | User is on `/#clases` page | Click link with text "Home" or "Inicio" | Page URL matches pattern `.*(/|/?home|/?Index)` (case insensitive) |
 
 ---
 

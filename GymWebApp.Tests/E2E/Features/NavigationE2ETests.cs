@@ -27,7 +27,7 @@ public class NavigationE2ETests : PlaywrightTestBase
         await clasesLink.ClickAsync();
 
         // THEN: URL refleja navegación
-        await Page.WaitForURLAsync(new Regex(".*/#classes.*", RegexOptions.IgnoreCase));
+        await Page.WaitForURLAsync(new Regex(".*/#clases.*", RegexOptions.IgnoreCase));
 
         // AND: verificar que la página contiene contenido relacionado
         var title = await Page.TitleAsync();
@@ -66,7 +66,7 @@ public class NavigationE2ETests : PlaywrightTestBase
     public async Task Navigation_ClickOnHomeLink_ReturnsToHomepage()
     {
         // GIVEN: usuario en página de clases
-        await Page.GotoAsync($"{E2eContainerHelper.Instance.FrontendBaseUrl}/#classes");
+        await Page.GotoAsync($"{E2eContainerHelper.Instance.FrontendBaseUrl}/#clases");
 
         // WHEN: hacer click en link de navegación "Home"
         var homeLink = Page.GetByRole(AriaRole.Link, new() { Name = "Inicio" }).First;
