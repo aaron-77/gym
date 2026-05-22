@@ -16,71 +16,33 @@ namespace GymFrontend.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _config;
         private readonly IHttpCustomClient client;
+        private readonly ClasesManager _clasesManager;
 
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IHttpCustomClient httpClient)
+        public HomeController(ILogger<HomeController> logger, IConfiguration configuration, IHttpCustomClient httpClient, ClasesManager clasesManager)
         {
             _logger = logger;
             _config = configuration;
             client = httpClient;
+            _clasesManager = clasesManager;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             _logger?.LogInformation("HomeController.Index called");
-            // Crear una lista de ejemplo de clases basada en las descripciones originales
-            var clasesPreview = new List<DTOClasePreview>
+            try
             {
-                new DTOClasePreview
+                var response = await _clasesManager.ObtenerPreviewDeClases();
+                if (response?.success == true && response.payload != null)
                 {
-                    idClase = 5,
-                    urlImage = "/img/hiit.jpg",
-                    nombreClase = "Entrenamiento HIIT",
-                    descripcionCortaClase =
-                        "Entrenamiento de intervalos de alta intensidad para maximizar la quema de caloru00edas y mejorar la salud cardiovascular.",
-                },
-                new DTOClasePreview
-                {
-                    idClase = 2,
-                    urlImage = "/img/strenght.jpg",
-                    nombreClase = "Fuerza y Potencia",
-                    descripcionCortaClase =
-                        "Desarrolla mu00fasculo, aumenta la fuerza y desarrolla potencia explosiva con nuestro programa de fuerza integral.",
-                },
-                new DTOClasePreview
-                {
-                    idClase = 3,
-                    urlImage = "/img/crossfit.jpg",
-                    nombreClase = "CrossFit",
-                    descripcionCortaClase =
-                        "Combina fuerza y acondicionamiento en movimientos funcionales variados realizados a alta intensidad.",
-                },
-                new DTOClasePreview
-                {
-                    idClase = 4,
-                    urlImage = "/img/boxing.jpg",
-                    nombreClase = "Boxeo",
-                    descripcionCortaClase =
-                        "Aprende tu00e9cnicas de boxeo mientras obtienes un entrenamiento de cuerpo completo que mejora la coordinaciu00f3n y quema caloru00edas.",
-                },
-                new DTOClasePreview
-                {
-                    idClase = 1,
-                    urlImage = "/img/functional.jpg",
-                    nombreClase = "Entrenamiento Funcional",
-                    descripcionCortaClase =
-                        "Mejora tus movimientos diarios con ejercicios que simulan actividades comunes.",
-                },
-                new DTOClasePreview
-                {
-                    idClase = 6,
-                    urlImage = "/img/personaltraining.jpg",
-                    nombreClase = "Entrenamiento Personal",
-                    descripcionCortaClase =
-                        "Obtu00e9n atenciu00f3n personalizada y entrenamientos personalizados para alcanzar tus objetivos especu00edficos de fitness.",
-                },
-            };
-
-            return View(clasesPreview);
+                    return View(response.payload);
+                }
+                return View(new List<DTOClasePreview>());
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error loading class previews");
+                return View(new List<DTOClasePreview>());
+            }
         }
 
         public IActionResult Privacy()

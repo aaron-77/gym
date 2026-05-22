@@ -1,8 +1,9 @@
 @model DTO.Dtos.DetalleDeClase
 
 @{
-    ViewData["Title"] = "Entrenamiento HIIT - GymPower";
-    ViewData["Description"] = "Descubre nuestro entrenamiento HIIT en GymPower. Quema caloru00edas y mejora tu condiciu00f3n fu00edsica con nuestras clases de alta intensidad.";
+    var tituloClase = Model.BeneficiosDeLaClase?.FirstOrDefault()?.beneficio ?? "CLASE";
+    ViewData["Title"] = $"{tituloClase} - GymPower";
+    ViewData["Description"] = Model.DescripcionDeLaClase ?? "Descubre nuestras clases en GymPower.";
     ViewData["BodyClass"] = "clase-detalle-page";
     Layout = "_NavbarLayout";
 }
@@ -22,16 +23,16 @@
             <p class="class-header-subtitle">Entrenamiento por Intervalos de Alta Intensidad</p>
             <div class="class-header-info">
                 <div class="info-badge">
-                    <img src="~/img/svgacceso24black.svg" alt="Duraciu00f3n" class="icon">
-                    <span>45 minutos</span>
+                    <img src="~/img/svgacceso24black.svg" alt="Duración" class="icon">
+                    <span>@(Model.Duracion > 0 ? $"{Model.Duracion} minutos" : "45 minutos")</span>
                 </div>
                 <div class="info-badge">
                     <img src="~/img/flame.svg" alt="Intensidad" class="icon">
-                    <span>Alta Intensidad</span>
+                    <span>@(!string.IsNullOrEmpty(Model.NivelDeIntensidad) ? Model.NivelDeIntensidad : "Alta Intensidad")</span>
                 </div>
                 <div class="info-badge">
                     <img src="~/img/target.svg" alt="Nivel" class="icon">
-                    <span>Intermedio a Avanzado</span>
+                    <span>@(!string.IsNullOrEmpty(Model.NivelDeDificultad) ? Model.NivelDeDificultad : "Intermedio a Avanzado")</span>
                 </div>
             </div>
             <a asp-controller="Home" asp-action="Index" asp-fragment="membership" class="btn btn-primary btn-lg">Reservar Clase</a>
@@ -45,12 +46,19 @@
         <div class="description-grid">
             <div class="description-content">
                 <h2 class="section-title">SOBRE ESTA <span class="text-accent">CLASE</span></h2>
-                <p class="description-text">
-                    El Entrenamiento por Intervalos de Alta Intensidad (HIIT) alterna entre ráfagas intensas de actividad y períodos fijos de actividad menos intensa o descanso. Nuestras clases HIIT están diseñadas para aumentar tu ritmo cardíaco y quemar más grasa en menos tiempo.
-                </p>
-                <p class="description-text">
-                    Este tipo de entrenamiento te proporciona un entrenamiento completo mientras mejora tu condición cardiovascular y maximiza la quema de calorías. Los estudios han demostrado que el HIIT puede quemar hasta un 30% más de calorías que otras formas de cardio en el mismo período de tiempo.
-                </p>
+                @if (!string.IsNullOrEmpty(Model.DescripcionDeLaClase))
+                {
+                    <p class="description-text">@Model.DescripcionDeLaClase</p>
+                }
+                else
+                {
+                    <p class="description-text">
+                        El Entrenamiento por Intervalos de Alta Intensidad (HIIT) alterna entre ráfagas intensas de actividad y períodos fijos de actividad menos intensa o descanso. Nuestras clases HIIT están diseñadas para aumentar tu ritmo cardíaco y quemar más grasa en menos tiempo.
+                    </p>
+                    <p class="description-text">
+                        Este tipo de entrenamiento te proporciona un entrenamiento completo mientras mejora tu condición cardiovascular y maximiza la quema de calorías. Los estudios han demostrado que el HIIT puede quemar hasta un 30% más de calorías que otras formas de cardio en el mismo período de tiempo.
+                    </p>
+                }
                 <div class="description-features">
                     @if (Model.BeneficiosDeLaClase != null && Model.BeneficiosDeLaClase.Any())
                     {
@@ -84,7 +92,7 @@
                 </div>
             </div>
             <div class="description-image">
-                <img src="~/img/hiit2.jpg" alt="Clase de HIIT en acción">
+                <img src="@(Model.imagenesDeClase?.urlParaParaDescripcionDeClase ?? "~/img/hiit2.jpg")" alt="Clase en acción">
             </div>
         </div>
     </div>
@@ -209,7 +217,7 @@
             }
         </div>
         <div class="tips-image">
-            <img src="~/img/lesiongym.jpg" alt="Principiante en clase de HIIT">
+            <img src="@(Model.imagenesDeClase?.urlParaBloqueConsejos ?? "~/img/lesiongym.jpg")" alt="Consejos para principiantes">
         </div>
     </div>
 </section>

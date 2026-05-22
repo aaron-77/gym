@@ -98,6 +98,26 @@ namespace BL
             }
         }
 
+        public async Task<DTOResponse<List<DTOClasePreview>>> ObtenerPreviewDeClases()
+        {
+            try
+            {
+                string endpoint = "api/clases/preview";
+                string response = await _httpClient.get(endpoint);
+                return JsonSerializer.Deserialize<DTOResponse<List<DTOClasePreview>>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<List<DTOClasePreview>> { success = false, message = "Error de deserialización o respuesta vacía." };
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: ObtenerPreviewDeClases | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+                
+                return new DTOResponse<List<DTOClasePreview>> { success = false, message = "Error al obtener previews de clases." };
+            }
+        }
+
         public async Task<DTOResponse<List<DTOClaseProgramadaView>>> ObtenerClasesProgramadasPorId(int? idClase = null)
         {
             try
