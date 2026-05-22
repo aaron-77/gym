@@ -33,6 +33,7 @@
 
 .fake
 API/logs
+GymFrontend/logs
 API/bin
 API/obj
 BL/bin
