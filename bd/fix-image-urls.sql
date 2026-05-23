@@ -1,8 +1,9 @@
 -- ============================================================================
 -- FitnessGym - Fix Image URLs Script
 -- ============================================================================
--- Replaces '../img/' prefix with '/img/' in all existing image URLs.
--- Safe to re-run: only affects rows that still have '../img/' prefix.
+-- Replaces '../img/' prefix with '/img/' ONLY in urlPublica columns.
+-- urlPrivada columns keep '../img/' prefix (server-side relative paths).
+-- Safe to re-run: only affects rows that still have '../img/' in urlPublica.
 -- ============================================================================
 
 SET NOCOUNT ON;
@@ -12,27 +13,26 @@ BEGIN TRAN;
 GO
 
 PRINT '========================================';
-PRINT 'Fixing image URLs: ../img/ -> /img/';
+PRINT 'Fixing image URLs: urlPublica ../img/ -> /img/';
 PRINT '========================================';
 PRINT '';
 
 -- ============================================================================
--- 1. Fix iconsForParameters
+-- 1. Fix iconsForParameters (only urlPublica)
 -- ============================================================================
-PRINT '--- 1. Fixing iconsForParameters ---';
+PRINT '--- 1. Fixing iconsForParameters urlPublica ---';
 
 UPDATE iconsForParameters
-SET urlPrivada = REPLACE(urlPrivada, '../img/', '/img/'),
-    urlPublica = REPLACE(urlPublica, '../img/', '/img/')
-WHERE urlPrivada LIKE '../img/%' OR urlPublica LIKE '../img/%';
+SET urlPublica = REPLACE(urlPublica, '../img/', '/img/')
+WHERE urlPublica LIKE '../img/%';
 
 PRINT '  Rows updated: ' + CAST(@@ROWCOUNT AS varchar(10));
 PRINT '';
 
 -- ============================================================================
--- 2. Fix imagesForClases
+-- 2. Fix imagesForClases (all columns are public URLs)
 -- ============================================================================
-PRINT '--- 2. Fixing imagesForClases ---';
+PRINT '--- 2. Fixing imagesForClases URLs ---';
 
 UPDATE imagesForClases
 SET urlParaBanner = REPLACE(urlParaBanner, '../img/', '/img/'),
@@ -46,14 +46,13 @@ PRINT '  Rows updated: ' + CAST(@@ROWCOUNT AS varchar(10));
 PRINT '';
 
 -- ============================================================================
--- 3. Fix imagesForExercises
+-- 3. Fix imagesForExercises (only urlPublica)
 -- ============================================================================
-PRINT '--- 3. Fixing imagesForExercises ---';
+PRINT '--- 3. Fixing imagesForExercises urlPublica ---';
 
 UPDATE imagesForExercises
-SET urlPrivada = REPLACE(urlPrivada, '../img/', '/img/'),
-    urlPublica = REPLACE(urlPublica, '../img/', '/img/')
-WHERE urlPrivada LIKE '../img/%' OR urlPublica LIKE '../img/%';
+SET urlPublica = REPLACE(urlPublica, '../img/', '/img/')
+WHERE urlPublica LIKE '../img/%';
 
 PRINT '  Rows updated: ' + CAST(@@ROWCOUNT AS varchar(10));
 PRINT '';
@@ -66,7 +65,7 @@ PRINT '--- Verification ---';
 DECLARE @RemainingBadUrls int = 0;
 
 SELECT @RemainingBadUrls = COUNT(*) FROM iconsForParameters
-WHERE urlPrivada LIKE '../img/%' OR urlPublica LIKE '../img/%';
+WHERE urlPublica LIKE '../img/%';
 
 SELECT @RemainingBadUrls = @RemainingBadUrls + COUNT(*) FROM imagesForClases
 WHERE urlParaBanner LIKE '../img/%'
@@ -74,12 +73,12 @@ WHERE urlParaBanner LIKE '../img/%'
    OR urlParaBloqueConsejos LIKE '../img/%';
 
 SELECT @RemainingBadUrls = @RemainingBadUrls + COUNT(*) FROM imagesForExercises
-WHERE urlPrivada LIKE '../img/%' OR urlPublica LIKE '../img/%';
+WHERE urlPublica LIKE '../img/%';
 
 IF @RemainingBadUrls = 0
-    PRINT '  SUCCESS: All image URLs now start with /img/';
+    PRINT '  SUCCESS: All public image URLs now start with /img/';
 ELSE
-    PRINT '  WARNING: ' + CAST(@RemainingBadUrls AS varchar(10)) + ' URLs still have ../img/ prefix';
+    PRINT '  WARNING: ' + CAST(@RemainingBadUrls AS varchar(10)) + ' public URLs still have ../img/ prefix';
 
 PRINT '';
 PRINT '========================================';

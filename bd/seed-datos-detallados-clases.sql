@@ -96,7 +96,7 @@ PRINT '--- 2. Updating class images ---';
 
 -- HIIT (5) - already exists, UPDATE paths
 UPDATE imagesForClases SET
-    urlParaBanner = N'/img/hiitherosection.jpg',
+    urlParaBanner = N'/img/hiit.jpg',
     urlParaParaDescripcionDeClase = N'/img/hiit2.jpg',
     urlParaBloqueConsejos = N'/img/lesiongym.jpg',
     FechaDeModificacion = GETDATE()
@@ -133,6 +133,12 @@ SELECT 10, N'/img/personaltraining.jpg', N'/img/personaltraining.jpg', N'/img/le
 WHERE NOT EXISTS (SELECT 1 FROM imagesForClases WHERE fkClase = 10);
 PRINT '  Personal (10) images inserted';
 
+-- Yoga Avanzado (12)
+INSERT INTO imagesForClases (fkClase, urlParaBanner, urlParaParaDescripcionDeClase, urlParaBloqueConsejos, FechaDeCreacion, FechaDeModificacion)
+SELECT 12, N'/img/esterilla.jpg', N'/img/esterilla.jpg', N'/img/lesiongym.jpg', GETDATE(), GETDATE()
+WHERE NOT EXISTS (SELECT 1 FROM imagesForClases WHERE fkClase = 12);
+PRINT '  Yoga Avanzado (12) images inserted';
+
 PRINT '';
 
 -- ============================================================================
@@ -141,103 +147,193 @@ PRINT '';
 PRINT '--- 3. Updating benefit icons ---';
 
 -- UPDATE existing icons to use real file paths
-UPDATE iconsForParameters SET urlPrivada = N'/img/lightbulb.svg', urlPublica = N'/img/lightbulb.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/lightbulb.svg', urlPublica = N'/img/lightbulb.svg'
 WHERE nombre = N'versatilidad';
-UPDATE iconsForParameters SET urlPrivada = N'/img/svgmacuerna.svg', urlPublica = N'/img/svgmacuerna.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/svgmacuerna.svg', urlPublica = N'/img/svgmacuerna.svg'
 WHERE nombre = N'fuerza-funcional';
-UPDATE iconsForParameters SET urlPrivada = N'/img/man.svg', urlPublica = N'/img/man.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/man.svg', urlPublica = N'/img/man.svg'
 WHERE nombre = N'comunidad';
-UPDATE iconsForParameters SET urlPrivada = N'/img/svgmacuerna.svg', urlPublica = N'/img/svgmacuerna.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/svgmacuerna.svg', urlPublica = N'/img/svgmacuerna.svg'
 WHERE nombre = N'hipertrofia';
-UPDATE iconsForParameters SET urlPrivada = N'/img/peso2.svg', urlPublica = N'/img/peso2.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/peso2.svg', urlPublica = N'/img/peso2.svg'
 WHERE nombre = N'densidad-osea';
-UPDATE iconsForParameters SET urlPrivada = N'/img/target.svg', urlPublica = N'/img/target.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/target.svg', urlPublica = N'/img/target.svg'
 WHERE nombre = N'coordinacion';
-UPDATE iconsForParameters SET urlPrivada = N'/img/man.svg', urlPublica = N'/img/man.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/man.svg', urlPublica = N'/img/man.svg'
 WHERE nombre = N'autodefensa';
-UPDATE iconsForParameters SET urlPrivada = N'/img/pies.svg', urlPublica = N'/img/pies.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/pies.svg', urlPublica = N'/img/pies.svg'
 WHERE nombre = N'movilidad';
-UPDATE iconsForParameters SET urlPrivada = N'/img/check.svg', urlPublica = N'/img/check.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/check.svg', urlPublica = N'/img/check.svg'
 WHERE nombre = N'prevencion';
-UPDATE iconsForParameters SET urlPrivada = N'/img/lightbulbwhite.svg', urlPublica = N'/img/lightbulbwhite.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/lightbulbwhite.svg', urlPublica = N'/img/lightbulbwhite.svg'
 WHERE nombre = N'atencion';
-UPDATE iconsForParameters SET urlPrivada = N'/img/svgarrow.svg', urlPublica = N'/img/svgarrow.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/svgarrow.svg', urlPublica = N'/img/svgarrow.svg'
 WHERE nombre = N'progresion';
-UPDATE iconsForParameters SET urlPrivada = N'/img/target.svg', urlPublica = N'/img/target.svg'
+UPDATE iconsForParameters SET urlPrivada = N'../img/target.svg', urlPublica = N'/img/target.svg'
 WHERE nombre = N'resultados';
+UPDATE iconsForParameters SET urlPrivada = N'../img/flame.svg', urlPublica = N'/img/flame.svg'
+WHERE nombre = N'flama';
 
 -- INSERT missing icons (IF NOT EXISTS)
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'versatilidad', N'/img/lightbulb.svg', N'/img/lightbulb.svg'
+SELECT N'versatilidad', N'../img/lightbulb.svg', N'/img/lightbulb.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'versatilidad');
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'fuerza-funcional', N'/img/svgmacuerna.svg', N'/img/svgmacuerna.svg'
+SELECT N'fuerza-funcional', N'../img/svgmacuerna.svg', N'/img/svgmacuerna.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'fuerza-funcional');
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'comunidad', N'/img/man.svg', N'/img/man.svg'
+SELECT N'comunidad', N'../img/man.svg', N'/img/man.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'comunidad');
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'hipertrofia', N'/img/svgmacuerna.svg', N'/img/svgmacuerna.svg'
+SELECT N'hipertrofia', N'../img/svgmacuerna.svg', N'/img/svgmacuerna.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'hipertrofia');
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'densidad-osea', N'/img/peso2.svg', N'/img/peso2.svg'
+SELECT N'densidad-osea', N'../img/peso2.svg', N'/img/peso2.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'densidad-osea');
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'coordinacion', N'/img/target.svg', N'/img/target.svg'
+SELECT N'coordinacion', N'../img/target.svg', N'/img/target.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'coordinacion');
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'autodefensa', N'/img/man.svg', N'/img/man.svg'
+SELECT N'autodefensa', N'../img/man.svg', N'/img/man.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'autodefensa');
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'movilidad', N'/img/pies.svg', N'/img/pies.svg'
+SELECT N'movilidad', N'../img/pies.svg', N'/img/pies.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'movilidad');
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'prevencion', N'/img/check.svg', N'/img/check.svg'
+SELECT N'prevencion', N'../img/check.svg', N'/img/check.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'prevencion');
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'atencion', N'/img/lightbulbwhite.svg', N'/img/lightbulbwhite.svg'
+SELECT N'atencion', N'../img/lightbulbwhite.svg', N'/img/lightbulbwhite.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'atencion');
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'progresion', N'/img/svgarrow.svg', N'/img/svgarrow.svg'
+SELECT N'progresion', N'../img/svgarrow.svg', N'/img/svgarrow.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'progresion');
 INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
-SELECT N'resultados', N'/img/target.svg', N'/img/target.svg'
+SELECT N'resultados', N'../img/target.svg', N'/img/target.svg'
 WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'resultados');
+INSERT INTO iconsForParameters (nombre, urlPrivada, urlPublica)
+SELECT N'flama', N'../img/flame.svg', N'/img/flame.svg'
+WHERE NOT EXISTS (SELECT 1 FROM iconsForParameters WHERE nombre = N'flama');
 
--- DELETE icons that don't have real files (were inserted by v1)
+-- Reassign FK references from fake icons to real ones BEFORE deleting
+-- Tables referencing iconsForParameters: parametrosDeMedicion, Ejercicios, Equipos, beneficiosDeClase
+PRINT '  Reassigning FK references from fake icons...';
+
+UPDATE parametrosDeMedicion SET fkIcon = (SELECT iconId FROM iconsForParameters WHERE nombre = N'flama')
+WHERE fkIcon IN (SELECT iconId FROM iconsForParameters WHERE nombre IN (N'cronometro', N'resistencia'));
+
+UPDATE parametrosDeMedicion SET fkIcon = (SELECT iconId FROM iconsForParameters WHERE nombre = N'coordinacion')
+WHERE fkIcon IN (SELECT iconId FROM iconsForParameters WHERE nombre = N'objetivo');
+
+UPDATE Ejercicios SET fkIcon = (SELECT iconId FROM iconsForParameters WHERE nombre = N'fuerza-funcional')
+WHERE fkIcon IN (SELECT iconId FROM iconsForParameters WHERE nombre = N'fuerza');
+
+UPDATE Equipos SET fkIcon = (SELECT iconId FROM iconsForParameters WHERE nombre = N'comunidad')
+WHERE fkIcon IN (SELECT iconId FROM iconsForParameters WHERE nombre = N'guantes');
+
+UPDATE beneficiosDeClase SET fkIcon = (SELECT iconId FROM iconsForParameters WHERE nombre = N'movilidad')
+WHERE fkIcon IN (SELECT iconId FROM iconsForParameters WHERE nombre = N'flexibilidad');
+
+-- Now safe to DELETE icons that don't have real files
 DELETE FROM iconsForParameters WHERE nombre IN (N'cronometro', N'objetivo', N'guantes', N'flexibilidad', N'resistencia', N'fuerza');
 
-PRINT '  12 benefit icons updated/inserted, 6 fake icons removed';
+PRINT '  13 benefit icons updated/inserted, 6 fake icons removed';
 PRINT '';
 
 -- ============================================================================
--- 3b. INSERT imagesForExercises (NEW SECTION)
+-- 3b. UPDATE/INSERT imagesForExercises
 -- ============================================================================
-PRINT '--- 3b. Inserting exercise images ---';
+PRINT '--- 3b. Updating/inserting exercise images ---';
 
-INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
-SELECT 8, N'Burpees', N'/img/burpees.jpg', N'/img/burpees.jpg'
-WHERE NOT EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 8);
+-- Exercise 8 (Burpees)
+IF EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 8)
+BEGIN
+    UPDATE imagesForExercises SET
+        nombreParaElFront = N'Burpees',
+        urlPrivada = N'../img/burpees.jpg',
+        urlPublica = N'/img/burpees.jpg'
+    WHERE fkEjercicio = 8;
+END
+ELSE
+BEGIN
+    INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
+    VALUES (8, N'Burpees', N'../img/burpees.jpg', N'/img/burpees.jpg');
+END
 
-INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
-SELECT 9, N'Mountain Climbers', N'/img/mountainclimbers.webp', N'/img/mountainclimbers.webp'
-WHERE NOT EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 9);
+-- Exercise 9 (Mountain Climbers)
+IF EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 9)
+BEGIN
+    UPDATE imagesForExercises SET
+        nombreParaElFront = N'Mountain Climbers',
+        urlPrivada = N'../img/mountainclimbers.webp',
+        urlPublica = N'/img/mountainclimbers.webp'
+    WHERE fkEjercicio = 9;
+END
+ELSE
+BEGIN
+    INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
+    VALUES (9, N'Mountain Climbers', N'../img/mountainclimbers.webp', N'/img/mountainclimbers.webp');
+END
 
-INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
-SELECT 10, N'Jumping Jacks', N'/img/jumpingjacks.webp', N'/img/jumpingjacks.webp'
-WHERE NOT EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 10);
+-- Exercise 10 (Jumping Jacks)
+IF EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 10)
+BEGIN
+    UPDATE imagesForExercises SET
+        nombreParaElFront = N'Jumping Jacks',
+        urlPrivada = N'../img/jumpingjacks.webp',
+        urlPublica = N'/img/jumpingjacks.webp'
+    WHERE fkEjercicio = 10;
+END
+ELSE
+BEGIN
+    INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
+    VALUES (10, N'Jumping Jacks', N'../img/jumpingjacks.webp', N'/img/jumpingjacks.webp');
+END
 
-INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
-SELECT 11, N'Sentadillas con Salto', N'/img/sentadillaconsalto.jpg', N'/img/sentadillaconsalto.jpg'
-WHERE NOT EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 11);
+-- Exercise 11 (Sentadillas con Salto)
+IF EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 11)
+BEGIN
+    UPDATE imagesForExercises SET
+        nombreParaElFront = N'Sentadillas con Salto',
+        urlPrivada = N'../img/sentadillaconsalto.jpg',
+        urlPublica = N'/img/sentadillaconsalto.jpg'
+    WHERE fkEjercicio = 11;
+END
+ELSE
+BEGIN
+    INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
+    VALUES (11, N'Sentadillas con Salto', N'../img/sentadillaconsalto.jpg', N'/img/sentadillaconsalto.jpg');
+END
 
-INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
-SELECT 12, N'Planchas Laterales', N'/img/sentadillalateral.webp', N'/img/sentadillalateral.webp'
-WHERE NOT EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 12);
+-- For Exercise 12 (Planchas Laterales)
+IF EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 12)
+BEGIN
+    UPDATE imagesForExercises SET
+        nombreParaElFront = N'Planchas Laterales',
+        urlPrivada = N'../img/sentadillalateral.webp',
+        urlPublica = N'/img/sentadillalateral.webp'
+    WHERE fkEjercicio = 12;
+END
+ELSE
+BEGIN
+    INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
+    VALUES (12, N'Planchas Laterales', N'../img/sentadillalateral.webp', N'/img/sentadillalateral.webp');
+END
 
-INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
-SELECT 13, N'High Knees', N'/img/highknees.jpg', N'/img/highknees.jpg'
-WHERE NOT EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 13);
+-- For Exercise 13 (High Knees) - Correct Planchas Laterales name to High Knees and use proper highknees.jpg
+IF EXISTS (SELECT 1 FROM imagesForExercises WHERE fkEjercicio = 13)
+BEGIN
+    UPDATE imagesForExercises SET
+        nombreParaElFront = N'High Knees',
+        urlPrivada = N'../img/highknees.jpg',
+        urlPublica = N'/img/highknees.jpg'
+    WHERE fkEjercicio = 13;
+END
+ELSE
+BEGIN
+    INSERT INTO imagesForExercises (fkEjercicio, nombreParaElFront, urlPrivada, urlPublica)
+    VALUES (13, N'High Knees', N'../img/highknees.jpg', N'/img/highknees.jpg');
+END
 
 PRINT '  6 exercise images inserted (skipped: Dominadas, Abdominales, peso muerto - no images available)';
 PRINT '';
@@ -891,7 +987,7 @@ PRINT '';
 PRINT 'Summary:';
 PRINT '  - 6 Clases updated with descriptions and metadata';
 PRINT '  - 5 imagesForClases updated/inserted with REAL /img/ paths';
-PRINT '  - 12 benefit icons updated/inserted with REAL SVG files';
+PRINT '  - 13 benefit icons updated/inserted with REAL SVG files';
 PRINT '  - 6 fake icons removed (no real files)';
 PRINT '  - 6 exercise images inserted (imagesForExercises)';
 PRINT '  - 15 beneficiosDeClase inserted (3 per class x 5 classes)';
