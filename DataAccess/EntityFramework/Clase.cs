@@ -9,6 +9,7 @@ public partial class Clase
     public int ClaseId { get; set; }
 
     public string NombreClase { get; set; } = null!;
+    public string? SubtituloClase {get; set;} 
 
     public int Cupo { get; set; }
 

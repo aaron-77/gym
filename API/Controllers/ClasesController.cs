@@ -102,6 +102,8 @@ namespace API.Controllers
                 // Mapear los resultados al modelo DetalleDeClase
                 var detalle = new DetalleDeClase
                 {
+                    NombreClase = detalleRaw.NombreClase,
+                    SubtituloClase = detalleRaw.SubtituloClase,
                     Duracion = detalleRaw.Duracion,
                     NivelDeIntensidad = detalleRaw.NivelDeIntensidad,
                     NivelDeDificultad = detalleRaw.NivelDeDificultad,

@@ -117,9 +117,7 @@ public static class ClasesProgramadasHelper
             row["fkEntrenador"] = datos.fkEntrenador ?? (object)DBNull.Value;
             row["cupoMaximo"] = datos.cupoMaximo;
             row["fkEstadoClaseProgramada"] = datos.fkEstadoClaseProgramada;
-            row["fechaDeLaClase"] = datos.fechaDeLaClase.HasValue 
-                ? datos.fechaDeLaClase.Value.ToDateTime(TimeOnly.MinValue) 
-                : DateTime.Now.AddDays(1);
+            row["fechaDeLaClase"] = datos.fechaDeLaClase;
             row["idUsuarioQueReserva"] = datos.idUsuarioQueReserva ?? (object)DBNull.Value;
             row["fkHoraLaboral"] = datos.fkHoraLaboral;
             row["idPreservaDeHorario"] = datos.fkHoraLaboral;

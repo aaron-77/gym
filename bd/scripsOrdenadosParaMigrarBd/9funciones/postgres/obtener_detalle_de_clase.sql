@@ -8,6 +8,7 @@ CREATE OR REPLACE FUNCTION public.obtener_detalle_de_clase(p_id_clase integer)
 RETURNS TABLE (
     clase_id integer,
     nombre_clase text,
+    subtitulo_clase text,
     duracion integer,
     nivel_de_intensidad text,
     nivel_de_dificultad text,
@@ -27,6 +28,7 @@ BEGIN
         SELECT 
             c.clase_id,
             c.nombre_clase,
+            c.subtitulo_clase,
             c.duracion_en_minutos AS duracion,
             ni.nombre_nivel_de_intensidad AS nivel_de_intensidad,
             nd.nombre_nivel_de_dificultad AS nivel_de_dificultad,

@@ -6598,33 +6598,33 @@ SET IDENTITY_INSERT [dbo].[Clases] ON
 
 GO
 
-INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (1, N'pecho', 10, N'ejericios para desarrollar pecho', NULL, NULL, NULL, 15, 60, 1, N'8094a747-55d9-4782-9b31-b6602a79b7ed')
+INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [SubtituloClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (1, N'pecho', NULL, 10, N'ejericios para desarrollar pecho', NULL, NULL, NULL, 15, 60, 1, N'8094a747-55d9-4782-9b31-b6602a79b7ed')
 GO
 
-INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (2, N'pecho', 10, N'ejericios para desarrollar pecho', NULL, NULL, NULL, 15, 60, 1, N'8094a747-55d9-4782-9b31-b6602a79b7ed')
+INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [SubtituloClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (2, N'pecho', NULL, 10, N'ejericios para desarrollar pecho', NULL, NULL, NULL, 15, 60, 1, N'8094a747-55d9-4782-9b31-b6602a79b7ed')
 GO
 
-INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (5, N'Hiit', 10, N' El Entrenamiento por Intervalos de Alta Intensidad (HIIT) alterna entre r�fagas intensas de actividad y per�odos fijos de actividad menos intensa o descanso. Nuestras clases HIIT est�n dise�adas para aumentar tu ritmo card�aco y quemar m�s grasa en menos tiempo.
+INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [SubtituloClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (5, N'Hiit', N'Entrenamiento por Intervalos de Alta Intensidad', 10, N' El Entrenamiento por Intervalos de Alta Intensidad (HIIT) alterna entre r�fagas intensas de actividad y per�odos fijos de actividad menos intensa o descanso. Nuestras clases HIIT est�n dise�adas para aumentar tu ritmo card�aco y quemar m�s grasa en menos tiempo.
 Este tipo de entrenamiento te proporciona un entrenamiento completo mientras mejora tu condici�n cardiovascular y maximiza la quema de calor�as. Los estudios han demostrado que el HIIT puede quemar hasta un 30% m�s de calor�as que otras formas de cardio en el mismo per�odo de tiempo. ', 45, 2, 3, 15, 60, 1, N'8094a747-55d9-4782-9b31-b6602a79b7ed')
 GO
 
-INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (6, N'Crossfit', 10, N' El Entrenamiento por Intervalos de Alta Intensidad (HIIT) alterna entre r�fagas intensas de actividad y per�odos fijos de actividad menos intensa o descanso. Nuestras clases HIIT est�n dise�adas para aumentar tu ritmo card�aco y quemar m�s grasa en menos tiempo.
+INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [SubtituloClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (6, N'Crossfit', N'Workout Funcional de Alta Intensidad', 10, N' El Entrenamiento por Intervalos de Alta Intensidad (HIIT) alterna entre r�fagas intensas de actividad y per�odos fijos de actividad menos intensa o descanso. Nuestras clases HIIT est�n dise�adas para aumentar tu ritmo card�aco y quemar m�s grasa en menos tiempo.
 Este tipo de entrenamiento te proporciona un entrenamiento completo mientras mejora tu condici�n cardiovascular y maximiza la quema de calor�as. Los estudios han demostrado que el HIIT puede quemar hasta un 30% m�s de calor�as que otras formas de cardio en el mismo per�odo de tiempo. ', 45, 3, 3, 15, 60, 1, N'8094a747-55d9-4782-9b31-b6602a79b7ed')
 GO
 
-INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (7, N'Fuerza y potencia', 10, NULL, 45, 3, 3, 15, 60, 1, N'8094a747-55d9-4782-9b31-b6602a79b7ed')
+INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [SubtituloClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (7, N'Fuerza y potencia', N'Desarrolla tu Máximo Potencial Muscular', 10, NULL, 45, 3, 3, 15, 60, 1, N'8094a747-55d9-4782-9b31-b6602a79b7ed')
 GO
 
-INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (8, N'Boxeo', 10, NULL, 45, 2, 1, 15, 60, 1, N'44e25915-a3df-4bdb-8520-07dca77ecb69')
+INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [SubtituloClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (8, N'Boxeo', N'Técnica, Resistencia y Potencia de Golpeo', 10, NULL, 45, 2, 1, 15, 60, 1, N'44e25915-a3df-4bdb-8520-07dca77ecb69')
 GO
 
-INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (9, N'Entrenamiento Funcional', 10, NULL, 45, 1, 1, 15, 60, 1, N'574820a9-b28b-4b37-a665-029d2f41e272')
+INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [SubtituloClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (9, N'Entrenamiento Funcional', N'Movimiento Natural y Eficiente para tu Cuerpo', 10, NULL, 45, 1, 1, 15, 60, 1, N'574820a9-b28b-4b37-a665-029d2f41e272')
 GO
 
-INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (10, N'Entrenamiento Personal', 10, NULL, 45, 1, 3, 15, 60, 1, N'44e25915-a3df-4bdb-8520-07dca77ecb69')
+INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [SubtituloClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (10, N'Entrenamiento Personal', N'Resultados Garantizados con un Coach Experto', 10, NULL, 45, 1, 3, 15, 60, 1, N'44e25915-a3df-4bdb-8520-07dca77ecb69')
 GO
 
-INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (12, N'Yoga Avanzado', 20, N'Sesi�n de yoga nivel avanzado enfocada en flexibilidad y respiraci�n.', 45, 2, 3, 15, 60, 1, N'8094a747-55d9-4782-9b31-b6602a79b7ed')
+INSERT [dbo].[Clases] ([ClaseID], [NombreClase], [SubtituloClase], [Cupo], [Descripcion], [duracionEnMinutos], [fkIntensidad], [fkDificultad], [tiempoDeDescansoEnMinutos], [duracionEnMinutosConDescansoIncluido], [fkEstadoClase], [InstructorId]) VALUES (12, N'Yoga Avanzado', N'Equilibrio, Fuerza y Flexibilidad al Siguiente Nivel', 20, N'Sesi�n de yoga nivel avanzado enfocada en flexibilidad y respiraci�n.', 45, 2, 3, 15, 60, 1, N'8094a747-55d9-4782-9b31-b6602a79b7ed')
 GO
 
 SET IDENTITY_INSERT [dbo].[Clases] OFF

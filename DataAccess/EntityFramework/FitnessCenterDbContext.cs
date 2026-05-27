@@ -238,6 +238,7 @@ public partial class FitnessCenterDbContext :IdentityDbContext<ApplicationUser>
             entity.HasKey(e => e.ClaseId).HasName("PK__Clases__F54296B30E7E66FD");
 
             entity.Property(e => e.ClaseId).HasColumnName("ClaseID");
+            entity.Property(e => e.SubtituloClase).HasColumnName("SubtituloClase");
             entity.Property(e => e.DuracionEnMinutos).HasColumnName("duracionEnMinutos");
             entity.Property(e => e.DuracionEnMinutosConDescansoIncluido)
                 .HasDefaultValue(60)
@@ -1510,6 +1511,7 @@ public partial class FitnessCenterDbContext :IdentityDbContext<ApplicationUser>
             entity.HasNoKey();
             entity.Property(d => d.claseId).HasColumnName("claseId");
             entity.Property(d => d.NombreClase).HasColumnName("nombreClase");
+            entity.Property(d => d.SubtituloClase).HasColumnName("subtituloClase");
             entity.Property(d => d.Duracion).HasColumnName("Duracion");
             entity.Property(d => d.NivelDeIntensidad).HasColumnName("NivelDeIntensidad");
             entity.Property(d => d.NivelDeDificultad).HasColumnName("NivelDeDificultad");

@@ -35,7 +35,7 @@ public class E2eContainerHelper : IAsyncLifetime
 
     // Backup configuration
     private const string BackupHostPath = "/mnt/archivos/estudio/proyectos/gym/bd/respaldosbd";
-    private const string BackupFileName = "FitnessGymBackup20260521.bak";
+    private const string BackupFileName = "FitnessGymBackup20260526.bak";
 
     // Nginx configuration
     private const string NginxConfPath = "/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/E2E/Common/nginx.conf";
@@ -65,6 +65,7 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
         _msSqlContainer = new MsSqlBuilder()
             .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
             .WithPassword(sqlPassword)
+            .WithEnvironment("TZ", "America/Mexico_City")
             .WithPortBinding(SqlServerInternalPort, true)
             .WithNetwork(_network)
             .WithNetworkAliases("sqlserver")

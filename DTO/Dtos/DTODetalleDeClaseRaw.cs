@@ -4,6 +4,7 @@ namespace DTO.Dtos
     {
         public int claseId { get; set; }
         public string? NombreClase { get; set; }
+        public string? SubtituloClase { get; set; }
         public int Duracion { get; set; }
         public string? NivelDeIntensidad { get; set; }
         public string? NivelDeDificultad { get; set; }

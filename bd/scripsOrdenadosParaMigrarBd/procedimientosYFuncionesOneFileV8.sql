@@ -692,6 +692,7 @@ CREATE   FUNCTION dbo.ObtenerDetalleDeClase(@IdClase INT)
         SELECT 
             c.claseId,
             c.NombreClase,
+            c.SubtituloClase,
             c.DuracionEnMinutos as Duracion,
             ni.NombreNivelDeIntensidad as NivelDeIntensidad ,
             nd.NombreNivelDeDificultad as NivelDeDificultad ,

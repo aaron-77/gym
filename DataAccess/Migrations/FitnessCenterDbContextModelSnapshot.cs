@@ -764,6 +764,9 @@ namespace DataAccess.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("SubtituloClase")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("TiempoDeDescansoEnMinutos")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")

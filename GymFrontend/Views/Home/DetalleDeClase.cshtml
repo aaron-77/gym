@@ -1,8 +1,7 @@
 @model DTO.Dtos.DetalleDeClase
 
 @{
-    var tituloClase = Model.BeneficiosDeLaClase?.FirstOrDefault()?.beneficio ?? "CLASE";
-    ViewData["Title"] = $"{tituloClase} - GymPower";
+    ViewData["Title"] = $"{Model.NombreClase} - GymPower";
     ViewData["Description"] = Model.DescripcionDeLaClase ?? "Descubre nuestras clases en GymPower.";
     ViewData["BodyClass"] = "clase-detalle-page";
     Layout = "_NavbarLayout";
@@ -19,8 +18,8 @@
     <div class="class-header-overlay"></div>
     <div class="container">
         <div class="class-header-content">
-            <h1 class="class-header-title">ENTRENAMIENTO <span class="text-accent">HIIT</span></h1>
-            <p class="class-header-subtitle">Entrenamiento por Intervalos de Alta Intensidad</p>
+            <h1 class="class-header-title">@Model.NombreClase</h1>
+            <p class="class-header-subtitle">@Model.SubtituloClase</p>
             <div class="class-header-info">
                 <div class="info-badge">
                     <img src="~/img/svgacceso24black.svg" alt="Duración" class="icon">
