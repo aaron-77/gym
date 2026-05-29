@@ -107,7 +107,7 @@ public static class ClasesProgramadasHelper
             dataTable.Columns.Add("fkEntrenador", typeof(string));
             dataTable.Columns.Add("cupoMaximo", typeof(int));
             dataTable.Columns.Add("fkEstadoClaseProgramada", typeof(int));
-            dataTable.Columns.Add("fechaDeLaClase", typeof(DateTime));
+            dataTable.Columns.Add("fechaDeLaClase", typeof(DateOnly));
             dataTable.Columns.Add("idUsuarioQueReserva", typeof(string));
             dataTable.Columns.Add("fkHoraLaboral", typeof(int));
             dataTable.Columns.Add("idPreservaDeHorario", typeof(int));
