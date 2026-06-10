@@ -70,7 +70,7 @@ namespace API.Controllers
         {
             try
             {
-                _logger?.LogInformation("Start ConsultarDetallesDeClase idClase={Id}", idClase);
+                _logger?.LogInformation("[API | ClasesController.ConsultarDetallesDeClase] Start idClase={Id}", idClase);
                 // Ejecutar la función SQL para obtener los detalles de la clase
                 var detalleRaw = await _context
                     .detalleDeClaseRawSP.FromSqlInterpolated(
@@ -156,7 +156,7 @@ namespace API.Controllers
                 };
 
                 // Construir y devolver la respuesta
-                _logger?.LogInformation("Finished ConsultarDetallesDeClase idClase={Id}", idClase);
+                _logger?.LogInformation("[API | ClasesController.ConsultarDetallesDeClase] Finished idClase={Id}", idClase);
                 return Ok(
                     ResponseManager.BuildResponse(
                         true,
@@ -169,7 +169,7 @@ namespace API.Controllers
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Error ConsultarDetallesDeClase idClase={Id}", idClase);
+                _logger?.LogError(ex, "[API | ClasesController.ConsultarDetallesDeClase] \n Error idClase={Id} \n ExceptionMessage:{exMessage} \n StackTrace:{stacktrace} \n innerExMessage:{innerMessage} \n InerExStackTrace", idClase,ex.Message,ex.StackTrace,ex.InnerException?.Message);
                 return StatusCode(
                     500,
                     ResponseManager.BuildResponse<DetalleDeClase>(

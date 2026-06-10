@@ -65,7 +65,7 @@ namespace GymFrontend.Controllers
         {
             try
             {
-                _logger?.LogInformation("Start HomeController.DetalleDeClase idClase={Id}", idClase);
+                _logger?.LogInformation("[Frontend | HomeController.DetalleDeClase] Start idClase={Id}", idClase);
                 string endpointUrl = $"api/clases/detallesDeClase?idClase={idClase}";
                 var responseString = await client.get(endpointUrl);
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -83,13 +83,7 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] M�todo: DetalleDeClase | " +
-                    $"L�nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
-                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
-                    $"Par�metro - IdClase: {idClase} | " +
-                    $"Stack Trace: {ex.StackTrace}";
-                Console.WriteLine(logMessage);
-                
+                _logger?.LogError(ex, "[Frontend | HomeController.DetalleDeClase] Error idClase={Id} | Causa: {ExceptionType} - {ExceptionMessage} | StackTrace: {StackTrace}", idClase, ex.GetType().Name, ex.Message, ex.StackTrace);
                 return View("Error");
             }
         }
