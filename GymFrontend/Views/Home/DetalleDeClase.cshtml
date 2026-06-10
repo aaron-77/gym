@@ -14,51 +14,51 @@
 }
 
 <!-- Cabecera de la Clase -->
-<section class="class-header" style="background-image: url('@Model.imagenesDeClase.urlParaBanner');">
+<section class="class-header" data-section="class-header" style="background-image: url('@Model.imagenesDeClase.urlParaBanner');">
     <div class="class-header-overlay"></div>
     <div class="container">
         <div class="class-header-content">
-            <h1 class="class-header-title">@Model.NombreClase</h1>
-            <p class="class-header-subtitle">@Model.SubtituloClase</p>
+            <h1 class="class-header-title" data-test="header-title">@Model.NombreClase</h1>
+            <p class="class-header-subtitle" data-test="header-subtitle">@Model.SubtituloClase</p>
             <div class="class-header-info">
-                <div class="info-badge">
-                    <img src="~/img/svgacceso24black.svg" alt="Duración" class="icon">
-                    <span>@(Model.Duracion > 0 ? $"{Model.Duracion} minutos" : "45 minutos")</span>
+                <div class="info-badge" data-test="header-duration">
+                    <img src="~/img/svgacceso24black.svg" alt="Duración" class="icon" data-test="header-duration-icon">
+                    <span data-test="header-duration-text">@(Model.Duracion > 0 ? $"{Model.Duracion} minutos" : "45 minutos")</span>
                 </div>
-                <div class="info-badge">
-                    <img src="~/img/flame.svg" alt="Intensidad" class="icon">
-                    <span>@(!string.IsNullOrEmpty(Model.NivelDeIntensidad) ? Model.NivelDeIntensidad : "Alta Intensidad")</span>
+                <div class="info-badge" data-test="header-intensity">
+                    <img src="~/img/flame.svg" alt="Intensidad" class="icon" data-test="header-intensity-icon">
+                    <span data-test="header-intensity-text">@(!string.IsNullOrEmpty(Model.NivelDeIntensidad) ? Model.NivelDeIntensidad : "Alta Intensidad")</span>
                 </div>
-                <div class="info-badge">
-                    <img src="~/img/target.svg" alt="Nivel" class="icon">
-                    <span>@(!string.IsNullOrEmpty(Model.NivelDeDificultad) ? Model.NivelDeDificultad : "Intermedio a Avanzado")</span>
+                <div class="info-badge" data-test="header-level">
+                    <img src="~/img/target.svg" alt="Nivel" class="icon" data-test="header-level-icon">
+                    <span data-test="header-level-text">@(!string.IsNullOrEmpty(Model.NivelDeDificultad) ? Model.NivelDeDificultad : "Intermedio a Avanzado")</span>
                 </div>
             </div>
-            <a asp-controller="Home" asp-action="Index" asp-fragment="membership" class="btn btn-primary btn-lg">Reservar Clase</a>
+            <a asp-controller="Home" asp-action="Index" asp-fragment="membership" class="btn btn-primary btn-lg" data-test="header-cta">Reservar Clase</a>
         </div>
     </div>
 </section>
 
 <!-- Descripción General -->
-<section class="class-description">
+<section class="class-description" data-section="class-description">
     <div class="container">
         <div class="description-grid">
             <div class="description-content">
-                <h2 class="section-title">SOBRE ESTA <span class="text-accent">CLASE</span></h2>
+                <h2 class="section-title" data-test="description-title">SOBRE ESTA <span class="text-accent">CLASE</span></h2>
                 @if (!string.IsNullOrEmpty(Model.DescripcionDeLaClase))
                 {
-                    <p class="description-text">@Model.DescripcionDeLaClase</p>
+                    <p class="description-text" data-test="description-text">@Model.DescripcionDeLaClase</p>
                 }
                 else
                 {
-                    <p class="description-text">
+                    <p class="description-text" data-test="description-text">
                         El Entrenamiento por Intervalos de Alta Intensidad (HIIT) alterna entre ráfagas intensas de actividad y períodos fijos de actividad menos intensa o descanso. Nuestras clases HIIT están diseñadas para aumentar tu ritmo cardíaco y quemar más grasa en menos tiempo.
                     </p>
-                    <p class="description-text">
+                    <p class="description-text" data-test="description-text">
                         Este tipo de entrenamiento te proporciona un entrenamiento completo mientras mejora tu condición cardiovascular y maximiza la quema de calorías. Los estudios han demostrado que el HIIT puede quemar hasta un 30% más de calorías que otras formas de cardio en el mismo período de tiempo.
                     </p>
                 }
-                <div class="description-features">
+                <div class="description-features" data-test-container="benefits">
                     @if (Model.BeneficiosDeLaClase != null && Model.BeneficiosDeLaClase.Any())
                     {
                         @foreach (var beneficio in Model.BeneficiosDeLaClase)
@@ -91,17 +91,17 @@
                 </div>
             </div>
             <div class="description-image">
-                <img src="@(Model.imagenesDeClase?.urlParaParaDescripcionDeClase ?? "~/img/hiit2.jpg")" alt="Clase en acción">
+                <img src="@(Model.imagenesDeClase?.urlParaParaDescripcionDeClase ?? "~/img/hiit2.jpg")" alt="Clase en acción" data-test="description-image">
             </div>
         </div>
     </div>
 </section>
 
 <!-- Estructura de la Clase -->
-<section class="class-structure">
+<section class="class-structure" data-section="class-structure">
     <div class="container">
-        <h2 class="section-title text-center">ESTRUCTURA DE LA <span class="text-accent">CLASE</span></h2>
-        <div class="structure-timeline">
+        <h2 class="section-title text-center" data-test="structure-title">ESTRUCTURA DE LA <span class="text-accent">CLASE</span></h2>
+        <div class="structure-timeline" data-test-container="structure-items">
             @if (Model.EstructuraDeLaClase != null && Model.EstructuraDeLaClase.Any())
             {
                 @foreach (var estructura in Model.EstructuraDeLaClase)
@@ -138,14 +138,14 @@
 </section>
 
 <!-- Ejercicios Principales -->
-<section class="class-exercises">
+<section class="class-exercises" data-section="class-exercises">
     <div class="container">
-        <h2 class="section-title text-center">EJERCICIOS <span class="text-accent">PRINCIPALES</span></h2>
-        <p class="section-subtitle text-center">
+        <h2 class="section-title text-center" data-test="exercises-title">EJERCICIOS <span class="text-accent">PRINCIPALES</span></h2>
+        <p class="section-subtitle text-center" data-test="exercises-subtitle">
             Estos son algunos de los ejercicios que podrás encontrar en nuestras clases de HIIT. Cada sesión varía para mantener el entrenamiento desafiante y evitar estancamientos.
         </p>
         
-        <div class="exercises-grid">
+        <div class="exercises-grid" data-test-container="exercises">
             @if (Model.EjerciciosDeClase != null && Model.EjerciciosDeClase.Any())
             {
                 @foreach (var ejercicio in Model.EjerciciosDeClase)
@@ -185,10 +185,10 @@
 </section>
 
 <!-- Consejos para Principiantes -->
-<section class="class-tips">
+<section class="class-tips" data-section="class-tips">
     <div class="container">
         <div class="tips-content">
-            <h2 class="section-title">CONSEJOS PARA <span class="text-accent">PRINCIPIANTES</span></h2>
+            <h2 class="section-title" data-test="tips-title">CONSEJOS PARA <span class="text-accent">PRINCIPIANTES</span></h2>
             @if (Model.Consejos != null)
             {
                 @await Html.PartialAsync("~/Views/Shared/_ConsejoIntro.cshtml", Model.Consejos)
@@ -216,20 +216,20 @@
             }
         </div>
         <div class="tips-image">
-            <img src="@(Model.imagenesDeClase?.urlParaBloqueConsejos ?? "~/img/lesiongym.jpg")" alt="Consejos para principiantes">
+            <img src="@(Model.imagenesDeClase?.urlParaBloqueConsejos ?? "~/img/lesiongym.jpg")" alt="Consejos para principiantes" data-test="tips-image">
         </div>
     </div>
 </section>
 
 <!-- Equipamiento -->
-<section class="class-equipment">
+<section class="class-equipment" data-section="class-equipment">
     <div class="container">
-        <h2 class="section-title text-center">EQUIPAMIENTO <span class="text-accent">RECOMENDADO</span></h2>
-        <p class="section-subtitle text-center">
+        <h2 class="section-title text-center" data-test="equipment-title">EQUIPAMIENTO <span class="text-accent">RECOMENDADO</span></h2>
+        <p class="section-subtitle text-center" data-test="equipment-subtitle">
             Aunque el HIIT puede realizarse sin equipamiento, estos elementos pueden mejorar tu experiencia:
         </p>
         
-        <div class="equipment-grid">
+        <div class="equipment-grid" data-test-container="equipment">
             @if (Model.EquipamientoRecomendado != null && Model.EquipamientoRecomendado.Any())
             {
                 @foreach (var equipo in Model.EquipamientoRecomendado)
@@ -261,10 +261,10 @@
 </section>
 
 <!-- Horarios -->
-<section class="class-schedule">
+<section class="class-schedule" data-section="class-schedule">
     <div class="container">
-        <h2 class="section-title text-center">HORARIOS <span class="text-accent">DISPONIBLES</span></h2>
-        <p class="section-subtitle text-center">
+        <h2 class="section-title text-center" data-test="schedule-title">HORARIOS <span class="text-accent">DISPONIBLES</span></h2>
+        <p class="section-subtitle text-center" data-test="schedule-subtitle">
             Ofrecemos múltiples horarios para adaptarnos a tu agenda. ¡Reserva tu plaza ahora!
         </p>
         
@@ -303,17 +303,17 @@
 </section>
 
 <!-- CTA -->
-<section class="class-cta">
+<section class="class-cta" data-section="class-cta">
     <div class="cta-overlay"></div>
     <div class="container">
         <div class="cta-content">
-            <h2 class="cta-title">¿LISTO PARA LLEVAR TU FITNESS AL <span class="text-accent">SIGUIENTE NIVEL</span>?</h2>
-            <p class="cta-text">
+            <h2 class="cta-title" data-test="cta-title">¿LISTO PARA LLEVAR TU FITNESS AL <span class="text-accent">SIGUIENTE NIVEL</span>?</h2>
+            <p class="cta-text" data-test="cta-text">
                 Únete a nuestras clases de HIIT y experimenta una transformación física y mental. El primer paso hacia un nuevo tú comienza aquí.
             </p>
             <div class="cta-buttons">
-                <a asp-controller="Home" asp-action="Index" asp-fragment="membership" class="btn btn-primary btn-lg">Reservar Clase</a>
-                <button class="btn btn-outline btn-lg">Ver Todas las Clases</button>
+                <a asp-controller="Home" asp-action="Index" asp-fragment="membership" class="btn btn-primary btn-lg" data-test="cta-primary-btn">Reservar Clase</a>
+                <button class="btn btn-outline btn-lg" data-test="cta-secondary-btn">Ver Todas las Clases</button>
             </div>
         </div>
     </div>

@@ -35,7 +35,7 @@ public class E2eContainerHelper : IAsyncLifetime
 
     // Backup configuration
     private const string BackupHostPath = "/mnt/archivos/estudio/proyectos/gym/bd/respaldosbd";
-    private const string BackupFileName = "FitnessGymBackup20260526.bak";
+    private const string BackupFileName = "FitnessGymBackup20260609.bak";
 
     // Nginx configuration
     private const string NginxConfPath = "/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/E2E/Common/nginx.conf";
@@ -94,6 +94,7 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
             .WithEnvironment(new Dictionary<string, string>
             {
                 ["ASPNETCORE_URLS"] = $"http://+:{ApiInternalPort}",
+                ["ASPNETCORE_ENVIRONMENT"] = "Production",
                 ["DB_CONNECTION_STRING"] = ConnectionString,
                 ["SECRET_TOKEN_KEY"] = "SuperSecretKey12345678901234567890123456789012",
                 ["Jwt:Issuer"] = "FitnessGym",
@@ -117,7 +118,8 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
             .WithEnvironment(new Dictionary<string, string>
             {
                 ["ASPNETCORE_URLS"] = $"http://+:{FrontendInternalPort}",
-                ["ConnectionStrings:FitnessCenterDB"] = ConnectionString,
+                ["DB_CONNECTION_STRING"] = ConnectionString,
+                ["ASPNETCORE_ENVIRONMENT"] = "Production",
                 ["SECRET_TOKEN_KEY"] = "SuperSecretKey12345678901234567890123456789012"
             })
             .WithPortBinding(FrontendInternalPort, true)

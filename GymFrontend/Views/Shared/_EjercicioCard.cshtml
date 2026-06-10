@@ -1,11 +1,11 @@
 @model DTO.Dtos.EjercicioPreview
 
-<div class="exercise-card">
+<div class="exercise-card" data-test="exercise-item">
     <div class="exercise-image">
-        <img src="@Model.UrlImagen" alt="@Model.NombreEjercicio">
+        <img src="@Model.UrlImagen" alt="@Model.NombreEjercicio" data-test="exercise-image">
     </div>
     <div class="exercise-content">
-        <h3 class="exercise-title">@Model.NombreEjercicio</h3>
-        <p class="exercise-description">@Model.DescripcionEjercicio</p>
+        <h3 class="exercise-title" data-test="exercise-title">@Model.NombreEjercicio</h3>
+        <p class="exercise-description" data-test="exercise-desc">@Model.DescripcionEjercicio</p>
     </div>
 </div>

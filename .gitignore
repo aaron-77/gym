@@ -54,3 +54,6 @@ test-results/*
 
 # Container logs
 container-logs/
+
+# Gentleman Guardian Angel config
+.gga

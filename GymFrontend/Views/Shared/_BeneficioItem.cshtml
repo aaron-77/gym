@@ -1,11 +1,11 @@
 @model dynamic
 
-<div class="feature-item">
+<div class="feature-item" data-test="benefit-item">
     <div class="feature-icon">
-        <img src="@Model.urlPublica" alt="Beneficio" class="icon">
+        <img src="@Model.urlPublica" alt="Beneficio" class="icon" data-test="benefit-icon">
     </div>
     <div>
-        <h3 class="feature-title">@Model.beneficio</h3>
-        <p class="feature-text">@Model.descripcionBeneficio</p>
+        <h3 class="feature-title" data-test="benefit-title">@Model.beneficio</h3>
+        <p class="feature-text" data-test="benefit-desc">@Model.descripcionBeneficio</p>
     </div>
 </div>
