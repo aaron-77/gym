@@ -14,7 +14,7 @@
 }
 
 <!-- Cabecera de la Clase -->
-<section class="class-header" data-section="class-header" style="background-image: url('@Model.imagenesDeClase.urlParaBanner');">
+<section class="class-header" data-section="class-header" style="background-image: url('@Model.imagenesDeClase?.urlParaBanner');">
     <div class="class-header-overlay"></div>
     <div class="container">
         <div class="class-header-content">
@@ -155,30 +155,7 @@
             }
             else
             {
-                @*  @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
-                {
-                    NombreEjercicio = "Burpees",
-                    DescripcionEjercicio = "Ejercicio de cuerpo completo que combina sentadilla, plancha, flexión y salto. Excelente para desarrollar resistencia cardiovascular y fuerza.",
-                    UrlIcono = "~/img/burpees.jpg"
-                })
-                @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
-                {
-                    NombreEjercicio = "Mountain Climbers",
-                    DescripcionEjercicio = "En posición de plancha, alternamos llevando las rodillas hacia el pecho. Trabaja el core y eleva el ritmo cardíaco.",
-                    UrlIcono = "~/img/mountainclimbers.webp"
-                })
-                @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
-                {
-                    NombreEjercicio = "Jumping Jacks",
-                    DescripcionEjercicio = "Saltos abriendo y cerrando piernas y brazos simultáneamente. Excelente ejercicio cardiovascular que involucra todo el cuerpo.",
-                    UrlIcono = "~/img/jumpingjacks.webp"
-                })
-                @await Html.PartialAsync("~/Views/Shared/_EjercicioCard.cshtml", new DTO.Dtos.EjercicioPreview
-                {
-                    NombreEjercicio = "Sentadillas con Salto",
-                    DescripcionEjercicio = "Sentadilla tradicional seguida de un salto explosivo. Desarrolla potencia en el tren inferior y eleva el ritmo cardíaco.",
-                    UrlIcono = "~/img/sentadillaconsalto.jpg"
-                }) *@
+                <p class="text-center" data-test="exercises-empty">No hay ejercicios disponibles para esta clase.</p>
             }
         </div>
     </div>
@@ -194,26 +171,6 @@
                 @await Html.PartialAsync("~/Views/Shared/_ConsejoIntro.cshtml", Model.Consejos)
                 @await Html.PartialAsync("~/Views/Shared/_ConsejosList.cshtml", Model.Consejos)
             }
-            else
-            {
-                @* <p class="tips-intro">
-                    Si eres nuevo en el HIIT, estos consejos te ayudarán a sacar el máximo provecho de tus entrenamientos mientras minimizas el riesgo de lesiones:
-                </p>
-                <ul class="tips-list">
-                    <li class="tips-item">
-                        <img src="~/img/check.svg" alt="Check" class="icon">
-                        <span>Comienza con versiones modificadas de los ejercicios hasta dominar la técnica correcta.</span>
-                    </li>
-                    <li class="tips-item">
-                        <img src="~/img/check.svg" alt="Check" class="icon">
-                        <span>Escucha a tu cuerpo y toma descansos adicionales si los necesitas.</span>
-                    </li>
-                    <li class="tips-item">
-                        <img src="~/img/check.svg" alt="Check" class="icon">
-                        <span>Mantén una buena hidratación antes, durante y después de la clase.</span>
-                    </li>
-                </ul> *@
-            }
         </div>
         <div class="tips-image">
             <img src="@(Model.imagenesDeClase?.urlParaBloqueConsejos ?? "~/img/lesiongym.jpg")" alt="Consejos para principiantes" data-test="tips-image">
@@ -226,7 +183,7 @@
     <div class="container">
         <h2 class="section-title text-center" data-test="equipment-title">EQUIPAMIENTO <span class="text-accent">RECOMENDADO</span></h2>
         <p class="section-subtitle text-center" data-test="equipment-subtitle">
-            Aunque el HIIT puede realizarse sin equipamiento, estos elementos pueden mejorar tu experiencia:
+            Estos elementos pueden mejorar tu experiencia:
         </p>
         
         <div class="equipment-grid" data-test-container="equipment">
@@ -240,21 +197,7 @@
             }
             else
             {
-                @* @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
-                {
-                    NombreEquipo = "Mancuernas Ligeras",
-                    Descripcion = "Para añadir resistencia a ejercicios como sentadillas o press de hombros."
-                })
-                @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
-                {
-                    NombreEquipo = "Kettlebells",
-                    Descripcion = "Ideales para ejercicios balísticos como swings o clean and press."
-                })
-                @await Html.PartialAsync("~/Views/Shared/_EquipoItem.cshtml", new DTO.Dtos.DTOEquipo
-                {
-                    NombreEquipo = "Esterilla",
-                    Descripcion = "Para mayor comodidad en ejercicios de suelo como planchas o abdominales."
-                }) *@
+                <p class="text-center" data-test="equipment-empty">No hay equipamiento recomendado para esta clase.</p>
             }
         </div>
     </div>

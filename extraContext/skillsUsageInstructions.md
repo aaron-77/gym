@@ -34,6 +34,7 @@ IMPORTANT: When you detect any of these contexts, IMMEDIATELY read the correspon
 | Bogus Factory | [.opencode/skills/bogus-factory/SKILL.md](.opencode/skills/bogus-factory/SKILL.md) |
 | Integration Test Base | [.opencode/skills/integration-test-base/SKILL.md](.opencode/skills/integration-test-base/SKILL.md) | Clases base para tests de integración .NET 8. Tipado explícito con `IntegrationTestBase<CitasApiWebApplicationFactory<Program>>`. Incluye soporte para SignalR Hubs con dos enfoques (WithStatefulReconnect o HttpMessageHandler manual). **DEBE REVISARSE para cualquier prueba de integración.** |
 | Test Helper | [.opencode/skills/test-helper/SKILL.md](.opencode/skills/test-helper/SKILL.md) |
+| sqlcmd env connect / OC_DB_* vars | [.opencode/skills/sqlcmd-env-connect/SKILL.md](.opencode/skills/sqlcmd-env-connect/SKILL.md) | Conectar a SQL Server con sqlcmd usando OC_DB_* env vars. SOLO esas cinco variables, prohibido leer otras. |
 
 ### How to use skills
 
