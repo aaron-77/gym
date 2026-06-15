@@ -208,6 +208,7 @@ try
     builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
     {
         options.UseSqlServer(dbConnectionString);
+        
     });
     Console.WriteLine("DbContext configurado");
 

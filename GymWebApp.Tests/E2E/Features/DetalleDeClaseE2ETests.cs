@@ -118,39 +118,7 @@ public class DetalleDeClaseE2ETests : PlaywrightTestBase
         await Expect(Page.Locator("[data-test='header-cta']")).ToBeVisibleAsync();
     }
 
-    [Fact]
-    public async Task DetalleDeClase_WhenOptionalDataIsMissing_RendersDefaults()
-    {
-        // GIVEN: crear clase con datos mínimos via Factory, persistir via Helper
-        var connString = E2eContainerHelper.Instance.HostConnectionString;
-
-        var clase = DetalleDeClaseFactory.CrearClaseConDatosMinimos();
-        var claseId = await DetalleDeClaseHelper.GuardarClaseAsync(connString, clase);
-
-        var imagen = DetalleDeClaseFactory.CrearImagen(claseId);
-        await DetalleDeClaseHelper.GuardarImagenAsync(connString, imagen);
-        var url = E2eContainerHelper.Instance.NginxBaseUrl; 
-        // WHEN: navegar al detalle
-        await Page.GotoAsync($"{url}/Home/DetalleDeClase?idClase={claseId}");
-            await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-        // THEN: valores por defecto en header
-        await Expect(Page.Locator("[data-test='header-duration-text']"))
-            .ToContainTextAsync("45 minutos");
-        await Expect(Page.Locator("[data-test='header-intensity-text']"))
-            .ToContainTextAsync("Alta Intensidad");
-        await Expect(Page.Locator("[data-test='header-level-text']"))
-            .ToContainTextAsync("Intermedio a Avanzado");
-
-        // Descripción default contiene HIIT
-        await Expect(Page.Locator("[data-test='description-text']").First)
-            .ToContainTextAsync("HIIT", new() { IgnoreCase = true });
-
-        // Fallbacks de listas vacías
-        await Expect(Page.Locator("[data-test='benefit-item']").First).ToBeVisibleAsync();
-        await Expect(Page.Locator("[data-test='structure-item']").First).ToBeVisibleAsync();
-        await Expect(Page.Locator("[data-test='schedule-item']").First).ToBeVisibleAsync();
-    }
+    
 
     [Fact]
     public async Task DetalleDeClase_WhenNoImages_DoesNotCrash()

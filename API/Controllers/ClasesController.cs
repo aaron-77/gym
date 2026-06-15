@@ -95,65 +95,8 @@ namespace API.Controllers
                         )
                     );
                 }
-                var deserializeOptions = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                };
-                // Mapear los resultados al modelo DetalleDeClase
-                var detalle = new DetalleDeClase
-                {
-                    NombreClase = detalleRaw.NombreClase,
-                    SubtituloClase = detalleRaw.SubtituloClase,
-                    Duracion = detalleRaw.Duracion,
-                    NivelDeIntensidad = detalleRaw.NivelDeIntensidad,
-                    NivelDeDificultad = detalleRaw.NivelDeDificultad,
-                    DescripcionDeLaClase = detalleRaw.DescripcionDeLaClase,
-                    BeneficiosDeLaClase = !string.IsNullOrEmpty(detalleRaw.BeneficiosDeLaClase)
-                        ? JsonSerializer.Deserialize<List<DTO.Dtos.DTOBeneficiosDeClase>>(
-                            detalleRaw.BeneficiosDeLaClase,
-                            deserializeOptions
-                        )
-                        : new List<DTO.Dtos.DTOBeneficiosDeClase>(),
-                    EstructuraDeLaClase = !string.IsNullOrEmpty(detalleRaw.EstructuraDeLaClase)
-                        ? JsonSerializer.Deserialize<List<DTO.Dtos.DTOEstructuraDeClase>>(
-                            detalleRaw.EstructuraDeLaClase,
-                            deserializeOptions
-                        )
-                        : new List<DTO.Dtos.DTOEstructuraDeClase>(),
-                    EjerciciosDeClase = !string.IsNullOrEmpty(detalleRaw.EjerciciosDeClase)
-                        ? JsonSerializer.Deserialize<List<EjercicioPreview>>(
-                            detalleRaw.EjerciciosDeClase,
-                            deserializeOptions
-                        )
-                        : new List<EjercicioPreview>(),
-                    Consejos = !string.IsNullOrEmpty(detalleRaw.Consejos)
-                        ? JsonSerializer
-                            .Deserialize<List<DTOConsejoDeClase>>(detalleRaw.Consejos)
-                            ?.FirstOrDefault()
-                        : null,
-                    EquipamientoRecomendado = !string.IsNullOrEmpty(
-                        detalleRaw.EquipamientoRecomendado
-                    )
-                        ? JsonSerializer.Deserialize<List<DTO.Dtos.DTOEquipo>>(
-                            detalleRaw.EquipamientoRecomendado,
-                            deserializeOptions
-                        )
-                        : new List<DTO.Dtos.DTOEquipo>(),
-                    HorariosProgramados = !string.IsNullOrEmpty(detalleRaw.HorariosProgramados)
-                        ? JsonSerializer.Deserialize<List<ClaseProgramada>>(
-                            detalleRaw.HorariosProgramados,
-                            deserializeOptions
-                        )
-                        : new List<ClaseProgramada>(),
-                    imagenesDeClase = !string.IsNullOrEmpty(detalleRaw.imagenesDeClase)
-                        ? JsonSerializer
-                            .Deserialize<List<DTOImagenesDeClase>>(
-                                detalleRaw.imagenesDeClase,
-                                deserializeOptions
-                            )
-                            ?.FirstOrDefault()
-                        : new DTOImagenesDeClase(),
-                };
+                // Mapear los resultados al modelo DetalleDeClase (los defaults los aplica FromRaw)
+                var detalle = DetalleDeClase.FromRaw(detalleRaw);
 
                 // Construir y devolver la respuesta
                 _logger?.LogInformation("[API | ClasesController.ConsultarDetallesDeClase] Finished idClase={Id}", idClase);
