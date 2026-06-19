@@ -9,10 +9,7 @@
 
 @section Styles {
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/landing-styles.css" type="text/css">
-    
-    <link rel="stylesheet"  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 }
 
 
@@ -24,11 +21,11 @@
             <h1 class="hero-title">LIBERA TU <span class="text-accent">POTENCIAL</span></h1>
             <p class="hero-subtitle">Supera tus límites. Transforma tu cuerpo. Eleva tu mente.</p>
             <div class="hero-buttons">
-                <button id="botonComienzaHoy" href="#membership" class="btn btn-primary">
+                <a id="botonComienzaHoy" href="#membership" class="btn btn-primary" role="button">
                     Comienza Hoy
                     <img src="~/img/svgarrow.svg" alt="Flecha">
-                </button>
-                <button class="btn btn-outline">
+                </a>
+                <button type="button" class="btn btn-outline" disabled>
                     Aprende Más
                     <img src="~/img/svgarrow.svg" alt="Flecha">
                 </button>
@@ -143,41 +140,41 @@
                 <div class="trainer-image">
                     <img src="~/img/tariner1croped.jpeg" alt="Alex Rodriguez">
                     <div class="trainer-overlay">
-                        <button class="btn btn-primary">Ver Perfil</button>
+                        <button type="button" class="btn btn-primary" disabled>Ver Perfil</button>
                     </div>
                 </div>
                 <h3 class="trainer-name">Alex Rodriguez</h3>
-                <p class="trainer-specialty">Fuerza y Acondicionamiento</p>
+                <p class="trainer-specialty">Fuerza y Potencia</p>
             </div>
             <div class="trainer-card">
                 <div class="trainer-image">
                     <img src="~/img/trainer2croped.jpeg" alt="Sarah Johnson">
                     <div class="trainer-overlay">
-                        <button class="btn btn-primary">Ver Perfil</button>
+                        <button type="button" class="btn btn-primary" disabled>Ver Perfil</button>
                     </div>
                 </div>
                 <h3 class="trainer-name">Sarah Johnson</h3>
-                <p class="trainer-specialty">HIIT y Entrenamiento Funcional</p>
+                <p class="trainer-specialty">Entrenamiento Funcional y Yoga</p>
             </div>
             <div class="trainer-card">
                 <div class="trainer-image">
                     <img src="~/img/trainer3-2croped.jpeg" alt="Mike Williams">
                     <div class="trainer-overlay">
-                        <button class="btn btn-primary">Ver Perfil</button>
+                        <button type="button" class="btn btn-primary" disabled>Ver Perfil</button>
                     </div>
                 </div>
                 <h3 class="trainer-name">Mike Williams</h3>
-                <p class="trainer-specialty">Culturismo y Nutrición</p>
+                <p class="trainer-specialty">Boxeo y Hiit</p>
             </div>
             <div class="trainer-card">
                 <div class="trainer-image">
                     <img src="~/img/trainer4.jpg" alt="Emma Davis">
                     <div class="trainer-overlay">
-                        <button class="btn btn-primary">Ver Perfil</button>
+                        <button type="button" class="btn btn-primary" disabled>Ver Perfil</button>
                     </div>
                 </div>
                 <h3 class="trainer-name">Emma Davis</h3>
-                <p class="trainer-specialty">CrossFit y Boxeo</p>
+                <p class="trainer-specialty">Entrenamiento Personal y Crossfit</p>
             </div>
         </div>
     </div>
@@ -200,7 +197,7 @@
                         <img src="~/img/testimonial2.jpeg" alt="David K.">
                     </div>
                     <div>
-                        <h3 class="testimonial-name">David K.</h3>
+                        <h3 class="testimonial-name">Marco Suarez </h3>
                         <p class="testimonial-role">Miembro por 2 años</p>
                     </div>
                 </div>
@@ -212,11 +209,11 @@
                         <img src="~/img/testimonial1.jpeg" alt="Jennifer L.">
                     </div>
                     <div>
-                        <h3 class="testimonial-name">Jennifer L.</h3>
+                        <h3 class="testimonial-name">Jennifer Alvarez</h3>
                         <p class="testimonial-role">Miembro por 1 año</p>
                     </div>
                 </div>
-                <p class="testimonial-quote">"La comunidad en GymPower es increíble. Todos son solidarios y motivadores. He perdido 30 libras y he ganado una confianza que nunca pensé que era posible."</p>
+                <p class="testimonial-quote">"La comunidad en GymPower es increíble. Todos son solidarios y motivadores, en lo personal el ambiente es importante para mantenerme motivada. He perdido 30 libras y he ganado una confianza que no tenia antes de entrar."</p>
             </div>
             <div class="testimonial-card">
                 <div class="testimonial-header">
@@ -224,11 +221,11 @@
                         <img src="~/img/testimonial3.jpeg" alt="Marcus T.">
                     </div>
                     <div>
-                        <h3 class="testimonial-name">Marcus T.</h3>
+                        <h3 class="testimonial-name">Pablo Arnaud</h3>
                         <p class="testimonial-role">Miembro por 3 años</p>
                     </div>
                 </div>
-                <p class="testimonial-quote">"Como ex atleta, necesitaba un gimnasio que pudiera igualar mi intensidad. GymPower lo logra con entrenamientos desafiantes y orientación experta cada vez."</p>
+                <p class="testimonial-quote">"Como ex atleta, necesitaba un gimnasio que pudiera igualar mi intensidad. GymPower lo logra con entrenamientos desafiantes y orientación experta  que no he visto en otros lados."</p>
             </div>
         </div>
     </div>
@@ -238,7 +235,7 @@
 <section id="membership" class="membership">
     <div class="container-landing section-center">
         <div class="section-header">
-            <h2 class="section-title">PLANES DE <span class="text-accent">MEMBRESÍA</span></h2>
+            <h2 class="section-title"> <span class="text-accent">MEMBRESÍA</span></h2>
             <p class="section-subtitle">
                 Elige la membresía que se adapte a tu estilo de vida y objetivos de fitness. Todos los planes incluyen acceso a nuestras instalaciones de última generación.
             </p>
@@ -248,97 +245,97 @@
             <div class="plan-card">
                 <h3 class="plan-name">Básico</h3>
                 <div class="plan-price">
-                    <span class="price">$49</span>
+                    <span class="price">$200</span>
                     <span class="period">/mes</span>
                 </div>
                 <ul class="plan-features">
                     <li>
-                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        <img src="~/img/lightbulb.svg" alt="" >
                         Acceso a las instalaciones del gimnasio
                     </li>
                     <li>
-                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        <img src="~/img/lightbulb.svg" alt="" >
                         Evaluación física básica
                     </li>
                     <li>
-                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        <img src="~/img/lightbulb.svg" alt="" >
                         2 clases grupales por semana
                     </li>
                     <li>
-                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        <img src="~/img/lightbulb.svg" alt="" >
                         Acceso a vestuarios
                     </li>
                 </ul>
-                <button class="btn btn-primary btn-full">Elegir Plan</button>
+                <button type="button" class="btn btn-primary btn-full">Elegir Plan</button>
             </div>
             <div class="plan-card plan-popular">
                 <div class="popular-badge">MÁS POPULAR</div>
                 <h3 class="plan-name">Premium</h3>
                 <div class="plan-price">
-                    <span class="price">$79</span>
+                    <span class="price">$400</span>
                     <span class="period">/mes</span>
                 </div>
                 <ul class="plan-features">
                     <li>
-                        <img src="~/img/lightbulbwhite.svg" alt="" srcset="">
+                        <img src="~/img/lightbulbwhite.svg" alt="" >
                         Acceso ilimitado al gimnasio
                     </li>
                     <li>
-                        <img src="~/img/lightbulbwhite.svg" alt="" srcset="">
+                        <img src="~/img/lightbulbwhite.svg" alt="" >
                         Evaluación física integral
                     </li>
                     <li>
-                        <img src="~/img/lightbulbwhite.svg" alt="" srcset="">
+                        <img src="~/img/lightbulbwhite.svg" alt="" >
                         Clases grupales ilimitadas
                     </li>
                     <li>
-                        <img src="~/img/lightbulbwhite.svg" alt="" srcset="">
+                        <img src="~/img/lightbulbwhite.svg" alt="" >
                         1 sesión de entrenamiento personal/mes
                     </li>
                     <li>
-                        <img src="~/img/lightbulbwhite.svg" alt="" srcset="">
+                        <img src="~/img/lightbulbwhite.svg" alt="" >
                         Consulta de nutrición
                     </li>
                 </ul>
-                <button class="btn btn-white btn-full">Elegir Plan</button>
+                <button type="button" class="btn btn-white btn-full">Elegir Plan</button>
             </div>
             <div class="plan-card">
                 <h3 class="plan-name">Élite</h3>
                 <div class="plan-price">
-                    <span class="price">$129</span>
+                    <span class="price">$600</span>
                     <span class="period">/mes</span>
                 </div>
                 <ul class="plan-features">
                     <li>
-                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        <img src="~/img/lightbulb.svg" alt="" >
                         Acceso ilimitado al gimnasio 24/7
                     </li>
                     <li>
-                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        <img src="~/img/lightbulb.svg" alt="" >
                         Evaluación física avanzada
                     </li>
                     <li>
-                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        <img src="~/img/lightbulb.svg" alt="" >
                         Clases grupales ilimitadas
                     </li>
                     <li>
-                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        <img src="~/img/lightbulb.svg" alt="" >
                         4 sesiones de entrenamiento personal/mes
                     </li>
                     <li>
-                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        <img src="~/img/lightbulb.svg" alt="" >
                         Plan de nutrición
                     </li>
                     <li>
-                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        <img src="~/img/lightbulb.svg" alt="" >
                         Acceso a la zona de recuperación
                     </li>
                     <li>
-                        <img src="~/img/lightbulb.svg" alt="" srcset="">
+                        <img src="~/img/lightbulb.svg" alt="" >
                         Pases para invitados
                     </li>
                 </ul>
-                <button class="btn btn-primary btn-full">Elegir Plan</button>
+                <button type="button" class="btn btn-primary btn-full">Elegir Plan</button>
             </div>
         </div>
     </div>
@@ -353,28 +350,11 @@
             <p class="cta-text">
                 Únete a nuestra comunidad de individuos motivados y transforma tu cuerpo y mente. El primer paso es tuyo.
             </p>
-            <button href="#membership" class="btn btn-primary btn-lg">Comienza Ahora</button>
+            <a href="#membership" class="btn btn-primary btn-lg" role="button">Comienza Ahora</a>
         </div>
     </div>
 </section>
 
 @section Scripts {
-    <script>
-        // Scroll to membership section when clicking the "Únete Ahora" button
-        document.getElementById('botonUneteAhora').addEventListener('click', function() {
-            document.getElementById('membership').scrollIntoView({ behavior: 'smooth' });
-        });
-        
-        // Scroll to membership section when clicking the "Comienza Hoy" button
-        document.getElementById('botonComienzaHoy').addEventListener('click', function() {
-            document.getElementById('membership').scrollIntoView({ behavior: 'smooth' });
-        });
-        
-        // Scroll to membership section when clicking any CTA button with href="#membership"
-        document.querySelectorAll('button[href="#membership"]').forEach(function(button) {
-            button.addEventListener('click', function() {
-                document.getElementById('membership').scrollIntoView({ behavior: 'smooth' });
-            });
-        });
-    </script>
+    <script src="~/js/landing.js" asp-append-version="true"></script>
 }
