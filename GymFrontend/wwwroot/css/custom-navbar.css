@@ -85,6 +85,10 @@
     color: var(--color-primary);
 }
 
+.nav-link.active {
+    color: var(--color-primary);
+}
+
 #botonUneteAhora {
     flex-shrink: 1;
     white-space: nowrap;
