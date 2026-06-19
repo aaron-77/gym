@@ -66,3 +66,40 @@
     window.addEventListener('scroll', updateActiveLink, { passive: true });
     window.addEventListener('load', updateActiveLink);
 })();
+
+// Active state en nav-links según la página actual — ilumina el link de la página activa
+(function () {
+    var navLinks = document.querySelectorAll('.nav-link');
+
+    // Links SIN fragmento/hash (navegación entre páginas, ej: /signIn, /signUp)
+    var pageLinks = Array.from(navLinks).filter(function (link) {
+        var href = link.getAttribute('href');
+        return href && !href.includes('#');
+    });
+
+    function normalizePath(path) {
+        // Saca trailing slash pero mantiene '/' para la raíz
+        return path.replace(/\/+$/, '') || '/';
+    }
+
+    function updateActivePageLink() {
+        var currentPath = normalizePath(window.location.pathname);
+
+        pageLinks.forEach(function (link) {
+            var linkPath = normalizePath(new URL(link.href, window.location.origin).pathname);
+
+            if (linkPath === currentPath) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+    }
+
+    // Correr al cargar la página
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateActivePageLink);
+    } else {
+        updateActivePageLink();
+    }
+})();
