@@ -104,7 +104,6 @@
         </div>
         
         <div class="classes-grid">
-            @* Esta sección generará dinámicamente los cards con el modelo DTOClasePreview *@
             @foreach (var clase in Model)
             {
                 <div class="class-card">
@@ -113,7 +112,9 @@
                     </div>
                     <div class="class-content">
                         <h3 class="class-title">@clase.nombreClase</h3>
-                        <p class="class-description">@clase.descripcionCortaClase</p>
+                        <div class="class-description-wrapper">
+                            <p class="class-description">@clase.descripcionCortaClase</p>
+                        </div>
                         <a asp-controller="Home" asp-action="DetalleDeClase" asp-route-idClase="@clase.idClase" class="class-btn">
                             Aprende Más 
                             <img src="~/img/svgredarrow.svg" alt="Flecha roja">
@@ -143,7 +144,7 @@
                         <button type="button" class="btn btn-primary" disabled>Ver Perfil</button>
                     </div>
                 </div>
-                <h3 class="trainer-name">Alex Rodriguez</h3>
+                <h3 class="trainer-name">Aaron Azcarraga</h3>
                 <p class="trainer-specialty">Fuerza y Potencia</p>
             </div>
             <div class="trainer-card">
@@ -153,7 +154,7 @@
                         <button type="button" class="btn btn-primary" disabled>Ver Perfil</button>
                     </div>
                 </div>
-                <h3 class="trainer-name">Sarah Johnson</h3>
+                <h3 class="trainer-name">Jessica Lagunes</h3>
                 <p class="trainer-specialty">Entrenamiento Funcional y Yoga</p>
             </div>
             <div class="trainer-card">
@@ -163,7 +164,7 @@
                         <button type="button" class="btn btn-primary" disabled>Ver Perfil</button>
                     </div>
                 </div>
-                <h3 class="trainer-name">Mike Williams</h3>
+                <h3 class="trainer-name">Antonio Marquez</h3>
                 <p class="trainer-specialty">Boxeo y Hiit</p>
             </div>
             <div class="trainer-card">
@@ -173,7 +174,7 @@
                         <button type="button" class="btn btn-primary" disabled>Ver Perfil</button>
                     </div>
                 </div>
-                <h3 class="trainer-name">Emma Davis</h3>
+                <h3 class="trainer-name">Maria Bermudez</h3>
                 <p class="trainer-specialty">Entrenamiento Personal y Crossfit</p>
             </div>
         </div>

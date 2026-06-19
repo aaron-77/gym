@@ -652,3 +652,26 @@ ul {
         font-size: 3rem;
     }
 }
+
+/* --- Tarea 25: Truncamiento con fade en previews de clases --- */
+.class-description-wrapper {
+    position: relative;
+    height: 80px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.class-description-wrapper::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        var(--color-dark-200) 100%
+    );
+    pointer-events: none;
+}
