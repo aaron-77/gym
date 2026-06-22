@@ -13,14 +13,12 @@
             if (ratio >= 0.4 && !animated.get(el)) {
                 // --- ENTRADA: visible al 40%+ y no había entrado aún ---
                 el.classList.remove('animate__' + animateOut);
-                void el.offsetWidth;
                 el.classList.add('animate__animated', 'animate__' + animateIn);
                 animated.set(el, true);
 
             } else if (ratio <= 0.1 && animated.get(el) && animateOut) {
                 // --- SALIDA: visible al 10%- había entrado, y tiene data-animate-out ---
                 el.classList.remove('animate__' + animateIn);
-                void el.offsetWidth;
                 el.classList.add('animate__animated', 'animate__' + animateOut);
                 animated.set(el, false);
             }
