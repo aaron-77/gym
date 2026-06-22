@@ -659,6 +659,14 @@ ul {
     opacity: 0;
 }
 
+/* --- Hidden classes direccionales (agregadas por JS en init) --- */
+/* Mantienen elemento invisible en la posición de inicio de su animación */
+.hidden { opacity: 0; }
+.hidden-left { opacity: 0; transform: translateX(-30px); }
+.hidden-right { opacity: 0; transform: translateX(30px); }
+.hidden-up { opacity: 0; transform: translateY(30px); }
+.hidden-flip { opacity: 0; }
+
 /* --- Hover grow/shrink para cards de clases y entrenadores --- */
 @keyframes card-hover-grow {
     0% { transform: scale(1); }

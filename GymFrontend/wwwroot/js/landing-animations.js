@@ -1,20 +1,24 @@
 (function () {
     'use strict';
 
-    var lastScrollY = window.scrollY;
-    var scrollDirection = 'down';
+    /* Mapa: valor de data-animate-in → clase hidden direccional */
+    var HIDDEN_MAP = {
+        fadeIn: 'hidden',
+        fadeInLeft: 'hidden-left',
+        fadeInRight: 'hidden-right',
+        fadeInUp: 'hidden-up',
+        flipInY: 'hidden-flip'
+    };
 
-    window.addEventListener('scroll', function () {
-        var currentScrollY = window.scrollY;
-        scrollDirection = currentScrollY >= lastScrollY ? 'down' : 'up';
-        lastScrollY = currentScrollY;
-    }, { passive: true });
+    function getHiddenClass(animateIn) {
+        return HIDDEN_MAP[animateIn] || 'hidden';
+    }
 
     /**
      * State machine por elemento:
-     *   'idle'    → puede hacer entrance
-     *   'entered' → puede hacer exit (no puede re-entrar)
-     *   'exited'  → puede hacer entrance de nuevo (no puede re-exit)
+     *   'idle'    → esperando primer entrance
+     *   'entered' → visible, puede hacer exit
+     *   'exited'  → oculto, puede re-entrar
      */
     var stateMap = new Map();
 
@@ -24,20 +28,20 @@
             var state = stateMap.get(el) || { phase: 'idle' };
             var animateIn = el.getAttribute('data-animate-in') || '';
             var animateOut = el.getAttribute('data-animate-out') || '';
+            var hiddenClass = getHiddenClass(animateIn);
 
-            var isEntering = entry.isIntersecting && scrollDirection === 'down' && state.phase !== 'entered';
-            var isExiting = !entry.isIntersecting && scrollDirection === 'up' && state.phase === 'entered';
-
-            if (isEntering && animateIn) {
-                // Swap to entrance animation
-                el.classList.remove('animate__' + animateIn, 'animate__' + animateOut);
-                void el.offsetWidth;
+            if (entry.isIntersecting && state.phase !== 'entered') {
+                // --- ENTRANCE: idle → entered  o  exited → entered ---
+                el.classList.remove(hiddenClass, 'animate__' + animateOut);
+                void el.offsetWidth; // fuerza reflow para reiniciar animación
                 el.classList.add('animate__animated', 'animate__' + animateIn);
                 state.phase = 'entered';
-            } else if (isExiting && animateOut) {
-                // Swap to exit animation
-                el.classList.remove('animate__' + animateIn, 'animate__' + animateOut);
-                void el.offsetWidth;
+
+            } else if (!entry.isIntersecting && state.phase === 'entered') {
+                // --- EXIT: entered → exited ---
+                el.classList.remove('animate__' + animateIn);
+                el.classList.add(hiddenClass);
+                void el.offsetWidth; // fuerza reflow para reiniciar animación
                 el.classList.add('animate__animated', 'animate__' + animateOut);
                 state.phase = 'exited';
             }
@@ -53,7 +57,9 @@
         var elements = document.querySelectorAll('[data-animate-in]');
         for (var i = 0; i < elements.length; i++) {
             var el = elements[i];
-            el.classList.add('animate__animated');
+            var animateIn = el.getAttribute('data-animate-in') || '';
+            var hiddenClass = getHiddenClass(animateIn);
+            el.classList.add(hiddenClass);
             observer.observe(el);
         }
     }
