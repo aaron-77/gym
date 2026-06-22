@@ -10,6 +10,7 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link rel="stylesheet" href="~/css/custom-navbar.css" type="text/css">
     <link rel="stylesheet" href="~/css/estilosFooter.css" type="text/css">
     @RenderSection("Styles", required: false)
@@ -34,6 +35,8 @@
                     class="nav-link">Entrenadores</a>
                 <a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="testimonials"
                     class="nav-link">Testimonios</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="membership"
+                    class="nav-link">Membresías</a>
                 <a asp-area="" asp-controller="Users" asp-action="Index" class="nav-link">Iniciar Sesión</a>
                 <a asp-area="" asp-controller="Users" asp-action="CrearCuenta" class="nav-link">Registrarse</a>
                 <a asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="membership"
@@ -104,8 +107,7 @@
     </footer>
 
     <script src="~/js/navbar.js" asp-append-version="true"></script>
-       
-    
+    <script src="~/js/landing-animations.js" asp-append-version="true"></script>
 
     @RenderSection("Scripts", required: false)
 </body>
