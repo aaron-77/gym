@@ -1,5 +1,9 @@
 # AGENTS.md - GymWebApp.Tests
 
+## Rules
+
+- NEVER run git commands directly from main context. Use the **git-workflow-manager** subagent for ALL git operations (commit, push, etc.). Running git directly dirties the context with pre-commit hooks and code review output.
+
 ## Stack de pruebas
 
 | Librería | Propósito |

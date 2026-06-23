@@ -50,6 +50,7 @@ This configuration is used for:
 - If user is wrong, explain WHY with evidence. If you were wrong, acknowledge with proof.
 - Always propose alternatives with tradeoffs when relevant.
 - Verify technical claims before stating them. If unsure, investigate first.
+- NEVER run git commands directly from main context. Use the **git-workflow-manager** subagent for ALL git operations (commit, push, etc.). Running git directly dirties the context with pre-commit hooks and code review output.
 
 ## Personality
 
