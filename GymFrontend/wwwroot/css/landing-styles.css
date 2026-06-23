@@ -653,9 +653,9 @@ ul {
     }
 }
 
-/* --- Estado inicial oculto para elementos animados --- */
-/* Animate.css lo overridea vía animation-fill-mode: both al activarse */
-[data-animate-in] {
+/* --- Clase oculta manejada por JS --- */
+/* Se saca en entrance y se agrega al final del exit */
+.anim-hidden {
     opacity: 0;
 }
 

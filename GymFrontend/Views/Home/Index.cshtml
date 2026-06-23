@@ -18,9 +18,9 @@
     <div class="hero-overlay"></div>
     <div class="container-landing">
         <div class="hero-content">
-            <h1 class="hero-title animate__animated" data-animate-in="fadeIn">LIBERA TU <span class="text-accent">POTENCIAL</span></h1>
-            <p class="hero-subtitle animate__animated" data-animate-in="fadeIn">Supera tus límites. Transforma tu cuerpo. Eleva tu mente.</p>
-            <div class="hero-buttons animate__animated" data-animate-in="fadeIn">
+            <h1 class="hero-title animate__animated anim-hidden" data-animate-in="fadeIn">LIBERA TU <span class="text-accent">POTENCIAL</span></h1>
+            <p class="hero-subtitle animate__animated anim-hidden" data-animate-in="fadeIn">Supera tus límites. Transforma tu cuerpo. Eleva tu mente.</p>
+            <div class="hero-buttons animate__animated anim-hidden" data-animate-in="fadeIn">
                 <a id="botonComienzaHoy" href="#membership" class="btn btn-primary" role="button">
                     Comienza Hoy
                     <img src="~/img/svgarrow.svg" alt="Flecha">
@@ -39,7 +39,7 @@
 <section id="about" class="about">
     <div class="container-landing section-center">
         <div class="about-grid">
-            <div class="about-content animate__animated" data-animate-in="fadeInLeft">
+            <div class="about-content animate__animated anim-hidden" data-animate-in="fadeInLeft">
                 <h2 class="section-title">ACERCA DE <span class="text-accent">GYMPOWER</span></h2>
                 <p class="section-text">
                     En GymPower, creemos en superar límites y romper barreras. Nuestras instalaciones de última generación están diseñadas para inspirarte y motivarte a alcanzar tus objetivos fitness.
@@ -86,7 +86,7 @@
                     </div>
                 </div>
             </div>
-            <div class="about-image animate__animated" data-animate-in="fadeInRight">
+            <div class="about-image animate__animated anim-hidden" data-animate-in="fadeInRight">
                 <img src="~/img/about1.jpg" alt="Interior del gimnasio">
             </div>
         </div>
@@ -111,7 +111,7 @@
             {
                 var animateInClass = classIdx % 3 == 0 ? "fadeInLeft" : (classIdx % 3 == 1 ? "fadeInUp" : "fadeInRight");
                 classIdx++;
-                <div class="class-card animate__animated" data-animate-in="@animateInClass">
+                <div class="class-card animate__animated anim-hidden" data-animate-in="@animateInClass">
                     <div class="class-image">
                         <img src="@clase.urlImage" alt="@clase.nombreClase">
                     </div>
@@ -142,28 +142,28 @@
         </div>
         
         <div class="trainers-grid">
-            <div class="trainer-card animate__animated" data-animate-in="flipInY" data-animate-out="flipOutY">
+            <div class="trainer-card animate__animated anim-hidden" data-animate-in="flipInY" data-animate-out="flipOutY">
                 <div class="trainer-image">
                     <img src="~/img/tariner1croped.jpeg" alt="Alex Rodriguez">
                 </div>
                 <h3 class="trainer-name">Aaron Azcarraga</h3>
                 <p class="trainer-specialty">Fuerza y Potencia</p>
             </div>
-            <div class="trainer-card animate__animated" data-animate-in="flipInY" data-animate-out="flipOutY">
+            <div class="trainer-card animate__animated anim-hidden" data-animate-in="flipInY" data-animate-out="flipOutY">
                 <div class="trainer-image">
                     <img src="~/img/trainer2croped.jpeg" alt="Sarah Johnson">
                 </div>
                 <h3 class="trainer-name">Jessica Lagunes</h3>
                 <p class="trainer-specialty">Entrenamiento Funcional y Yoga</p>
             </div>
-            <div class="trainer-card animate__animated" data-animate-in="flipInY" data-animate-out="flipOutY">
+            <div class="trainer-card animate__animated anim-hidden" data-animate-in="flipInY" data-animate-out="flipOutY">
                 <div class="trainer-image">
                     <img src="~/img/trainer3-2croped.jpeg" alt="Mike Williams">
                 </div>
                 <h3 class="trainer-name">Antonio Marquez</h3>
                 <p class="trainer-specialty">Boxeo y Hiit</p>
             </div>
-            <div class="trainer-card animate__animated" data-animate-in="flipInY" data-animate-out="flipOutY">
+            <div class="trainer-card animate__animated anim-hidden" data-animate-in="flipInY" data-animate-out="flipOutY">
                 <div class="trainer-image">
                     <img src="~/img/trainer4.jpg" alt="Emma Davis">
                 </div>
@@ -185,7 +185,7 @@
         </div>
         
         <div class="testimonials-grid">
-            <div class="testimonial-card animate__animated" data-animate-in="fadeIn" data-animate-out="fadeOut">
+            <div class="testimonial-card animate__animated anim-hidden" data-animate-in="fadeIn" data-animate-out="fadeOut">
                 <div class="testimonial-header">
                     <div class="testimonial-image">
                         <img src="~/img/testimonial2.jpeg" alt="David K.">
@@ -197,7 +197,7 @@
                 </div>
                 <p class="testimonial-quote">"GymPower transformó completamente mi enfoque hacia el fitness. Los entrenadores me empujaron más allá de lo que pensé que era posible, y nunca he estado más fuerte."</p>
             </div>
-            <div class="testimonial-card animate__animated" data-animate-in="fadeIn" data-animate-out="fadeOut">
+            <div class="testimonial-card animate__animated anim-hidden" data-animate-in="fadeIn" data-animate-out="fadeOut">
                 <div class="testimonial-header">
                     <div class="testimonial-image">
                         <img src="~/img/testimonial1.jpeg" alt="Jennifer L.">
@@ -209,7 +209,7 @@
                 </div>
                 <p class="testimonial-quote">"La comunidad en GymPower es increíble. Todos son solidarios y motivadores, en lo personal el ambiente es importante para mantenerme motivada. He perdido 30 libras y he ganado una confianza que no tenia antes de entrar."</p>
             </div>
-            <div class="testimonial-card animate__animated" data-animate-in="fadeIn" data-animate-out="fadeOut">
+            <div class="testimonial-card animate__animated anim-hidden" data-animate-in="fadeIn" data-animate-out="fadeOut">
                 <div class="testimonial-header">
                     <div class="testimonial-image">
                         <img src="~/img/testimonial3.jpeg" alt="Marcus T.">
@@ -236,7 +236,7 @@
         </div>
         
         <div class="plans-grid">
-            <div class="plan-card animate__animated" data-animate-in="flipInY" data-animate-out="flipOutY">
+            <div class="plan-card animate__animated anim-hidden" data-animate-in="flipInY" data-animate-out="flipOutY">
                 <h3 class="plan-name">Básico</h3>
                 <div class="plan-price">
                     <span class="price">$200</span>
@@ -262,7 +262,7 @@
                 </ul>
                 <button type="button" class="btn btn-primary btn-full">Elegir Plan</button>
             </div>
-            <div class="plan-card plan-popular animate__animated" data-animate-in="flipInY" data-animate-out="flipOutY">
+            <div class="plan-card plan-popular animate__animated anim-hidden" data-animate-in="flipInY" data-animate-out="flipOutY">
                 <div class="popular-badge">MÁS POPULAR</div>
                 <h3 class="plan-name">Premium</h3>
                 <div class="plan-price">
@@ -293,7 +293,7 @@
                 </ul>
                 <button type="button" class="btn btn-white btn-full">Elegir Plan</button>
             </div>
-            <div class="plan-card animate__animated" data-animate-in="flipInY" data-animate-out="flipOutY">
+            <div class="plan-card animate__animated anim-hidden" data-animate-in="flipInY" data-animate-out="flipOutY">
                 <h3 class="plan-name">Élite</h3>
                 <div class="plan-price">
                     <span class="price">$600</span>
@@ -338,8 +338,8 @@
         <div class="cta-overlay"></div>
         <div class="container-landing">
             <div class="cta-content">
-                <h2 class="cta-title animate__animated" data-animate-in="fadeIn" data-animate-out="fadeOut">COMIENZA TU VIAJE FITNESS <span class="text-accent">HOY</span></h2>
-                <p class="cta-text animate__animated" data-animate-in="fadeIn" data-animate-out="fadeOut">
+                <h2 class="cta-title animate__animated anim-hidden" data-animate-in="fadeIn" data-animate-out="fadeOut">COMIENZA TU VIAJE FITNESS <span class="text-accent">HOY</span></h2>
+                <p class="cta-text animate__animated anim-hidden" data-animate-in="fadeIn" data-animate-out="fadeOut">
                     Únete a nuestra comunidad de individuos motivados y transforma tu cuerpo y mente. El primer paso es tuyo.
                 </p>
                 <a href="#membership" class="btn btn-primary btn-lg" role="button">Comienza Ahora</a>

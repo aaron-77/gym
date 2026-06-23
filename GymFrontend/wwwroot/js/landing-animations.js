@@ -1,25 +1,25 @@
 (function () {
     'use strict';
 
-    var animated = new Map(); // element → true si ya reprodujo entrance
+    var animated = new Map();
 
     var observer = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
             var el = entry.target;
-            var ratio = entry.intersectionRatio;
             var animateIn = el.getAttribute('data-animate-in') || '';
             var animateOut = el.getAttribute('data-animate-out') || '';
 
-            if (ratio >= 0.4 && !animated.get(el)) {
-                // --- ENTRADA: visible al 40%+ y no había entrado aún ---
-                el.classList.remove('animate__' + animateOut);
+            if (entry.isIntersecting && !animated.get(el)) {
+                // ENTRADA: sacar hidden y salida, poner entrada
+                el.classList.remove('anim-hidden', 'animate__' + animateOut);
                 el.classList.add('animate__' + animateIn);
                 animated.set(el, true);
 
-            } else if (ratio <= 0.1 && animated.get(el) && animateOut) {
-                // --- SALIDA: visible al 10%- había entrado, y tiene data-animate-out ---
+            } else if (!entry.isIntersecting && animated.get(el) && animateOut) {
+                // SALIDA: sacar entrada, poner salida, AL FINAL hidden
                 el.classList.remove('animate__' + animateIn);
                 el.classList.add('animate__' + animateOut);
+                el.classList.add('anim-hidden');
                 animated.set(el, false);
             }
         });
