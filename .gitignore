@@ -57,3 +57,6 @@ container-logs/
 
 # Gentleman Guardian Angel config
 .gga
+
+# Original image resources (not needed in repo)
+recursosOriginales/
