@@ -39,7 +39,7 @@ body {
 
 /* Login Page Styles */
 .main-container {
-    background-image: url('/content/fondologin.jpg');
+    background-image: url('/content/fondologin.webp');
     background-size: cover;
     background-position: center;
     min-height: 100vh;
@@ -58,7 +58,7 @@ body {
 }
 
 .bg-split-image-container {
-    background-image: url('/content/fondoCrearCuenta.jpg');
+    background-image: url('/content/fondoCrearCuenta.webp');
     background-size: cover;
     background-position: center;
     display: none;

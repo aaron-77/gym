@@ -136,7 +136,7 @@ ul {
     display: flex;
     align-items: center;
     overflow: hidden;
-    background-image: url('../img/hero1.jpg');
+    background-image: url('../img/hero1.webp');
     background-size: cover;
     background-position: center;
 }
@@ -551,7 +551,7 @@ ul {
 /* CTA Section */
 .cta {
     padding: 5rem 0;
-    background-image: url('../img/cta.jpg');
+    background-image: url('../img/cta.webp');
     background-size: cover;
     background-position: center;
     position: relative;
