@@ -68,7 +68,7 @@ GymWebApp.Tests/
 - **CONSULTA OBLIGATORIA**: Si identificás la necesidad de cubrir un escenario extra, debés proponerlo primero y esperar la confirmación del usuario antes de implementar.
 - **NO HELPERS EN TESTS**: No escribir lógica de helper dentro de las clases de prueba. Usar clases helper existentes (DatabaseHelper, TestContainerHelper) o crear nuevas en GymWebApp.Tests/Integration/Helpers/ y llamarlas desde los tests.
 - **CONSULTAR ESQUEMA DE BD**: Antes de escribir queries SQL, verificar los nombres de columnas
-  en bd/scripsOrdenadosParaMigrarBd/3tablas/tablas.sql. El esquema es la fuente de verdad.
+  en bd/esquemaBdsDeReferenciaParaIa/FitnessGymSchemaActual.sql. El esquema es la fuente de verdad.
 
 ### Reglas específicas para Tests E2E
 
@@ -85,7 +85,7 @@ GymWebApp.Tests/
 - **CONSULTA OBLIGATORIA**: Si identificás la necesidad de cubrir un escenario extra, debés proponerlo primero y esperar la confirmación del usuario antes de implementar.
 - **NO HELPERS EN TESTS**: No escribir lógica de helper dentro de las clases de prueba. Usar clases helper existentes (DatabaseHelper, TestContainerHelper) o crear nuevas en GymWebApp.Tests/Integration/Helpers/ y llamarlas desde los tests.
 - **CONSULTAR ESQUEMA DE BD**: Antes de escribir queries SQL, verificar los nombres de columnas 
-  en bd/scripsOrdenadosParaMigrarBd/3tablas/tablas.sql. El esquema es la fuente de verdad.
+  en bd/esquemaBdsDeReferenciaParaIa/FitnessGymSchemaActual.sql. El esquema es la fuente de verdad.
 
 ## Directorios de Especificaciones (Requerimientos)
 
