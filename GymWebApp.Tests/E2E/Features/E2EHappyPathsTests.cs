@@ -1,11 +1,8 @@
-using GymWebApp.Tests.E2E.Common;
-using GymWebApp.Tests.SharedHelpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 
-
-using Renci.SshNet;
-using System.Text.RegularExpressions;
+using GymWebApp.Tests.E2E.Common;
+using GymWebApp.Tests.SharedHelpers;
 
 namespace GymWebApp.Tests.E2E.Features;
 
@@ -21,7 +18,6 @@ public class E2EHappyPathsTests : PlaywrightTestBase
     public E2EHappyPathsTests(E2eContainerHelper e2eContainerHelper, PlaywrightHelper playwrightHelper) 
         : base(e2eContainerHelper, playwrightHelper)
     {
-        // Keep existing config loading as-is (don't change to E2ETestSettings)
         var configPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "appsettings.Testing.json");
         if (!File.Exists(configPath))
         {
@@ -88,7 +84,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         var sidebar = Page.Locator("#sidebar");
         await Assertions.Expect(sidebar).ToBeVisibleAsync();
 
-            var currentUrl = Page.Url;
+        var currentUrl = Page.Url;
         Assert.True(
             currentUrl.Contains("clientes"),
             $"Se esperaba redirección a /clientes. URL actual: {currentUrl}");
@@ -131,9 +127,6 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         
         var consultarBtn = Page.Locator("input#submitButton");
         await consultarBtn.ClickAsync();
-
-
-        
     }
 
     #endregion
@@ -194,18 +187,14 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         // Then: Mensaje de éxito visible en la UI
         var pageContent = await Page.ContentAsync();
         var successMessage = pageContent.Contains("Registro exitoso");
-
         Assert.True(
             successMessage,
             $"Se esperaba mensaje de éxito. URL actual: {Page.Url}");
-
-        
-        
     }
 
     #endregion
 
-    #region 7. Empleado - Registrar Clase Catálogo
+    #region 7. Empleado - Gestionar Duración Citas Medición
 
     [Fact]
     public async Task Empleado_GestionarDuracionCitasMedicion()
@@ -278,7 +267,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         await horarioDisponible.ClickAsync();
         var modalConfirmacion = Page.Locator("button.swal2-confirm.swal2-styled");
         await Assertions.Expect(modalConfirmacion).ToBeVisibleAsync();
-        modalConfirmacion.ClickAsync();
+        await modalConfirmacion.ClickAsync();
         // And: Envía formulario
         await Page.Locator("#registrarClaseProgramadaBtn").ClickAsync();
         await Page.Locator("div.swal2-container").WaitForAsync();
@@ -302,10 +291,10 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
         // Setup: Registrar clase programada para asegurar que comboClases tenga opciones con horarios disponibles
-        var datosClase = await ClasesProgramadasHelper.GenerarClaseProgramadaObject(
+        var datosClase = await ClasesProgramadasHelper.GenerarClaseProgramadaAsync(
             E2eContainerHelper.HostConnectionString);
-        datosClase.fechaDeLaClase = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
-        var claseRegistrada = await ClasesProgramadasHelper.RegistrarClaseProgramada(
+
+        var claseRegistrada = await ClasesProgramadasHelper.RegistrarClaseProgramadaAsync(
             E2eContainerHelper.HostConnectionString, datosClase);
 
         // When: Navega a inscripción de clases y selecciona cliente y clase
@@ -491,14 +480,14 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         // And: Envía formulario
         await Page.Locator("button.btn-primary[type='submit']").ClickAsync();
 
-// Then: Mensaje de éxito visible en SweetAlert
-            await Page.Locator("div.swal2-container").WaitForAsync();
-            var pageContent = await Page.ContentAsync();
-            var successMessage = pageContent.Contains("Registro exitoso");
+        // Then: Mensaje de éxito visible en SweetAlert
+        await Page.Locator("div.swal2-container").WaitForAsync();
+        var pageContent = await Page.ContentAsync();
+        var successMessage = pageContent.Contains("Registro exitoso");
 
-            Assert.True(
-                successMessage,
-                $"Se esperaba mensaje de éxito. URL actual: {Page.Url}");
+        Assert.True(
+            successMessage,
+            $"Se esperaba mensaje de éxito. URL actual: {Page.Url}");
     }
 
     #endregion

@@ -1,6 +1,7 @@
+using System.Data;
+
 using Microsoft.Data.SqlClient;
 using DTO.Dtos;
-using System.Data;
 
 namespace GymWebApp.Tests.SharedHelpers;
 
@@ -11,7 +12,7 @@ public static class ClasesProgramadasHelper
     /// </summary>
     /// <param name="connectionString">Connection string para la base de datos</param>
     /// <returns>DTODatosClaseProgramada con datos de prueba</returns>
-    public static async Task<DTODatosClaseProgramada> GenerarClaseProgramadaObject(string connectionString)
+    public static async Task<DTODatosClaseProgramada> GenerarClaseProgramadaAsync(string connectionString)
     {
         int claseId = 0;
         string entrenadorId = string.Empty;
@@ -33,7 +34,7 @@ public static class ClasesProgramadasHelper
                 }
             }
 
-            // Consulta 3: Obtener primera hora laboral orden por idHora
+            // Consulta 2: Obtener primera hora laboral orden por idHora
             TimeSpan horaInicio = TimeSpan.Zero;
             using (var cmd3 = connection.CreateCommand())
             {
@@ -48,7 +49,7 @@ public static class ClasesProgramadasHelper
                 }
             }
 
-            // Consulta 2: Obtener entrenador disponible usando SP
+            // Consulta 3: Obtener entrenador disponible usando SP
             var fechaReferencia = DateTime.Now.Date.AddDays(1).Add(horaInicio);
             using (var cmd2 = connection.CreateCommand())
             {
@@ -69,7 +70,7 @@ public static class ClasesProgramadasHelper
                 fkClase = claseId,
                 fkEntrenador = entrenadorId,
                 fkEstadoClaseProgramada = 1, // Disponible
-                fechaDeLaClase = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
+                fechaDeLaClase = DateOnly.FromDateTime(DateTime.Now),
                 idUsuarioQueReserva = null, // Para pre-reserva sin cliente
                 fkHoraLaboral = horaLaboralId,
                 cupoMaximo = 20
@@ -79,7 +80,7 @@ public static class ClasesProgramadasHelper
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR en [ClasesProgramadasHelper.GenerarClaseProgramadaObject]: {ex.Message}");
+            Console.WriteLine($"ERROR en [ClasesProgramadasHelper.GenerarClaseProgramadaAsync]: {ex.Message}");
             Console.WriteLine($"Causa: {ex.InnerException?.Message ?? "N/A"}");
             throw;
         }
@@ -90,7 +91,7 @@ public static class ClasesProgramadasHelper
     /// </summary>
     /// <param name="connectionString">Connection string para la base de datos</param>
     /// <param name="datos">Datos de la clase programada</param>
-    public static async Task<DTODatosClaseProgramada> RegistrarClaseProgramada(string connectionString, DTODatosClaseProgramada datos)
+    public static async Task<DTODatosClaseProgramada> RegistrarClaseProgramadaAsync(string connectionString, DTODatosClaseProgramada datos)
     {
         try
         {
@@ -138,7 +139,7 @@ public static class ClasesProgramadasHelper
         catch (Exception ex)
         {
             
-            Console.WriteLine($"ERROR en [ClasesProgramadasHelper.RegistrarClaseProgramada]: {ex.Message}");
+            Console.WriteLine($"ERROR en [ClasesProgramadasHelper.RegistrarClaseProgramadaAsync]: {ex.Message}");
             Console.WriteLine($"Causa: {ex.InnerException?.Message ?? "N/A"}");
             throw;
         }
