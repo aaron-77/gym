@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace GymFrontend.TagHelpers
 {
@@ -12,10 +13,15 @@ namespace GymFrontend.TagHelpers
     public class AppConfigTagHelper : TagHelper
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger<AppConfigTagHelper> _logger;
 
-        public AppConfigTagHelper(IConfiguration configuration)
+        [HtmlAttributeName("sections")]
+        public string? Sections { get; set; }
+
+        public AppConfigTagHelper(IConfiguration configuration, ILogger<AppConfigTagHelper> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
@@ -23,22 +29,33 @@ namespace GymFrontend.TagHelpers
             output.TagName = "script";
             output.Attributes.SetAttribute("type", "text/javascript");
 
-            var configDict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-            foreach (var child in _configuration.GetChildren())
+            if (string.IsNullOrWhiteSpace(Sections))
             {
-                configDict[child.Key] = ReadSection(child);
+                _logger.LogWarning("AppConfig tag helper used without 'sections' attribute. No config exposed.");
+                output.Content.SetHtmlContent("window.AppConfig = {};");
+                return Task.CompletedTask;
+            }
+
+            var sectionNames = Sections.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var configDict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var name in sectionNames)
+            {
+                var section = _configuration.GetSection(name);
+                if (section.Exists())
+                {
+                    configDict[name] = ReadSection(section);
+                }
             }
 
             var options = new JsonSerializerOptions { WriteIndented = false };
             string json = JsonSerializer.Serialize(configDict, options);
 
-            string script = $"window.AppConfig = {json};";
-
-            output.Content.SetHtmlContent(script);
+            output.Content.SetHtmlContent($"window.AppConfig = {json};");
             return Task.CompletedTask;
         }
 
-        private object ReadSection(IConfigurationSection section)
+        private static object ReadSection(IConfigurationSection section)
         {
             if (section.GetChildren().Any())
             {
