@@ -245,7 +245,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase
 
         // When: Navega a registro de clases programadas
         await Page.GotoAsync($"{BaseUrl}/Clases/registroClasesProgramadas");
-
+    
         // Then: Calendario visible (usa locator que tiene espera implícita)
         await Assertions.Expect(Page.Locator("#calendarGrid")).ToBeVisibleAsync();
 

@@ -1,7 +1,8 @@
 using GymFrontend.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Configuration;
-using Moq;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -23,10 +24,12 @@ namespace GymWebApp.Tests
                     { "Nested:Key2", "Value2" }
                 })
                 .Build();
+            var logger = Substitute.For<ILogger<AppConfigTagHelper>>();
 
-            var tagHelper = new AppConfigTagHelper(configuration);
+            var tagHelper = new AppConfigTagHelper(configuration, logger);
+            tagHelper.Sections = "TestKey,Nested";
             var context = new TagHelperContext(
-                new TagHelperAttributeList(),
+                new TagHelperAttributeList { new TagHelperAttribute("sections", "TestKey,Nested") },
                 new Dictionary<object, object>(),
                 "unique-id");
             var output = new TagHelperOutput(
@@ -41,7 +44,7 @@ namespace GymWebApp.Tests
             Assert.Equal("script", output.TagName);
             Assert.Equal("text/javascript", output.Attributes["type"]?.Value?.ToString());
             Assert.NotNull(output.Content);
-            
+                
             var content = output.Content.GetContent();
             Assert.Contains("window.AppConfig", content);
             Assert.Contains("TestKey", content);
@@ -60,10 +63,12 @@ namespace GymWebApp.Tests
                     { "JwtSettings:SecretKey", "test-secret-key" }
                 })
                 .Build();
+            var logger = Substitute.For<ILogger<AppConfigTagHelper>>();
 
-            var tagHelper = new AppConfigTagHelper(configuration);
+            var tagHelper = new AppConfigTagHelper(configuration, logger);
+            tagHelper.Sections = "EndPoints";
             var context = new TagHelperContext(
-                new TagHelperAttributeList(),
+                new TagHelperAttributeList { new TagHelperAttribute("sections", "EndPoints") },
                 new Dictionary<object, object>(),
                 "unique-id");
             var output = new TagHelperOutput(
@@ -76,11 +81,12 @@ namespace GymWebApp.Tests
 
             // Assert
             var content = output.Content.GetContent();
+            // EndPoints section IS exposed (included in sections whitelist)
             Assert.Contains("EndPoints", content);
-            Assert.Contains("api", content);
             Assert.Contains("https://api.example.com", content);
             Assert.Contains("http://api.example.com", content);
-            Assert.Contains("JwtSettings", content);
+            // JwtSettings is NOT in sections whitelist → should NOT be exposed
+            Assert.DoesNotContain("JwtSettings", content);
         }
 
         [Fact]
@@ -95,10 +101,12 @@ namespace GymWebApp.Tests
                     { "BooleanKey", "true" }
                 })
                 .Build();
+            var logger = Substitute.For<ILogger<AppConfigTagHelper>>();
 
-            var tagHelper = new AppConfigTagHelper(configuration);
+            var tagHelper = new AppConfigTagHelper(configuration, logger);
+            tagHelper.Sections = "SimpleKey,NumberKey,BooleanKey";
             var context = new TagHelperContext(
-                new TagHelperAttributeList(),
+                new TagHelperAttributeList { new TagHelperAttribute("sections", "SimpleKey,NumberKey,BooleanKey") },
                 new Dictionary<object, object>(),
                 "unique-id");
             var output = new TagHelperOutput(
@@ -132,8 +140,9 @@ namespace GymWebApp.Tests
         {
             // Arrange
             var configuration = new ConfigurationBuilder().Build();
+            var logger = Substitute.For<ILogger<AppConfigTagHelper>>();
 
-            var tagHelper = new AppConfigTagHelper(configuration);
+            var tagHelper = new AppConfigTagHelper(configuration, logger);
             var context = new TagHelperContext(
                 new TagHelperAttributeList(),
                 new Dictionary<object, object>(),
@@ -165,10 +174,12 @@ namespace GymWebApp.Tests
                     { "Nested:TestKey", "NestedValue" }
                 })
                 .Build();
+            var logger = Substitute.For<ILogger<AppConfigTagHelper>>();
 
-            var tagHelper = new AppConfigTagHelper(configuration);
+            var tagHelper = new AppConfigTagHelper(configuration, logger);
+            tagHelper.Sections = "TestKey,Nested";
             var context = new TagHelperContext(
-                new TagHelperAttributeList(),
+                new TagHelperAttributeList { new TagHelperAttribute("sections", "TestKey,Nested") },
                 new Dictionary<object, object>(),
                 "unique-id");
             var output = new TagHelperOutput(
@@ -206,10 +217,12 @@ namespace GymWebApp.Tests
                     { "Key3", "Value3" }
                 })
                 .Build();
+            var logger = Substitute.For<ILogger<AppConfigTagHelper>>();
 
-            var tagHelper = new AppConfigTagHelper(configuration);
+            var tagHelper = new AppConfigTagHelper(configuration, logger);
+            tagHelper.Sections = "Key1,Key2,Key3";
             var context = new TagHelperContext(
-                new TagHelperAttributeList(),
+                new TagHelperAttributeList { new TagHelperAttribute("sections", "Key1,Key2,Key3") },
                 new Dictionary<object, object>(),
                 "unique-id");
             var output = new TagHelperOutput(
@@ -232,6 +245,52 @@ namespace GymWebApp.Tests
             var lineCount = jsonContent.Split('\n').Length;
             // Para un objeto pequeño, no debería tener muchas líneas si está minificado
             Assert.True(lineCount <= 3, "El JSON debería estar minificado");
+        }
+
+        [Fact]
+        public async Task ProcessAsync_OnlyExposesWhitelistedSections()
+        {
+            // Arrange
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "PublicSection:Key1", "PublicValue" },
+                    { "HiddenSection:SecretKey", "SecretValue" }
+                })
+                .Build();
+            var logger = Substitute.For<ILogger<AppConfigTagHelper>>();
+
+            var tagHelper = new AppConfigTagHelper(configuration, logger);
+            tagHelper.Sections = "PublicSection";
+            var context = new TagHelperContext(
+                new TagHelperAttributeList { new TagHelperAttribute("sections", "PublicSection") },
+                new Dictionary<object, object>(),
+                "unique-id");
+            var output = new TagHelperOutput(
+                "app-config",
+                new TagHelperAttributeList(),
+                (cache, encoder) => Task.FromResult<TagHelperContent>(new DefaultTagHelperContent()));
+
+            // Act
+            await tagHelper.ProcessAsync(context, output);
+
+            // Assert
+            var content = output.Content.GetContent();
+
+            // PublicSection IS in the whitelist → should be exposed
+            Assert.Contains("PublicSection", content);
+            Assert.Contains("PublicValue", content);
+
+            // HiddenSection is NOT in the whitelist → should NOT be exposed
+            Assert.DoesNotContain("HiddenSection", content);
+            Assert.DoesNotContain("SecretValue", content);
+
+            // Verify the JSON is valid
+            var jsonStart = content.IndexOf('{');
+            var jsonEnd = content.LastIndexOf('}') + 1;
+            var jsonContent = content.Substring(jsonStart, jsonEnd - jsonStart);
+            var jsonDoc = JsonDocument.Parse(jsonContent);
+            Assert.NotNull(jsonDoc);
         }
     }
 }
