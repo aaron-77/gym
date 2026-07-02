@@ -27,13 +27,11 @@ La función retorna una tabla con la siguiente estructura:
 |---------|------|-------------|
 | `idInscripcion` | `INT` | ID único de la inscripción |
 | `fechaDeInscripcion` | `DATETIME` | Fecha y hora de la inscripción |
-| `estadoInscripcion` | `NVARCHAR(MAX)` | Nombre del estado de la inscripción |
 | `idClaseProgramada` | `INT` | ID de la clase programada |
 | `nombreClase` | `NVARCHAR(100)` | Nombre de la clase |
 | `fechaDeLaClase` | `DATE` | Fecha de la clase programada |
 | `horaInicio` | `TIME` | Hora de inicio de la clase |
 | `horaFin` | `TIME` | Hora de fin de la clase |
-| `cupoMaximo` | `INT` | Cupo máximo de la clase |
 | `nombreEntrenador` | `NVARCHAR` | Nombre completo del entrenador |
 
 ### 3.3 Lógica de filtrado
@@ -42,7 +40,7 @@ La función debe retornar inscripciones que cumplan TODAS estas condiciones:
 
 1. **Filtro por cliente:** `fkCliente = @idUsuario`
 2. **Filtro por estado de inscripción:** Solo inscripciones con estado **'vigente'** (usando la vista `v_idEstadoVigenteInscripcionAClase`)
-3. **Filtro de fecha/hora:** ALGUNO de estas condiciones:
+3. **Filtro de fecha/hora:** ALGUNA de estas condiciones:
    - **Clase futura:** `fechaDeLaClase > fecha actual`
    - **Clase del día actual con hora futura:** `fechaDeLaClase = fecha actual AND horaInicio > hora actual`
 

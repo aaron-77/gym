@@ -26,7 +26,7 @@ Crear scripts de prueba para validar la función `fn_obtenerInscripcionesDelClie
 | 3 | Parámetro NULL | Pasar NULL como parámetro @idUsuario | Resultado vacío (0 filas) |
 | 4 | Solo inscripciones pasadas | Cliente con inscripciones a clases que ya pasaron | Resultado vacío (0 filas) |
 | 5 | Filtro de hora del día actual | Verificar que no se retornen clases de hoy con hora pasada | Solo clases de hoy con horaInicio > hora actual |
-| 6 | Estructura de retorno | Verificar que la función retorna todos los campos requeridos | 10 columnas con nombres correctos |
+| 6 | Estructura de retorno | Verificar que la función retorna todos los campos requeridos | 8 columnas con nombres correctos |
 | 7 | Orden de resultados | Verificar que los resultados vienen ordenados por fecha y hora | Ordenado por fechaDeLaClase, horaInicio |
 | 8 | LEFT JOIN con entrenador | Verificar que se maneja correctamente la ausencia de entrenador | nombreEntrenador puede ser NULL |
 
@@ -140,11 +140,11 @@ WHERE fechaDeLaClase = CAST(GETDATE() AS DATE);
 ```sql
 DECLARE @idClienteEstructura NVARCHAR(450) = 'REEMPLAZAR_CON_GUID_REAL';
 
--- Verificar que retorna las 10 columnas
+-- Verificar que retorna las 8 columnas
 SELECT 
-    idInscripcion, fechaDeInscripcion, estadoInscripcion,
+    idInscripcion, fechaDeInscripcion,
     idClaseProgramada, nombreClase, fechaDeLaClase,
-    horaInicio, horaFin, cupoMaximo, nombreEntrenador
+    horaInicio, horaFin, nombreEntrenador
 FROM dbo.fn_obtenerInscripcionesDelCliente(@idClienteEstructura);
 ```
 

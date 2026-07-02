@@ -16,13 +16,11 @@ RETURN
     SELECT
         ic.idInscripcion,
         ic.fechaDeInscripcion,
-        ei.nombreEstadoInscripcion AS estadoInscripcion,
         cp.idProgramacionClase AS idClaseProgramada,
         c.NombreClase AS nombreClase,
         cp.fechaDeLaClase,
         hl.horaInicio,
         hl.horaFin,
-        cp.cupoMaximo,
         CONCAT(u.NombreCompleto, ' ', u.Apellido) AS nombreEntrenador
     FROM inscripcionesDeClases ic
         INNER JOIN clasesProgramadas cp 
@@ -40,15 +38,10 @@ RETURN
     WHERE ic.fkCliente = @idUsuario
         -- Solo inscripciones vigentes
         AND ei.idEstadoInscripcion = (SELECT idEstadoInscripcion FROM v_idEstadoVigenteInscripcionAClase)
+        -- Solo clases desde hoy en adelante
         AND (
-            -- Clase futura: fecha posterior a hoy
             cp.fechaDeLaClase > CAST(GETDATE() AS DATE)
-            OR 
-            -- Clase del día actual con hora futura
-            (
-                cp.fechaDeLaClase = CAST(GETDATE() AS DATE)
-                AND hl.horaInicio > CAST(GETDATE() AS TIME)
-            )
+            OR (cp.fechaDeLaClase = CAST(GETDATE() AS DATE) AND hl.horaInicio > CAST(GETDATE() AS TIME))
         )
 );
 

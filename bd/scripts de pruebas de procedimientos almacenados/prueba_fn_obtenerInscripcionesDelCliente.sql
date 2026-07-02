@@ -37,7 +37,6 @@ SELECT
     fechaDeLaClase,
     CONVERT(VARCHAR, horaInicio, 108) AS horaInicio,
     CONVERT(VARCHAR, horaFin, 108) AS horaFin,
-    estadoInscripcion,
     nombreEntrenador
 FROM dbo.fn_obtenerInscripcionesDelCliente(@idClienteHappyPath)
 ORDER BY fechaDeLaClase, horaInicio;
@@ -169,13 +168,11 @@ SELECT
     'Prueba 6: Estructura de retorno' AS prueba,
     idInscripcion,
     fechaDeInscripcion,
-    estadoInscripcion,
     idClaseProgramada,
     nombreClase,
     fechaDeLaClase,
     horaInicio,
     horaFin,
-    cupoMaximo,
     nombreEntrenador
 FROM dbo.fn_obtenerInscripcionesDelCliente(@idClienteEstructura);
 
