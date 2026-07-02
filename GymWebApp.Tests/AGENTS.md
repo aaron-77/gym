@@ -99,7 +99,7 @@ GymWebApp.Tests/
 ### Reglas de Specs de Pruebas
 
 - Separar specs de tests en archivos distintos a los de implementación
-- NO incluir código en los specs
+- **NO incluir código de NINGÚN tipo** — ni C#, ni SQL, ni HTML, ni JavaScript, ni Razor. Los specs son texto puro: descripciones, tablas y listas.
 - Estructura: [specs/spect-skeleton.md](../specs/spect-skeleton.md)
 - Reglas completas en [AGENTS.md principal](../AGENTS.md#specs-specifications)
 

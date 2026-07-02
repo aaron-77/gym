@@ -220,7 +220,9 @@ NO incluyen código — solo descripciones, tablas y listas.
 - Los nombres de archivo empiezan con `spect-`
 - La numeración sigue la secuencia existente (28, 29, 30, 31...)
 - Separar specs de implementación y tests en archivos distintos
-- NO incluir código en los specs
+- **NO incluir código de NINGÚN tipo** — ni C#, ni SQL, ni HTML, ni JavaScript, ni Razor
+  Los specs son texto puro: descripciones, tablas y listas. Cualquier detalle técnico
+  debe describirse en texto, no mostrarse como código
 - Incluir la spec de la que depende en "Recursos utilizados"
 - En specs de servicios o controllers, incluir sección "Acciones que debe realizar" con pasos sin código
 
