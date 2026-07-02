@@ -151,3 +151,8 @@ var response = JsonSerializer.Deserialize<DTOResponse<DTOLoggedUser>>(json);
 // Create response
 return Ok(new DTOResponse<User> { success = true, payload = user });
 ```
+
+## Specs (Specifications)
+
+Ver [AGENTS.md principal](../AGENTS.md#specs-specifications) para reglas de specs.
+Plantilla: `specs/spect-skeleton.md`

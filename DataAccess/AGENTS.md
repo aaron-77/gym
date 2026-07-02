@@ -171,3 +171,8 @@ public static IServiceCollection AddDataAccess(this IServiceCollection services)
 - SQL Server provider: `options.UseSqlServer()`
 - Use `appsettings.json` for non-sensitive settings
 - Never commit secrets to version control
+
+## Specs (Specifications)
+
+Ver [AGENTS.md principal](../AGENTS.md#specs-specifications) para reglas de specs.
+Plantilla: `specs/spect-skeleton.md`

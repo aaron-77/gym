@@ -308,3 +308,8 @@ public class UsersControllerTests
 - JWT settings configured in Program.cs
 - Page redirects configured in `appsettings.json` under `pages:empleados` and `pages:clientes`
 - Environment variables for secrets (never commit)
+
+## Specs (Specifications)
+
+Ver [AGENTS.md principal](../AGENTS.md#specs-specifications) para reglas de specs.
+Plantilla: `specs/spect-skeleton.md`

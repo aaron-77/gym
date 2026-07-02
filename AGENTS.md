@@ -114,6 +114,15 @@ FitnessGym/
 | DataAccess | Entities, Repositories, Migrations | Persistence only |
 | DTO | Data Transfer Objects | Communication between layers |
 
+### Reglas de validación realizada en métodos de clase
+
+Las validaciones que se hacen por métodos en clases deben separarse en clases de servicios específicas:
+
+| Tipo de Validación | Capa | Ejemplo |
+|-------------------|------|---------|
+| **Requiere BD** | `API/Services/Validaciones/` | Verificar si un usuario existe, verificar si un email ya está registrado |
+| **No requiere BD** | `BL/Validaciones/` | Validar formato de email, validar que una contraseña cumpla requisitos, validar rangos de fechas |
+
 ## Dev  workflow
 
 ### Phase 1: Architecture & Planning
@@ -200,6 +209,22 @@ See [extraContext/ejemplosArquitecturaYCodigoGenerales/testing.md](extraContext/
 ## Database
 
 See [extraContext/code-style/database.md](extraContext/code-style/database.md)
+
+## Specs (Specifications)
+
+Los specs son documentos que describen qué crear, patrones a aplicar y criterios de aceptación.
+NO incluyen código — solo descripciones, tablas y listas.
+
+### Reglas de Specs
+
+- Los nombres de archivo empiezan con `spect-`
+- La numeración sigue la secuencia existente (28, 29, 30, 31...)
+- Separar specs de implementación y tests en archivos distintos
+- NO incluir código en los specs
+- Incluir la spec de la que depende en "Recursos utilizados"
+- En specs de servicios o controllers, incluir sección "Acciones que debe realizar" con pasos sin código
+
+Para crear un spec, seguir la estructura en [specs/spect-skeleton.md](specs/spect-skeleton.md).
 
 ## Schema de Base de Datos
 El esquema de la base de datos está disponible en: [bd/esquemaBdsDeReferenciaParaIa/FitnessGymSchemaActual.sql](bd/esquemaBdsDeReferenciaParaIa/FitnessGymSchemaActual.sql). Este archivo es la fuente de verdad y se mantiene actualizado copiando el archivo con la fecha más reciente en el mismo directorio.

@@ -161,3 +161,8 @@ public class ValidarPasswordAttribute : ValidationAttribute
 - Environment variables for API base URLs and secrets
 - Endpoints via `EndpointsManager` in `BL/Utils/`
 - JWT settings in `JwtSettings` DTO class
+
+## Specs (Specifications)
+
+Ver [AGENTS.md principal](../AGENTS.md#specs-specifications) para reglas de specs.
+Plantilla: `specs/spect-skeleton.md`

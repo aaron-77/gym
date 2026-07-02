@@ -279,3 +279,8 @@ public class AuthServiceTests
 - **BackGroundWork/**: Background functionality, typically executed via Quartz
 - **Hubs/**: SignalR hubs for real-time functionality
 - **Services/**: Reusable business logic classes, accessible from controllers or hub methods
+
+## Specs (Specifications)
+
+Ver [AGENTS.md principal](../AGENTS.md#specs-specifications) para reglas de specs.
+Plantilla: `specs/spect-skeleton.md`

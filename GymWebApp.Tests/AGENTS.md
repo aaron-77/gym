@@ -96,6 +96,13 @@ GymWebApp.Tests/
 | `specs/e2e-infraestructura.md` | Especificación de infraestructura E2E (contenedores, Nginx, seeding). |
 | `specs/e2e-tests.md` | Especificación de escenarios E2E (flujos de usuario aprobados). |
 
+### Reglas de Specs de Pruebas
+
+- Separar specs de tests en archivos distintos a los de implementación
+- NO incluir código en los specs
+- Estructura: [specs/spect-skeleton.md](../specs/spect-skeleton.md)
+- Reglas completas en [AGENTS.md principal](../AGENTS.md#specs-specifications)
+
 ## Directorios de Pruebas (Código)
 
 | Directorio | Descripción |
