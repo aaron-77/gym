@@ -1,13 +1,12 @@
-using System.Text;
 using Microsoft.Data.SqlClient;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Networks;
-using GymWebApp.Tests.Integration.Common;
 using Respawn;
 using Respawn.Graph;
 using Testcontainers;
 using Testcontainers.MsSql;
+using GymWebApp.Tests.Integration.Common;
 using DatabaseHelper = GymWebApp.Tests.SharedHelpers.DatabaseHelper;
 
 namespace GymWebApp.Tests.E2E.Common;
@@ -35,12 +34,12 @@ public class E2eContainerHelper : IAsyncLifetime
 
     // Backup configuration
     private const string BackupHostPath = "/mnt/archivos/estudio/proyectos/gym/bd/respaldosbd";
-    private const string BackupFileName = "FitnessGymBackup20260609.bak";
+    private const string BackupFileName = "FitnessGymBackup20260703.bak";
 
     // Nginx configuration
     private const string NginxConfPath = "/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/E2E/Common/nginx.conf";
 
-public static E2eContainerHelper Instance { get; private set; } = null!;
+    public static E2eContainerHelper Instance { get; private set; } = null!;
 
     public string FrontendBaseUrl => $"http://localhost:{_frontendExternalPort}";
     public string ApiBaseUrl => $"http://localhost:{_apiExternalPort}";
@@ -61,7 +60,7 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
         await _network.CreateAsync();
 
         // 2. Iniciar SQL Server
-        var sqlPassword = "Terrabreak13";
+        var sqlPassword = ConfigHelper.GetProperty("SqlServer:Password");
         _msSqlContainer = new MsSqlBuilder()
             .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
             .WithPassword(sqlPassword)
@@ -84,7 +83,7 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
         // Connection string para FitnessCenterDB (usando alias de red)
         ConnectionString = $"Server=sqlserver,{SqlServerInternalPort};Database=FitnessCenterDB;User Id=sa;Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
 
-// Connection string for Respawn (runs from host, needs localhost + mapped port)
+        // Connection string for Respawn (runs from host, needs localhost + mapped port)
         HostConnectionString = $"Server=127.0.0.1,{sqlMappedPort};Database=FitnessCenterDB;User Id=sa;Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
 
         // 3. Iniciar API (placeholder - requiere imagen real del proyecto)
@@ -96,9 +95,9 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
                 ["ASPNETCORE_URLS"] = $"http://+:{ApiInternalPort}",
                 ["ASPNETCORE_ENVIRONMENT"] = "Production",
                 ["DB_CONNECTION_STRING"] = ConnectionString,
-                ["SECRET_TOKEN_KEY"] = "SuperSecretKey12345678901234567890123456789012",
-                ["Jwt:Issuer"] = "FitnessGym",
-                ["Jwt:Audience"] = "FitnessGymUsers"
+                ["SECRET_TOKEN_KEY"] = ConfigHelper.GetProperty("JwtSettings:SecretKey"),
+                ["Jwt:Issuer"] = ConfigHelper.GetProperty("JwtSettings:Issuer"),
+                ["Jwt:Audience"] = ConfigHelper.GetProperty("JwtSettings:BackendAudiencie")
             })
             .WithPortBinding(ApiInternalPort, true)
             .WithNetwork(_network)
@@ -120,7 +119,7 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
                 ["ASPNETCORE_URLS"] = $"http://+:{FrontendInternalPort}",
                 ["DB_CONNECTION_STRING"] = ConnectionString,
                 ["ASPNETCORE_ENVIRONMENT"] = "Production",
-                ["SECRET_TOKEN_KEY"] = "SuperSecretKey12345678901234567890123456789012"
+                ["SECRET_TOKEN_KEY"] = ConfigHelper.GetProperty("JwtSettings:SecretKey")
             })
             .WithPortBinding(FrontendInternalPort, true)
             .WithNetwork(_network)
@@ -151,7 +150,7 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
         await InitializeRespawnAsync();
     }
 
-    Task IAsyncLifetime.InitializeAsync() => InitializeImplAsync();
+        Task IAsyncLifetime.InitializeAsync() => InitializeImplAsync();
 
     private async Task InitializeRespawnAsync()
     {
@@ -313,5 +312,5 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
 
         _respawner = null;
     }
-Task IAsyncLifetime.DisposeAsync() => DisposeImplAsync();
+        Task IAsyncLifetime.DisposeAsync() => DisposeImplAsync();
 }

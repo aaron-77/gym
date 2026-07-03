@@ -1,9 +1,7 @@
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using Respawn;
 using Respawn.Graph;
 using Testcontainers.MsSql;
-using FitnessCenterDbContext = DataAccess.EntityFramework.FitnessCenterDbContext;
 
 namespace GymWebApp.Tests.Integration.Common;
 
@@ -134,10 +132,6 @@ public class TestContainerHelper : IAsyncLifetime
                 new Table("Roles"),
                 new Table("Rutinas"),
                 new Table("TipoRutina"),
-                new Table("beneficiosDeClase"),
-                new Table("estructuraDeClase"),
-                new Table("consejosParaLasClases"),
-                new Table("imagesForClases"),
                 new Table("imagesForExercises"),
                 new Table("iconsForParameters"),
                 new Table("parametrosDeMedicion"),
@@ -166,7 +160,7 @@ public class TestContainerHelper : IAsyncLifetime
 
     private async Task RestoreDatabaseFromBackupAsync(SqlConnection connection)
     {
-        var backupPath = "/backup/FitnessGymBackup20260526.bak";
+        var backupPath = "/backup/FitnessGymBackup20260703.bak";
         var databaseName = "FitnessCenterDB";
 
         var fileListSql = "RESTORE FILELISTONLY FROM DISK = @BackupPath";
