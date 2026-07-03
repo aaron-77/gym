@@ -1,7 +1,27 @@
+using System.Collections;
+using System.Diagnostics;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.Json;
+using System.Threading.RateLimiting;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Quartz;
+using Serilog;
+
 using API.Controllers;
 using API.Hubs;
 using API.Infraestructure.Auth;
 using API.Services;
+using API.Services.Validaciones;
 using BL;
 using BL.BackGroundWork.Jobs;
 using BL.EnPointsLogic;
@@ -10,23 +30,6 @@ using DataAccess;
 using DataAccess.EntityFramework;
 using DataAccess.Identity;
 using DTO.Dtos;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Quartz;
-using System.Collections;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Text;
-using Serilog;
-using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using System.Diagnostics;
-using System.Threading.RateLimiting;
-using System.Text.Json;
 
 
 try
@@ -243,6 +246,8 @@ try
     builder.Services.AddScoped<TokensService>();
     builder.Services.AddScoped<IUsersService, UsersService>();
     builder.Services.AddScoped<IClasesService, ClasesService>();
+    builder.Services.AddScoped<IServiceConsultarInscripcionesDeCliente, ServiceConsultarInscripcionesDeCliente>();
+    builder.Services.AddScoped<IValidadorUsuarioExistente, ValidadorUsuarioExistente>();
     Console.WriteLine("Servicios personalizados registrados");
 
     // Quartz
@@ -261,7 +266,6 @@ try
             }));
     });
     builder.Services.AddQuartzHostedService(option => option.WaitForJobsToComplete = true);
-    builder.Services.AddQuartz(options => { options.UseMicrosoftDependencyInjectionJobFactory(); });
     Console.WriteLine("Quartz configurado");
 
     // Authorization y capas adicionales
@@ -273,10 +277,6 @@ try
     Console.WriteLine("========================================");
     Console.WriteLine("CONSTRUYENDO APLICACION...");
     Console.WriteLine("========================================");
-    foreach (var kv in Environment.GetEnvironmentVariables().Cast<DictionaryEntry>())
-    {
-        Console.WriteLine($"{kv.Key} = {kv.Value}");
-    }
 
     var app = builder.Build();
     
