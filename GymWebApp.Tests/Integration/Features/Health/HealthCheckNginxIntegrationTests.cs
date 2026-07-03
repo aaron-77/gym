@@ -25,7 +25,7 @@ public class HealthCheckNginxIntegrationTests
         // Then: Returns 200 OK with {"status":"Healthy"}
         
         using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync($"{E2eContainerHelper.Instance.NginxBaseUrl}/api/health");
+        var response = await httpClient.GetAsync($"{_e2eContainerHelper.NginxBaseUrl}/api/health");
         
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
@@ -43,7 +43,7 @@ public class HealthCheckNginxIntegrationTests
         // Then: Returns 200 OK with {"status":"Healthy"}
         
         using var httpClient = new HttpClient();
-        var response = await httpClient.GetAsync($"{E2eContainerHelper.Instance.NginxBaseUrl}/health");
+        var response = await httpClient.GetAsync($"{_e2eContainerHelper.NginxBaseUrl}/health");
         
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         

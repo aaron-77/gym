@@ -125,6 +125,8 @@ public static E2eContainerHelper Instance { get; private set; } = null!;
             .WithPortBinding(FrontendInternalPort, true)
             .WithNetwork(_network)
             .WithNetworkAliases("fitnessgym_frontend")
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilPortIsAvailable(FrontendInternalPort))
             .Build();
 
         await _frontendContainer.StartAsync();
