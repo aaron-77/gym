@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using API.Services.Validaciones;
@@ -16,9 +15,6 @@ namespace API.Services
         private readonly ILogger<ServiceConsultarInscripcionesDeCliente> _logger;
         private readonly IValidadorUsuarioExistente _validadorUsuario;
 
-        /// <summary>
-        /// Constructor principal con DI.
-        /// </summary>
         public ServiceConsultarInscripcionesDeCliente(
             FitnessCenterDbContext context,
             ILogger<ServiceConsultarInscripcionesDeCliente> logger,
@@ -27,18 +23,6 @@ namespace API.Services
             _context = context;
             _logger = logger;
             _validadorUsuario = validadorUsuario;
-        }
-
-        /// <summary>
-        /// Constructor de retrocompatibilidad — crea el validador internamente.
-        /// Usado por tests existentes que aún no inyectan IValidadorUsuarioExistente.
-        /// </summary>
-        public ServiceConsultarInscripcionesDeCliente(
-            FitnessCenterDbContext context,
-            UserManager<ApplicationUser> userManager,
-            ILogger<ServiceConsultarInscripcionesDeCliente> logger)
-            : this(context, logger, new ValidadorUsuarioExistente(userManager))
-        {
         }
 
         public async Task<DTOResponse<List<DTOInscripcionDelCliente>>> ConsultarInscripcionesAsync(string idUsuario)

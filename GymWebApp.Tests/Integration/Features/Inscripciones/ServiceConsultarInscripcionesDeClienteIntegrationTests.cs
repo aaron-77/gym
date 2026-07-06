@@ -131,11 +131,22 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
 
         var clienteRow = await DatabaseHelper.ExecuteQuerySingleAsync(
             TestContainerHelper.ConnectionString,
-            @"SELECT TOP 1 Id FROM AspNetUsers
-              WHERE Id NOT IN (SELECT fkCliente FROM inscripcionesDeClases)");
+            @"SELECT TOP 1 u.Id FROM AspNetUsers u
+              WHERE NOT EXISTS (
+                  SELECT 1
+                  FROM inscripcionesDeClases i
+                      INNER JOIN clasesProgramadas cp ON i.fkProgramacionClase = cp.idProgramacionClase
+                      INNER JOIN horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
+                      INNER JOIN horasLaborales hl ON hcp.fkHorarioLaboral = hl.idHora
+                  WHERE i.fkCliente = u.Id
+                      AND (
+                          cp.fechaDeLaClase > CAST(GETDATE() AS DATE)
+                          OR (cp.fechaDeLaClase = CAST(GETDATE() AS DATE) AND hl.horaInicio > CAST(GETDATE() AS TIME))
+                      )
+              )");
 
         var clienteId = clienteRow?["Id"]?.ToString();
-        clienteId.Should().NotBeNull("Debe existir al menos un usuario sin inscripciones en seed data");
+        clienteId.Should().NotBeNull("Debe existir al menos un usuario sin inscripciones vigentes (futuras) en seed data");
 
         // Act
         var result = await service.ConsultarInscripcionesAsync(clienteId!);

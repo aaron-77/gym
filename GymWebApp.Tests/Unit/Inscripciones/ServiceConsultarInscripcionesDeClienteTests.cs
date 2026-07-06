@@ -1,9 +1,9 @@
 using FluentAssertions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 using API.Services;
+using API.Services.Validaciones;
 using DataAccess.EntityFramework;
 using DataAccess.Identity;
 using DTO.Dtos;
@@ -13,7 +13,7 @@ namespace GymWebApp.Tests.Unit.Inscripciones;
 public class ServiceConsultarInscripcionesDeClienteTests
 {
     private readonly FitnessCenterDbContext _mockContext;
-    private readonly UserManager<ApplicationUser> _mockUserManager;
+    private readonly IValidadorUsuarioExistente _mockValidador;
     private readonly ILogger<ServiceConsultarInscripcionesDeCliente> _mockLogger;
     private readonly ServiceConsultarInscripcionesDeCliente _sut;
 
@@ -21,14 +21,10 @@ public class ServiceConsultarInscripcionesDeClienteTests
     {
         _mockContext = Substitute.For<FitnessCenterDbContext>();
         _mockLogger = Substitute.For<ILogger<ServiceConsultarInscripcionesDeCliente>>();
-
-        var mockUserStore = Substitute.For<IUserStore<ApplicationUser>>();
-        _mockUserManager = Substitute.For<UserManager<ApplicationUser>>(
-            mockUserStore,
-            null!, null!, null!, null!, null!, null!, null!, null!);
+        _mockValidador = Substitute.For<IValidadorUsuarioExistente>();
 
         _sut = new ServiceConsultarInscripcionesDeCliente(
-            _mockContext, _mockUserManager, _mockLogger);
+            _mockContext, _mockLogger, _mockValidador);
     }
 
     #region Validation Tests - Guard Clauses
@@ -86,7 +82,7 @@ public class ServiceConsultarInscripcionesDeClienteTests
     {
         // Arrange
         var validGuid = Guid.NewGuid().ToString();
-        _mockUserManager.FindByIdAsync(validGuid).Returns((ApplicationUser?)null);
+        _mockValidador.ValidarAsync(validGuid).Returns((false, (ApplicationUser?)null));
 
         // Act
         var result = await _sut.ConsultarInscripcionesAsync(validGuid);
@@ -133,10 +129,10 @@ public class ServiceConsultarInscripcionesDeClienteTests
             }
         };
 
-        _mockUserManager.FindByIdAsync(validGuid).Returns(new ApplicationUser { Id = validGuid });
+        _mockValidador.ValidarAsync(validGuid).Returns((true, new ApplicationUser { Id = validGuid }));
 
         var service = new ServiceConsultarInscripcionesDeClienteTestable(
-            _mockContext, _mockUserManager, _mockLogger)
+            _mockContext, _mockLogger, _mockValidador)
         {
             OnExecuteQueryAsync = _ => Task.FromResult(expectedInscripciones)
         };
@@ -159,10 +155,10 @@ public class ServiceConsultarInscripcionesDeClienteTests
         // Arrange
         var validGuid = Guid.NewGuid().ToString();
 
-        _mockUserManager.FindByIdAsync(validGuid).Returns(new ApplicationUser { Id = validGuid });
+        _mockValidador.ValidarAsync(validGuid).Returns((true, new ApplicationUser { Id = validGuid }));
 
         var service = new ServiceConsultarInscripcionesDeClienteTestable(
-            _mockContext, _mockUserManager, _mockLogger)
+            _mockContext, _mockLogger, _mockValidador)
         {
             OnExecuteQueryAsync = _ => Task.FromResult(new List<DTOInscripcionDelCliente>())
         };
@@ -183,10 +179,10 @@ public class ServiceConsultarInscripcionesDeClienteTests
         // Arrange
         var validGuid = Guid.NewGuid().ToString();
 
-        _mockUserManager.FindByIdAsync(validGuid).Returns(new ApplicationUser { Id = validGuid });
+        _mockValidador.ValidarAsync(validGuid).Returns((true, new ApplicationUser { Id = validGuid }));
 
         var service = new ServiceConsultarInscripcionesDeClienteTestable(
-            _mockContext, _mockUserManager, _mockLogger)
+            _mockContext, _mockLogger, _mockValidador)
         {
             OnExecuteQueryAsync = _ => throw new InvalidOperationException("Error de BD simulado")
         };
@@ -208,9 +204,9 @@ internal class ServiceConsultarInscripcionesDeClienteTestable : ServiceConsultar
 
     public ServiceConsultarInscripcionesDeClienteTestable(
         FitnessCenterDbContext context,
-        UserManager<ApplicationUser> userManager,
-        ILogger<ServiceConsultarInscripcionesDeCliente> logger)
-        : base(context, userManager, logger)
+        ILogger<ServiceConsultarInscripcionesDeCliente> logger,
+        IValidadorUsuarioExistente validadorUsuario)
+        : base(context, logger, validadorUsuario)
     {
     }
 
