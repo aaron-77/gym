@@ -19,9 +19,7 @@ obteniendo el ID del usuario desde su token de identificación y consumiendo la 
 
 | Dependencia | Tipo | Descripción |
 |-------------|------|-------------|
-| `IHttpClientFactory` | HTTP | Crear clientes HTTP para consumir API |
-| `IJwtTokenGenerator` | Auth | Obtener token JWT para peticiones a la API |
-| `UserManager<ApplicationUser>` | Identity | Validar existencia de usuario |
+| `IHttpCustomClient` | HTTP | Cliente HTTP con JWT automático para consumir API |
 | `ILogger` | Logging | Logear errores y eventos |
 
 ## 3. Endpoint a crear
@@ -48,13 +46,11 @@ obteniendo el ID del usuario desde su token de identificación y consumiendo la 
 ### 3.4 Acciones que debe realizar
 
 1. Obtener ID del usuario desde el token JWT
-2. Validar que el ID del usuario tenga formato GUID válido
-3. Buscar el usuario en la BD usando `UserManager.FindByIdAsync`
-4. Si el usuario no existe, retornar error o redirect
-5. Validar que el usuario tenga rol `empleado`
-6. Crear cliente HTTP con token JWT para peticiones a la API
-7. Hacer petición GET directa a la API para obtener todos los clientes
-8. Pasar los datos de clientes a la vista `CancelarReagendarInscripcion`
+2. Validar que el ID del usuario tenga formato GUID válido (solo validación de forma, no de existencia — eso es responsabilidad de la API)
+3. Hacer petición GET directa a la API para obtener todos los clientes (el `AuthHeaderHandler` de `IHttpCustomClient` inyecta el JWT automáticamente)
+4. Pasar los datos de clientes a la vista `CancelarReagendarInscripcion`
+
+> **Nota sobre validaciones:** La validación de existencia del usuario y la verificación del rol `empleado` son responsabilidad exclusiva de la API backend. El frontend solo verifica formato de GUID y la autenticación vía el `[Authorize(Roles = "empleado")]` que valida el claim del JWT.
 
 ### 3.5 Patrones a aplicar
 
@@ -77,7 +73,9 @@ obteniendo el ID del usuario desde su token de identificación y consumiendo la 
 - [ ] Autenticación requerida
 - [ ] Solo rol `empleado` puede acceder
 - [ ] ID del usuario obtenido desde token JWT
-- [ ] Petición directa a API sin usar managers
+- [ ] Validación de formato GUID con `ValidadorStringId.Validar()`
+- [ ] **NO** se valida existencia del usuario (responsabilidad de API)
+- [ ] **NO** se valida rol explícitamente contra BD (responsabilidad de API; `[Authorize(Roles = "empleado")]` valida el claim del JWT)
+- [ ] Petición directa a API via `IHttpCustomClient`
 - [ ] Vista CancelarReagendarInscripcion muestra clientes
 - [ ] Manejo de errores con logging
-- [ ] Token JWT añadido a peticiones API correctamente
