@@ -40,71 +40,13 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
         return new ServiceConsultarInscripcionesDeCliente(context, logger, validador);
     }
 
-    /// <summary>
-    /// Genera datos frescos de clases programadas e inscripciones.
-    /// Ejecuta sp_cron_generarClasesProgramadas (clases para HOY) y luego selecciona
-    /// una clase que SÍ va a ser visible por fn_obtenerInscripcionesDelCliente
-    /// (mismo filtro: fecha futura o fecha hoy con hora no vencida).
-    /// </summary>
-    /// <returns>ID del cliente que fue inscrito.</returns>
-    private async Task<string> SeedFreshInscripcionAsync()
-    {
-        // 1. Generar clases programadas para hoy
-        await DatabaseHelper.ExecuteNonQueryAsync(
-            TestContainerHelper.ConnectionString,
-            "EXEC dbo.sp_cron_generarClasesProgramadas");
-
-        // 2. Tomar un cliente sin inscripciones previas (evita duplicados)
-        var clienteRow = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            @"SELECT TOP 1 Id FROM AspNetUsers
-              WHERE Id NOT IN (SELECT fkCliente FROM inscripcionesDeClases)
-              ORDER BY NEWID()");
-        var clienteId = clienteRow?["Id"]?.ToString();
-        clienteId.Should().NotBeNull("Debe existir al menos un usuario en seed data");
-
-        // 3. Seleccionar una clase que pase el MISMO filtro que fn_obtenerInscripcionesDelCliente
-        //    (fecha futura, o fecha hoy con hora todavía no vencida)
-        var claseRow = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            @"SELECT TOP 1 cp.idProgramacionClase
-              FROM clasesProgramadas cp
-              INNER JOIN horariosDeClasesProgramadas hcp
-                  ON cp.idProgramacionClase = hcp.fkClaseProgramada
-              INNER JOIN horasLaborales hl
-                  ON hcp.fkHorarioLaboral = hl.idHora
-              WHERE cp.fechaDeLaClase > CAST(GETDATE() AS DATE)
-                 OR (cp.fechaDeLaClase = CAST(GETDATE() AS DATE)
-                     AND hl.horaInicio > CAST(GETDATE() AS TIME))
-              ORDER BY NEWID()");
-
-        var idClaseProgramada = claseRow?["idProgramacionClase"] != null
-            ? Convert.ToInt32(claseRow["idProgramacionClase"])
-            : 0;
-
-        idClaseProgramada.Should().BeGreaterThan(0,
-            "sp_cron_generarClasesProgramadas debió generar al menos una clase con horario futuro");
-
-        // 4. Inscribir al cliente via SP (valida cupo, duplicados, etc.)
-        await DatabaseHelper.ExecuteNonQueryAsync(
-            TestContainerHelper.ConnectionString,
-            "EXEC dbo.sp_generarRegistroDePrueba_inscricionesDeClases @idCliente = @Cliente, @idClaseProgramada = @Clase",
-            new Dictionary<string, object?>
-            {
-                ["@Cliente"] = clienteId!,
-                ["@Clase"] = idClaseProgramada
-            });
-
-        return clienteId!;
-    }
-
     #region Happy Path
 
     [Fact]
     public async Task ConsultarInscripcionesAsync_ClienteConInscripcionesFuturas_ReturnsOkWithList()
     {
         // Arrange — generar datos frescos via SPs
-        var clienteId = await SeedFreshInscripcionAsync();
+        var clienteId = await InscripcionTestHelper.SeedFreshInscripcionAsync(TestContainerHelper.ConnectionString);
         var service = CreateService();
 
         // Act
@@ -129,23 +71,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
         // Arrange — BD recién reseteada, buscar usuario sin inscripciones
         var service = CreateService();
 
-        var clienteRow = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            @"SELECT TOP 1 u.Id FROM AspNetUsers u
-              WHERE NOT EXISTS (
-                  SELECT 1
-                  FROM inscripcionesDeClases i
-                      INNER JOIN clasesProgramadas cp ON i.fkProgramacionClase = cp.idProgramacionClase
-                      INNER JOIN horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
-                      INNER JOIN horasLaborales hl ON hcp.fkHorarioLaboral = hl.idHora
-                  WHERE i.fkCliente = u.Id
-                      AND (
-                          cp.fechaDeLaClase > CAST(GETDATE() AS DATE)
-                          OR (cp.fechaDeLaClase = CAST(GETDATE() AS DATE) AND hl.horaInicio > CAST(GETDATE() AS TIME))
-                      )
-              )");
-
-        var clienteId = clienteRow?["Id"]?.ToString();
+        var clienteId = await InscripcionTestHelper.GetClienteSinInscripcionesVigentesAsync(TestContainerHelper.ConnectionString);
         clienteId.Should().NotBeNull("Debe existir al menos un usuario sin inscripciones vigentes (futuras) en seed data");
 
         // Act
@@ -160,7 +86,41 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
 
     #endregion
 
-    #region Edge Cases
+    #region Edge Cases — Validación de parámetros
+
+    [Fact]
+    public async Task ConsultarInscripcionesAsync_GuidVacio_ReturnsBadRequest()
+    {
+        // Arrange
+        var service = CreateService();
+
+        // Act
+        var result = await service.ConsultarInscripcionesAsync(string.Empty);
+
+        // Assert
+        result.success.Should().BeFalse();
+        result.httpCode.Should().Be(400);
+        result.errors.Should().Contain(e => e.message.Contains("ID de usuario"));
+    }
+
+    [Fact]
+    public async Task ConsultarInscripcionesAsync_NullId_ReturnsBadRequest()
+    {
+        // Arrange
+        var service = CreateService();
+
+        // Act
+        var result = await service.ConsultarInscripcionesAsync(null!);
+
+        // Assert
+        result.success.Should().BeFalse();
+        result.httpCode.Should().Be(400);
+        result.errors.Should().Contain(e => e.message.Contains("ID de usuario"));
+    }
+
+    #endregion
+
+    #region Edge Cases — Casos con BD
 
     [Fact]
     public async Task ConsultarInscripcionesAsync_GuidInexistente_ReturnsNotFound()
@@ -182,7 +142,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
     public async Task ConsultarInscripcionesAsync_ClienteConSoloInscripcionesCanceladas_ReturnsOkWithEmptyList()
     {
         // Arrange — generar inscripción vigente via SP y luego cancelarla
-        var clienteId = await SeedFreshInscripcionAsync();
+        var clienteId = await InscripcionTestHelper.SeedFreshInscripcionAsync(TestContainerHelper.ConnectionString);
         var service = CreateService();
 
         // Obtener la inscripción recién creada y cambiarla a cancelada
