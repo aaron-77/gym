@@ -9,11 +9,11 @@ namespace GymFrontend.Controllers
 {
     public class InscripcionesController : Controller
     {
-        private readonly IHttpCustomClient _httpClient;
+        private readonly BL.IHttpCustomClient _httpClient;
         private readonly ILogger<InscripcionesController> _logger;
 
         public InscripcionesController(
-            IHttpCustomClient httpClient,
+            BL.IHttpCustomClient httpClient,
             ILogger<InscripcionesController> logger)
         {
             _httpClient = httpClient;
@@ -23,7 +23,7 @@ namespace GymFrontend.Controllers
         [Authorize(Roles = "empleado")]
         [HttpGet]
         [Route("inscripciones/cancelarReagendar")]
-        public async Task<IActionResult> CancelarReagendarInscripcionAsync()
+        public async Task<IActionResult> CancelarReagendarInscripcion()
         {
             try
             {
@@ -48,14 +48,13 @@ namespace GymFrontend.Controllers
                     clientes = apiResponse?.payload;
                 }
 
-                ViewBag.Clientes = clientes ?? new List<QueryUser>();
-                return View("CancelarReagendarInscripcion");
+                return View("CancelarReagendarInscripcion", clientes ?? new List<QueryUser>());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error CancelarReagendarInscripcion (InscripcionesController)");
-                ViewBag.Clientes = new List<QueryUser>();
-                return View("CancelarReagendarInscripcion");
+                ViewBag.ErrorMessage = "Ocurrió un error al cargar los datos.";
+                return View("CancelarReagendarInscripcion", new List<QueryUser>());
             }
         }
     }
