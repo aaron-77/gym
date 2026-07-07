@@ -170,11 +170,13 @@ namespace GymFrontend
                         },
                         OnChallenge = context =>
                         {
+                            //context.HandleResponse();
                             context.Response.Redirect(LoginPath);
                             return Task.CompletedTask;
                         },
                         OnForbidden = context =>
                         {
+                            //context.HandleResponse();
                             context.Response.Redirect(AccessDeniedPath);
                             return Task.CompletedTask;
                         }
@@ -296,6 +298,7 @@ namespace GymFrontend
                 }).RequireRateLimiting("HealthPolicy");
                 Console.WriteLine("Health check endpoint configurado en /health con rate limiting (100 req/min)");
 
+                app.MapControllers();
                 app.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");

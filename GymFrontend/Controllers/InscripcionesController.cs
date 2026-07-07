@@ -1,19 +1,22 @@
 using System.Security.Claims;
 using System.Text.Json;
+using BL;
+using DTO.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using DTO.Dtos;
 
 namespace GymFrontend.Controllers
 {
+    [Route("[controller]")]
+    [ApiController]
     public class InscripcionesController : Controller
     {
-        private readonly BL.IHttpCustomClient _httpClient;
+        private readonly IHttpCustomClient _httpClient;
         private readonly ILogger<InscripcionesController> _logger;
 
         public InscripcionesController(
-            BL.IHttpCustomClient httpClient,
+            IHttpCustomClient httpClient,
             ILogger<InscripcionesController> logger)
         {
             _httpClient = httpClient;
@@ -22,7 +25,8 @@ namespace GymFrontend.Controllers
 
         [Authorize(Roles = "empleado")]
         [HttpGet]
-        [Route("inscripciones/cancelarReagendar")]
+        [Route("cancelarReagendar")]
+        
         public async Task<IActionResult> CancelarReagendarInscripcion()
         {
             try
