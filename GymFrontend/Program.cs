@@ -1,20 +1,19 @@
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.RateLimiting;
+using System.Net;
+using System.Text;
+using System.Text.Json;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using BL;
 using BL.EnPointsLogic;
 using BL.Utils;
 using DataAccess;
 using DTO.Dtos;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using Serilog;
-using System.Net;
-using System.Text;
-using System.Text.Json;
 
 namespace GymFrontend
 {
@@ -55,16 +54,7 @@ namespace GymFrontend
                 });
 
                 builder.Services.AddHealthChecks();
-                if (builder.Environment.IsProduction())
-                {
-                    builder.Services.Configure<ForwardedHeadersOptions>(options =>
-                    {
-                        options.ForwardedHeaders =
-                            ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
-                        options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
-                    });
-                }
-                if (builder.Environment.IsStaging())
+                if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
                 {
                     builder.Services.Configure<ForwardedHeadersOptions>(options =>
                     {
@@ -74,39 +64,39 @@ namespace GymFrontend
                     });
                 }
 
-                Console.WriteLine("WebApplicationBuilder creado");
+                Log.Logger.Information("WebApplicationBuilder creado");
 
-                Console.WriteLine("=== DEBUGGING URLS ===");
-                Console.WriteLine($"ASPNETCORE_URLS env: {Environment.GetEnvironmentVariable("ASPNETCORE_URLS")}");
-                Console.WriteLine($"ASPNETCORE_URLS config: {builder.Configuration["ASPNETCORE_URLS"]}");
-                Console.WriteLine($"Urls property: {string.Join(", ", builder.WebHost.GetSetting("urls") ?? "null")}");
-                Console.WriteLine("======================");
+                Log.Logger.Information("=== DEBUGGING URLS ===");
+                Log.Logger.Information("ASPNETCORE_URLS env: {Urls}", Environment.GetEnvironmentVariable("ASPNETCORE_URLS"));
+                Log.Logger.Information("ASPNETCORE_URLS config: {Urls}", builder.Configuration["ASPNETCORE_URLS"]);
+                Log.Logger.Information("Urls property: {Urls}", string.Join(", ", builder.WebHost.GetSetting("urls") ?? "null"));
+                Log.Logger.Information("======================");
 
-                string aspnetcore_urls = builder.Configuration["ASPNETCORE_URLS"] ?? "";
-                aspnetcore_urls = aspnetcore_urls.Trim().ToLowerInvariant();
-                Console.WriteLine("URLs procesadas");
+                string aspnetcoreUrls = builder.Configuration["ASPNETCORE_URLS"] ?? "";
+                aspnetcoreUrls = aspnetcoreUrls.Trim().ToLowerInvariant();
+                Log.Logger.Information("URLs procesadas");
 
                 builder.Services.AddControllersWithViews();
-                Console.WriteLine("Controllers con Views agregados");
+                Log.Logger.Information("Controllers con Views agregados");
 
                 builder.Services.AddHttpContextAccessor();
-                Console.WriteLine("HttpContextAccessor registrado");
+                Log.Logger.Information("HttpContextAccessor registrado");
 
                 builder.Services.AddScoped<AuthHeaderHandler>();
                 bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
-                Console.WriteLine($"SSL configurado: {useSsl}");
+                Log.Logger.Information("SSL configurado: {UseSsl}", useSsl);
 
-                // Escoge la URL del backend según el valor de UseSsl
-                string BaseApiUrlForClientHttp = builder.Configuration[
-                    aspnetcore_urls.Contains("https") ? "EndPoints:api:ssl" : "EndPoints:api:nossl"
+                // Escoge la URL del backend según si las URLs contienen https
+                string baseApiUrlForClientHttp = builder.Configuration[
+                    aspnetcoreUrls.Contains("https") ? "EndPoints:api:ssl" : "EndPoints:api:nossl"
                 ] ?? "http://localhost:5274";
-                Console.WriteLine($"Base API URL: {BaseApiUrlForClientHttp}");
+                Log.Logger.Information("Base API URL: {BaseApiUrl}", baseApiUrlForClientHttp);
 
                 builder.Services.AddHttpClient<IHttpCustomClient, HttpCustomClient>(client =>
                 {
-                    client.BaseAddress = new Uri(BaseApiUrlForClientHttp);
+                    client.BaseAddress = new Uri(baseApiUrlForClientHttp);
                 }).AddHttpMessageHandler<AuthHeaderHandler>();
-                Console.WriteLine("HttpClient configurado");
+                Log.Logger.Information("HttpClient configurado");
 
                 // Managers
                 builder.Services.AddScoped<EndPointsManager>();
@@ -119,21 +109,21 @@ namespace GymFrontend
                 builder.Services.AddScoped<ClasesManager>();
                 builder.Services.AddScoped<JwtTokenGenerator>();
                 builder.Services.AddScoped<CookieService>();
-                Console.WriteLine("Managers registrados");
+                Log.Logger.Information("Managers registrados");
 
                 var jwtSection = builder.Configuration.GetSection("JwtSettings");
                 var pagesSection = builder.Configuration.GetSection("pages");
                 builder.Services.Configure<JwtSettings>(jwtSection);
                 builder.Services.Configure<PagesSettings>(pagesSection);
-                Console.WriteLine("Configuracion JWT y Pages cargada");
+                Log.Logger.Information("Configuracion JWT y Pages cargada");
 
                 var jwtSettings = jwtSection.Get<JwtSettings>();
                 var pagesSettings = pagesSection.Get<PagesSettings>();
                 var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY"));
-                var LoginPath = pagesSettings.Login;
-                var AccessDeniedPath = pagesSettings.Forbidden;
-                Console.WriteLine($"Login Path: {LoginPath}");
-                Console.WriteLine($"Access Denied Path: {AccessDeniedPath}");
+                var loginPath = pagesSettings.Login;
+                var accessDeniedPath = pagesSettings.Forbidden;
+                Log.Logger.Information("Login Path: {LoginPath}", loginPath);
+                Log.Logger.Information("Access Denied Path: {AccessDeniedPath}", accessDeniedPath);
 
                 builder.Services.AddAuthentication(options =>
                 {
@@ -142,7 +132,7 @@ namespace GymFrontend
                 }).AddJwtBearer(options =>
                 {
                     string audience = jwtSettings.FrontAudiencie;
-                    if (aspnetcore_urls.Contains("https"))
+                    if (aspnetcoreUrls.Contains("https"))
                     {
                         audience = jwtSettings.FrontendAudienceSsl;
                     }
@@ -170,29 +160,28 @@ namespace GymFrontend
                         },
                         OnChallenge = context =>
                         {
-                            //context.HandleResponse();
-                            context.Response.Redirect(LoginPath);
+                            context.HandleResponse();
+                            context.Response.Redirect(loginPath);
                             return Task.CompletedTask;
                         },
                         OnForbidden = context =>
                         {
-                            //context.HandleResponse();
-                            context.Response.Redirect(AccessDeniedPath);
+                            context.Response.Redirect(accessDeniedPath);
                             return Task.CompletedTask;
                         }
                     };
                 });
-                Console.WriteLine("JWT Authentication configurado");
+                Log.Logger.Information("JWT Authentication configurado");
 
                 builder.Services.ConfigureApplicationCookie(options =>
                 {
-                    options.LoginPath = LoginPath;
-                    options.AccessDeniedPath = AccessDeniedPath;
+                    options.LoginPath = loginPath;
+                    options.AccessDeniedPath = accessDeniedPath;
                 });
-                Console.WriteLine("Application Cookie configurado");
+                Log.Logger.Information("Application Cookie configurado");
 
                 builder.Services.AddAuthorization();
-                Console.WriteLine("Authorization agregado");
+                Log.Logger.Information("Authorization agregado");
 
                 // Connection String para el DbContext
                 var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
@@ -200,27 +189,23 @@ namespace GymFrontend
 
                 builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
                     options.UseSqlServer(dbConnectionString));
-                Console.WriteLine("DbContext configurado");
+                Log.Logger.Information("DbContext configurado");
 
                 builder.Services.AddRazorPages();
-                Console.WriteLine("Razor Pages agregado");
+                Log.Logger.Information("Razor Pages agregado");
 
                 builder.Services.AddDataAccess();
                 builder.Services.AddBusinessLayer();
-                Console.WriteLine("DataAccess y BusinessLayer registrados");
+                Log.Logger.Information("DataAccess y BusinessLayer registrados");
 
-                Console.WriteLine("========================================");
-                Console.WriteLine("CONSTRUYENDO APLICACION...");
-                Console.WriteLine("========================================");
+                Log.Logger.Information("========================================");
+                Log.Logger.Information("CONSTRUYENDO APLICACION...");
+                Log.Logger.Information("========================================");
 
                 var app = builder.Build();
-                Console.WriteLine("App construida exitosamente");
+                Log.Logger.Information("App construida exitosamente");
 
-                if (app.Environment.IsStaging())
-                {
-                    app.UseForwardedHeaders();
-                }
-                if (app.Environment.IsProduction())
+                if (app.Environment.IsStaging() || app.Environment.IsProduction())
                 {
                     app.UseForwardedHeaders();
                 }
@@ -233,23 +218,21 @@ namespace GymFrontend
                     var useSslConfig = config.GetValue<bool>("UseSsl");
                     var jwtSettingsConfig = config.GetSection("JwtSettings").Get<JwtSettings>();
 
-                    Console.WriteLine("\n" + new string('=', 60));
-                    Console.WriteLine("APLICACION INICIADA");
-                    Console.WriteLine(new string('=', 60));
+                    logger.LogInformation("");
+                    logger.LogInformation("APLICACION INICIADA");
+                    logger.LogInformation("");
 
                     foreach (var address in addresses)
                     {
-                        logger.LogInformation($"Escuchando en: {address}");
-                        Console.WriteLine($"  {address}");
+                        logger.LogInformation("Escuchando en: {Address}", address);
                     }
 
-                    Console.WriteLine(new string('-', 60));
-                    Console.WriteLine("CONFIGURACION ACTIVA:");
-                    Console.WriteLine($"  SSL Habilitado: {useSslConfig}");
-                    Console.WriteLine($"  Issuer: {jwtSettingsConfig?.Issuer}");
-                    Console.WriteLine($"  Audiencia Frontend: {(useSslConfig ? jwtSettingsConfig?.FrontendAudienceSsl : jwtSettingsConfig?.FrontAudiencie)}");
-                    Console.WriteLine($"  Expiracion Token: {jwtSettingsConfig?.ExpiryMinutes} minutos");
-                    Console.WriteLine(new string('=', 60) + "\n");
+                    logger.LogInformation("--- CONFIGURACION ACTIVA ---");
+                    logger.LogInformation("SSL Habilitado: {UseSsl}", useSslConfig);
+                    logger.LogInformation("Issuer: {Issuer}", jwtSettingsConfig?.Issuer);
+                    logger.LogInformation("Audiencia Frontend: {Audience}", useSslConfig ? jwtSettingsConfig?.FrontendAudienceSsl : jwtSettingsConfig?.FrontAudiencie);
+                    logger.LogInformation("Expiracion Token: {ExpiryMinutes} minutos", jwtSettingsConfig?.ExpiryMinutes);
+                    logger.LogInformation("");
 
                     logger.LogInformation("Configuracion JWT cargada correctamente");
                 });
@@ -259,11 +242,11 @@ namespace GymFrontend
                 {
                     app.UseExceptionHandler("/Home/Error");
                     app.UseHsts();
-                    Console.WriteLine("Modo Production - Exception Handler y HSTS configurados");
+                    Log.Logger.Information("Modo Production - Exception Handler y HSTS configurados");
                 }
                 else
                 {
-                    Console.WriteLine("Modo Development");
+                    Log.Logger.Information("Modo Development");
                 }
                 if (app.Environment.IsDevelopment())
                 {
@@ -273,19 +256,19 @@ namespace GymFrontend
                     }
                 }
 
-                Console.WriteLine("HTTPS Redirection configurado");
+                Log.Logger.Information("HTTPS Redirection configurado");
 
                 app.UseStaticFiles();
-                Console.WriteLine("Static Files configurado");
+                Log.Logger.Information("Static Files configurado");
 
                 app.UseRouting();
-                Console.WriteLine("Routing configurado");
+                Log.Logger.Information("Routing configurado");
 
                 app.UseAuthentication();
-                Console.WriteLine("Authentication middleware agregado");
+                Log.Logger.Information("Authentication middleware agregado");
 
                 app.UseAuthorization();
-                Console.WriteLine("Authorization middleware agregado");
+                Log.Logger.Information("Authorization middleware agregado");
 
                 app.MapHealthChecks("/health", new HealthCheckOptions
                 {
@@ -296,17 +279,17 @@ namespace GymFrontend
                         await JsonSerializer.SerializeAsync(context.Response.Body, result);
                     }
                 }).RequireRateLimiting("HealthPolicy");
-                Console.WriteLine("Health check endpoint configurado en /health con rate limiting (100 req/min)");
+                Log.Logger.Information("Health check endpoint configurado en /health con rate limiting (100 req/min)");
 
                 app.MapControllers();
                 app.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
-                Console.WriteLine("Controller Routes mapeadas");
+                Log.Logger.Information("Controller Routes mapeadas");
 
-                Console.WriteLine("========================================");
-                Console.WriteLine("FRONTEND LISTO - INICIANDO SERVIDOR...");
-                Console.WriteLine("========================================");
+                Log.Logger.Information("========================================");
+                Log.Logger.Information("FRONTEND LISTO - INICIANDO SERVIDOR...");
+                Log.Logger.Information("========================================");
 
                 await app.RunAsync();
             }

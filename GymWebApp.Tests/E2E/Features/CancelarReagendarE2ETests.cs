@@ -45,18 +45,18 @@ public class CancelarReagendarE2ETests : PlaywrightTestBase
         // THEN: la vista se renderiza con el título correspondiente
         await Expect(Page.Locator("h1")).ToContainTextAsync("Cancelar / Reagendar Inscripción");
 
-        // AND: muestra la tabla de clientes o el mensaje de "no se encontraron clientes"
+        // AND: muestra el combo de clientes o el mensaje de "no se encontraron clientes"
         // Ambos casos son válidos — lo importante es que NO muestra un error
-        var tablaClientes = Page.Locator("#tablaClientes");
+        var comboCliente = Page.Locator("#comboCliente");
         var noClientesMsg = Page.Locator("text=No se encontraron clientes activos");
         var errorAlert = Page.Locator(".alert-danger");
 
-        var tablaVisible = await tablaClientes.IsVisibleAsync();
+        var comboVisible = await comboCliente.IsVisibleAsync();
         var noClientesVisible = await noClientesMsg.IsVisibleAsync();
 
-        Assert.True(tablaVisible || noClientesVisible,
-            $"La página debería mostrar la tabla de clientes o el mensaje de 'no se encontraron clientes'. " +
-            $"Tabla visible: {tablaVisible}, NoClientes visible: {noClientesVisible}");
+        Assert.True(comboVisible || noClientesVisible,
+            $"La página debería mostrar el combo de clientes o el mensaje de 'no se encontraron clientes'. " +
+            $"Combo visible: {comboVisible}, NoClientes visible: {noClientesVisible}");
 
         // AND: el mensaje de error de API NO debe aparecer
         await Expect(errorAlert).Not.ToBeVisibleAsync();
