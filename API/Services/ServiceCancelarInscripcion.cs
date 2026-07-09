@@ -30,15 +30,9 @@ public class ServiceCancelarInscripcion : IServiceCancelarInscripcion
             // Paso 1: Guard clause — ID debe ser mayor a 0
             if (idInscripcion <= 0)
             {
-                return ResponseManager.BuildResponse<bool>(
-                    success: false,
-                    httpCode: 400,
-                    message: "Datos inválidos",
-                    errors: new List<ErrorModel>
-                    {
-                        new() { propiedad = "idInscripcion", message = "El ID de inscripción debe ser mayor a 0." }
-                    },
-                    payload: false);
+                return ResponseManager.BadRequest<bool>(
+                    "Datos inválidos",
+                    "idInscripcion|El ID de inscripción debe ser mayor a 0.");
             }
 
             // Paso 2: Buscar inscripción con su clase programada y horarios
@@ -51,15 +45,9 @@ public class ServiceCancelarInscripcion : IServiceCancelarInscripcion
             // Paso 3: Validar que la inscripción exista
             if (inscripcion is null)
             {
-                return ResponseManager.BuildResponse<bool>(
-                    success: false,
-                    httpCode: 404,
-                    message: "Inscripción no encontrada",
-                    errors: new List<ErrorModel>
-                    {
-                        new() { propiedad = "idInscripcion", message = "La inscripción especificada no existe." }
-                    },
-                    payload: false);
+                return ResponseManager.NotFound<bool>(
+                    "Inscripción no encontrada",
+                    "idInscripcion|La inscripción especificada no existe.");
             }
 
             var claseProgramada = inscripcion.FkProgramacionClaseNavigation;
@@ -67,15 +55,7 @@ public class ServiceCancelarInscripcion : IServiceCancelarInscripcion
             if (!claseProgramada.FechaDeLaClase.HasValue)
             {
                 _logger.LogError("[CancelarInscripcionAsync] La clase programada {IdProgramacionClase} no tiene fecha asignada", claseProgramada.IdProgramacionClase);
-                return ResponseManager.BuildResponse<bool>(
-                    success: false,
-                    httpCode: 500,
-                    message: "Error interno del servidor",
-                    errors: new List<ErrorModel>
-                    {
-                        new() { message = "La clase programada no tiene una fecha asignada.", propiedad = null }
-                    },
-                    payload: false);
+                return ResponseManager.InternalServerError<bool>("Error interno del servidor");
             }
 
             var fechaClase = claseProgramada.FechaDeLaClase.Value;
@@ -90,41 +70,20 @@ public class ServiceCancelarInscripcion : IServiceCancelarInscripcion
 
             if (!esValido)
             {
-                return ResponseManager.BuildResponse<bool>(
-                    success: false,
-                    httpCode: 400,
-                    message: mensajeError,
-                    errors: new List<ErrorModel>
-                    {
-                        new() { propiedad = "idInscripcion", message = mensajeError }
-                    },
-                    payload: false);
+                return ResponseManager.BadRequest<bool>(mensajeError, $"idInscripcion|{mensajeError}");
             }
 
             // Paso 5: Ejecutar el procedimiento almacenado de cancelación
             await _context.Database.ExecuteSqlInterpolatedAsync(
                 $@"EXEC dbo.sp_procesoCompletoCancelacionDeInscripcionAClase @idInscripcion = {idInscripcion}");
 
-            return ResponseManager.BuildResponse<bool>(
-                success: true,
-                httpCode: 200,
-                message: "Inscripción cancelada exitosamente",
-                errors: null,
-                payload: true);
+            return ResponseManager.Ok<bool>("Inscripción cancelada exitosamente", true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[CancelarInscripcionAsync] Error al cancelar inscripción {IdInscripcion}", idInscripcion);
 
-            return ResponseManager.BuildResponse<bool>(
-                success: false,
-                httpCode: 500,
-                message: "Error interno del servidor",
-                errors: new List<ErrorModel>
-                {
-                    new() { message = "Ocurrió un error al cancelar la inscripción.", propiedad = null }
-                },
-                payload: false);
+            return ResponseManager.InternalServerError<bool>("Error interno del servidor");
         }
     }
 }
