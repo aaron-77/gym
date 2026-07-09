@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Xunit;
 using API.Services;
 using API.Services.Validaciones;
+using BL.Validaciones;
 using DataAccess.EntityFramework;
+using DataAccess.Infraestructure;
 using DTO.Dtos;
 using GymWebApp.Tests.Integration.Common;
 using GymWebApp.Tests.Integration.Helpers;
@@ -12,7 +14,7 @@ using GymWebApp.Tests.Integration.Helpers;
 namespace GymWebApp.Tests.Integration.Features.Inscripciones;
 
 /// <summary>
-/// Tests de integración para ServiceConsultarInscripcionesDeCliente (spec 32).
+/// Tests de integración para InscripcionesService (spec 32).
 /// Validan la interacción real con la BD: función SQL, UserManager, DI real.
 /// Los tests de guard clauses (null, empty, whitespace) se cubren en Unit tests.
 ///
@@ -31,13 +33,15 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
     /// <summary>
     /// Crea el servicio con dependencias reales resueltas desde DI.
     /// </summary>
-    private ServiceConsultarInscripcionesDeCliente CreateService()
+    private InscripcionesService CreateService()
     {
         var context = Factory.Services.GetRequiredService<FitnessCenterDbContext>();
-        var logger = Factory.Services.GetRequiredService<ILogger<ServiceConsultarInscripcionesDeCliente>>();
-        var validador = Factory.Services.GetRequiredService<IValidadorUsuarioExistente>();
+        var logger = Factory.Services.GetRequiredService<ILogger<InscripcionesService>>();
+        var validadorFecha = Factory.Services.GetRequiredService<IValidadorFechaCancelacionInscripcion>();
+        var validadorUsuario = Factory.Services.GetRequiredService<IValidadorUsuarioExistente>();
+        var dbExecutor = Factory.Services.GetRequiredService<IDataAccessExecutor>();
 
-        return new ServiceConsultarInscripcionesDeCliente(context, logger, validador);
+        return new InscripcionesService(context, logger, validadorFecha, validadorUsuario, dbExecutor);
     }
 
     #region Happy Path
@@ -50,7 +54,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
         var service = CreateService();
 
         // Act
-        var result = await service.ConsultarInscripcionesAsync(clienteId);
+        var result = await service.ConsultarInscripcionesDeClienteAsync(clienteId);
 
         // Assert
         result.success.Should().BeTrue();
@@ -75,7 +79,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
         clienteId.Should().NotBeNull("Debe existir al menos un usuario sin inscripciones vigentes (futuras) en seed data");
 
         // Act
-        var result = await service.ConsultarInscripcionesAsync(clienteId!);
+        var result = await service.ConsultarInscripcionesDeClienteAsync(clienteId!);
 
         // Assert
         result.success.Should().BeTrue();
@@ -95,7 +99,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
         var service = CreateService();
 
         // Act
-        var result = await service.ConsultarInscripcionesAsync(string.Empty);
+        var result = await service.ConsultarInscripcionesDeClienteAsync(string.Empty);
 
         // Assert
         result.success.Should().BeFalse();
@@ -110,7 +114,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
         var service = CreateService();
 
         // Act
-        var result = await service.ConsultarInscripcionesAsync(null!);
+        var result = await service.ConsultarInscripcionesDeClienteAsync(null!);
 
         // Assert
         result.success.Should().BeFalse();
@@ -130,7 +134,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
         var guidInexistente = Guid.NewGuid().ToString();
 
         // Act
-        var result = await service.ConsultarInscripcionesAsync(guidInexistente);
+        var result = await service.ConsultarInscripcionesDeClienteAsync(guidInexistente);
 
         // Assert
         result.success.Should().BeFalse();
@@ -165,7 +169,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
             new Dictionary<string, object?> { ["@Id"] = idInscripcion });
 
         // Act
-        var result = await service.ConsultarInscripcionesAsync(clienteId);
+        var result = await service.ConsultarInscripcionesDeClienteAsync(clienteId);
 
         // Assert
         result.success.Should().BeTrue();
@@ -181,7 +185,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
         var service = CreateService();
 
         // Act
-        var result = await service.ConsultarInscripcionesAsync("abc123");
+        var result = await service.ConsultarInscripcionesDeClienteAsync("abc123");
 
         // Assert
         result.success.Should().BeFalse();

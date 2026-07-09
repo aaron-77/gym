@@ -18,12 +18,12 @@ namespace API.Controllers
     [ApiController]
     public class InscripcionesController : ControllerBase
     {
-        private readonly IServiceConsultarInscripcionesDeCliente _service;
+        private readonly IInscripcionesService _service;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<InscripcionesController> _logger;
 
         public InscripcionesController(
-            IServiceConsultarInscripcionesDeCliente service,
+            IInscripcionesService service,
             UserManager<ApplicationUser> userManager,
             ILogger<InscripcionesController> logger)
         {
@@ -99,7 +99,7 @@ namespace API.Controllers
                 }
 
                 // Paso 6: Llamar al servicio para obtener las inscripciones
-                var result = await _service.ConsultarInscripcionesAsync(idUsuario);
+                var result = await _service.ConsultarInscripcionesDeClienteAsync(idUsuario);
 
                 // Paso 7: Retornar la respuesta del servicio
                 return Ok(result);

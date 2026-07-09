@@ -21,6 +21,7 @@ namespace DataAccess
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IAccessTokenRepository, AccessTokenRepository>();
             services.AddScoped<IClasesRepository, ClasesRepository>();
+            services.AddScoped<Infraestructure.IDataAccessExecutor, Infraestructure.DataAccessExecutor>();
             // Aquí se pueden añadir otros repositorios de DataAccess
 
             return services;

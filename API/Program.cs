@@ -19,6 +19,7 @@ using API.Controllers;
 using API.Hubs;
 using API.Infraestructure.Auth;
 using API.Services;
+using API.Services.Validaciones;
 using BL.Validaciones;
 using BL;
 using BL.BackGroundWork.Jobs;
@@ -232,10 +233,9 @@ try
     builder.Services.AddScoped<TokensService>();
     builder.Services.AddScoped<IUsersService, UsersService>();
     builder.Services.AddScoped<IClasesService, ClasesService>();
-    builder.Services.AddScoped<IServiceConsultarInscripcionesDeCliente, ServiceConsultarInscripcionesDeCliente>();
+    builder.Services.AddScoped<IInscripcionesService, InscripcionesService>();
     builder.Services.AddScoped<IValidadorUsuarioExistente, ValidadorUsuarioExistente>();
     builder.Services.AddScoped<IValidadorFechaCancelacionInscripcion, ValidadorFechaCancelacionInscripcion>();
-    builder.Services.AddScoped<IServiceCancelarInscripcion, ServiceCancelarInscripcion>();
     Console.WriteLine("Servicios personalizados registrados");
 
     // Quartz

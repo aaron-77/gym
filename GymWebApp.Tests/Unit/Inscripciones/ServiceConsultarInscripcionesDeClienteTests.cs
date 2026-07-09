@@ -4,8 +4,10 @@ using NSubstitute;
 using Xunit;
 using API.Services;
 using API.Services.Validaciones;
+using BL.Validaciones;
 using DataAccess.EntityFramework;
 using DataAccess.Identity;
+using DataAccess.Infraestructure;
 using DTO.Dtos;
 
 namespace GymWebApp.Tests.Unit.Inscripciones;
@@ -14,17 +16,17 @@ public class ServiceConsultarInscripcionesDeClienteTests
 {
     private readonly FitnessCenterDbContext _mockContext;
     private readonly IValidadorUsuarioExistente _mockValidador;
-    private readonly ILogger<ServiceConsultarInscripcionesDeCliente> _mockLogger;
-    private readonly ServiceConsultarInscripcionesDeCliente _sut;
+    private readonly ILogger<InscripcionesService> _mockLogger;
+    private readonly IValidadorFechaCancelacionInscripcion _mockValidadorFecha;
+    private readonly IDataAccessExecutor _mockDbExecutor;
 
     public ServiceConsultarInscripcionesDeClienteTests()
     {
         _mockContext = Substitute.For<FitnessCenterDbContext>();
-        _mockLogger = Substitute.For<ILogger<ServiceConsultarInscripcionesDeCliente>>();
+        _mockLogger = Substitute.For<ILogger<InscripcionesService>>();
         _mockValidador = Substitute.For<IValidadorUsuarioExistente>();
-
-        _sut = new ServiceConsultarInscripcionesDeCliente(
-            _mockContext, _mockLogger, _mockValidador);
+        _mockValidadorFecha = Substitute.For<IValidadorFechaCancelacionInscripcion>();
+        _mockDbExecutor = Substitute.For<IDataAccessExecutor>();
     }
 
     #region Validation Tests - Guard Clauses
@@ -32,8 +34,12 @@ public class ServiceConsultarInscripcionesDeClienteTests
     [Fact]
     public async Task ConsultarInscripcionesAsync_NullId_ReturnsBadRequest()
     {
+        // Arrange
+        var sut = new InscripcionesService(
+            _mockContext, _mockLogger, _mockValidadorFecha, _mockValidador, _mockDbExecutor);
+
         // Act
-        var result = await _sut.ConsultarInscripcionesAsync(null!);
+        var result = await sut.ConsultarInscripcionesDeClienteAsync(null!);
 
         // Assert
         result.success.Should().BeFalse();
@@ -44,8 +50,12 @@ public class ServiceConsultarInscripcionesDeClienteTests
     [Fact]
     public async Task ConsultarInscripcionesAsync_EmptyId_ReturnsBadRequest()
     {
+        // Arrange
+        var sut = new InscripcionesService(
+            _mockContext, _mockLogger, _mockValidadorFecha, _mockValidador, _mockDbExecutor);
+
         // Act
-        var result = await _sut.ConsultarInscripcionesAsync(string.Empty);
+        var result = await sut.ConsultarInscripcionesDeClienteAsync(string.Empty);
 
         // Assert
         result.success.Should().BeFalse();
@@ -56,8 +66,12 @@ public class ServiceConsultarInscripcionesDeClienteTests
     [Fact]
     public async Task ConsultarInscripcionesAsync_WhitespaceId_ReturnsBadRequest()
     {
+        // Arrange
+        var sut = new InscripcionesService(
+            _mockContext, _mockLogger, _mockValidadorFecha, _mockValidador, _mockDbExecutor);
+
         // Act
-        var result = await _sut.ConsultarInscripcionesAsync("   ");
+        var result = await sut.ConsultarInscripcionesDeClienteAsync("   ");
 
         // Assert
         result.success.Should().BeFalse();
@@ -68,8 +82,12 @@ public class ServiceConsultarInscripcionesDeClienteTests
     [Fact]
     public async Task ConsultarInscripcionesAsync_InvalidGuidFormat_ReturnsBadRequest()
     {
+        // Arrange
+        var sut = new InscripcionesService(
+            _mockContext, _mockLogger, _mockValidadorFecha, _mockValidador, _mockDbExecutor);
+
         // Act
-        var result = await _sut.ConsultarInscripcionesAsync("abc123");
+        var result = await sut.ConsultarInscripcionesDeClienteAsync("abc123");
 
         // Assert
         result.success.Should().BeFalse();
@@ -83,9 +101,11 @@ public class ServiceConsultarInscripcionesDeClienteTests
         // Arrange
         var validGuid = Guid.NewGuid().ToString();
         _mockValidador.ValidarAsync(validGuid).Returns((false, (ApplicationUser?)null));
+        var sut = new InscripcionesService(
+            _mockContext, _mockLogger, _mockValidadorFecha, _mockValidador, _mockDbExecutor);
 
         // Act
-        var result = await _sut.ConsultarInscripcionesAsync(validGuid);
+        var result = await sut.ConsultarInscripcionesDeClienteAsync(validGuid);
 
         // Assert
         result.success.Should().BeFalse();
@@ -130,15 +150,14 @@ public class ServiceConsultarInscripcionesDeClienteTests
         };
 
         _mockValidador.ValidarAsync(validGuid).Returns((true, new ApplicationUser { Id = validGuid }));
+        _mockDbExecutor.QueryAsync<DTOInscripcionDelCliente>(Arg.Any<FormattableString>())
+            .Returns(Task.FromResult(expectedInscripciones));
 
-        var service = new ServiceConsultarInscripcionesDeClienteTestable(
-            _mockContext, _mockLogger, _mockValidador)
-        {
-            OnExecuteQueryAsync = _ => Task.FromResult(expectedInscripciones)
-        };
+        var sut = new InscripcionesService(
+            _mockContext, _mockLogger, _mockValidadorFecha, _mockValidador, _mockDbExecutor);
 
         // Act
-        var result = await service.ConsultarInscripcionesAsync(validGuid);
+        var result = await sut.ConsultarInscripcionesDeClienteAsync(validGuid);
 
         // Assert
         result.success.Should().BeTrue();
@@ -156,15 +175,14 @@ public class ServiceConsultarInscripcionesDeClienteTests
         var validGuid = Guid.NewGuid().ToString();
 
         _mockValidador.ValidarAsync(validGuid).Returns((true, new ApplicationUser { Id = validGuid }));
+        _mockDbExecutor.QueryAsync<DTOInscripcionDelCliente>(Arg.Any<FormattableString>())
+            .Returns(Task.FromResult(new List<DTOInscripcionDelCliente>()));
 
-        var service = new ServiceConsultarInscripcionesDeClienteTestable(
-            _mockContext, _mockLogger, _mockValidador)
-        {
-            OnExecuteQueryAsync = _ => Task.FromResult(new List<DTOInscripcionDelCliente>())
-        };
+        var sut = new InscripcionesService(
+            _mockContext, _mockLogger, _mockValidadorFecha, _mockValidador, _mockDbExecutor);
 
         // Act
-        var result = await service.ConsultarInscripcionesAsync(validGuid);
+        var result = await sut.ConsultarInscripcionesDeClienteAsync(validGuid);
 
         // Assert
         result.success.Should().BeTrue();
@@ -180,15 +198,16 @@ public class ServiceConsultarInscripcionesDeClienteTests
         var validGuid = Guid.NewGuid().ToString();
 
         _mockValidador.ValidarAsync(validGuid).Returns((true, new ApplicationUser { Id = validGuid }));
+        _mockDbExecutor
+            .QueryAsync<DTOInscripcionDelCliente>(Arg.Any<FormattableString>())
+            .Returns(Task.FromException<List<DTOInscripcionDelCliente>>(
+                new InvalidOperationException("Error de BD simulado")));
 
-        var service = new ServiceConsultarInscripcionesDeClienteTestable(
-            _mockContext, _mockLogger, _mockValidador)
-        {
-            OnExecuteQueryAsync = _ => throw new InvalidOperationException("Error de BD simulado")
-        };
+        var sut = new InscripcionesService(
+            _mockContext, _mockLogger, _mockValidadorFecha, _mockValidador, _mockDbExecutor);
 
         // Act
-        var result = await service.ConsultarInscripcionesAsync(validGuid);
+        var result = await sut.ConsultarInscripcionesDeClienteAsync(validGuid);
 
         // Assert
         result.success.Should().BeFalse();
@@ -196,23 +215,4 @@ public class ServiceConsultarInscripcionesDeClienteTests
     }
 
     #endregion
-}
-
-internal class ServiceConsultarInscripcionesDeClienteTestable : ServiceConsultarInscripcionesDeCliente
-{
-    public Func<string, Task<List<DTOInscripcionDelCliente>>>? OnExecuteQueryAsync { get; set; }
-
-    public ServiceConsultarInscripcionesDeClienteTestable(
-        FitnessCenterDbContext context,
-        ILogger<ServiceConsultarInscripcionesDeCliente> logger,
-        IValidadorUsuarioExistente validadorUsuario)
-        : base(context, logger, validadorUsuario)
-    {
-    }
-
-    protected override Task<List<DTOInscripcionDelCliente>> ExecuteQueryAsync(string idUsuario)
-    {
-        return OnExecuteQueryAsync?.Invoke(idUsuario)
-               ?? Task.FromResult(new List<DTOInscripcionDelCliente>());
-    }
 }
