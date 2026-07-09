@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Diagnostics;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -21,7 +19,7 @@ using API.Controllers;
 using API.Hubs;
 using API.Infraestructure.Auth;
 using API.Services;
-using API.Services.Validaciones;
+using BL.Validaciones;
 using BL;
 using BL.BackGroundWork.Jobs;
 using BL.EnPointsLogic;
@@ -40,7 +38,7 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    // Rate limiting para health check - 100 req/min
+    // Rate Limiting
     builder.Services.AddRateLimiter(options =>
     {
         options.AddPolicy("HealthPolicy", context =>
@@ -53,6 +51,16 @@ try
                     QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                     QueueLimit = 0
                 }));
+
+        options.AddFixedWindowLimiter(policyName: "PublicPolicy", options =>
+        {
+            options.PermitLimit = 15;
+            options.Window = TimeSpan.FromMinutes(1);
+            options.QueueLimit = 0;
+            options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        });
+
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     });
 
     builder.Services.AddHealthChecks();
@@ -66,15 +74,7 @@ try
     builder.Host.UseSerilog();
     Console.WriteLine("WebApplicationBuilder creado");
 
-    if (builder.Environment.IsProduction()) { 
-        builder.Services.Configure<ForwardedHeadersOptions>(options =>
-    {
-        options.ForwardedHeaders =
-            ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
-        options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
-    });
-    }
-    if (builder.Environment.IsStaging())
+    if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
     {
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
@@ -122,8 +122,7 @@ try
     string secretKeyString = secretFromEnv
         ?? builder.Configuration["JwtSettings:Secret"]
         ?? builder.Configuration["JwtSettings:SecretKey"]
-        ?? jwtSettings?.GetType().GetProperty("Secret")?.GetValue(jwtSettings)?.ToString()
-        ?? jwtSettings?.GetType().GetProperty("SecretKey")?.GetValue(jwtSettings)?.ToString()
+        ?? jwtSettings?.SecretKey
         ?? "__development_secret_key_replace_for_production__"; // fallback para migraciones/local
 
     var key = Encoding.UTF8.GetBytes(secretKeyString);
@@ -160,7 +159,7 @@ try
     });
     Console.WriteLine("JWT Authentication configurado");
 
-    var frontendUrl= builder.Configuration["EndPoints:frontend:external"];
+    var frontendUrl = builder.Configuration["EndPoints:frontend:external"] ?? string.Empty;
     // CORS
     builder.Services.AddCors(options =>
     {
@@ -194,19 +193,6 @@ try
     builder.Services.AddSwaggerGen();
     Console.WriteLine("Swagger configurado");
 
-    // Rate Limiting
-    builder.Services.AddRateLimiter(options =>
-    {
-        options.AddFixedWindowLimiter(policyName: "PublicPolicy", options =>
-        {
-            options.PermitLimit = 15;
-            options.Window = TimeSpan.FromMinutes(1);
-            options.QueueLimit = 0;
-            options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-        });
-        
-        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    });
 
     builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
     {
@@ -218,7 +204,7 @@ try
     // Email
     var smtpSettings = builder.Configuration.GetSection("SmtpSettings");
     string smtpServer = smtpSettings["Server"];
-    int smtpPort = int.Parse(smtpSettings["Port"]);
+    int smtpPort = int.TryParse(smtpSettings["Port"], out var parsedPort) ? parsedPort : 587;
     string smtpUsername = smtpSettings["Username"];
     string smtpPassword = smtpSettings["Password"];
     builder.Services.AddScoped(sp => new EmailManagerMailKit(smtpServer, smtpPort, smtpUsername, smtpPassword));
@@ -248,6 +234,8 @@ try
     builder.Services.AddScoped<IClasesService, ClasesService>();
     builder.Services.AddScoped<IServiceConsultarInscripcionesDeCliente, ServiceConsultarInscripcionesDeCliente>();
     builder.Services.AddScoped<IValidadorUsuarioExistente, ValidadorUsuarioExistente>();
+    builder.Services.AddScoped<IValidadorFechaCancelacionInscripcion, ValidadorFechaCancelacionInscripcion>();
+    builder.Services.AddScoped<IServiceCancelarInscripcion, ServiceCancelarInscripcion>();
     Console.WriteLine("Servicios personalizados registrados");
 
     // Quartz
@@ -319,6 +307,8 @@ try
     
     Console.WriteLine("HTTPS Redirection configurado");
 
+    app.UseCors("originsPolicyOne");
+
     app.Use(async (context, next) =>
     {
         // Excluir endpoint público de preview del bloqueo de origins
@@ -336,8 +326,6 @@ try
         }
         await next();
     });
-
-    app.UseCors("originsPolicyOne");
     Console.WriteLine("CORS aplicado");
 
     if (app.Environment.IsStaging() || app.Environment.IsProduction())
