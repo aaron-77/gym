@@ -1641,6 +1641,10 @@ public partial class FitnessCenterDbContext :IdentityDbContext<ApplicationUser>
         {
             entity.Property(u => u.IdSecundario)
                   .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore);
+
+            // Ignorar navegaciones que no tienen FK real en BD
+            // HorariosDeClasesProgramada no tiene columna ApplicationUserId
+            entity.Ignore(e => e.HorariosDeClasesProgramada);
         });
 
 

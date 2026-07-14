@@ -1,14 +1,15 @@
-# Spec: ServiceConsultarInscripcionesDeCliente - Creación de Servicio
+# Spec: ConsultarInscripcionesDeCliente (InscripcionesService)
 
 ## 1. Resumen
 
-Crear un servicio para consultar las inscripciones de un cliente que valide el ID del usuario,
-verifique que exista en la BD, ejecute la función SQL `fn_obtenerInscripcionesDelCliente` y
-devuelva el resultado.
+Servicio unificado para consultar las inscripciones de un cliente que valida el ID del usuario,
+verifica que exista en la BD, ejecuta la función SQL `fn_obtenerInscripcionesDelCliente` y
+devuelve el resultado. Implementado como parte de `InscripcionesService`.
 
 ## 2. Contexto
 
 - **Capa:** API Services
+- **Servicio unificado:** `InscripcionesService` — implementa `IInscripcionesService`
 
 ### 2.1 Recursos utilizados
 
@@ -22,71 +23,63 @@ devuelva el resultado.
 | Dependencia | Tipo | Descripción |
 |-------------|------|-------------|
 | `FitnessCenterDbContext` | DataAccess | Contexto de EF Core para acceder a la BD |
-| `UserManager<ApplicationUser>` | Identity | Validar existencia de usuario |
-| `ILogger` | Logging | Logear errores y eventos
+| `IValidadorUsuarioExistente` | API Services | Validar que el usuario exista en BD |
+| `IDataAccessExecutor` | DataAccess | Ejecutar consultas SQL y procedimientos |
+| `ILogger<InscripcionesService>` | Logging | Logear errores y eventos |
 
-## 3. Servicio a crear
+## 3. Método en el servicio unificado
 
-### 3.1 Archivos
+### 3.1 Contrato
+
+```csharp
+Task<DTOResponse<List<DTOInscripcionDelCliente>>> ConsultarInscripcionesDeClienteAsync(string idUsuario);
+```
+
+### 3.2 Archivos
 
 | Archivo | Descripción |
 |---------|-------------|
-| `API/Services/IServiceConsultarInscripcionesDeCliente.cs` | Interfaz |
-| `API/Services/ServiceConsultarInscripcionesDeCliente.cs` | Implementación |
-
-### 3.2 Contrato
-
-El servicio debe exponer un método asíncrono que reciba `string idUsuario` y devuelva `Task<DTOResponse<List<DTOInscripcionDelCliente>>>`.
+| `API/Services/IInscripcionesService.cs` | Interfaz unificada (contiene este método) |
+| `API/Services/InscripcionesService.cs` | Implementación unificada |
 
 ### 3.3 Flujo de validación
 
 | Paso | Validación | Patrón | Error |
 |------|-----------|--------|-------|
-| 1 | ID no es NULL, vacío o whitespace | Guard clause | 400 |
-| 2 | ID tiene formato GUID válido | `Guid.TryParse` | 400 |
-| 3 | Usuario existe en BD | `UserManager.FindByIdAsync` | 404 |
-| 4 | Ejecutar función SQL | `FromSqlInterpolated` | 500 |
+| 1 | ID no es NULL, vacío o whitespace | `ValidadorStringId.Validar` | 400 |
+| 2 | ID tiene formato GUID válido | `ValidadorStringId.Validar` (valida GUID) | 400 |
+| 3 | Usuario existe en BD | `IValidadorUsuarioExistente` (vía UserManager) | 404 |
+| 4 | Ejecutar función SQL | `IDataAccessExecutor.QueryAsync` | 500 |
 
 ### 3.4 Acciones que debe realizar
 
-1. Validar que el parámetro `idUsuario` no sea NULL, vacío o whitespace
-2. Validar que `idUsuario` tenga formato GUID válido usando `Guid.TryParse`
-3. Buscar el usuario en la BD usando `UserManager.FindByIdAsync`
+1. Validar formato del ID usando `ValidadorStringId.Validar(idUsuario, "ID de usuario")`
+2. Si el formato es inválido, retornar error 400
+3. Validar que el usuario exista en BD usando `IValidadorUsuarioExistente.ValidarAsync(idUsuario)`
 4. Si el usuario no existe, retornar error 404
-5. Ejecutar la función SQL `fn_obtenerInscripcionesDelCliente` usando `FromSqlInterpolated`
+5. Ejecutar la función SQL `fn_obtenerInscripcionesDelCliente` usando `IDataAccessExecutor.QueryAsync`
 6. Retornar la lista de inscripciones en la respuesta
-
-### 3.5 Patrones a aplicar
-
-- **Guard clauses:** Validaciones tempranas al inicio del método, return inmediato con error
-- **ResponseManager:** Usar `ResponseManager.BuildResponse<T>()` para construir respuestas
-- **ErrorModel:** Crear lista de `ErrorModel` con propiedad y mensaje descriptivo
-- **Logging:** Usar `ILogger` con `LogError` en catch, incluir `idUsuario` en el log
-- **Async/Await:** Todo el método debe ser async, usar `await` para operaciones de BD
-- **Dependency Injection:** Inyectar `FitnessCenterDbContext`, `UserManager<ApplicationUser>`, `ILogger`
-- **Try/Catch:** Envolver la lógica principal en try/catch, logear errores y retornar respuesta de error
 
 ### 3.5 Inyección de dependencias
 
-Registrar en `Program.cs`:
+Registrado en `Program.cs`:
 ```csharp
-services.AddScoped<IServiceConsultarInscripcionesDeCliente, ServiceConsultarInscripcionesDeCliente>();
+builder.Services.AddScoped<IInscripcionesService, InscripcionesService>();
 ```
 
-## 4. Archivos a crear
+## 4. Archivos del servicio unificado
 
 | Archivo | Descripción |
 |---------|-------------|
-| `API/Services/IServiceConsultarInscripcionesDeCliente.cs` | Interfaz del servicio |
-| `API/Services/ServiceConsultarInscripcionesDeCliente.cs` | Implementación del servicio |
-| `API/Program.cs` | Modificar para registrar DI |
+| `API/Services/IInscripcionesService.cs` | Interfaz unificada (todos los métodos de inscripciones) |
+| `API/Services/InscripcionesService.cs` | Implementación unificada |
 
 ## 5. Criterios de aceptación
 
-- [ ] Servicio con interfaz e implementación
-- [ ] Validación de GUID con `Guid.TryParse`
-- [ ] Validación de existencia de usuario con `FindByIdAsync`
-- [ ] Ejecución de función SQL con `FromSqlInterpolated`
-- [ ] DI registrada en Program.cs
-- [ ] Manejo de errores con ResponseManager
-- [ ] Logging de errores con ILogger
+- [x] Método `ConsultarInscripcionesDeClienteAsync` en `IInscripcionesService` e `InscripcionesService`
+- [x] Validación de formato de ID con `ValidadorStringId`
+- [x] Validación de existencia de usuario con `IValidadorUsuarioExistente`
+- [x] Ejecución de función SQL con `IDataAccessExecutor.QueryAsync`
+- [x] DI registrada como `IInscripcionesService → InscripcionesService`
+- [x] Manejo de errores con `ResponseManager`
+- [x] Logging de errores con `ILogger`

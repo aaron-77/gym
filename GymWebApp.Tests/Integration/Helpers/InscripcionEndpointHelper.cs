@@ -14,40 +14,33 @@ public static class InscripcionEndpointHelper
     /// <returns>ID del cliente que fue inscrito.</returns>
     public static async Task<string> SeedFreshInscripcionAsync(string connectionString)
     {
-        // 1. Tomar un cliente existente de seed data
+        // 1. Tomar un cliente sin inscripciones previas
         var clienteRow = await DatabaseHelper.ExecuteQuerySingleAsync(
             connectionString,
             @"SELECT TOP 1 Id FROM AspNetUsers
               WHERE Id NOT IN (SELECT fkCliente FROM inscripcionesDeClases)
               ORDER BY NEWID()");
 
-        var clienteId = clienteRow?["Id"]?.ToString();
-        if (clienteId == null)
+        // Fallback: si todos los clientes ya tienen inscripciones,
+        // tomar uno que tenga inscripciones en clases de hoy y devolverlo directamente
+        if (clienteRow == null)
         {
-            // Si todos los usuarios tienen inscripciones, crear uno nuevo
-            clienteId = Guid.NewGuid().ToString();
-            await DatabaseHelper.ExecuteNonQueryAsync(
+            clienteRow = await DatabaseHelper.ExecuteQuerySingleAsync(
                 connectionString,
-                @"INSERT INTO AspNetUsers (Id, UserName, NormalizedUserName, Email, EmailConfirmed, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, NombreCompleto, FechaDeRegistro)
-                  VALUES (@Id, @Id, @Id, @Id + '@test.com', 0, 0, 0, 0, 0, 'Test User', GETDATE())",
-                new Dictionary<string, object?> { ["@Id"] = clienteId });
+                @"SELECT TOP 1 fkCliente AS Id FROM (
+                    SELECT DISTINCT i.fkCliente
+                    FROM inscripcionesDeClases i
+                    INNER JOIN clasesProgramadas cp ON i.fkProgramacionClase = cp.idProgramacionClase
+                    WHERE cp.fechaDeLaClase = CAST(GETDATE() AS DATE)
+                ) sub
+                ORDER BY NEWID()");
 
-            var rolRow = await DatabaseHelper.ExecuteQuerySingleAsync(
-                connectionString,
-                "SELECT TOP 1 Id FROM AspNetRoles WHERE Name = 'cliente'");
-            var rolId = rolRow?["Id"]?.ToString();
-            if (rolId != null)
-            {
-                await DatabaseHelper.ExecuteNonQueryAsync(
-                    connectionString,
-                    "INSERT INTO AspNetUserRoles (UserId, RoleId) VALUES (@UserId, @RoleId)",
-                    new Dictionary<string, object?>
-                    {
-                        ["@UserId"] = clienteId,
-                        ["@RoleId"] = rolId
-                    });
-            }
+            return clienteRow?["Id"]?.ToString()
+                ?? throw new InvalidOperationException("No se encontró ningún cliente en la BD");
         }
+
+        var clienteId = clienteRow["Id"]?.ToString()
+            ?? throw new InvalidOperationException("El cliente seleccionado tiene Id nulo");
 
         // 2. Obtener una clase y un entrenador existente
         var claseRow = await DatabaseHelper.ExecuteQuerySingleAsync(

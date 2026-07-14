@@ -49,8 +49,8 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
     [Fact]
     public async Task ConsultarInscripcionesAsync_ClienteConInscripcionesFuturas_ReturnsOkWithList()
     {
-        // Arrange — generar datos frescos via SPs
-        var clienteId = await InscripcionTestHelper.SeedFreshInscripcionAsync(TestContainerHelper.ConnectionString);
+        // Arrange — generar inscripción en fecha posterior para evitar colisiones
+        var (clienteId, _) = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(TestContainerHelper.ConnectionString);
         var service = CreateService();
 
         // Act
@@ -60,7 +60,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
         result.success.Should().BeTrue();
         result.httpCode.Should().Be(200);
         result.payload.Should().NotBeNull();
-        result.payload.Should().NotBeEmpty("El cliente fue inscrito via SP a una clase de hoy");
+        result.payload.Should().NotBeEmpty("El cliente seleccionado no tiene inscripciones con fechas futuras");
         result.payload.Should().AllSatisfy(i =>
         {
             i.IdInscripcion.Should().BeGreaterThan(0);
@@ -146,21 +146,10 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
     public async Task ConsultarInscripcionesAsync_ClienteConSoloInscripcionesCanceladas_ReturnsOkWithEmptyList()
     {
         // Arrange — generar inscripción vigente via SP y luego cancelarla
-        var clienteId = await InscripcionTestHelper.SeedFreshInscripcionAsync(TestContainerHelper.ConnectionString);
+        var (clienteId, idInscripcion) = await InscripcionTestHelper.SeedFreshInscripcionAsync(TestContainerHelper.ConnectionString);
         var service = CreateService();
 
-        // Obtener la inscripción recién creada y cambiarla a cancelada
-        var inscripcionRow = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            @"SELECT TOP 1 idInscripcion FROM inscripcionesDeClases 
-              WHERE fkCliente = @Cliente AND fkEstadoInscripcion = 1",
-            new Dictionary<string, object?> { ["@Cliente"] = clienteId });
-
-        var idInscripcion = inscripcionRow?["idInscripcion"] != null
-            ? Convert.ToInt32(inscripcionRow["idInscripcion"])
-            : 0;
-
-        idInscripcion.Should().BeGreaterThan(0, "SeedFreshInscripcionAsync debió crear una inscripción vigente");
+        idInscripcion.Should().BeGreaterThan(0);
 
         // Cambiar estado a cancelada (idEstadoInscripcion = 4)
         await DatabaseHelper.ExecuteNonQueryAsync(

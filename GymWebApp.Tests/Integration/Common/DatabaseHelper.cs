@@ -123,7 +123,8 @@ public static class DatabaseHelper
         if (result == null || result == DBNull.Value)
             return default;
 
-        return (T)Convert.ChangeType(result, typeof(T));
+        var targetType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
+        return (T)Convert.ChangeType(result, targetType);
     }
 
     /// <summary>
