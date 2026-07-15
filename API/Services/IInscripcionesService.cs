@@ -21,4 +21,14 @@ public interface IInscripcionesService
     /// <param name="idInscripcion">ID de la inscripción a cancelar.</param>
     /// <returns>DTOResponse con true si se canceló exitosamente.</returns>
     Task<DTOResponse<bool>> CancelarInscripcionAsync(int idInscripcion);
+
+    /// <summary>
+    /// Reagenda una inscripción validando que exista, que la clase no haya finalizado,
+    /// que la clase programada destino exista, y ejecuta el procedimiento almacenado de reagendación.
+    /// </summary>
+    /// <param name="idInscripcion">ID de la inscripción a reagendar.</param>
+    /// <param name="idClaseProgramada">ID de la clase programada destino.</param>
+    /// <param name="idCliente">ID del cliente.</param>
+    /// <returns>DTOResponse con true si se reagendó exitosamente.</returns>
+    Task<DTOResponse<bool>> ReagendarInscripcionAsync(int idInscripcion, int idClaseProgramada, string idCliente);
 }

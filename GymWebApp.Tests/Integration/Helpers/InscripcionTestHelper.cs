@@ -513,4 +513,80 @@ public static class InscripcionTestHelper
 
         return (clienteId, idInscripcion);
     }
+
+    /// <summary>
+    /// Crea una inscripción con fecha de ayer y hora futura desde cero.
+    /// Útil para tests que necesitan una inscripción con fecha ya pasada
+    /// (ej: validación de fecha mínima en cancelación/reagendación).
+    /// </summary>
+    /// <returns>Tupla con (clienteId, idInscripcion).</returns>
+    public static async Task<(string ClienteId, int IdInscripcion)> SeedSingleInscripcionConFechaPasadaAsync(
+        string connectionString)
+    {
+        // 1. Obtener un cliente con rol 'cliente'
+        var clienteRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+            connectionString,
+            @"SELECT TOP 1 u.Id
+              FROM AspNetUsers u
+              INNER JOIN AspNetUserRoles ur ON u.Id = ur.UserId
+              INNER JOIN AspNetRoles r ON ur.RoleId = r.Id
+              WHERE r.Name = 'cliente'
+              ORDER BY NEWID()")
+            ?? throw new InvalidOperationException("No hay clientes con rol 'cliente' en AspNetUsers");
+
+        var clienteId = clienteRow["Id"]?.ToString()
+            ?? throw new InvalidOperationException("El cliente seleccionado tiene Id nulo");
+
+        // 2. Obtener una clase existente
+        var claseRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+            connectionString,
+            "SELECT TOP 1 ClaseID, Cupo FROM Clases ORDER BY NEWID()")
+            ?? throw new InvalidOperationException("No hay clases en la tabla Clases");
+
+        var fkClase = Convert.ToInt32(claseRow["ClaseID"]);
+        var cupoMaximo = Convert.ToInt32(claseRow["Cupo"]);
+
+        // 3. Insertar en clasesProgramadas con fecha de AYER
+        var claseProgramadaRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+            connectionString,
+            @"INSERT INTO clasesProgramadas (fkClase, cupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase)
+              OUTPUT INSERTED.idProgramacionClase
+              VALUES (@FkClase, @CupoMaximo, 1, DATEADD(DAY, -1, CAST(GETDATE() AS DATE)))",
+            new Dictionary<string, object?>
+            {
+                ["@FkClase"] = fkClase,
+                ["@CupoMaximo"] = cupoMaximo
+            });
+
+        var idProgramacionClase = Convert.ToInt32(claseProgramadaRow!["idProgramacionClase"]);
+
+        // 4. Obtener un idHora laboral y insertar horario
+        var idHora = await GetIdHoraLaboralFuturaAsync(connectionString);
+
+        await DatabaseHelper.ExecuteNonQueryAsync(
+            connectionString,
+            @"INSERT INTO horariosDeClasesProgramadas (fkClaseProgramada, fkHorarioLaboral)
+              VALUES (@FkClaseProgramada, @FkHorarioLaboral)",
+            new Dictionary<string, object?>
+            {
+                ["@FkClaseProgramada"] = idProgramacionClase,
+                ["@FkHorarioLaboral"] = idHora
+            });
+
+        // 5. Insertar en inscripcionesDeClases (estado = 1 "vigente")
+        var inscripcionRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+            connectionString,
+            @"INSERT INTO inscripcionesDeClases (fkProgramacionClase, fkEstadoInscripcion, fkCliente)
+              OUTPUT INSERTED.idInscripcion
+              VALUES (@FkProgramacionClase, 1, @FkCliente)",
+            new Dictionary<string, object?>
+            {
+                ["@FkProgramacionClase"] = idProgramacionClase,
+                ["@FkCliente"] = clienteId
+            });
+
+        var idInscripcion = Convert.ToInt32(inscripcionRow!["idInscripcion"]);
+
+        return (clienteId, idInscripcion);
+    }
 }

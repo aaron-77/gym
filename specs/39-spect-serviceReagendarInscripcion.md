@@ -4,7 +4,8 @@
 
 Método para reagendar inscripciones que valida que la inscripción exista,
 que sea de una fecha futura o del día actual con hora posterior, que la clase programada
-destino exista, y ejecute el procedimiento almacenado de reagendación.
+destino exista, que el tipo de clase coincida, que la fecha destino sea posterior a la original,
+y ejecute el procedimiento almacenado de reagendación.
 Se implementará como parte de `InscripcionesService`.
 
 ## 2. Contexto
@@ -53,7 +54,9 @@ Task<DTOResponse<bool>> ReagendarInscripcionAsync(int idInscripcion, int idClase
 | 5 | Fecha inscripción >= fecha actual | `IValidadorFechaCancelacionInscripcion.Validar` | 400 |
 | 6 | Si es fecha actual, hora clase > hora actual | `IValidadorFechaCancelacionInscripcion.Validar` | 400 |
 | 7 | Clase programada destino existe en BD | `FindAsync` | 404 |
-| 8 | Ejecutar procedimiento almacenado | `IDataAccessExecutor.ExecuteAsync` | 500 |
+| 8 | Tipo de clase (fkClase) de la clase programada original coincide con el de la clase programada destino | Comparación directa | 400 |
+| 9 | Fecha de la clase programada destino > fecha de la clase programada original | Comparación directa | 400 |
+| 10 | Ejecutar procedimiento almacenado | `IDataAccessExecutor.ExecuteAsync` | 500 |
 
 ### 3.4 Acciones que debe realizar
 
@@ -67,8 +70,12 @@ Task<DTOResponse<bool>> ReagendarInscripcionAsync(int idInscripcion, int idClase
 8. Si la validación de fecha/hora falla, retornar error 400
 9. Buscar la clase programada destino en la BD usando `FindAsync`
 10. Si la clase programada no existe, retornar error 404
-11. Ejecutar el procedimiento almacenado `sp_procesoCompletoReagendacionDeInscripcion` via `IDataAccessExecutor.ExecuteAsync`
-12. Retornar `true` en el payload
+11. Validar que el `fkClase` de la clase programada original (obtenida de la inscripción) sea igual al `fkClase` de la clase programada destino
+12. Si no coinciden, retornar error 400 con mensaje "El tipo de clase de la clase programada destino no coincide con el tipo de clase de la inscripción original"
+13. Validar que `claseDestino.FechaDeLaClase > claseProgramadaOriginal.FechaDeLaClase`
+14. Si la fecha destino es menor o igual, retornar error 400 con mensaje "La fecha de la clase programada destino debe ser posterior a la fecha de la clase original"
+15. Ejecutar el procedimiento almacenado `sp_procesoCompletoReagendacionDeInscripcion` via `IDataAccessExecutor.ExecuteAsync`
+16. Retornar `true` en el payload
 
 ### 3.5 Inyección de dependencias
 
@@ -94,6 +101,8 @@ builder.Services.AddScoped<IDataAccessExecutor, DataAccessExecutor>();
 - [ ] Validación de fecha >= fecha actual con `IValidadorFechaCancelacionInscripcion`
 - [ ] Validación de hora > hora actual si es fecha de hoy
 - [ ] Validación de existencia de clase programada destino
+- [ ] Validación de que el tipo de clase (fkClase) de la clase programada original coincide con el de la clase programada destino
+- [ ] Validación de que la fecha de la clase programada destino es posterior a la fecha de la clase programada original
 - [ ] Ejecución de procedimiento almacenado con `IDataAccessExecutor.ExecuteAsync`
 - [ ] DI existente (no requiere nuevos registros)
 - [ ] Manejo de errores con `ResponseManager`

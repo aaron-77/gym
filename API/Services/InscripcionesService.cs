@@ -167,4 +167,122 @@ public class InscripcionesService : IInscripcionesService
             return ResponseManager.InternalServerError<bool>("Error interno del servidor");
         }
     }
+
+    // ──────────────────────────────────────────────
+    //  ReagendarInscripcionAsync
+    //  Spec 39
+    // ──────────────────────────────────────────────
+
+    public async Task<DTOResponse<bool>> ReagendarInscripcionAsync(int idInscripcion, int idClaseProgramada, string idCliente)
+    {
+        try
+        {
+            // Paso 1: Guard clause — idInscripcion debe ser mayor a 0
+            if (idInscripcion <= 0)
+            {
+                return ResponseManager.BadRequest<bool>(
+                    "Datos inválidos",
+                    "idInscripcion|El ID de inscripción debe ser mayor a 0.");
+            }
+
+            // Paso 2: Guard clause — idClaseProgramada debe ser mayor a 0
+            if (idClaseProgramada <= 0)
+            {
+                return ResponseManager.BadRequest<bool>(
+                    "Datos inválidos",
+                    "idClaseProgramada|El ID de clase programada debe ser mayor a 0.");
+            }
+
+            // Paso 3: Guard clause — idCliente no debe ser NULL, vacío o whitespace
+            if (string.IsNullOrWhiteSpace(idCliente))
+            {
+                return ResponseManager.BadRequest<bool>(
+                    "Datos inválidos",
+                    "idCliente|El ID del cliente no puede estar vacío.");
+            }
+
+            // Paso 4: Buscar la inscripción con Include de clase programada + horarios
+            var inscripcion = await _context.InscripcionesDeClases
+                .Include(i => i.FkProgramacionClaseNavigation)
+                    .ThenInclude(cp => cp.HorariosDeClasesProgramada)
+                        .ThenInclude(h => h.FkHorarioLaboralNavigation)
+                .FirstOrDefaultAsync(i => i.IdInscripcion == idInscripcion);
+
+            // Paso 5: Si la inscripción no existe, retornar error 404
+            if (inscripcion is null)
+            {
+                return ResponseManager.NotFound<bool>(
+                    "Inscripción no encontrada",
+                    "idInscripcion|La inscripción especificada no existe.");
+            }
+
+            var claseProgramada = inscripcion.FkProgramacionClaseNavigation;
+
+            if (!claseProgramada.FechaDeLaClase.HasValue)
+            {
+                _logger.LogError("[ReagendarInscripcionAsync] La clase programada {IdProgramacionClase} no tiene fecha asignada", claseProgramada.IdProgramacionClase);
+                return ResponseManager.InternalServerError<bool>("Error interno del servidor");
+            }
+
+            var fechaClase = claseProgramada.FechaDeLaClase.Value;
+
+            // Paso 6: Obtener la hora de inicio de la clase programada
+            var horaInicio = claseProgramada.HorariosDeClasesProgramada
+                .Select(h => h.FkHorarioLaboralNavigation.HoraInicio)
+                .DefaultIfEmpty()
+                .First();
+
+            // Paso 7: Validar fecha y hora usando IValidadorFechaCancelacionInscripcion
+            var (esValido, mensajeError) = _validadorFecha.Validar(fechaClase, horaInicio);
+
+            // Paso 8: Si la validación de fecha/hora falla, retornar error 400
+            if (!esValido)
+            {
+                return ResponseManager.BadRequest<bool>(mensajeError, $"idInscripcion|{mensajeError}");
+            }
+
+            // Paso 9: Buscar la clase programada destino en la BD usando FindAsync
+            var claseDestino = await _context.ClasesProgramadas.FindAsync(idClaseProgramada);
+
+            // Paso 10: Si la clase programada destino no existe, retornar error 404
+            if (claseDestino is null)
+            {
+                return ResponseManager.NotFound<bool>(
+                    "Clase programada no encontrada",
+                    "idClaseProgramada|La clase programada destino especificada no existe.");
+            }
+
+            // Paso 11: Validar que el tipo de clase (fkClase) de la clase programada destino
+            //          coincida con el de la clase programada original
+            if (claseProgramada.FkClase != claseDestino.FkClase)
+            {
+                return ResponseManager.BadRequest<bool>(
+                    "Datos inválidos",
+                    "idClaseProgramada|El tipo de clase de la clase programada destino no coincide con el tipo de clase de la inscripción original.");
+            }
+
+            // Paso 12: Validar que la fecha de la clase programada destino
+            //          sea estrictamente posterior a la fecha de la clase original
+            if (claseDestino.FechaDeLaClase <= claseProgramada.FechaDeLaClase)
+            {
+                return ResponseManager.BadRequest<bool>(
+                    "Datos inválidos",
+                    "idClaseProgramada|La fecha de la clase programada destino debe ser posterior a la fecha de la clase original.");
+            }
+
+            // Paso 13: Ejecutar el procedimiento almacenado de reagendación
+            await _dbExecutor.ExecuteAsync(
+                $@"DECLARE @estadoOperacion INT;
+                  EXEC dbo.sp_procesoCompletoReagendacionDeInscripcion @idInscripcionCancelada = {idInscripcion}, @idClaseProgramadaNueva = {idClaseProgramada}, @idCliente = {idCliente}, @estadoOperacion = @estadoOperacion OUTPUT;");
+
+            // Paso 14: Retornar true en el payload
+            return ResponseManager.Ok<bool>("Inscripción reagendada exitosamente", true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[ReagendarInscripcionAsync] Error al reagendar inscripción {IdInscripcion}", idInscripcion);
+
+            return ResponseManager.InternalServerError<bool>("Error interno del servidor");
+        }
+    }
 }
