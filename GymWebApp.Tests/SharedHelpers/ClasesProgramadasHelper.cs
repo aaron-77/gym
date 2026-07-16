@@ -144,4 +144,31 @@ public static class ClasesProgramadasHelper
             throw;
         }
     }
+
+    /// <summary>
+    /// Registra una clase programada a bajo nivel (solo insert en clasesProgramadas).
+    /// Usa el DTO del endpoint de la API y el patrón moderno de helpers con DatabaseHelper.
+    /// NO registra horarios — eso se maneja por separado.
+    /// </summary>
+    /// <param name="connectionString">Connection string para la base de datos</param>
+    /// <param name="datos">Datos de la clase programada (DTODatosClaseProgramada)</param>
+    /// <returns>ID de la clase programada registrada (idProgramacionClase)</returns>
+    public static async Task<int> RegistrarClaseProgramadaLL(string connectionString, DTODatosClaseProgramada datos)
+    {
+        var result = await DatabaseHelper.ExecuteScalarAsync<decimal>(
+            connectionString,
+            @"INSERT INTO clasesProgramadas (fkClase, fkEntrenador, cupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase)
+              VALUES (@FkClase, @FkEntrenador, @CupoMaximo, @FkEstadoClaseProgramada, @FechaDeLaClase);
+              SELECT SCOPE_IDENTITY();",
+            new Dictionary<string, object?>
+            {
+                ["@FkClase"] = datos.fkClase,
+                ["@FkEntrenador"] = datos.fkEntrenador,
+                ["@CupoMaximo"] = datos.cupoMaximo,
+                ["@FkEstadoClaseProgramada"] = datos.fkEstadoClaseProgramada,
+                ["@FechaDeLaClase"] = datos.fechaDeLaClase
+            });
+
+        return Convert.ToInt32(result);
+    }
 }
