@@ -145,13 +145,18 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
     [Fact]
     public async Task ConsultarInscripcionesAsync_ClienteConSoloInscripcionesCanceladas_ReturnsOkWithEmptyList()
     {
-        // Arrange — generar inscripción vigente via SP y luego cancelarla
-        var (clienteId, idInscripcion) = await InscripcionTestHelper.SeedFreshInscripcionAsync(TestContainerHelper.ConnectionString);
+        // Arrange
         var service = CreateService();
 
-        idInscripcion.Should().BeGreaterThan(0);
+        // 1. Obtener un cliente que no tenga inscripciones vigentes
+        var clienteId = await InscripcionTestHelper.ObtenerClienteSinInscripcionesAsync(
+            TestContainerHelper.ConnectionString);
 
-        // Cambiar estado a cancelada (idEstadoInscripcion = 4)
+        // 2. Seed inscripcion para ESE cliente específico
+        var (_, idInscripcion) = await InscripcionTestHelper.SeedSingleInscripcionWithClientAsync(
+            TestContainerHelper.ConnectionString, clienteId);
+
+        // 3. Cambiar estado a cancelada (idEstadoInscripcion = 4)
         await DatabaseHelper.ExecuteNonQueryAsync(
             TestContainerHelper.ConnectionString,
             "UPDATE inscripcionesDeClases SET fkEstadoInscripcion = 4 WHERE idInscripcion = @Id",

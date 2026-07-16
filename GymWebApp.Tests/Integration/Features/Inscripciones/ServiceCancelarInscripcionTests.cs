@@ -34,8 +34,8 @@ public class ServiceCancelarInscripcionTests : IntegrationTestBase
     
     public async Task CancelarInscripcionAsync_InscripcionValidaFutura_ReturnsOk()
     {
-        // Arrange — generar inscripción con fecha futura via SPs
-        var (_, idInscripcion) = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
+        // Arrange — generar inscripción con fecha posterior a la última clase existente
+        var (_, idInscripcion) = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
             TestContainerHelper.ConnectionString);
         // Act
         var result = await _service.CancelarInscripcionAsync(idInscripcion);

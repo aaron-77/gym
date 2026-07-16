@@ -263,7 +263,7 @@ public class InscripcionesService : IInscripcionesService
 
             // Paso 12: Validar que la fecha de la clase programada destino
             //          sea estrictamente posterior a la fecha de la clase original
-            if (claseDestino.FechaDeLaClase <= claseProgramada.FechaDeLaClase)
+            if (claseDestino.FechaDeLaClase > claseProgramada.FechaDeLaClase)
             {
                 return ResponseManager.BadRequest<bool>(
                     "Datos inválidos",

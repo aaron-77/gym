@@ -1,7 +1,10 @@
 using System.Data;
+using System.Transactions;
 
 using Microsoft.Data.SqlClient;
+
 using DTO.Dtos;
+using GymWebApp.Tests.Integration.Helpers;
 
 namespace GymWebApp.Tests.SharedHelpers;
 
@@ -170,5 +173,40 @@ public static class ClasesProgramadasHelper
             });
 
         return Convert.ToInt32(result);
+    }
+
+    /// <summary>
+    /// Registra una clase programada y su horario asociado en UNA SOLA TRANSACCIÓN.
+    /// Orquesta <see cref="RegistrarClaseProgramadaLL"/> y
+    /// <see cref="HorariosHelper.registrarHorarioDeClaseProgramada"/>.
+    /// Si cualquiera de las dos operaciones falla, se revierte todo (rollback total).
+    /// </summary>
+    /// <param name="connectionString">Connection string para la base de datos</param>
+    /// <param name="datos">Datos de la clase programada (DTODatosClaseProgramada)</param>
+    /// <returns>
+    /// Tupla con:
+    /// <list type="bullet">
+    ///   <item><description><c>IdClaseProgramada</c>: ID generado en <c>clasesProgramadas</c> (PK)</description></item>
+    ///   <item><description><c>IdHorarioClaseProgramada</c>: ID generado en <c>horariosDeClasesProgramadas</c> (PK)</description></item>
+    /// </list>
+    /// </returns>
+    public static async Task<(int IdClaseProgramada, int IdHorarioClaseProgramada)>
+        RegistrarClaseProgramadaML(string connectionString, DTODatosClaseProgramada datos)
+    {
+        using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+        // Paso 1: Registrar la clase programada → obtiene idProgramacionClase
+        var idClaseProgramada = await RegistrarClaseProgramadaLL(connectionString, datos);
+
+        // Paso 2: Registrar el horario asociado → obtiene idHorarioDeClaseProgramada
+        var idHorario = await HorariosHelper.registrarHorarioDeClaseProgramada(
+            connectionString,
+            idClaseProgramada,
+            datos.fkHoraLaboral);
+
+        // Si llegamos acá sin excepciones, confirmamos la transacción
+        scope.Complete();
+
+        return (idClaseProgramada, idHorario);
     }
 }
