@@ -3,7 +3,9 @@ using System.Transactions;
 
 using Microsoft.Data.SqlClient;
 
+using BL.Utils.Enums;
 using DTO.Dtos;
+using GymWebApp.Tests.Integration.Common;
 using GymWebApp.Tests.Integration.Helpers;
 
 namespace GymWebApp.Tests.SharedHelpers;
@@ -208,5 +210,152 @@ public static class ClasesProgramadasHelper
         scope.Complete();
 
         return (idClaseProgramada, idHorario);
+    }
+
+    /// <summary>
+    /// Registra una clase programada con fecha anterior al registro más antiguo.
+    /// Obtiene la fecha inmediatamente anterior a la clase programada más vieja,
+    /// cualquier idHoraLaboral disponible, una clase activa y un entrenador disponible,
+    /// y delega en <see cref="RegistrarClaseProgramadaML"/> que maneja la transacción completa (clase + horario).
+    /// </summary>
+    /// <param name="connectionString">Connection string para la base de datos</param>
+    /// <returns>
+    /// Tupla con:
+    /// <list type="bullet">
+    ///   <item><description><c>IdClaseProgramada</c>: ID generado en <c>clasesProgramadas</c> (PK)</description></item>
+    ///   <item><description><c>IdHorarioClaseProgramada</c>: ID generado en <c>horariosDeClasesProgramadas</c> (PK)</description></item>
+    /// </list>
+    /// </returns>
+    public static async Task<(int IdClaseProgramada, int IdHorarioClaseProgramada)>
+        registrarClaseProgramadaPasada(string connectionString)
+    {
+        try
+        {
+            // Paso 1: Obtener la fecha anterior al registro más antiguo
+            var oldestDateRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+                connectionString,
+                "SELECT MIN(fechaDeLaClase) AS OldestDate FROM clasesProgramadas")
+                ?? throw new InvalidOperationException("No hay clases programadas registradas");
+
+            var oldestDate = DateOnly.FromDateTime(
+                Convert.ToDateTime(oldestDateRow["OldestDate"]));
+            var pastDate = oldestDate.AddDays(-1);
+
+            // Paso 2: Obtener cualquier idHoraLaboral
+            var horaLaboralRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+                connectionString,
+                "SELECT TOP 1 idHora FROM horasLaborales ORDER BY idHora")
+                ?? throw new InvalidOperationException("No hay horas laborales disponibles");
+
+            var idHoraLaboral = Convert.ToInt32(horaLaboralRow["idHora"]);
+
+            // Paso 3: Obtener una clase activa
+            var claseRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+                connectionString,
+                "SELECT TOP 1 ClaseID FROM Clases WHERE fkEstadoClase = 1")
+                ?? throw new InvalidOperationException("No hay clases activas disponibles");
+
+            var fkClase = Convert.ToInt32(claseRow["ClaseID"]);
+
+            // Paso 4: Obtener un entrenador disponible para la fecha pasada
+            var entrenadorRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+                connectionString,
+                "EXEC sp_obtenerEntrenadoresDisponibles @fechaReferencia = @Fecha",
+                new Dictionary<string, object?> { ["@Fecha"] = pastDate.ToDateTime(TimeOnly.MinValue) })
+                ?? throw new InvalidOperationException("No hay entrenadores disponibles");
+
+            var fkEntrenador = entrenadorRow["UsuarioID"]?.ToString()
+                ?? throw new InvalidOperationException("El entrenador seleccionado tiene Id nulo");
+
+            // Paso 5: Construir DTO con los datos obtenidos
+            var datos = new DTODatosClaseProgramada
+            {
+                fkClase = fkClase,
+                fkEntrenador = fkEntrenador,
+                cupoMaximo = 20,
+                fkEstadoClaseProgramada = 1, // Disponible
+                fechaDeLaClase = pastDate,
+                idUsuarioQueReserva = null,
+                fkHoraLaboral = idHoraLaboral,
+                idPreservaDeHorario = null
+            };
+
+            // Paso 6: Delegar en RegistrarClaseProgramadaML (transacción completa)
+            return await RegistrarClaseProgramadaML(connectionString, datos);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ERROR en [ClasesProgramadasHelper.registrarClaseProgramadaPasada]: {ex.Message}");
+            Console.WriteLine($"Causa: {ex.InnerException?.Message ?? "N/A"}");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Registra una clase programada para el día y hora actual.
+    /// Orquesta <see cref="HorariosHelper.ObtenerUnHorarioDisponible"/> para obtener
+    /// un slot disponible hoy a la hora actual, consulta los datos necesarios
+    /// (clase activa, entrenador disponible), y delega en <see cref="RegistrarClaseProgramadaML"/>
+    /// que maneja la transacción completa (clase + horario).
+    /// </summary>
+    /// <param name="connectionString">Connection string para la base de datos</param>
+    /// <returns>
+    /// Tupla con:
+    /// <list type="bullet">
+    ///   <item><description><c>IdClaseProgramada</c>: ID generado en <c>clasesProgramadas</c> (PK)</description></item>
+    ///   <item><description><c>IdHorarioClaseProgramada</c>: ID generado en <c>horariosDeClasesProgramadas</c> (PK)</description></item>
+    /// </list>
+    /// </returns>
+    public static async Task<(int IdClaseProgramada, int IdHorarioClaseProgramada)>
+        RegistrarClaseProgramadaActual(string connectionString)
+    {
+        try
+        {
+            // Paso 1: Obtener un slot disponible para hoy a la hora actual
+            var (fechaDisponible, idHoraLaboral) = await HorariosHelper.ObtenerUnHorarioDisponible(
+                connectionString,
+                FiltroFecha.Igual,
+                FiltroHora.Igual);
+
+            // Paso 2: Obtener una clase activa
+            var claseRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+                connectionString,
+                "SELECT TOP 1 ClaseID FROM Clases WHERE fkEstadoClase = 1")
+                ?? throw new InvalidOperationException("No hay clases activas disponibles");
+
+            var fkClase = Convert.ToInt32(claseRow["ClaseID"]);
+
+            // Paso 3: Obtener un entrenador disponible para la fecha/hora actual
+            var entrenadorRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+                connectionString,
+                "EXEC sp_obtenerEntrenadoresDisponibles @fechaReferencia = @Fecha",
+                new Dictionary<string, object?> { ["@Fecha"] = DateTime.Now })
+                ?? throw new InvalidOperationException("No hay entrenadores disponibles");
+
+            var fkEntrenador = entrenadorRow["UsuarioID"]?.ToString()
+                ?? throw new InvalidOperationException("El entrenador seleccionado tiene Id nulo");
+
+            // Paso 4: Construir DTO con los datos obtenidos
+            var datos = new DTODatosClaseProgramada
+            {
+                fkClase = fkClase,
+                fkEntrenador = fkEntrenador,
+                cupoMaximo = 20,
+                fkEstadoClaseProgramada = 1, // Disponible
+                fechaDeLaClase = fechaDisponible,
+                idUsuarioQueReserva = null,
+                fkHoraLaboral = idHoraLaboral,
+                idPreservaDeHorario = null
+            };
+
+            // Paso 5: Delegar en RegistrarClaseProgramadaML (transacción completa)
+            return await RegistrarClaseProgramadaML(connectionString, datos);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ERROR en [ClasesProgramadasHelper.RegistrarClaseProgramadaActual]: {ex.Message}");
+            Console.WriteLine($"Causa: {ex.InnerException?.Message ?? "N/A"}");
+            throw;
+        }
     }
 }
