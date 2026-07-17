@@ -227,7 +227,7 @@ public static class ClasesProgramadasHelper
     /// </list>
     /// </returns>
     public static async Task<(int IdClaseProgramada, int IdHorarioClaseProgramada)>
-        registrarClaseProgramadaPasada(string connectionString)
+        RegistrarClaseProgramadaPasada(string connectionString)
     {
         try
         {
@@ -285,7 +285,7 @@ public static class ClasesProgramadasHelper
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ERROR en [ClasesProgramadasHelper.registrarClaseProgramadaPasada]: {ex.Message}");
+            Console.WriteLine($"ERROR en [ClasesProgramadasHelper.RegistrarClaseProgramadaPasada]: {ex.Message}");
             Console.WriteLine($"Causa: {ex.InnerException?.Message ?? "N/A"}");
             throw;
         }
