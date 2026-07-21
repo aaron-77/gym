@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Threading.RateLimiting;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -124,6 +123,7 @@ try
         ?? builder.Configuration["JwtSettings:Secret"]
         ?? builder.Configuration["JwtSettings:SecretKey"]
         ?? jwtSettings?.SecretKey
+        ?? builder.Configuration["JwtSettings:Secret"]
         ?? "__development_secret_key_replace_for_production__"; // fallback para migraciones/local
 
     var key = Encoding.UTF8.GetBytes(secretKeyString);
@@ -235,7 +235,7 @@ try
     builder.Services.AddScoped<IClasesService, ClasesService>();
     builder.Services.AddScoped<IInscripcionesService, InscripcionesService>();
     builder.Services.AddScoped<IValidadorUsuarioExistente, ValidadorUsuarioExistente>();
-    builder.Services.AddScoped<IValidadorFechaCancelacionInscripcion, ValidadorFechaCancelacionInscripcion>();
+    builder.Services.AddScoped<IValidadorFechasInscripcionesYClasesProgramadas, ValidadorFechasInscripcionesYClasesProgramadas>();
     Console.WriteLine("Servicios personalizados registrados");
 
     // Quartz
@@ -365,26 +365,7 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine("========================================");
-    Console.WriteLine("ERROR CRITICO AL INICIAR API:");
-    Console.WriteLine("========================================");
-    Console.WriteLine("Tipo: " + ex.GetType().Name);
-    Console.WriteLine("Mensaje: " + ex.Message);
-    Console.WriteLine("----------------------------------------");
-    Console.WriteLine("Stack Trace:");
-    Console.WriteLine(ex.StackTrace);
-
-    if (ex.InnerException != null)
-    {
-        Console.WriteLine("----------------------------------------");
-        Console.WriteLine("Inner Exception:");
-        Console.WriteLine("Tipo: " + ex.InnerException.GetType().Name);
-        Console.WriteLine("Mensaje: " + ex.InnerException.Message);
-        Console.WriteLine(ex.InnerException.StackTrace);
-    }
-
-    Console.WriteLine("========================================");
-
+    Log.Fatal(ex, "Error crítico al iniciar la API");
     Environment.Exit(1);
 }
 

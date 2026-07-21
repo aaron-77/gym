@@ -37,21 +37,35 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
         var (clienteId, idInscripcion) = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
             TestContainerHelper.ConnectionString);
 
-        // Obtener el fkClase de la inscripción original para crear el destino con el MISMO tipo
+        // Obtener el fkClase y fecha de la inscripción original para crear el destino con el MISMO tipo
         var claseOriginalRow = await DatabaseHelper.ExecuteQuerySingleAsync(
             TestContainerHelper.ConnectionString,
-            @"SELECT cp.fkClase, cp.cupoMaximo
+            @"SELECT cp.fkClase, cp.fechaDeLaClase, cp.cupoMaximo
               FROM inscripcionesDeClases i
               INNER JOIN clasesProgramadas cp ON i.fkProgramacionClase = cp.idProgramacionClase
               WHERE i.idInscripcion = @IdInscripcion",
             new Dictionary<string, object?> { ["@IdInscripcion"] = idInscripcion })
             ?? throw new InvalidOperationException("No se encontró la inscripción original");
 
-        // Crear una clase programada destino con fecha disponible real y el mismo fkClase
-        var (fechaDisponible, _) = await HorariosHelper.ObtenerUnHorarioDisponible(
+        var fechaOriginal = DateOnly.FromDateTime((DateTime)claseOriginalRow["fechaDeLaClase"]);
+
+        // Crear una clase programada destino con fecha posterior a la original y el mismo fkClase
+        // Usamos ObtenerHorariosDisponiblesFiltrados y filtramos manualmente para garantizar
+        // que la fecha destino sea estrictamente posterior a la fecha original.
+        var horariosDisponibles = await HorariosHelper.ObtenerHorariosDisponiblesFiltrados(
             TestContainerHelper.ConnectionString,
-            FiltroFecha.MayorIgual,
+            FiltroFecha.Mayor,
             FiltroHora.SinFiltro);
+
+        var horariosPosteriores = horariosDisponibles
+            .Where(h => h["FechaDisponible"] != null
+                        && DateOnly.FromDateTime(Convert.ToDateTime(h["FechaDisponible"])) > fechaOriginal)
+            .ToList();
+
+        var fechaDisponible = horariosPosteriores.Count > 0
+            ? DateOnly.FromDateTime(Convert.ToDateTime(
+                horariosPosteriores[new Random().Next(horariosPosteriores.Count)]["FechaDisponible"]))
+            : fechaOriginal.AddDays(30);
 
         var idHoraFutura = await InscripcionTestHelper.GetIdHoraLaboralFuturaAsync(
             TestContainerHelper.ConnectionString);
@@ -290,10 +304,10 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
         var (clienteId, idInscripcion) = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
             TestContainerHelper.ConnectionString);
 
-        // Obtener datos originales: fkClase, fkEntrenador, cupoMaximo, fkHorarioLaboral
+        // Obtener datos originales: fkClase, fkEntrenador, fkHorarioLaboral
         var claseOriginalRow = await DatabaseHelper.ExecuteQuerySingleAsync(
             TestContainerHelper.ConnectionString,
-            @"SELECT cp.fkClase, cp.fechaDeLaClase, cp.fkEntrenador, cp.cupoMaximo, hcp.fkHorarioLaboral
+            @"SELECT cp.fkClase, cp.fechaDeLaClase, cp.fkEntrenador, hcp.fkHorarioLaboral
               FROM inscripcionesDeClases i
               INNER JOIN clasesProgramadas cp ON i.fkProgramacionClase = cp.idProgramacionClase
               INNER JOIN horariosDeClasesProgramadas hcp ON cp.idProgramacionClase = hcp.fkClaseProgramada
@@ -301,10 +315,11 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
             new Dictionary<string, object?> { ["@IdInscripcion"] = idInscripcion })
             ?? throw new InvalidOperationException("No se encontró la inscripción original");
 
+        const int cupoMaximo = 99;
+
         var fkClaseOriginal = Convert.ToInt32(claseOriginalRow["fkClase"]);
         var fkEntrenadorOriginal = claseOriginalRow["fkEntrenador"]?.ToString()
             ?? throw new InvalidOperationException("La inscripción original no tiene entrenador");
-        var cupoMaximo = Convert.ToInt32(claseOriginalRow["cupoMaximo"]);
         var fkHorarioLaboralOriginal = Convert.ToInt32(claseOriginalRow["fkHorarioLaboral"]);
 
         var idEstadoDisponible = await DatabaseHelper.ExecuteScalarAsync<int?>(
@@ -312,10 +327,8 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
             "SELECT idEstadoClaseProgramada FROM v_idEstadoDisponibleClasesProgramadas")
             ?? 1;
 
-        // Insertar clase destino con fecha = AYER (menor a la fecha original)
-        // para que falle la validación de fecha destino > fecha original.
-        // Se calcula la fecha en C# y se pasa como parámetro para evitar
-        // confusión con DATEADD en el contexto de la query.
+        // Insertar clase destino con fecha = AYER para que falle la validación
+        // de fecha destino (clase ya finalizó).
         // Se incluye el MISMO entrenador y horario que la original.
         var fechaAyer = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
         var destinoRow = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -351,7 +364,7 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
         // Assert
         result.success.Should().BeFalse();
         result.httpCode.Should().Be(400);
-        result.errors.Should().Contain(e => e.message.Contains("posterior"));
+        result.errors.Should().Contain(e => e.message.Contains("finalizó"));
     }
 
     #endregion

@@ -30,11 +30,9 @@ public class ServiceCancelarInscripcionTests : IntegrationTestBase
     #region Happy Path
 
     [Fact]
-  
-    
     public async Task CancelarInscripcionAsync_InscripcionValidaFutura_ReturnsOk()
     {
-        // Arrange — generar inscripción con fecha posterior a la última clase existente
+        // Arrange — generar inscripción con fecha futura
         var (_, idInscripcion) = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
             TestContainerHelper.ConnectionString);
         // Act

@@ -17,7 +17,7 @@ public class ServiceConsultarInscripcionesDeClienteTests
     private readonly FitnessCenterDbContext _mockContext;
     private readonly IValidadorUsuarioExistente _mockValidador;
     private readonly ILogger<InscripcionesService> _mockLogger;
-    private readonly IValidadorFechaCancelacionInscripcion _mockValidadorFecha;
+    private readonly IValidadorFechasInscripcionesYClasesProgramadas _mockValidadorFecha;
     private readonly IDataAccessExecutor _mockDbExecutor;
 
     public ServiceConsultarInscripcionesDeClienteTests()
@@ -25,7 +25,7 @@ public class ServiceConsultarInscripcionesDeClienteTests
         _mockContext = Substitute.For<FitnessCenterDbContext>();
         _mockLogger = Substitute.For<ILogger<InscripcionesService>>();
         _mockValidador = Substitute.For<IValidadorUsuarioExistente>();
-        _mockValidadorFecha = Substitute.For<IValidadorFechaCancelacionInscripcion>();
+        _mockValidadorFecha = Substitute.For<IValidadorFechasInscripcionesYClasesProgramadas>();
         _mockDbExecutor = Substitute.For<IDataAccessExecutor>();
     }
 

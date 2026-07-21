@@ -37,7 +37,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
     {
         var context = Factory.Services.GetRequiredService<FitnessCenterDbContext>();
         var logger = Factory.Services.GetRequiredService<ILogger<InscripcionesService>>();
-        var validadorFecha = Factory.Services.GetRequiredService<IValidadorFechaCancelacionInscripcion>();
+        var validadorFecha = Factory.Services.GetRequiredService<IValidadorFechasInscripcionesYClasesProgramadas>();
         var validadorUsuario = Factory.Services.GetRequiredService<IValidadorUsuarioExistente>();
         var dbExecutor = Factory.Services.GetRequiredService<IDataAccessExecutor>();
 
@@ -60,6 +60,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
         result.success.Should().BeTrue();
         result.httpCode.Should().Be(200);
         result.payload.Should().NotBeNull();
+
         result.payload.Should().NotBeEmpty("El cliente seleccionado no tiene inscripciones con fechas futuras");
         result.payload.Should().AllSatisfy(i =>
         {
