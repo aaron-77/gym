@@ -1,6 +1,5 @@
 using System.Data;
 using System.Transactions;
-
 using Microsoft.Data.SqlClient;
 
 using BL.Utils.Enums;
@@ -180,7 +179,7 @@ public static class ClasesProgramadasHelper
     /// <summary>
     /// Registra una clase programada y su horario asociado en UNA SOLA TRANSACCIÓN.
     /// Orquesta <see cref="RegistrarClaseProgramadaLL"/> y
-    /// <see cref="HorariosHelper.registrarHorarioDeClaseProgramada"/>.
+    /// <see cref="HorariosHelper.RegistrarHorarioDeClaseProgramada"/>.
     /// Si cualquiera de las dos operaciones falla, se revierte todo (rollback total).
     /// </summary>
     /// <param name="connectionString">Connection string para la base de datos</param>
@@ -201,7 +200,7 @@ public static class ClasesProgramadasHelper
         var idClaseProgramada = await RegistrarClaseProgramadaLL(connectionString, datos);
 
         // Paso 2: Registrar el horario asociado → obtiene idHorarioDeClaseProgramada
-        var idHorario = await HorariosHelper.registrarHorarioDeClaseProgramada(
+        var idHorario = await HorariosHelper.RegistrarHorarioDeClaseProgramada(
             connectionString,
             idClaseProgramada,
             datos.fkHoraLaboral);

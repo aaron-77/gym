@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using BL.Utils.Enums;
 using GymWebApp.Tests.Integration.Common;
 
@@ -103,13 +100,13 @@ public static class HorariosHelper
     /// <param name="idHoraLaboral">FK a horasLaborales.</param>
     /// <param name="idEstadoHorario">FK a estadosHorarioClaseProgramada (opcional, default activo).</param>
     /// <returns>ID del registro insertado (idHorarioDeClaseProgramada).</returns>
-    public static async Task<int> registrarHorarioDeClaseProgramada(
+    public static async Task<int> RegistrarHorarioDeClaseProgramada(
         string connectionString,
         int idClaseProgramada,
         int idHoraLaboral,
         int? idEstadoHorario = null)
     {
-        // Resolver estado por defecto si no se especificó
+        // Resolver estado por defecto si no se especificó (lectura fuera de transacción)
         if (idEstadoHorario == null)
         {
             idEstadoHorario = await DatabaseHelper.ExecuteScalarAsync<int>(
@@ -117,20 +114,25 @@ public static class HorariosHelper
                 "SELECT idEstadoHorarioClase FROM estadosHorarioClaseProgramada WHERE nombreEstadoHorario = 'activo'");
         }
 
-        // Insertar el horario y obtener el ID generado
-        var result = await DatabaseHelper.ExecuteScalarAsync<decimal>(
-            connectionString,
-            @"INSERT INTO horariosDeClasesProgramadas (fkClaseProgramada, fkHorarioLaboral, fkEstadoHorarioClase)
-              VALUES (@FkClaseProgramada, @FkHorarioLaboral, @FkEstadoHorarioClase);
-              SELECT SCOPE_IDENTITY();",
-            new Dictionary<string, object?>
-            {
-                ["@FkClaseProgramada"] = idClaseProgramada,
-                ["@FkHorarioLaboral"] = idHoraLaboral,
-                ["@FkEstadoHorarioClase"] = idEstadoHorario.Value
-            });
+        var estadoHorario = idEstadoHorario.Value;
 
-        return Convert.ToInt32(result);
+        // INSERT dentro de transacción
+        return await DatabaseHelper.WithTransactionAsync(connectionString, async (connection, transaction) =>
+        {
+            var result = await DatabaseHelper.ExecuteScalarAsync<decimal>(
+                connection, transaction,
+                @"INSERT INTO horariosDeClasesProgramadas (fkClaseProgramada, fkHorarioLaboral, fkEstadoHorarioClase)
+                  VALUES (@FkClaseProgramada, @FkHorarioLaboral, @FkEstadoHorarioClase);
+                  SELECT SCOPE_IDENTITY();",
+                new Dictionary<string, object?>
+                {
+                    ["@FkClaseProgramada"] = idClaseProgramada,
+                    ["@FkHorarioLaboral"] = idHoraLaboral,
+                    ["@FkEstadoHorarioClase"] = estadoHorario
+                });
+
+            return Convert.ToInt32(result);
+        });
     }
 
     /// <summary>

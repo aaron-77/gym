@@ -1,8 +1,8 @@
+using System.Data;
+using System.Reflection;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using DataAccess.EntityFramework;
-using System.Data;
-using System.Reflection;
 
 namespace GymWebApp.Tests.Integration.Common;
 
@@ -22,6 +22,62 @@ public static class DatabaseHelper
         return new SqlConnection(connectionString);
     }
 
+    // ──────────────────────────────────────────────
+    //  Transaction helpers
+    // ──────────────────────────────────────────────
+
+    /// <summary>
+    /// Ejecuta un bloque de operaciones DDL dentro de una transacción.
+    /// Abre conexión, inicia transacción, ejecuta el callback, y hace Commit o Rollback automáticamente.
+    /// </summary>
+    public static async Task<T> WithTransactionAsync<T>(
+        string connectionString,
+        Func<SqlConnection, SqlTransaction, Task<T>> operation,
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+    {
+        await using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
+        await using var transaction = (SqlTransaction)await connection.BeginTransactionAsync(isolationLevel);
+        try
+        {
+            var result = await operation(connection, transaction);
+            await transaction.CommitAsync();
+            return result;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Ejecuta un bloque de operaciones DDL sin valor de retorno, dentro de una transacción.
+    /// </summary>
+    public static async Task WithTransactionAsync(
+        string connectionString,
+        Func<SqlConnection, SqlTransaction, Task> operation,
+        IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
+    {
+        await using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
+        await using var transaction = (SqlTransaction)await connection.BeginTransactionAsync(isolationLevel);
+        try
+        {
+            await operation(connection, transaction);
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    //  QueryAsync — retorna lista de dictionaries
+    // ──────────────────────────────────────────────
+
     /// <summary>
     /// Executes a query and returns a list of dictionaries, where each dictionary represents a row.
     /// </summary>
@@ -30,12 +86,25 @@ public static class DatabaseHelper
         string sql, 
         Dictionary<string, object?>? parameters = null)
     {
-        var results = new List<Dictionary<string, object?>>();
-
         await using var connection = GetSqlConnection(connectionString);
         await connection.OpenAsync();
 
+        return await ExecuteQueryAsync(connection, null, sql, parameters);
+    }
+
+    /// <summary>
+    /// Executes a query within an existing connection/transaction and returns a list of dictionaries.
+    /// </summary>
+    public static async Task<List<Dictionary<string, object?>>> ExecuteQueryAsync(
+        SqlConnection connection,
+        SqlTransaction? transaction,
+        string sql,
+        Dictionary<string, object?>? parameters = null)
+    {
+        var results = new List<Dictionary<string, object?>>();
+
         await using var command = connection.CreateCommand();
+        command.Transaction = transaction;
         command.CommandText = sql;
 
         if (parameters != null)
@@ -73,6 +142,23 @@ public static class DatabaseHelper
     }
 
     /// <summary>
+    /// Executes a query within an existing connection/transaction and returns a single row.
+    /// </summary>
+    public static async Task<Dictionary<string, object?>?> ExecuteQuerySingleAsync(
+        SqlConnection connection,
+        SqlTransaction? transaction,
+        string sql,
+        Dictionary<string, object?>? parameters = null)
+    {
+        var results = await ExecuteQueryAsync(connection, transaction, sql, parameters);
+        return results.Count > 0 ? results[0] : null;
+    }
+
+    // ──────────────────────────────────────────────
+    //  ExecuteNonQueryAsync
+    // ──────────────────────────────────────────────
+
+    /// <summary>
     /// Executes a non-query SQL statement (INSERT, UPDATE, DELETE) and returns the number of rows affected.
     /// </summary>
     public static async Task<int> ExecuteNonQueryAsync(
@@ -83,7 +169,20 @@ public static class DatabaseHelper
         await using var connection = GetSqlConnection(connectionString);
         await connection.OpenAsync();
 
+        return await ExecuteNonQueryAsync(connection, null, sql, parameters);
+    }
+
+    /// <summary>
+    /// Executes a non-query SQL statement within an existing connection/transaction.
+    /// </summary>
+    public static async Task<int> ExecuteNonQueryAsync(
+        SqlConnection connection,
+        SqlTransaction? transaction,
+        string sql,
+        Dictionary<string, object?>? parameters = null)
+    {
         await using var command = connection.CreateCommand();
+        command.Transaction = transaction;
         command.CommandText = sql;
 
         if (parameters != null)
@@ -97,6 +196,10 @@ public static class DatabaseHelper
         return await command.ExecuteNonQueryAsync();
     }
 
+    // ──────────────────────────────────────────────
+    //  ExecuteScalarAsync
+    // ──────────────────────────────────────────────
+
     /// <summary>
     /// Executes a query and returns the first column of the first row (scalar value).
     /// </summary>
@@ -108,7 +211,20 @@ public static class DatabaseHelper
         await using var connection = GetSqlConnection(connectionString);
         await connection.OpenAsync();
 
+        return await ExecuteScalarAsync<T>(connection, null, sql, parameters);
+    }
+
+    /// <summary>
+    /// Executes a query within an existing connection/transaction and returns a scalar value.
+    /// </summary>
+    public static async Task<T?> ExecuteScalarAsync<T>(
+        SqlConnection connection,
+        SqlTransaction? transaction,
+        string sql,
+        Dictionary<string, object?>? parameters = null)
+    {
         await using var command = connection.CreateCommand();
+        command.Transaction = transaction;
         command.CommandText = sql;
 
         if (parameters != null)
