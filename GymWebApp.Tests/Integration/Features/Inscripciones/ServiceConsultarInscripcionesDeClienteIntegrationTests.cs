@@ -50,7 +50,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
     public async Task ConsultarInscripcionesAsync_ClienteConInscripcionesFuturas_ReturnsOkWithList()
     {
         // Arrange — generar inscripción en fecha posterior para evitar colisiones
-        var (clienteId, _) = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(TestContainerHelper.ConnectionString);
+        var (clienteId, _) = await InscripcionTestHelper.SeedSingleInscripcionConHoraFuturaAsync(TestContainerHelper.ConnectionString);
         var service = CreateService();
 
         // Act

@@ -164,8 +164,12 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
                 TestContainerHelper.ConnectionString);
         }
 
+        // Crear clase destino válida (misma fkClase, fecha futura, horario futuro)
+        var idClaseDestino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
+            TestContainerHelper.ConnectionString, idInscripcion);
+
         // Act
-        var result = await _service.ReagendarInscripcionAsync(idInscripcion, 1, idCliente);
+        var result = await _service.ReagendarInscripcionAsync(idInscripcion, idClaseDestino, idCliente);
 
         // Assert
         result.success.Should().BeFalse();
@@ -212,8 +216,12 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
                 TestContainerHelper.ConnectionString);
         }
 
+        // Crear clase destino válida (misma fkClase, fecha futura, horario futuro)
+        var idClaseDestino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
+            TestContainerHelper.ConnectionString, idInscripcion);
+
         // Act
-        var result = await _service.ReagendarInscripcionAsync(idInscripcion, 1, idCliente);
+        var result = await _service.ReagendarInscripcionAsync(idInscripcion, idClaseDestino, idCliente);
 
         // Assert
         result.success.Should().BeFalse();
@@ -364,7 +372,7 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
         // Assert
         result.success.Should().BeFalse();
         result.httpCode.Should().Be(400);
-        result.errors.Should().Contain(e => e.message.Contains("finalizó"));
+        result.errors.Should().Contain(e => e.message.Contains("menor"));
     }
 
     #endregion
