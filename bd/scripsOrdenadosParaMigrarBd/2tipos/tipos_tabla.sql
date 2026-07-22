@@ -40,3 +40,11 @@ CREATE TYPE [dbo].[UnidadDeTiempo] AS TABLE(
 )
 GO
 
+CREATE TYPE [dbo].[DatosDiaFestivoVariable] AS TABLE(
+	[diaDeFechaVariable] [int] NOT NULL,
+	[semanaDeFechaVariable] [int] NULL,
+	[mesDeFechaVariable] [int] NULL,
+	[idTipoDeRecurrencia] [int] NULL
+)
+GO
+
