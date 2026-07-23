@@ -1,0 +1,11 @@
+change: fn-obtener-dias-festivos-variables-actuales
+created: 2026-07-22
+status: proposed
+phases:
+  proposal: completed
+  spec: completed
+  design: completed
+  tasks: completed
+  apply: completed
+  verify: completed
+  archive: pending

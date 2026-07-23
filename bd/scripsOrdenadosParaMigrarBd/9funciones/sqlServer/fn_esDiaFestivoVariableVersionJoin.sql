@@ -130,10 +130,14 @@ BEGIN
                AND @semanaDeFechaVariable IS NULL
                AND @nombreTipoDeRecurrencia = 'mensual'
         BEGIN
-            DECLARE @fechaFestiva_caso4 DATE = DATEFROMPARTS(YEAR(@fechaAnalizada), MONTH(@fechaAnalizada), @diaDeFechaVariable);
-            IF @fechaFestiva_caso4 = @fechaAnalizada
+            DECLARE @ultimoDiaDelMes INT = DAY(EOMONTH(@fechaAnalizada));
+            IF @diaDeFechaVariable <= @ultimoDiaDelMes
             BEGIN
-                SET @resultado = 1;
+                DECLARE @fechaFestiva_caso4 DATE = DATEFROMPARTS(YEAR(@fechaAnalizada), MONTH(@fechaAnalizada), @diaDeFechaVariable);
+                IF @fechaFestiva_caso4 = @fechaAnalizada
+                BEGIN
+                    SET @resultado = 1;
+                END
             END   
         END
     
