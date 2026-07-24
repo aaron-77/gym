@@ -59,9 +59,8 @@ validando el ID del usuario autenticado y llamando al servicio de cancelación.
 4. Si el usuario no existe, retornar error 404
 5. Recibir el request body con `idInscripcion`
 6. Validar que el request body no sea NULL
-7. Validar que `idInscripcion` sea mayor a 0
-8. Llamar al servicio `ServiceCancelarInscripcion` con el `idInscripcion`
-9. Retornar respuesta exitosa sin data
+7. Llamar al servicio `ServiceCancelarInscripcion` con el `idInscripcion`
+8. Retornar respuesta exitosa sin data
 
 ### 3.6 Patrones a aplicar
 
@@ -89,7 +88,6 @@ El endpoint debe devolver una respuesta exitosa sin data.
 - [ ] Validación de ID de usuario con GUID format
 - [ ] Validación de existencia de usuario en BD
 - [ ] Validación de request body
-- [ ] Validación de idInscripcion > 0
 - [ ] Llamada al servicio `ServiceCancelarInscripcion`
 - [ ] Respuesta exitosa sin data
 - [ ] Manejo de errores con ResponseManager

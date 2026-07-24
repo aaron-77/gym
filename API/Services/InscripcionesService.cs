@@ -1,34 +1,28 @@
-using Microsoft.EntityFrameworkCore;
-
 using API.Services.Validaciones;
 using BL.Utils;
 using BL.Validaciones;
-using DataAccess.EntityFramework;
-using DataAccess.Infraestructure;
+using DataAccess.Repositories;
 using DTO.Dtos;
 
 namespace API.Services;
 
 public class InscripcionesService : IInscripcionesService
 {
-    private readonly FitnessCenterDbContext _context;
+    private readonly IInscripcionRepository _repository;
     private readonly ILogger<InscripcionesService> _logger;
     private readonly IValidadorFechasInscripcionesYClasesProgramadas _validadorFecha;
     private readonly IValidadorUsuarioExistente _validadorUsuario;
-    private readonly IDataAccessExecutor _dbExecutor;
 
     public InscripcionesService(
-        FitnessCenterDbContext context,
+        IInscripcionRepository repository,
         ILogger<InscripcionesService> logger,
         IValidadorFechasInscripcionesYClasesProgramadas validadorFecha,
-        IValidadorUsuarioExistente validadorUsuario,
-        IDataAccessExecutor dbExecutor)
+        IValidadorUsuarioExistente validadorUsuario)
     {
-        _context = context;
+        _repository = repository;
         _logger = logger;
         _validadorFecha = validadorFecha;
         _validadorUsuario = validadorUsuario;
-        _dbExecutor = dbExecutor;
     }
 
     // ──────────────────────────────────────────────
@@ -70,10 +64,8 @@ public class InscripcionesService : IInscripcionesService
                     payload: null!);
             }
 
-            // Paso 3: Ejecutar función SQL para obtener inscripciones
-            var inscripciones = await _dbExecutor
-                .QueryAsync<DTOInscripcionDelCliente>(
-                    $"SELECT * FROM dbo.fn_obtenerInscripcionesDelCliente({idUsuario})");
+            // Paso 3: Obtener inscripciones vía repository
+            var inscripciones = await _repository.ObtenerInscripcionesDelClienteAsync(idUsuario);
 
             // Paso 4: Retornar respuesta exitosa
             return ResponseManager.BuildResponse<List<DTOInscripcionDelCliente>>(
@@ -116,12 +108,8 @@ public class InscripcionesService : IInscripcionesService
                     "idInscripcion|El ID de inscripción debe ser mayor a 0.");
             }
 
-            // Paso 2: Buscar inscripción con su clase programada y horarios
-            var inscripcion = await _context.InscripcionesDeClases
-                .Include(i => i.FkProgramacionClaseNavigation)
-                    .ThenInclude(cp => cp.HorariosDeClasesProgramada)
-                        .ThenInclude(h => h.FkHorarioLaboralNavigation)
-                .FirstOrDefaultAsync(i => i.IdInscripcion == idInscripcion);
+            // Paso 2: Buscar inscripción con su clase programada y horarios vía repository
+            var inscripcion = await _repository.ObtenerInscripcionConClaseYHorariosAsync(idInscripcion);
 
             // Paso 3: Validar que la inscripción exista
             if (inscripcion is null)
@@ -154,9 +142,8 @@ public class InscripcionesService : IInscripcionesService
                 return ResponseManager.BadRequest<bool>(mensajeError, $"idInscripcion|{mensajeError}");
             }
 
-            // Paso 5: Ejecutar el procedimiento almacenado de cancelación
-            await _dbExecutor.ExecuteAsync(
-                $@"EXEC dbo.sp_procesoCompletoCancelacionDeInscripcionAClase @idInscripcion = {idInscripcion}");
+            // Paso 5: Ejecutar el procedimiento almacenado de cancelación vía repository
+            await _repository.EjecutarCancelacionAsync(idInscripcion);
 
             return ResponseManager.Ok<bool>("Inscripción cancelada exitosamente", true);
         }
@@ -201,12 +188,8 @@ public class InscripcionesService : IInscripcionesService
                     "idCliente|El ID del cliente no puede estar vacío.");
             }
 
-            // Paso 4: Buscar la inscripción con Include de la clase programada original para validar tipo
-            var inscripcion = await _context.InscripcionesDeClases
-                .Include(i => i.FkProgramacionClaseNavigation)
-                    .ThenInclude(cp => cp.HorariosDeClasesProgramada)
-                        .ThenInclude(h => h.FkHorarioLaboralNavigation)
-                .FirstOrDefaultAsync(i => i.IdInscripcion == idInscripcion);
+            // Paso 4: Buscar la inscripción vía repository
+            var inscripcion = await _repository.ObtenerInscripcionConClaseYHorariosAsync(idInscripcion);
 
             // Paso 5: Si la inscripción no existe, retornar error 404
             if (inscripcion is null)
@@ -216,11 +199,8 @@ public class InscripcionesService : IInscripcionesService
                     "idInscripcion|La inscripción especificada no existe.");
             }
 
-            // Paso 6: Buscar la clase programada destino con Include de horarios + horas laborales
-            var claseDestino = await _context.ClasesProgramadas
-                .Include(cp => cp.HorariosDeClasesProgramada)
-                    .ThenInclude(h => h.FkHorarioLaboralNavigation)
-                .FirstOrDefaultAsync(cp => cp.IdProgramacionClase == idClaseProgramada);
+            // Paso 6: Buscar la clase programada destino vía repository
+            var claseDestino = await _repository.ObtenerClaseProgramadaConHorariosAsync(idClaseProgramada);
 
             // Paso 7: Si la clase programada destino no existe, retornar error 404
             if (claseDestino is null)
@@ -287,10 +267,8 @@ public class InscripcionesService : IInscripcionesService
                 return ResponseManager.BadRequest<bool>(mensajeError, $"idClaseProgramada|{mensajeError}");
             }
 
-            // Paso 12: Ejecutar el procedimiento almacenado de reagendación
-            await _dbExecutor.ExecuteAsync(
-                $@"DECLARE @estadoOperacion INT;
-                  EXEC dbo.sp_procesoCompletoReagendacionDeInscripcion @idInscripcionCancelada = {idInscripcion}, @idClaseProgramadaNueva = {idClaseProgramada}, @idCliente = {idCliente}, @estadoOperacion = @estadoOperacion OUTPUT;");
+            // Paso 12: Ejecutar el procedimiento almacenado de reagendación vía repository
+            await _repository.EjecutarReagendacionAsync(idInscripcion, idClaseProgramada, idCliente);
 
             // Paso 13: Retornar true en el payload
             return ResponseManager.Ok<bool>("Inscripción reagendada exitosamente", true);

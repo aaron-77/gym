@@ -5,8 +5,7 @@ using Xunit;
 using API.Services;
 using API.Services.Validaciones;
 using BL.Validaciones;
-using DataAccess.EntityFramework;
-using DataAccess.Infraestructure;
+using DataAccess.Repositories;
 using DTO.Dtos;
 using GymWebApp.Tests.Integration.Common;
 using GymWebApp.Tests.Integration.Helpers;
@@ -35,13 +34,12 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
     /// </summary>
     private InscripcionesService CreateService()
     {
-        var context = Factory.Services.GetRequiredService<FitnessCenterDbContext>();
+        var repository = Factory.Services.GetRequiredService<IInscripcionRepository>();
         var logger = Factory.Services.GetRequiredService<ILogger<InscripcionesService>>();
         var validadorFecha = Factory.Services.GetRequiredService<IValidadorFechasInscripcionesYClasesProgramadas>();
         var validadorUsuario = Factory.Services.GetRequiredService<IValidadorUsuarioExistente>();
-        var dbExecutor = Factory.Services.GetRequiredService<IDataAccessExecutor>();
 
-        return new InscripcionesService(context, logger, validadorFecha, validadorUsuario, dbExecutor);
+        return new InscripcionesService(repository, logger, validadorFecha, validadorUsuario);
     }
 
     #region Happy Path
