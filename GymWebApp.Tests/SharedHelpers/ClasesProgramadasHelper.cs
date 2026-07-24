@@ -311,10 +311,17 @@ public static class ClasesProgramadasHelper
         try
         {
             // Paso 1: Obtener un slot disponible para hoy a la hora actual
-            var (fechaDisponible, idHoraLaboral) = await HorariosHelper.ObtenerUnHorarioDisponible(
+            var slotDisponible = await HorariosHelper.ObtenerUnHorarioDisponible(
                 connectionString,
                 FiltroFecha.Igual,
                 FiltroHora.Igual);
+
+            if (slotDisponible == null)
+                throw new InvalidOperationException(
+                    "No hay horarios disponibles para hoy a la hora actual. " +
+                    "Use SeedFallbackAsync para obtener una fecha alternativa.");
+
+            var (fechaDisponible, idHoraLaboral) = slotDisponible.Value;
 
             // Paso 2: Obtener una clase activa
             var claseRow = await DatabaseHelper.ExecuteQuerySingleAsync(

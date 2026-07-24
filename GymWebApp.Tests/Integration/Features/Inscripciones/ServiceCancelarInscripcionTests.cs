@@ -33,8 +33,24 @@ public class ServiceCancelarInscripcionTests : IntegrationTestBase
     public async Task CancelarInscripcionAsync_InscripcionValidaFutura_ReturnsOk()
     {
         // Arrange — generar inscripción con fecha futura
-        var (_, idInscripcion) = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
+        var seedResult = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
             TestContainerHelper.ConnectionString);
+
+        if (seedResult == null)
+        {
+            var fallbackDate = await InscripcionTestHelper.SeedFallbackAsync(
+                TestContainerHelper.ConnectionString, DateTime.Today.Year);
+
+            fallbackDate.Should().NotBeNull("No se pudo encontrar fecha alternativa para el seed");
+
+            seedResult = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
+                TestContainerHelper.ConnectionString,
+                fallbackDate!.Value.ToDateTime(TimeOnly.MinValue));
+        }
+
+        seedResult.Should().NotBeNull("El seed debería tener una inscripción disponible");
+
+        var (_, idInscripcion) = seedResult!.Value;
         // Act
         var result = await _service.CancelarInscripcionAsync(idInscripcion);
 

@@ -45,21 +45,21 @@ public static class HorariosHelper
     {
         var horarios = await ObtenerHorariosDisponibles(connectionString, fecha);
 
-        // Aplicar filtro de fecha
-        var hoy = DateTime.Today;
+        // Aplicar filtro de fecha usando la fecha recibida como referencia
+        var fechaRef = fecha?.Date ?? DateTime.Today;
         horarios = filtroFecha switch
         {
             FiltroFecha.Igual => horarios
                 .Where(r => r["FechaDisponible"] != null
-                            && Convert.ToDateTime(r["FechaDisponible"]).Date == hoy)
+                            && Convert.ToDateTime(r["FechaDisponible"]).Date == fechaRef)
                 .ToList(),
             FiltroFecha.Mayor => horarios
                 .Where(r => r["FechaDisponible"] != null
-                            && Convert.ToDateTime(r["FechaDisponible"]).Date > hoy)
+                            && Convert.ToDateTime(r["FechaDisponible"]).Date > fechaRef)
                 .ToList(),
             FiltroFecha.MayorIgual => horarios
                 .Where(r => r["FechaDisponible"] != null
-                            && Convert.ToDateTime(r["FechaDisponible"]).Date >= hoy)
+                            && Convert.ToDateTime(r["FechaDisponible"]).Date >= fechaRef)
                 .ToList(),
             _ => horarios
         };
@@ -144,8 +144,9 @@ public static class HorariosHelper
     /// <param name="filtroFecha">Filtro de fecha a aplicar.</param>
     /// <param name="filtroHora">Filtro de hora a aplicar.</param>
     /// <param name="fecha">Fecha base para consultar (opcional, default hoy).</param>
-    /// <returns>Tupla con (FechaDisponible, IdHora) de un slot disponible aleatorio.</returns>
-    public static async Task<(DateOnly FechaDisponible, int IdHora)> ObtenerUnHorarioDisponible(
+    /// <returns>Tupla con (FechaDisponible, IdHora) de un slot disponible aleatorio,
+    /// o null si no hay horarios disponibles con los filtros especificados.</returns>
+    public static async Task<(DateOnly FechaDisponible, int IdHora)?> ObtenerUnHorarioDisponible(
         string connectionString,
         FiltroFecha filtroFecha,
         FiltroHora filtroHora,
@@ -155,8 +156,7 @@ public static class HorariosHelper
             connectionString, filtroFecha, filtroHora, fecha);
 
         if (horarios.Count == 0)
-            throw new InvalidOperationException(
-                $"No hay horarios disponibles con los filtros especificados");
+            return null;
 
         var random = new Random();
         var slot = horarios[random.Next(horarios.Count)];

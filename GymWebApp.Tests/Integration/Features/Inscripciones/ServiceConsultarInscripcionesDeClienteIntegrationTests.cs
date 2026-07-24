@@ -48,7 +48,24 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
     public async Task ConsultarInscripcionesAsync_ClienteConInscripcionesFuturas_ReturnsOkWithList()
     {
         // Arrange — generar inscripción en fecha posterior para evitar colisiones
-        var (clienteId, _) = await InscripcionTestHelper.SeedSingleInscripcionConHoraFuturaAsync(TestContainerHelper.ConnectionString);
+        var seedResult = await InscripcionTestHelper.SeedSingleInscripcionConHoraFuturaAsync(
+            TestContainerHelper.ConnectionString);
+
+        if (seedResult == null)
+        {
+            var fallbackDate = await InscripcionTestHelper.SeedFallbackAsync(
+                TestContainerHelper.ConnectionString, DateTime.Today.Year);
+
+            fallbackDate.Should().NotBeNull("No se pudo encontrar fecha alternativa para el seed");
+
+            seedResult = await InscripcionTestHelper.SeedSingleInscripcionConHoraFuturaAsync(
+                TestContainerHelper.ConnectionString,
+                fallbackDate!.Value.ToDateTime(TimeOnly.MinValue));
+        }
+
+        seedResult.Should().NotBeNull("El seed debería tener una inscripción disponible");
+
+        var (clienteId, _) = seedResult!.Value;
         var service = CreateService();
 
         // Act
@@ -152,8 +169,24 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
             TestContainerHelper.ConnectionString);
 
         // 2. Seed inscripcion para ESE cliente específico
-        var (_, idInscripcion) = await InscripcionTestHelper.SeedSingleInscripcionWithClientAsync(
+        var seedResult = await InscripcionTestHelper.SeedSingleInscripcionWithClientAsync(
             TestContainerHelper.ConnectionString, clienteId);
+
+        if (seedResult == null)
+        {
+            var fallbackDate = await InscripcionTestHelper.SeedFallbackAsync(
+                TestContainerHelper.ConnectionString, DateTime.Today.Year);
+
+            fallbackDate.Should().NotBeNull("No se pudo encontrar fecha alternativa para el seed");
+
+            seedResult = await InscripcionTestHelper.SeedSingleInscripcionWithClientAsync(
+                TestContainerHelper.ConnectionString, clienteId,
+                fallbackDate!.Value.ToDateTime(TimeOnly.MinValue));
+        }
+
+        seedResult.Should().NotBeNull("El seed debería tener una inscripción disponible");
+
+        var (_, idInscripcion) = seedResult!.Value;
 
         // 3. Cambiar estado a cancelada (idEstadoInscripcion = 4)
         await DatabaseHelper.ExecuteNonQueryAsync(

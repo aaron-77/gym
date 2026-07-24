@@ -1,0 +1,15 @@
+schema: spec-driven
+change: ObtenerHorariosNoDisponibles
+phase: verify
+completed:
+  - proposal
+  - specs
+  - design
+  - tasks
+  - apply
+  - verify
+pending:
+  - archive
+artifact_store: openspec
+execution_mode: interactive
+delivery_strategy: ask-on-risk

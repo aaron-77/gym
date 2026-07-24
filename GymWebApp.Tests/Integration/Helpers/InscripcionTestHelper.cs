@@ -107,7 +107,7 @@ public static class InscripcionTestHelper
     /// sp_cron_generarClasesProgramadas. No busca inscripciones existentes — siempre crea una nueva.
     /// </summary>
     /// <returns>Tupla con (clienteId, idInscripcion).</returns>
-    public static async Task<(string ClienteId, int IdInscripcion)> SeedFreshInscripcionAsync(
+    public static async Task<(string ClienteId, int IdInscripcion)?> SeedFreshInscripcionAsync(
         string connectionString, DateTime? fechaReferencia = null)
         => await SeedSingleInscripcionConHoraFuturaAsync(connectionString, fechaReferencia);
 
@@ -118,8 +118,8 @@ public static class InscripcionTestHelper
     /// Útil para tests que necesitan el idInscripcion
     /// (ej: CancelarInscripcionAsync, ReagendarInscripcionAsync).
     /// </summary>
-    /// <returns>Tupla con (clienteId, idInscripcion).</returns>
-    public static async Task<(string ClienteId, int IdInscripcion)> SeedFreshInscripcionAndReturnIdAsync(
+    /// <returns>Tupla con (clienteId, idInscripcion), o null si no hay horarios disponibles.</returns>
+    public static async Task<(string ClienteId, int IdInscripcion)?> SeedFreshInscripcionAndReturnIdAsync(
         string connectionString, DateTime? fechaReferencia = null)
         => await SeedFreshInscripcionAsync(connectionString, fechaReferencia);
 
@@ -374,17 +374,22 @@ public static class InscripcionTestHelper
     /// 2. Toma un cliente con rol 'cliente' y una clase existente.
     /// 3. Inserta en clasesProgramadas, horariosDeClasesProgramadas e inscripcionesDeClases.
     /// </summary>
-    /// <returns>Tupla con (clienteId, idInscripcion).</returns>
-    public static async Task<(string ClienteId, int IdInscripcion)> SeedSingleInscripcionConHoraFuturaAsync(
+    /// <returns>Tupla con (clienteId, idInscripcion), o null si no hay horarios disponibles.</returns>
+    public static async Task<(string ClienteId, int IdInscripcion)?> SeedSingleInscripcionConHoraFuturaAsync(
         string connectionString, DateTime? fechaReferencia = null)
     {
         // NOTA: HorariosHelper se llama con connectionString porque solo hace lecturas (SP de consulta).
         // Las escrituras (INSERTs) van dentro de WithTransactionAsync.
-        var (fechaDisponible, idHoraLaboral) = await HorariosHelper.ObtenerUnHorarioDisponible(
+        var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
             connectionString,
             FiltroFecha.Igual,
             FiltroHora.Mayor,
             fechaReferencia);
+
+        if (slot == null)
+            return null;
+
+        var (fechaDisponible, idHoraLaboral) = slot.Value;
 
         var clienteRow = await DatabaseHelper.ExecuteQuerySingleAsync(
             connectionString,
@@ -472,8 +477,8 @@ public static class InscripcionTestHelper
     /// 3. Inserta en clasesProgramadas, horariosDeClasesProgramadas e inscripcionesDeClases.
     /// Garantiza que no colisiona con el index IX_entrenadorfechahora.
     /// </summary>
-    /// <returns>Tupla con (clienteId, idInscripcion).</returns>
-    public static async Task<(string ClienteId, int IdInscripcion)> SeedSingleInscripcionConFechaPosteriorAsync(
+    /// <returns>Tupla con (clienteId, idInscripcion), o null si no hay horarios disponibles.</returns>
+    public static async Task<(string ClienteId, int IdInscripcion)?> SeedSingleInscripcionConFechaPosteriorAsync(
         string connectionString, DateTime? fechaReferencia = null)
     {
         // Lecturas fuera de transacción
@@ -481,7 +486,7 @@ public static class InscripcionTestHelper
             connectionString, FiltroFecha.Mayor, FiltroHora.SinFiltro, fechaReferencia);
 
         if (horarios.Count == 0)
-            throw new InvalidOperationException("No se encontraron horarios disponibles");
+            return null;
 
         var primerSlot = horarios.First();
         var fechaClase = DateOnly.FromDateTime(Convert.ToDateTime(primerSlot["FechaDisponible"]));
@@ -572,11 +577,16 @@ public static class InscripcionTestHelper
     /// 2. Toma un cliente con rol 'cliente' y una clase existente.
     /// 3. Inserta en clasesProgramadas, horariosDeClasesProgramadas e inscripcionesDeClases.
     /// </summary>
-    public static async Task<(string ClienteId, int IdInscripcion)> SeedSingleInscripcionConFechaYHoraPosterioresAsync(
+    public static async Task<(string ClienteId, int IdInscripcion)?> SeedSingleInscripcionConFechaYHoraPosterioresAsync(
         string connectionString, DateTime? fechaReferencia = null)
     {
-        var (fechaDisponible, idHoraLaboral) = await HorariosHelper.ObtenerUnHorarioDisponible(
+        var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
             connectionString, FiltroFecha.Mayor, FiltroHora.Mayor, fechaReferencia);
+
+        if (slot == null)
+            return null;
+
+        var (fechaDisponible, idHoraLaboral) = slot.Value;
 
         var (clienteId, fkClase, cupoMaximo, fkEntrenador) = await LeerDatosBaseParaSeedAsync(
             connectionString);
@@ -597,11 +607,16 @@ public static class InscripcionTestHelper
     /// 2. Toma un cliente con rol 'cliente' y una clase existente.
     /// 3. Inserta en clasesProgramadas, horariosDeClasesProgramadas e inscripcionesDeClases.
     /// </summary>
-    public static async Task<(string ClienteId, int IdInscripcion)> SeedSingleInscripcionConFechaMayorIgualSinFiltroHoraAsync(
+    public static async Task<(string ClienteId, int IdInscripcion)?> SeedSingleInscripcionConFechaMayorIgualSinFiltroHoraAsync(
         string connectionString, DateTime? fechaReferencia = null)
     {
-        var (fechaDisponible, idHoraLaboral) = await HorariosHelper.ObtenerUnHorarioDisponible(
+        var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
             connectionString, FiltroFecha.MayorIgual, FiltroHora.SinFiltro, fechaReferencia);
+
+        if (slot == null)
+            return null;
+
+        var (fechaDisponible, idHoraLaboral) = slot.Value;
 
         var (clienteId, fkClase, cupoMaximo, fkEntrenador) = await LeerDatosBaseParaSeedAsync(
             connectionString);
@@ -622,11 +637,16 @@ public static class InscripcionTestHelper
     /// 2. Toma un cliente con rol 'cliente' y una clase existente.
     /// 3. Inserta en clasesProgramadas, horariosDeClasesProgramadas e inscripcionesDeClases.
     /// </summary>
-    public static async Task<(string ClienteId, int IdInscripcion)> SeedSingleInscripcionConFechaIgualSinFiltroHoraAsync(
+    public static async Task<(string ClienteId, int IdInscripcion)?> SeedSingleInscripcionConFechaIgualSinFiltroHoraAsync(
         string connectionString, DateTime? fechaReferencia = null)
     {
-        var (fechaDisponible, idHoraLaboral) = await HorariosHelper.ObtenerUnHorarioDisponible(
+        var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
             connectionString, FiltroFecha.Igual, FiltroHora.SinFiltro, fechaReferencia);
+
+        if (slot == null)
+            return null;
+
+        var (fechaDisponible, idHoraLaboral) = slot.Value;
 
         var (clienteId, fkClase, cupoMaximo, fkEntrenador) = await LeerDatosBaseParaSeedAsync(
             connectionString);
@@ -841,6 +861,65 @@ public static class InscripcionTestHelper
     }
 
     /// <summary>
+    /// Obtiene todas las fechas no disponibles para un año dado, combinando:
+    /// - Días festivos fijos (diasFestivosYDescansos, estado 'no se labora')
+    /// - Días festivos variables calculados para el año vía fn_obtenerDiasFestivosVariablesActuales
+    /// - Fechas con clases programadas (clasesProgramadas)
+    /// - Fechas con pre-reservas activas (preReservasDeHorario)
+    /// Útil para que tests de integración determinen rápidamente qué fechas evitar
+    /// al elegir un horario disponible.
+    /// </summary>
+    /// <param name="connectionString">Connection string de la BD de pruebas.</param>
+    /// <param name="anio">Año para el cual calcular días festivos variables.</param>
+    /// <returns>HashSet con las fechas no disponibles.</returns>
+    public static async Task<HashSet<DateOnly>> ObtenerHorariosNoDisponibles(
+        string connectionString,
+        int anio)
+    {
+        const string sql = @"
+            SELECT DISTINCT Fecha FROM (
+                SELECT CAST(fechaFestivaODescanso AS DATE) AS Fecha
+                FROM dbo.diasFestivosYDescansos dfd
+                INNER JOIN dbo.estadosDeActividadLaboral eal
+                    ON dfd.fkEstadoActividadLaboral = eal.idEstadoActividadLaboral
+                WHERE eal.nombreEstadoActividadLaboral = 'no se labora'
+
+                UNION ALL
+
+                SELECT CAST(fechaExacta AS DATE) AS Fecha
+                FROM dbo.fn_obtenerDiasFestivosVariablesActuales(@Anio)
+
+                UNION ALL
+
+                SELECT DISTINCT CAST(fechaDeLaClase AS DATE) AS Fecha
+                FROM dbo.clasesProgramadas
+                WHERE fechaDeLaClase IS NOT NULL
+
+                UNION ALL
+
+                SELECT DISTINCT CAST(fechaDeLaClase AS DATE) AS Fecha
+                FROM dbo.preReservasDeHorario
+                WHERE fechaDeLaClase IS NOT NULL
+            ) AS Fuentes";
+
+        var rows = await DatabaseHelper.ExecuteQueryAsync(
+            connectionString,
+            sql,
+            new Dictionary<string, object?> { ["@Anio"] = anio });
+
+        var result = new HashSet<DateOnly>();
+        foreach (var row in rows)
+        {
+            if (row["Fecha"] is DateTime fecha)
+            {
+                result.Add(DateOnly.FromDateTime(fecha));
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// Crea UNA inscripción desde cero para un cliente específico,
     /// usando sp_obtenerHorariosDisponibles para obtener un slot (fecha + hora) realmente disponible
     /// con FiltroFecha.MayorIgual y FiltroHora.SinFiltro.
@@ -848,18 +927,23 @@ public static class InscripcionTestHelper
     /// </summary>
     /// <param name="connectionString">Connection string de la BD de pruebas.</param>
     /// <param name="clienteId">ID del cliente al que asociar la inscripción.</param>
-    /// <returns>Tupla con (clienteId, idInscripcion).</returns>
-    public static async Task<(string ClienteId, int IdInscripcion)> SeedSingleInscripcionWithClientAsync(
+    /// <returns>Tupla con (clienteId, idInscripcion), o null si no hay horarios disponibles.</returns>
+    public static async Task<(string ClienteId, int IdInscripcion)?> SeedSingleInscripcionWithClientAsync(
         string connectionString,
         string clienteId,
         DateTime? fechaReferencia = null)
     {
         // Lecturas fuera de transacción
-        var (fechaDisponible, idHoraLaboral) = await HorariosHelper.ObtenerUnHorarioDisponible(
+        var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
             connectionString,
             FiltroFecha.MayorIgual,
             FiltroHora.SinFiltro,
             fechaReferencia);
+
+        if (slot == null)
+            return null;
+
+        var (fechaDisponible, idHoraLaboral) = slot.Value;
 
         var claseRow = await DatabaseHelper.ExecuteQuerySingleAsync(
             connectionString,
@@ -935,8 +1019,8 @@ public static class InscripcionTestHelper
     /// </summary>
     /// <param name="connectionString">Connection string de la BD de pruebas.</param>
     /// <param name="idInscripcion">ID de la inscripción original (para obtener fkClase).</param>
-    /// <returns>ID de la clase programada destino insertada.</returns>
-    public static async Task<int> CreateValidDestinationClassForReagendarAsync(
+    /// <returns>ID de la clase programada destino insertada, o null si no hay horarios disponibles.</returns>
+    public static async Task<int?> CreateValidDestinationClassForReagendarAsync(
         string connectionString, int idInscripcion)
     {
         // Lecturas fuera de transacción
@@ -952,8 +1036,13 @@ public static class InscripcionTestHelper
         var fkClaseOriginal = Convert.ToInt32(claseOriginalRow["fkClase"]);
         var cupoMaximo = Convert.ToInt32(claseOriginalRow["cupoMaximo"]);
 
-        var (fechaDisponible, idHoraLaboral) = await HorariosHelper.ObtenerUnHorarioDisponible(
+        var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
             connectionString, FiltroFecha.Mayor, FiltroHora.Mayor);
+
+        if (slot == null)
+            return null;
+
+        var (fechaDisponible, idHoraLaboral) = slot.Value;
 
         var idEstadoDisponible = await DatabaseHelper.ExecuteScalarAsync<int?>(
             connectionString,
@@ -999,5 +1088,69 @@ public static class InscripcionTestHelper
 
             return idClaseDestino;
         });
+    }
+
+    /// <summary>
+    /// Busca una fecha en el rango [hoy, hoy+rangoDias] que NO esté en fechasOcupadas.
+    /// No cruza el límite del año actual. Lógica pura en memoria.
+    /// </summary>
+    /// <param name="fechasOcupadas">Set de fechas no disponibles (ej: de ObtenerHorariosNoDisponibles).</param>
+    /// <param name="rangoDias">Cantidad de días a analizar desde hoy. No cruza el año (default 365).</param>
+    /// <returns>Una fecha disponible aleatoria, o null si no hay gaps en el rango.</returns>
+    public static async Task<DateOnly?> FindAvailableDateGapAsync(
+        HashSet<DateOnly> fechasOcupadas,
+        int rangoDias = 365)
+    {
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+        var finDeAnio = new DateOnly(hoy.Year, 12, 31);
+        var tope = DateOnly.FromDayNumber(Math.Min(
+            hoy.DayNumber + rangoDias,
+            finDeAnio.DayNumber));
+
+        var gaps = new List<DateOnly>();
+        for (var fecha = hoy; fecha <= tope; fecha = fecha.AddDays(1))
+        {
+            if (!fechasOcupadas.Contains(fecha))
+                gaps.Add(fecha);
+        }
+
+        if (gaps.Count == 0)
+            return null;
+
+        return gaps[Random.Shared.Next(gaps.Count)];
+    }
+
+    /// <summary>
+    /// Orquesta el fallback completo: consulta fechas no disponibles, busca gaps,
+    /// verifica contra el SP y retorna una fecha alternativa viable.
+    /// </summary>
+    /// <param name="connectionString">Connection string de BD de pruebas.</param>
+    /// <param name="anio">Año para calcular días festivos variables.</param>
+    /// <param name="rangoDias">Rango máximo desde hoy (default 365, limitado a fin de año).</param>
+    /// <returns>Fecha gap confirmada por el SP, o null si no se encontró ninguna.</returns>
+    public static async Task<DateOnly?> SeedFallbackAsync(
+        string connectionString,
+        int anio,
+        int rangoDias = 365)
+    {
+        var hoy = DateOnly.FromDateTime(DateTime.Today);
+        var finDeAnio = new DateOnly(hoy.Year, 12, 31);
+        var diasRestantes = finDeAnio.DayNumber - hoy.DayNumber;
+        var rangoEfectivo = Math.Min(rangoDias, diasRestantes);
+
+        if (rangoEfectivo <= 0)
+            return null;
+
+        var fechasOcupadas = await ObtenerHorariosNoDisponibles(connectionString, anio);
+        var fechaGap = await FindAvailableDateGapAsync(fechasOcupadas, rangoEfectivo);
+
+        if (fechaGap == null)
+            return null;
+
+        // Verificar que el SP retorne resultados para esta fecha
+        var horarios = await HorariosHelper.ObtenerHorariosDisponibles(
+            connectionString, fechaGap.Value.ToDateTime(TimeOnly.MinValue));
+
+        return horarios.Count > 0 ? fechaGap : null;
     }
 }

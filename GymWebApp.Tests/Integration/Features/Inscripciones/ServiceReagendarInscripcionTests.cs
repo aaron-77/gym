@@ -34,8 +34,23 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
     public async Task ReagendarInscripcionAsync_InscripcionValidaFutura_ReturnsOk()
     {
         // Arrange — generar inscripción con fecha posterior a la última clase existente
-        var (clienteId, idInscripcion) = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
+        var seedResult = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
             TestContainerHelper.ConnectionString);
+
+        if (seedResult == null)
+        {
+            var fallbackDate = await InscripcionTestHelper.SeedFallbackAsync(
+                TestContainerHelper.ConnectionString, DateTime.Today.Year);
+
+            if (fallbackDate == null)
+                throw new InvalidOperationException("No se pudo encontrar fecha alternativa para el seed");
+
+            seedResult = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
+                TestContainerHelper.ConnectionString,
+                fallbackDate.Value.ToDateTime(TimeOnly.MinValue));
+        }
+
+        var (clienteId, idInscripcion) = seedResult!.Value;
 
         // Obtener el fkClase y fecha de la inscripción original para crear el destino con el MISMO tipo
         var claseOriginalRow = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -166,7 +181,8 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
 
         // Crear clase destino válida (misma fkClase, fecha futura, horario futuro)
         var idClaseDestino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
-            TestContainerHelper.ConnectionString, idInscripcion);
+            TestContainerHelper.ConnectionString, idInscripcion)
+            ?? throw new InvalidOperationException("No se pudo crear una clase destino para el test");
 
         // Act
         var result = await _service.ReagendarInscripcionAsync(idInscripcion, idClaseDestino, idCliente);
@@ -218,7 +234,8 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
 
         // Crear clase destino válida (misma fkClase, fecha futura, horario futuro)
         var idClaseDestino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
-            TestContainerHelper.ConnectionString, idInscripcion);
+            TestContainerHelper.ConnectionString, idInscripcion)
+            ?? throw new InvalidOperationException("No se pudo crear una clase destino para el test");
 
         // Act
         var result = await _service.ReagendarInscripcionAsync(idInscripcion, idClaseDestino, idCliente);
@@ -233,8 +250,23 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
     public async Task ReagendarInscripcionAsync_ClaseDestinoInexistente_ReturnsNotFound()
     {
         // Arrange — generar inscripción válida con fecha futura
-        var (clienteId, idInscripcion) = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
+        var seedResult = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
             TestContainerHelper.ConnectionString);
+
+        if (seedResult == null)
+        {
+            var fallbackDate = await InscripcionTestHelper.SeedFallbackAsync(
+                TestContainerHelper.ConnectionString, DateTime.Today.Year);
+
+            if (fallbackDate == null)
+                throw new InvalidOperationException("No se pudo encontrar fecha alternativa para el seed");
+
+            seedResult = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
+                TestContainerHelper.ConnectionString,
+                fallbackDate.Value.ToDateTime(TimeOnly.MinValue));
+        }
+
+        var (clienteId, idInscripcion) = seedResult!.Value;
 
         // Act — pasar idClaseProgramada que no existe (la validación de fecha pasa primero,
         // luego busca la clase destino y no la encuentra)
@@ -250,8 +282,23 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
     public async Task ReagendarInscripcionAsync_TipoClaseDestinoDiferente_ReturnsBadRequest()
     {
         // Arrange — generar inscripción con fecha futura
-        var (clienteId, idInscripcion) = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
+        var seedResult = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
             TestContainerHelper.ConnectionString);
+
+        if (seedResult == null)
+        {
+            var fallbackDate = await InscripcionTestHelper.SeedFallbackAsync(
+                TestContainerHelper.ConnectionString, DateTime.Today.Year);
+
+            if (fallbackDate == null)
+                throw new InvalidOperationException("No se pudo encontrar fecha alternativa para el seed");
+
+            seedResult = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
+                TestContainerHelper.ConnectionString,
+                fallbackDate.Value.ToDateTime(TimeOnly.MinValue));
+        }
+
+        var (clienteId, idInscripcion) = seedResult!.Value;
 
         // Obtener el fkClase original de la inscripción
         var claseOriginalRow = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -309,8 +356,23 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
     public async Task ReagendarInscripcionAsync_FechaDestinoMenorOIgual_ReturnsBadRequest()
     {
         // Arrange — generar inscripción con fecha futura
-        var (clienteId, idInscripcion) = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
+        var seedResult = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
             TestContainerHelper.ConnectionString);
+
+        if (seedResult == null)
+        {
+            var fallbackDate = await InscripcionTestHelper.SeedFallbackAsync(
+                TestContainerHelper.ConnectionString, DateTime.Today.Year);
+
+            if (fallbackDate == null)
+                throw new InvalidOperationException("No se pudo encontrar fecha alternativa para el seed");
+
+            seedResult = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
+                TestContainerHelper.ConnectionString,
+                fallbackDate.Value.ToDateTime(TimeOnly.MinValue));
+        }
+
+        var (clienteId, idInscripcion) = seedResult!.Value;
 
         // Obtener datos originales: fkClase, fkEntrenador, fkHorarioLaboral
         var claseOriginalRow = await DatabaseHelper.ExecuteQuerySingleAsync(
