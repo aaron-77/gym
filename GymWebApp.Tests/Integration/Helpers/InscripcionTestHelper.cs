@@ -289,6 +289,21 @@ public static class InscripcionTestHelper
     }
 
     /// <summary>
+    /// Obtiene un TimeSpan aleatorio desde horasLaborales.horaInicio.
+    /// Útil para casos de fallback donde se necesita una hora concreta (no DateTime.Now)
+    /// como referencia temporal en los filtros de HorariosHelper.
+    /// </summary>
+    public static async Task<TimeSpan> GetRandomHoraLaboralAsync(string connectionString)
+    {
+        var row = await DatabaseHelper.ExecuteQuerySingleAsync(
+            connectionString,
+            "SELECT TOP 1 horaInicio FROM horasLaborales ORDER BY NEWID()")
+            ?? throw new InvalidOperationException("No hay horas laborales en la tabla horasLaborales");
+
+        return (TimeSpan)row["horaInicio"];
+    }
+
+    /// <summary>
     /// Crea una inscripción con fecha de hoy y hora pasada desde cero:
     /// 1. Obtiene un idHora de hora laboral pasada (via GetIdHoraLaboralAnteriorAsync).
     /// 2. Toma un cliente y una clase existentes.

@@ -67,7 +67,7 @@ public static class HorariosHelper
         // Aplicar filtro de hora
         if (filtroHora != FiltroHora.SinFiltro)
         {
-            var horaActualFloored = new TimeSpan(DateTime.Now.Hour, 0, 0);
+            var horaActualFloored = new TimeSpan(fecha?.Hour ?? DateTime.Now.Hour, 0, 0);
 
             horarios = filtroHora switch
             {

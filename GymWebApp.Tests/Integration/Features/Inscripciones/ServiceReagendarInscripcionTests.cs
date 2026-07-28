@@ -45,9 +45,12 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
             if (fallbackDate == null)
                 throw new InvalidOperationException("No se pudo encontrar fecha alternativa para el seed");
 
+            var horaFallback = await InscripcionTestHelper.GetRandomHoraLaboralAsync(
+                TestContainerHelper.ConnectionString);
+
             seedResult = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
                 TestContainerHelper.ConnectionString,
-                fallbackDate.Value.ToDateTime(TimeOnly.MinValue));
+                fallbackDate.Value.ToDateTime(TimeOnly.FromTimeSpan(horaFallback)));
         }
 
         var (clienteId, idInscripcion) = seedResult!.Value;
@@ -261,9 +264,12 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
             if (fallbackDate == null)
                 throw new InvalidOperationException("No se pudo encontrar fecha alternativa para el seed");
 
+            var horaFallback = await InscripcionTestHelper.GetRandomHoraLaboralAsync(
+                TestContainerHelper.ConnectionString);
+
             seedResult = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
                 TestContainerHelper.ConnectionString,
-                fallbackDate.Value.ToDateTime(TimeOnly.MinValue));
+                fallbackDate.Value.ToDateTime(TimeOnly.FromTimeSpan(horaFallback)));
         }
 
         var (clienteId, idInscripcion) = seedResult!.Value;
@@ -293,9 +299,12 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
             if (fallbackDate == null)
                 throw new InvalidOperationException("No se pudo encontrar fecha alternativa para el seed");
 
+            var horaFallback = await InscripcionTestHelper.GetRandomHoraLaboralAsync(
+                TestContainerHelper.ConnectionString);
+
             seedResult = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
                 TestContainerHelper.ConnectionString,
-                fallbackDate.Value.ToDateTime(TimeOnly.MinValue));
+                fallbackDate.Value.ToDateTime(TimeOnly.FromTimeSpan(horaFallback)));
         }
 
         var (clienteId, idInscripcion) = seedResult!.Value;
@@ -367,9 +376,12 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
             if (fallbackDate == null)
                 throw new InvalidOperationException("No se pudo encontrar fecha alternativa para el seed");
 
+            var horaFallback = await InscripcionTestHelper.GetRandomHoraLaboralAsync(
+                TestContainerHelper.ConnectionString);
+
             seedResult = await InscripcionTestHelper.SeedSingleInscripcionConFechaPosteriorAsync(
                 TestContainerHelper.ConnectionString,
-                fallbackDate.Value.ToDateTime(TimeOnly.MinValue));
+                fallbackDate.Value.ToDateTime(TimeOnly.FromTimeSpan(horaFallback)));
         }
 
         var (clienteId, idInscripcion) = seedResult!.Value;
