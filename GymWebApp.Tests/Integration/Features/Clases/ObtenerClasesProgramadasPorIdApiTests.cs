@@ -55,16 +55,19 @@ public class ObtenerClasesProgramadasPorIdApiTests : IntegrationTestBase
 
     #endregion
 
-    #region Sad Path 1 - Sin autenticación retorna Unauthorized
+    #region Sad Path 1 - ID de clase inexistente retorna lista vacía
 
     /// <summary>
-    /// Escenario: Usuario anónimo intenta acceder al endpoint sin token
-    /// GIVEN: El usuario no está autenticado
-    /// WHEN: Se hace GET a /api/Clases/obtenerClasesProgramadasPorId?idClase=1 sin token
-    /// THEN: El estado de respuesta debe ser 401 Unauthorized
+    /// Escenario: Usuario autenticado consulta clases programadas con un ID de clase inexistente
+    /// GIVEN: El usuario está autenticado con token JWT válido
+    /// AND el ID de clase no existe en la base de datos
+    /// WHEN: Se hace GET a /api/Clases/obtenerClasesProgramadasPorId?idClase=99999
+    /// THEN: El estado de respuesta debe ser 200 OK
+    /// AND success debe ser true
+    /// AND payload debe ser una lista vacía
     /// </summary>
     [Fact]
-public async Task ObtenerClasesProgramadasPorId_SinAuth_ReturnsUnauthorized()
+    public async Task ObtenerClasesProgramadasPorId_ConIdInexistente_RetornaListaVacia()
     {
         // Arrange
         await SetAuthHeaderAsync();

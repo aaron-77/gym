@@ -100,18 +100,10 @@ public class InscripcionesService : IInscripcionesService
     {
         try
         {
-            // Paso 1: Guard clause — ID debe ser mayor a 0
-            if (idInscripcion <= 0)
-            {
-                return ResponseManager.BadRequest<bool>(
-                    "Datos inválidos",
-                    "idInscripcion|El ID de inscripción debe ser mayor a 0.");
-            }
-
-            // Paso 2: Buscar inscripción con su clase programada y horarios vía repository
+            // Paso 1: Buscar inscripción con su clase programada y horarios vía repository
             var inscripcion = await _repository.ObtenerInscripcionConClaseYHorariosAsync(idInscripcion);
 
-            // Paso 3: Validar que la inscripción exista
+            // Paso 2: Validar que la inscripción exista
             if (inscripcion is null)
             {
                 return ResponseManager.NotFound<bool>(
@@ -129,7 +121,7 @@ public class InscripcionesService : IInscripcionesService
 
             var fechaClase = claseProgramada.FechaDeLaClase.Value;
 
-            // Paso 4: Validar fecha y hora de la clase usando el validador
+            // Paso 3: Validar fecha y hora de la clase usando el validador
             var horaInicio = claseProgramada.HorariosDeClasesProgramada
                 .Select(h => h.FkHorarioLaboralNavigation.HoraInicio)
                 .DefaultIfEmpty()
@@ -142,7 +134,7 @@ public class InscripcionesService : IInscripcionesService
                 return ResponseManager.BadRequest<bool>(mensajeError, $"idInscripcion|{mensajeError}");
             }
 
-            // Paso 5: Ejecutar el procedimiento almacenado de cancelación vía repository
+            // Paso 4: Ejecutar el procedimiento almacenado de cancelación vía repository
             await _repository.EjecutarCancelacionAsync(idInscripcion);
 
             return ResponseManager.Ok<bool>("Inscripción cancelada exitosamente", true);

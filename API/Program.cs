@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -185,6 +186,31 @@ try
     builder.Services.AddControllers(options =>
     {
         options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+    });
+
+    builder.Services.Configure<ApiBehaviorOptions>(options =>
+    {
+        options.InvalidModelStateResponseFactory = context =>
+        {
+            var errors = context.ModelState
+                .Where(e => e.Value?.Errors.Count > 0)
+                .SelectMany(kvp => kvp.Value!.Errors.Select(e => new ErrorModel
+                {
+                    message = e.ErrorMessage,
+                    propiedad = kvp.Key
+                }))
+                .ToList();
+
+            var response = ResponseManager.BuildResponse<object>(
+                success: false,
+                httpCode: 400,
+                message: "Error de validación",
+                errors: errors,
+                payload: null
+            );
+
+            return new BadRequestObjectResult(response);
+        };
     });
     builder.Services.AddSignalR();
     Console.WriteLine("Controllers y SignalR registrados");

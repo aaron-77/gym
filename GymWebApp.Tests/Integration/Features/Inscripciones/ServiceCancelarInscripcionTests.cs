@@ -62,30 +62,30 @@ public class ServiceCancelarInscripcionTests : IntegrationTestBase
 
     #endregion
 
-    #region Edge Cases — Guard Clauses
+    #region Edge Cases — IDs inválidos
 
     [Fact]
-    public async Task CancelarInscripcionAsync_IdCero_ReturnsBadRequest()
+    public async Task CancelarInscripcionAsync_IdCero_ReturnsNotFound()
     {
         // Act
         var result = await _service.CancelarInscripcionAsync(0);
 
         // Assert
         result.success.Should().BeFalse();
-        result.httpCode.Should().Be(400);
-        result.errors.Should().Contain(e => e.message.Contains("mayor a 0"));
+        result.httpCode.Should().Be(404);
+        result.errors.Should().Contain(e => e.message.Contains("no existe"));
     }
 
     [Fact]
-    public async Task CancelarInscripcionAsync_IdNegativo_ReturnsBadRequest()
+    public async Task CancelarInscripcionAsync_IdNegativo_ReturnsNotFound()
     {
         // Act
         var result = await _service.CancelarInscripcionAsync(-1);
 
         // Assert
         result.success.Should().BeFalse();
-        result.httpCode.Should().Be(400);
-        result.errors.Should().Contain(e => e.message.Contains("mayor a 0"));
+        result.httpCode.Should().Be(404);
+        result.errors.Should().Contain(e => e.message.Contains("no existe"));
     }
 
     #endregion

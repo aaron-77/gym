@@ -33,7 +33,6 @@
     "gentleman": {
       "description": "Senior Architect mentor - helpful first, challenging when it matters",
       "mode": "primary",
-      "model": "opencode/deepseek-v4-flash-free",
       "prompt": "{file:./AGENTS.md}",
       "tools": {
         "edit": true,
@@ -44,7 +43,6 @@
       "description": "Implement code changes from task definitions",
       "hidden": true,
       "mode": "subagent",
-      "model": "opencode/minimax-m2.5-free",
       "prompt": "{file:/home/aaron/.config/opencode/prompts/sdd/sdd-apply.md}",
       "tools": {
         "bash": true,
@@ -69,7 +67,6 @@
       "description": "Create technical design from proposals",
       "hidden": true,
       "mode": "subagent",
-      "model": "opencode/glm-5-free",
       "prompt": "{file:/home/aaron/.config/opencode/prompts/sdd/sdd-design.md}",
       "tools": {
         "bash": true,
@@ -82,7 +79,6 @@
       "description": "Investigate codebase and think through ideas",
       "hidden": true,
       "mode": "subagent",
-      "model": "opencode/glm-5-free",
       "prompt": "{file:/home/aaron/.config/opencode/prompts/sdd/sdd-explore.md}",
       "tools": {
         "bash": true,
@@ -95,7 +91,6 @@
       "description": "Bootstrap SDD context and project configuration",
       "hidden": true,
       "mode": "subagent",
-      "model": "opencode/glm-5-free",
       "prompt": "{file:/home/aaron/.config/opencode/prompts/sdd/sdd-init.md}",
       "tools": {
         "bash": true,
@@ -119,7 +114,6 @@
     "sdd-orchestrator": {
       "description": "Agent Teams Orchestrator - coordinates sub-agents, never does work inline",
       "mode": "primary",
-      "model": "opencode/deepseek-v4-flash-free",
       "permission": {
         "task": {
           "*": "deny",
@@ -141,7 +135,6 @@
       "description": "Create change proposals from explorations",
       "hidden": true,
       "mode": "subagent",
-      "model": "opencode/glm-5-free",
       "prompt": "{file:/home/aaron/.config/opencode/prompts/sdd/sdd-propose.md}",
       "tools": {
         "bash": true,
@@ -154,7 +147,6 @@
       "description": "Write detailed specifications from proposals",
       "hidden": true,
       "mode": "subagent",
-      "model": "opencode/minimax-m2.5-free",
       "prompt": "{file:/home/aaron/.config/opencode/prompts/sdd/sdd-spec.md}",
       "tools": {
         "bash": true,
@@ -167,7 +159,6 @@
       "description": "Break down specs and designs into implementation tasks",
       "hidden": true,
       "mode": "subagent",
-      "model": "opencode/glm-5-free",
       "prompt": "{file:/home/aaron/.config/opencode/prompts/sdd/sdd-tasks.md}",
       "tools": {
         "bash": true,
@@ -180,7 +171,6 @@
       "description": "Validate implementation against specs",
       "hidden": true,
       "mode": "subagent",
-      "model": "opencode/glm-5-free",
       "prompt": "{file:/home/aaron/.config/opencode/prompts/sdd/sdd-verify.md}",
       "tools": {
         "bash": true,

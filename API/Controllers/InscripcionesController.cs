@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using API.Infraestructure;
 using API.Services;
 using API.Services.Validaciones;
 using BL.Utils;
@@ -87,7 +88,7 @@ namespace API.Controllers
                 var result = await _service.ConsultarInscripcionesDeClienteAsync(idUsuario);
 
                 // Paso 6: Retornar la respuesta según el código HTTP del DTO
-                return Responder(result);
+                return this.Responder(result);
             }
             catch (Exception ex)
             {
@@ -156,7 +157,7 @@ namespace API.Controllers
                 var result = await _service.CancelarInscripcionAsync(request.IdInscripcion);
 
                 // Paso 5: Retornar respuesta según el código HTTP del DTO
-                return Responder(result);
+                return this.Responder(result);
             }
             catch (Exception ex)
             {
@@ -173,25 +174,133 @@ namespace API.Controllers
                     payload: null!));
             }
         }
-        // ──────────────────────────────────────────────
-        //  Helpers
-        // ──────────────────────────────────────────────
 
         /// <summary>
-        /// Convierte un DTOResponse&lt;T&gt; en el IActionResult correspondiente
-        /// según su código HTTP, para mantener sincronizados el status code
-        /// de la respuesta HTTP con el httpCode del DTO.
+        /// POST api/inscripciones/reagendar
+        /// Reagenda una inscripción validando los datos de entrada y llamando al servicio de reagendación.
+        /// Solo accesible por usuarios con rol "empleado".
         /// </summary>
-        private IActionResult Responder<T>(DTOResponse<T> response)
+        [HttpPost]
+        [Authorize(Roles = "empleado")]
+        [Route("api/inscripciones/reagendar")]
+        public async Task<IActionResult> ReagendarInscripcion([FromBody] ReagendarInscripcionRequest request)
         {
-            return response.httpCode switch
+            try
             {
-                200 => Ok(response),
-                201 => Created(string.Empty, response),
-                400 => BadRequest(response),
-                404 => NotFound(response),
-                _ => StatusCode(response.httpCode, response)
-            };
+                _logger.LogInformation("Start ReagendarInscripcion");
+
+                // Paso 1: Obtener el ID del usuario autenticado desde el token JWT
+                var authenticatedUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                // Paso 2: Validar que el ID del usuario tenga formato GUID válido
+                if (!Guid.TryParse(authenticatedUserId, out _))
+                {
+                    return BadRequest(ResponseManager.BuildResponse<object>(
+                        success: false,
+                        httpCode: 400,
+                        message: "Datos inválidos",
+                        errors: new List<ErrorModel>
+                        {
+                            new() { message = "El ID del usuario autenticado no tiene un formato GUID válido.", propiedad = null }
+                        },
+                        payload: null!));
+                }
+
+                // Paso 3: Validar que el usuario autenticado exista en BD
+                var (existe, _) = await _validadorUsuario.ValidarAsync(authenticatedUserId);
+                if (!existe)
+                {
+                    _logger.LogWarning("Usuario autenticado no encontrado en BD: {UserId}", authenticatedUserId);
+                    return NotFound(ResponseManager.BuildResponse<object>(
+                        success: false,
+                        httpCode: 404,
+                        message: "Usuario no encontrado",
+                        errors: new List<ErrorModel>
+                        {
+                            new() { message = "El usuario autenticado no existe en el sistema.", propiedad = null }
+                        },
+                        payload: null!));
+                }
+
+                // Paso 4: Validar que el request body no sea NULL
+                if (request is null)
+                {
+                    return BadRequest(ResponseManager.BuildResponse<object>(
+                        success: false,
+                        httpCode: 400,
+                        message: "Datos inválidos",
+                        errors: new List<ErrorModel>
+                        {
+                            new() { message = "El cuerpo de la solicitud no puede ser nulo.", propiedad = null }
+                        },
+                        payload: null!));
+                }
+
+                // Paso 5: Validar que idInscripcion sea mayor a 0
+                if (request.IdInscripcion <= 0)
+                {
+                    return BadRequest(ResponseManager.BuildResponse<object>(
+                        success: false,
+                        httpCode: 400,
+                        message: "Datos inválidos",
+                        errors: new List<ErrorModel>
+                        {
+                            new() { message = "El ID de inscripción debe ser mayor a 0.", propiedad = "idInscripcion" }
+                        },
+                        payload: null!));
+                }
+
+                // Paso 6: Validar que idClaseProgramada sea mayor a 0
+                if (request.IdClaseProgramada <= 0)
+                {
+                    return BadRequest(ResponseManager.BuildResponse<object>(
+                        success: false,
+                        httpCode: 400,
+                        message: "Datos inválidos",
+                        errors: new List<ErrorModel>
+                        {
+                            new() { message = "El ID de clase programada debe ser mayor a 0.", propiedad = "idClaseProgramada" }
+                        },
+                        payload: null!));
+                }
+
+                // Paso 7: Validar que idCliente no sea NULL, vacío o whitespace
+                if (string.IsNullOrWhiteSpace(request.IdCliente))
+                {
+                    return BadRequest(ResponseManager.BuildResponse<object>(
+                        success: false,
+                        httpCode: 400,
+                        message: "Datos inválidos",
+                        errors: new List<ErrorModel>
+                        {
+                            new() { message = "El ID del cliente no puede estar vacío.", propiedad = "idCliente" }
+                        },
+                        payload: null!));
+                }
+
+                // Paso 8: Llamar al servicio de reagendación
+                var result = await _service.ReagendarInscripcionAsync(
+                    request.IdInscripcion,
+                    request.IdClaseProgramada,
+                    request.IdCliente);
+
+                // Paso 9: Retornar respuesta según el código HTTP del DTO
+                return this.Responder(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en ReagendarInscripcion");
+
+                return StatusCode(500, ResponseManager.BuildResponse<object>(
+                    success: false,
+                    httpCode: 500,
+                    message: "Error interno del servidor",
+                    errors: new List<ErrorModel>
+                    {
+                        new() { message = "Ocurrió un error al reagendar la inscripción.", propiedad = null }
+                    },
+                    payload: null!));
+            }
         }
     }
 }

@@ -1,0 +1,16 @@
+schema: spec-driven
+change: CancelarInscripcionEndpoint
+phase: archive
+completed:
+  - proposal
+  - specs
+  - design
+  - tasks
+  - apply
+  - verify
+  - archive
+pending: []
+artifact_store: hybrid
+execution_mode: automatic
+delivery_strategy: ask-on-risk
+archived_at: 2026-07-27

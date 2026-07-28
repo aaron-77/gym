@@ -63,7 +63,9 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
                 fallbackDate!.Value.ToDateTime(TimeOnly.MinValue));
         }
 
-        seedResult.Should().NotBeNull("El seed debería tener una inscripción disponible");
+
+        
+seedResult.Should().NotBeNull("El seed debería tener una inscripción disponible");
 
         var (clienteId, _) = seedResult!.Value;
         var service = CreateService();
