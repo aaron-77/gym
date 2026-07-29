@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
 using BL;
@@ -59,6 +60,34 @@ namespace GymFrontend.Controllers
                 _logger.LogError(ex, "Error CancelarReagendarInscripcion (InscripcionesController)");
                 ViewBag.ErrorMessage = "Ocurrió un error al cargar los datos.";
                 return View("CancelarReagendarInscripcion", new List<QueryUser>());
+            }
+        }
+
+        [Authorize(Roles = "empleado")]
+        [HttpPost]
+        [Route("cancelar")]
+        public async Task<IActionResult> CancelarInscripcion([FromBody] JsonElement body)
+        {
+            try
+            {
+                _logger.LogInformation("Start InscripcionesController.CancelarInscripcion (POST)");
+
+                var idInscripcion = body.GetProperty("idInscripcion").GetInt32();
+
+                var apiRequest = new CancelarInscripcionRequest
+                {
+                    IdInscripcion = idInscripcion
+                };
+
+                var jsonContent = JsonContent.Create(apiRequest);
+                var apiResponse = await _httpClient.post("api/inscripciones/cancelar", jsonContent);
+
+                return Content(apiResponse ?? "{}", "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error CancelarInscripcion (InscripcionesController)");
+                return StatusCode(500, new { success = false, message = "Error al cancelar inscripción" });
             }
         }
     }
