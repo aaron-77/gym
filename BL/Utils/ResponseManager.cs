@@ -21,7 +21,7 @@ public static class ResponseManager
             {
                 success = success,
                 httpCode = httpCode,
-                message = message,
+                message = message ,
                 errors = errors ?? new List<ErrorModel>(),
                 payload = payload
             };

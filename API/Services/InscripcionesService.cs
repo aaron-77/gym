@@ -239,7 +239,7 @@ public class InscripcionesService : IInscripcionesService
                 return ResponseManager.InternalServerError<bool>("Error interno del servidor");
             }
 
-            if (claseOriginal.FechaDeLaClase.Value >= claseDestino.FechaDeLaClase.Value)
+            if (claseOriginal.FechaDeLaClase.Value > claseDestino.FechaDeLaClase.Value)
             {
                 return ResponseManager.BadRequest<bool>(
                     "Datos inválidos",
