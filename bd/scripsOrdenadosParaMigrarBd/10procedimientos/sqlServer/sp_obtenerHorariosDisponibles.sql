@@ -8,7 +8,11 @@ CREATE   PROCEDURE [dbo].[sp_obtenerHorariosDisponibles]
 AS
 BEGIN
     SET NOCOUNT ON;
-    SET @Fecha = ISNULL(@Fecha, CAST(GETDATE() AS DATE));
+
+    DECLARE @hoy DATE = CAST(GETDATE() AS DATE);
+    DECLARE @horaActual TIME(0) = CAST(GETDATE() AS TIME(0));
+
+    SET @Fecha = ISNULL(@Fecha, @hoy);
 
     -- Build calendar dates for the month
     WITH FechasDelMes AS (
@@ -29,7 +33,8 @@ BEGIN
             CASE WHEN DATENAME(dw, f.Fecha) IN ('Sábado','Domingo') THEN 'Fin de Semana' ELSE 'Día Laboral' END AS TipoDeDia
         FROM FechasDelMes f
         CROSS JOIN dbo.horasLaborales hl
-        WHERE f.Fecha >= CAST(GETDATE() AS DATE)
+        WHERE f.Fecha >= @Fecha
+          AND (f.Fecha <> @hoy OR hl.horaInicio > @horaActual)
     ),
 
     -- Slots occupied by scheduled classes (use clasesProgramadas.fechaDeLaClase)

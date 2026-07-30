@@ -174,3 +174,33 @@ The endpoint MUST reject requests that attempt to create a pre-reservation with 
 - THEN the response status MUST be `500 Internal Server Error`
 - AND the `success` field MUST be `false`
 - AND only ONE record MUST exist in `preReservasDeHorario` for that combination (verified via direct DB query)
+
+### Requirement 13: Horarios Disponibles Filtra Horas Vencidas del Día Actual
+
+The endpoint MUST NOT return horarios whose `horaInicio` has already passed when the requested date is today. Only horarios with `horaInicio` later than the current time SHALL be returned for the current date. This filter does NOT apply to future dates.
+
+#### Scenario: Hoy a las 15:30, no se devuelven horarios anteriores
+
+- GIVEN there are available horarios at 06:00, 07:00, ..., 16:00, 17:00 for today
+- AND the current time is 15:30
+- WHEN a GET request is made to `/api/horarios/obtenerHorariosDisponibles` without a date parameter
+- THEN the response status MUST be `200 OK`
+- AND the `payload` MUST NOT include horarios with `horaInicio` before 15:30
+
+#### Scenario: Hoy a las 15:30, sí se devuelven horarios desde las 16:00 en adelante
+
+- GIVEN there are available horarios at 06:00, 07:00, ..., 15:30, 16:00, 17:00 for today
+- AND the current time is 15:30
+- WHEN a GET request is made to `/api/horarios/obtenerHorariosDisponibles` without a date parameter
+- THEN the response status MUST be `200 OK`
+- AND the `payload` MUST include horarios con `horaInicio` a las 16:00 y 17:00
+- AND the `payload` MUST NOT include horarios con `horaInicio` a las 15:30 o anteriores
+
+#### Scenario: Fecha futura, se devuelven todos los horarios sin filtro de hora
+
+- GIVEN the requested date is tomorrow (a future date)
+- AND there are available horarios at 06:00, 07:00, ..., 17:00 for tomorrow
+- AND the current time is 15:30
+- WHEN a GET request is made to `/api/horarios/obtenerHorariosDisponibles?fecha=<tomorrow>`
+- THEN the response status MUST be `200 OK`
+- AND the `payload` MUST include ALL horarios for tomorrow, including those with `horaInicio` before 15:30
