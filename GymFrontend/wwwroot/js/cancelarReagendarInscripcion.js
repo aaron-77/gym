@@ -32,6 +32,33 @@ function bindEvents() {
     document.addEventListener('changedDate', onChangedDate);
 }
 
+function fillComboBox(combobox, items, defaultText, mapFn) {
+    if (!combobox) {
+        console.error('fillComboBox: el elemento combobox es null');
+        return;
+    }
+
+    combobox.innerHTML = `<option value="">${defaultText}</option>`;
+
+    if (items && items.length > 0) {
+        items.forEach(item => {
+            const result = mapFn(item);
+            const option = document.createElement('option');
+            option.value = result.value;
+            option.textContent = result.text;
+            if (result.dataset) {
+                Object.entries(result.dataset).forEach(([key, val]) => {
+                    option.dataset[key] = val;
+                });
+            }
+            combobox.appendChild(option);
+        });
+        combobox.disabled = false;
+    } else {
+        combobox.disabled = true;
+    }
+}
+
 async function onClienteChange() {
     const idCliente = comboCliente.value;
     if (!idCliente) {
@@ -43,15 +70,11 @@ async function onClienteChange() {
         const response = await realizarPeticionAPI('/inscripciones/cliente', undefined, { idCliente });
         const inscripciones = response.payload || response;
 
-        comboInscripcion.innerHTML = '<option value="">Seleccione una inscripción...</option>';
-        (inscripciones || []).forEach(ins => {
-            const option = document.createElement('option');
-            option.value = ins.idInscripcion;
-            option.textContent = `${ins.nombreClase} — ${ins.fechaDeLaClase}`;
-            option.dataset.idClaseProgramada = ins.idClaseProgramada;
-            comboInscripcion.appendChild(option);
-        });
-        comboInscripcion.disabled = false;
+        fillComboBox(comboInscripcion, inscripciones, 'Seleccione una inscripción...', ins => ({
+            value: ins.idInscripcion,
+            text: `${ins.nombreClase} — ${ins.fechaDeLaClase}`,
+            dataset: { idClaseProgramada: ins.idClaseProgramada }
+        }));
     } catch {
         showMessage(iconTypes.error, 'Error al obtener inscripciones del cliente');
     }
@@ -237,7 +260,7 @@ function resetUI() {
 }
 
 function resetComboInscripcion() {
-    comboInscripcion.innerHTML = '<option value="">Primero seleccione un cliente...</option>';
+    fillComboBox(comboInscripcion, null, 'Primero seleccione un cliente...', () => ({}));
     comboInscripcion.disabled = true;
 }
 

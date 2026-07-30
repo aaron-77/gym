@@ -64,6 +64,37 @@ namespace GymFrontend.Controllers
         }
 
         [Authorize(Roles = "empleado")]
+        [HttpGet]
+        [Route("cliente")]
+        public async Task<IActionResult> Cliente([FromQuery] string idCliente)
+        {
+            try
+            {
+                _logger.LogInformation("Start InscripcionesController.Cliente (GET)");
+
+                if (string.IsNullOrWhiteSpace(idCliente))
+                {
+                    return BadRequest(new { success = false, message = "El ID del cliente es requerido." });
+                }
+
+                var apiResponse = await _httpClient.get($"api/inscripciones/obtenerInscripcionesDelCliente/{idCliente}");
+
+                if (apiResponse == null)
+                {
+                    _logger.LogWarning("API devolvió null para idCliente={IdCliente}", idCliente);
+                    return StatusCode(502, new { success = false, message = "Error al obtener inscripciones del cliente" });
+                }
+
+                return Content(apiResponse, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error Cliente (InscripcionesController)");
+                return StatusCode(500, new { success = false, message = "Error al obtener inscripciones del cliente" });
+            }
+        }
+
+        [Authorize(Roles = "empleado")]
         [HttpPost]
         [Route("cancelar")]
         public async Task<IActionResult> CancelarInscripcion([FromBody] JsonElement body)
