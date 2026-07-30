@@ -19,4 +19,4 @@
 
 ## Phase 4: Versionado
 
-- [ ] 4.1 Commit con mensaje convencional: `feat: add hour filter to sp_obtenerHorariosDisponibles`
+- [x] 4.1 Commit con mensaje convencional: `feat: add hour filter to sp_obtenerHorariosDisponibles` (commit `1f54b56`, pushed a origin/dev)

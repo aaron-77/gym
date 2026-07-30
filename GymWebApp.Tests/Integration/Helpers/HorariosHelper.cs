@@ -22,7 +22,7 @@ public static class HorariosHelper
         DateTime? fecha = null)
     {
         var horarios = await DatabaseHelper.ExecuteQueryAsync(
-            connectionString,
+            connectionString, 
             "EXEC sp_obtenerHorariosDisponibles @Fecha = @Fecha",
             new Dictionary<string, object?> { ["@Fecha"] = fecha ?? DateTime.Today });
 

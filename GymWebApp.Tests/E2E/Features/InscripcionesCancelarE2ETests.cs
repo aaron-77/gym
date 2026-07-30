@@ -41,8 +41,8 @@ public class InscripcionesCancelarE2ETests : PlaywrightTestBase
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
         await Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
-        // GIVEN: datos de prueba en BD
-        await InscripcionEndpointHelper.SeedFreshInscripcionAsync(E2eContainerHelper.Instance.HostConnectionString);
+        // GIVEN: datos de prueba en BD (retorna el ID del cliente creado)
+        var clienteId = await InscripcionEndpointHelper.SeedFreshInscripcionAsync(E2eContainerHelper.Instance.HostConnectionString);
 
         // WHEN: navega a la vista de cancelar/reagendar
         await Page.GotoAsync($"{BaseUrl}/Inscripciones/cancelarReagendar");
@@ -51,11 +51,9 @@ public class InscripcionesCancelarE2ETests : PlaywrightTestBase
         // THEN: la vista se renderiza con el título
         await Expect(Page.Locator("h1")).ToContainTextAsync("Cancelar / Reagendar Inscripción");
 
-        // WHEN: selecciona el primer cliente del combo
+        // WHEN: selecciona el cliente que fue inscrito en el seed
         var comboCliente = Page.Locator("#comboCliente");
-        var firstClientOption = comboCliente.Locator("option:not([value=''])").First;
-        var clientValue = await firstClientOption.GetAttributeAsync("value");
-        await comboCliente.SelectOptionAsync(clientValue!);
+        await comboCliente.SelectOptionAsync(clienteId);
 
         // WHEN: espera que se carguen las inscripciones y selecciona una
         var comboInscripcion = Page.Locator("#comboInscripcion");
