@@ -97,20 +97,13 @@ namespace GymFrontend.Controllers
         [Authorize(Roles = "empleado")]
         [HttpPost]
         [Route("cancelar")]
-        public async Task<IActionResult> CancelarInscripcion([FromBody] JsonElement body)
+        public async Task<IActionResult> CancelarInscripcion([FromBody] CancelarInscripcionRequest request)
         {
             try
             {
                 _logger.LogInformation("Start InscripcionesController.CancelarInscripcion (POST)");
 
-                var idInscripcion = body.GetProperty("idInscripcion").GetInt32();
-
-                var apiRequest = new CancelarInscripcionRequest
-                {
-                    IdInscripcion = idInscripcion
-                };
-
-                var jsonContent = JsonContent.Create(apiRequest);
+                var jsonContent = JsonContent.Create(request);
                 var apiResponse = await _httpClient.post("api/inscripciones/cancelar", jsonContent);
 
                 return Content(apiResponse ?? "{}", "application/json");
