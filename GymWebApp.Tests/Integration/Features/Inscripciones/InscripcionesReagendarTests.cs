@@ -44,12 +44,8 @@ public class InscripcionesReagendarTests : IntegrationTestBase
 
             fallbackDate.Should().NotBeNull("No se pudo encontrar fecha alternativa para el seed");
 
-            var horaFallback = await InscripcionTestHelper.GetRandomHoraLaboralAsync(
-                TestContainerHelper.ConnectionString);
-
             seedResult = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
-                TestContainerHelper.ConnectionString,
-                fallbackDate!.Value.ToDateTime(TimeOnly.FromTimeSpan(horaFallback)));
+                TestContainerHelper.ConnectionString, fallbackDate!.Value);
         }
 
         seedResult.Should().NotBeNull("El seed debería tener una inscripción disponible");

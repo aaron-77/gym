@@ -58,12 +58,8 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
 
             fallbackDate.Should().NotBeNull("No se pudo encontrar fecha alternativa para el seed");
 
-            var horaFallback = await InscripcionTestHelper.GetRandomHoraLaboralAsync(
-                TestContainerHelper.ConnectionString);
-
             seedResult = await InscripcionTestHelper.SeedSingleInscripcionConHoraFuturaAsync(
-                TestContainerHelper.ConnectionString,
-                fallbackDate!.Value.ToDateTime(TimeOnly.FromTimeSpan(horaFallback)));
+                TestContainerHelper.ConnectionString, fallbackDate!.Value);
         }
 
 
@@ -185,8 +181,7 @@ seedResult.Should().NotBeNull("El seed debería tener una inscripción disponibl
             fallbackDate.Should().NotBeNull("No se pudo encontrar fecha alternativa para el seed");
 
             seedResult = await InscripcionTestHelper.SeedSingleInscripcionWithClientAsync(
-                TestContainerHelper.ConnectionString, clienteId,
-                fallbackDate!.Value.ToDateTime(TimeOnly.MinValue));
+                TestContainerHelper.ConnectionString, clienteId, fallbackDate!.Value);
         }
 
         seedResult.Should().NotBeNull("El seed debería tener una inscripción disponible");
