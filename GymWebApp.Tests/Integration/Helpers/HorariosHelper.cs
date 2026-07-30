@@ -143,17 +143,18 @@ public static class HorariosHelper
     /// <param name="connectionString">Connection string de la BD de pruebas.</param>
     /// <param name="filtroFecha">Filtro de fecha a aplicar.</param>
     /// <param name="filtroHora">Filtro de hora a aplicar.</param>
-    /// <param name="fecha">Fecha base para consultar (opcional, default hoy).</param>
+    /// <param name="fecha">Fecha base para consultar (opcional, default null = hoy).</param>
     /// <returns>Tupla con (FechaDisponible, IdHora) de un slot disponible aleatorio,
     /// o null si no hay horarios disponibles con los filtros especificados.</returns>
     public static async Task<(DateOnly FechaDisponible, int IdHora)?> ObtenerUnHorarioDisponible(
         string connectionString,
         FiltroFecha filtroFecha,
         FiltroHora filtroHora,
-        DateTime? fecha = null)
+        DateOnly? fecha = null)
     {
         var horarios = await ObtenerHorariosDisponiblesFiltrados(
-            connectionString, filtroFecha, filtroHora, fecha);
+            connectionString, filtroFecha, filtroHora,
+            fecha?.ToDateTime(TimeOnly.MinValue));
 
         if (horarios.Count == 0)
             return null;

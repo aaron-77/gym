@@ -108,7 +108,7 @@ public static class InscripcionTestHelper
     /// </summary>
     /// <returns>Tupla con (clienteId, idInscripcion).</returns>
     public static async Task<(string ClienteId, int IdInscripcion)?> SeedFreshInscripcionAsync(
-        string connectionString, DateTime? fechaReferencia = null)
+        string connectionString, DateOnly? fechaReferencia = null)
         => await SeedSingleInscripcionConHoraFuturaAsync(connectionString, fechaReferencia);
 
     /// <summary>
@@ -120,7 +120,7 @@ public static class InscripcionTestHelper
     /// </summary>
     /// <returns>Tupla con (clienteId, idInscripcion), o null si no hay horarios disponibles.</returns>
     public static async Task<(string ClienteId, int IdInscripcion)?> SeedFreshInscripcionAndReturnIdAsync(
-        string connectionString, DateTime? fechaReferencia = null)
+        string connectionString, DateOnly? fechaReferencia = null)
         => await SeedFreshInscripcionAsync(connectionString, fechaReferencia);
 
     /// <summary>
@@ -391,7 +391,7 @@ public static class InscripcionTestHelper
     /// </summary>
     /// <returns>Tupla con (clienteId, idInscripcion), o null si no hay horarios disponibles.</returns>
     public static async Task<(string ClienteId, int IdInscripcion)?> SeedSingleInscripcionConHoraFuturaAsync(
-        string connectionString, DateTime? fechaReferencia = null)
+        string connectionString, DateOnly? fechaReferencia = null)
     {
         // NOTA: HorariosHelper se llama con connectionString porque solo hace lecturas (SP de consulta).
         // Las escrituras (INSERTs) van dentro de WithTransactionAsync.
@@ -593,7 +593,7 @@ public static class InscripcionTestHelper
     /// 3. Inserta en clasesProgramadas, horariosDeClasesProgramadas e inscripcionesDeClases.
     /// </summary>
     public static async Task<(string ClienteId, int IdInscripcion)?> SeedSingleInscripcionConFechaYHoraPosterioresAsync(
-        string connectionString, DateTime? fechaReferencia = null)
+        string connectionString, DateOnly? fechaReferencia = null)
     {
         var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
             connectionString, FiltroFecha.Mayor, FiltroHora.Mayor, fechaReferencia);
@@ -623,7 +623,7 @@ public static class InscripcionTestHelper
     /// 3. Inserta en clasesProgramadas, horariosDeClasesProgramadas e inscripcionesDeClases.
     /// </summary>
     public static async Task<(string ClienteId, int IdInscripcion)?> SeedSingleInscripcionConFechaMayorIgualSinFiltroHoraAsync(
-        string connectionString, DateTime? fechaReferencia = null)
+        string connectionString, DateOnly? fechaReferencia = null)
     {
         var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
             connectionString, FiltroFecha.MayorIgual, FiltroHora.SinFiltro, fechaReferencia);
@@ -653,7 +653,7 @@ public static class InscripcionTestHelper
     /// 3. Inserta en clasesProgramadas, horariosDeClasesProgramadas e inscripcionesDeClases.
     /// </summary>
     public static async Task<(string ClienteId, int IdInscripcion)?> SeedSingleInscripcionConFechaIgualSinFiltroHoraAsync(
-        string connectionString, DateTime? fechaReferencia = null)
+        string connectionString, DateOnly? fechaReferencia = null)
     {
         var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
             connectionString, FiltroFecha.Igual, FiltroHora.SinFiltro, fechaReferencia);
@@ -946,7 +946,7 @@ public static class InscripcionTestHelper
     public static async Task<(string ClienteId, int IdInscripcion)?> SeedSingleInscripcionWithClientAsync(
         string connectionString,
         string clienteId,
-        DateTime? fechaReferencia = null)
+        DateOnly? fechaReferencia = null)
     {
         // Lecturas fuera de transacción
         var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
@@ -1027,6 +1027,21 @@ public static class InscripcionTestHelper
     }
 
     /// <summary>
+    /// Obtiene el horaInicio más alto de la tabla horasLaborales.
+    /// </summary>
+    /// <param name="connectionString">Connection string de la BD de pruebas.</param>
+    /// <returns>El TimeSpan del horaInicio más alto.</returns>
+    public static async Task<TimeSpan> GetMaxHoraInicioAsync(string connectionString)
+    {
+        var row = await DatabaseHelper.ExecuteQuerySingleAsync(
+            connectionString,
+            "SELECT MAX(horaInicio) AS MaxHoraInicio FROM horasLaborales")
+            ?? throw new InvalidOperationException("No hay horas laborales registradas");
+
+        return (TimeSpan)row["MaxHoraInicio"];
+    }
+
+    /// <summary>
     /// Crea una clase programada destino válida (misma fkClase, fecha futura, horario futuro)
     /// para tests de ReagendarInscripcionAsync.
     /// Útil para tests donde la inscripción original tiene fecha/hora pasada pero el destino
@@ -1034,9 +1049,10 @@ public static class InscripcionTestHelper
     /// </summary>
     /// <param name="connectionString">Connection string de la BD de pruebas.</param>
     /// <param name="idInscripcion">ID de la inscripción original (para obtener fkClase).</param>
+    /// <param name="fecha">Fecha de referencia para buscar horarios disponibles (opcional, default null = hoy).</param>
     /// <returns>ID de la clase programada destino insertada, o null si no hay horarios disponibles.</returns>
     public static async Task<int?> CreateValidDestinationClassForReagendarAsync(
-        string connectionString, int idInscripcion)
+        string connectionString, int idInscripcion, DateOnly? fecha = null)
     {
         // Lecturas fuera de transacción
         var claseOriginalRow = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -1052,7 +1068,7 @@ public static class InscripcionTestHelper
         var cupoMaximo = Convert.ToInt32(claseOriginalRow["cupoMaximo"]);
 
         var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
-            connectionString, FiltroFecha.Mayor, FiltroHora.Mayor);
+            connectionString, FiltroFecha.MayorIgual, FiltroHora.Mayor, fecha);
 
         if (slot == null)
             return null;
