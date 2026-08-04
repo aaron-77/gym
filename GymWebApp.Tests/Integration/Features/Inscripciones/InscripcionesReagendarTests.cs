@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using GymWebApp.Tests.Integration.Common;
 using GymWebApp.Tests.Integration.Helpers;
+using BL.Utils.Enums;
 using DTO.Dtos;
 using Xunit;
 
@@ -33,9 +34,27 @@ public class InscripcionesReagendarTests : IntegrationTestBase
     [Fact]
     public async Task Reagendar_InscripcionValida_RetornaOk()
     {
-        // Arrange — generar inscripción con fecha de hoy y hora futura
-        var seedResult = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
+        // Arrange — verificar si estamos fuera del horario laboral máximo
+        var maxHoraInicio = await InscripcionTestHelper.GetMaxHoraInicioAsync(
             TestContainerHelper.ConnectionString);
+
+        DateOnly? fechaReferencia = null;
+
+        if (DateTime.Now.TimeOfDay >= maxHoraInicio - TimeSpan.FromMinutes(1))
+        {
+            var slotDisponible = await HorariosHelper.ObtenerUnHorarioDisponible(
+                TestContainerHelper.ConnectionString,
+                FiltroFecha.Mayor,
+                FiltroHora.SinFiltro);
+
+            slotDisponible.Should().NotBeNull(
+                "Debe haber al menos un horario disponible en fecha futura como fallback");
+            fechaReferencia = slotDisponible!.Value.FechaDisponible;
+        }
+
+        // Arrange — generar inscripción con fecha disponible
+        var seedResult = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
+            TestContainerHelper.ConnectionString, fechaReferencia);
 
         if (seedResult == null)
         {
@@ -43,17 +62,18 @@ public class InscripcionesReagendarTests : IntegrationTestBase
                 TestContainerHelper.ConnectionString, DateTime.Today.Year);
 
             fallbackDate.Should().NotBeNull("No se pudo encontrar fecha alternativa para el seed");
+            fechaReferencia = fallbackDate!.Value;
 
             seedResult = await InscripcionTestHelper.SeedFreshInscripcionAndReturnIdAsync(
-                TestContainerHelper.ConnectionString, fallbackDate!.Value);
+                TestContainerHelper.ConnectionString, fechaReferencia);
         }
 
         seedResult.Should().NotBeNull("El seed debería tener una inscripción disponible");
         var (clienteId, idInscripcion) = seedResult!.Value;
 
-        // Crear clase destino válida para el reagendamiento
+        // Crear clase destino válida para el reagendamiento (con fechaReferencia si aplica)
         var idClaseDestino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
-            TestContainerHelper.ConnectionString, idInscripcion);
+            TestContainerHelper.ConnectionString, idInscripcion, fechaReferencia);
 
         idClaseDestino.Should().NotBeNull("No se pudo crear la clase destino para el reagendamiento");
 

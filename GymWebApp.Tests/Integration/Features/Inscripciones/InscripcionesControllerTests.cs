@@ -29,6 +29,8 @@ public class InscripcionesControllerTests : IntegrationTestBase
     public async Task ObtenerInscripciones_ClienteConInscripcionesFuturas_ReturnsOkWithList()
     {
         // Arrange — generar inscripciones frescas via SPs
+
+        
         var clienteId = await InscripcionEndpointHelper.SeedFreshInscripcionAsync(
             TestContainerHelper.ConnectionString);
 

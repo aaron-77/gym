@@ -118,7 +118,7 @@ namespace BL
             }
         }
 
-        public async Task<DTOResponse<List<DTOClaseProgramadaView>>> ObtenerClasesProgramadasPorId(int? idClase = null)
+        public async Task<DTOResponse<List<DTOClaseProgramadaView>>> ObtenerClasesProgramadasPorId(int? idClase = null, DateOnly? fecha = null)
         {
             try
             {
@@ -126,6 +126,11 @@ namespace BL
                 if (idClase.HasValue)
                 {
                     endpoint += "?idClase=" + idClase.Value;
+                }
+                // La fecha de referencia se agrega solo si viene con valor; si es null, el server aplica su fecha actual por defecto
+                if (fecha.HasValue)
+                {
+                    endpoint += (idClase.HasValue ? "&" : "?") + "fecha=" + fecha.Value.ToString("yyyy-MM-dd");
                 }
                 string response = await _httpClient.get(endpoint);
                 return JsonSerializer.Deserialize<DTOResponse<List<DTOClaseProgramadaView>>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<List<DTOClaseProgramadaView>> { success = false, message = "Error de deserialización o respuesta vacía." };
@@ -136,6 +141,7 @@ namespace BL
                     $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"Parámetro - IdClase: {idClase} | " +
+                    $"Parámetro - Fecha: {fecha} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 

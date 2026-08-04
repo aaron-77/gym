@@ -3,7 +3,7 @@
  * Maneja la integración entre el calendario y el visualizador de horarios
  */
 
-import { realizarPeticionAPI, getApiBaseUrl, getNginxBaseUrl, getSignalRBaseUrl } from './httpClient.js';
+import { realizarPeticionAPI, getApiBaseUrl, getNginxBaseUrl, getSignalRBaseUrl, obtenerFechaReferencia } from './httpClient.js';
 import { Calendar } from './calendario.js';
 import { ScheduleViewer } from './horariosDelDia.js';
 import { formDataToJson } from './formDataToJson.js';
@@ -278,15 +278,13 @@ function existenEsosHorarios(fecha) {
 
 /**
  * Obtiene horarios disponibles y pre-reservados para una fecha específica
- * @param {string} fecha - Fecha en formato ISO para el query param
+ * @param {string} [fecha] - Fecha en formato ISO para el query param. Default: hoy del browser (yyyy-MM-dd)
  * @returns {Object} Objeto con horariosDisponibles y preReservasDeHorario
  */
-async function obtenerHorariosNuevos(fecha = null) {
+async function obtenerHorariosNuevos(fecha = obtenerFechaReferencia()) {
     try {
-        const params = {};
-        if (fecha) {  // solo agrega fecha si no es null o undefined
-            params.fecha = fecha;
-        }
+        // La fecha de referencia se envía SIEMPRE (default = hoy del browser)
+        const params = { fecha };
         const responseHorariosDisponibles = await realizarPeticionAPI('/Horarios/obtenerHorariosDisponibles', undefined, params);
         const responsePreReservas = await realizarPeticionAPI('/Horarios/obtenerPreReservas', undefined, params);
         

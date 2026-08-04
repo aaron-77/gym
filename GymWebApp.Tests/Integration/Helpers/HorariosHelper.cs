@@ -21,10 +21,12 @@ public static class HorariosHelper
         string connectionString,
         DateTime? fecha = null)
     {
+        var fechaReferencia = NormalizarFechaReferencia(fecha ?? DateTime.Today);
+
         var horarios = await DatabaseHelper.ExecuteQueryAsync(
             connectionString, 
             "EXEC sp_obtenerHorariosDisponibles @Fecha = @Fecha",
-            new Dictionary<string, object?> { ["@Fecha"] = fecha ?? DateTime.Today });
+            new Dictionary<string, object?> { ["@Fecha"] = fechaReferencia });
 
         return horarios;
     }
@@ -43,10 +45,12 @@ public static class HorariosHelper
         FiltroHora filtroHora,
         DateTime? fecha = null)
     {
-        var horarios = await ObtenerHorariosDisponibles(connectionString, fecha);
+        // Normalizar la fecha de referencia y usarla tanto para el SP como para el filtro,
+        // para mantener consistencia cuando la consulta se hace el último día del mes.
+        var fechaRef = NormalizarFechaReferencia(fecha?.Date ?? DateTime.Today);
+        var horarios = await ObtenerHorariosDisponibles(connectionString, fechaRef);
 
-        // Aplicar filtro de fecha usando la fecha recibida como referencia
-        var fechaRef = fecha?.Date ?? DateTime.Today;
+        // Aplicar filtro de fecha usando la fecha normalizada como referencia
         horarios = filtroFecha switch
         {
             FiltroFecha.Igual => horarios
@@ -166,5 +170,29 @@ public static class HorariosHelper
         var idHora = Convert.ToInt32(slot["idHora"]);
 
         return (fechaDisponible, idHora);
+    }
+
+    /// <summary>
+    /// Normaliza la fecha de referencia para que la consulta al SP nunca quede sin días disponibles.
+    /// sp_obtenerHorariosDisponibles genera el calendario de TODO el mes de @Fecha y filtra f.Fecha >= @Fecha;
+    /// si la fecha es el último día del mes, el resultado quedaría casi vacío (y vacío si la hora actual ya pasó),
+    /// haciendo fallar los tests. Se avanza al primer día del mes siguiente para regenerar el mes completo.
+    /// Esto cubre también el fin de año (31 de diciembre → 1 de enero del año siguiente, AddMonths maneja el año).
+    /// </summary>
+    /// <param name="fecha">Fecha de referencia a normalizar.</param>
+    /// <returns>Primer día del mes siguiente si la fecha cae el último día del mes; si no, la fecha original.</returns>
+    private static DateTime NormalizarFechaReferencia(DateTime fecha)
+    {
+        var fechaSolo = fecha.Date;
+
+        // Si es el último día del mes, mover la referencia al primer día del mes siguiente.
+        // AddMonths maneja el fin de año de forma nativa (diciembre → enero del año siguiente).
+        if (fechaSolo.Day == DateTime.DaysInMonth(fechaSolo.Year, fechaSolo.Month))
+        {
+            var mesSiguiente = fechaSolo.AddMonths(1);
+            return new DateTime(mesSiguiente.Year, mesSiguiente.Month, 1);
+        }
+
+        return fechaSolo;
     }
 }

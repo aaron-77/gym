@@ -52,6 +52,19 @@ async function realizarPeticionAPI(endpointPath, body, params) {
 
 
 /**
+ * Obtiene la fecha de referencia del browser en formato yyyy-MM-dd (sv-SE)
+ * @param {Date|string} [fecha] - Fecha a formatear. Default: hoy del browser. Si ya es string se devuelve tal cual.
+ * @returns {string} Fecha en formato yyyy-MM-dd
+ */
+function obtenerFechaReferencia(fecha = new Date()) {
+    // Si ya viene formateada como string (yyyy-MM-dd), se devuelve sin cambios
+    if (typeof fecha === 'string') {
+        return fecha;
+    }
+    return fecha.toLocaleDateString('sv-SE');
+}
+
+/**
  * Obtiene la URL base del porxy inverso(nginx) desde la configuración
  * @returns {string} URL base del proxy inverso
  */
@@ -143,7 +156,8 @@ if (typeof window !== 'undefined') {
     window.getNginxBaseUrl = getNginxBaseUrl;
     window.getSignalRBaseUrl = getSignalRBaseUrl;
     window.realizarPeticionAPI = realizarPeticionAPI;
+    window.obtenerFechaReferencia = obtenerFechaReferencia;
 }
 
 // Exportar las funciones para uso en otros módulos
-export { realizarPeticionAPI, getApiBaseUrl, getFrontendBaseUrl, getNginxBaseUrl, getSignalRBaseUrl }; 
+export { realizarPeticionAPI, getApiBaseUrl, getFrontendBaseUrl, getNginxBaseUrl, getSignalRBaseUrl, obtenerFechaReferencia }; 

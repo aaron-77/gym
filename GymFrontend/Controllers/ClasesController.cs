@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace GymFrontend.Controllers
@@ -149,11 +150,32 @@ namespace GymFrontend.Controllers
         }
 
         [HttpGet("obtenerClasesProgramadasPorId")]
-        public async Task<IActionResult> ObtenerClasesProgramadasPorId([FromQuery] int? idClase = null)
+        public async Task<IActionResult> ObtenerClasesProgramadasPorId([FromQuery] int? idClase = null, [FromQuery] DateOnly? fecha = null)
         {
+            // Validar el modelo (defensivo; una fecha malformada ya cortocircuita con 400 por [ApiController])
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(
+                    ResponseManager.BuildResponse<List<DTOClaseProgramadaView>>(
+                        false,
+                        400,
+                        "Datos inválidos",
+                        ModelState
+                            .Values.SelectMany(v => v.Errors)
+                            .Select(e => new ErrorModel
+                            {
+                                propiedad = "NONE",
+                                message = e.ErrorMessage,
+                            })
+                            .ToList(),
+                        null
+                    )
+                );
+            }
+
             try
             {
-                var result = await _clasesManager.ObtenerClasesProgramadasPorId(idClase);
+                var result = await _clasesManager.ObtenerClasesProgramadasPorId(idClase, fecha);
                 if (result.success)
                 {
                     return Ok(result);
@@ -166,6 +188,7 @@ namespace GymFrontend.Controllers
                     $"L�nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"Par�metro - IdClase: {idClase} | " +
+                    $"Par�metro - Fecha: {fecha} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 

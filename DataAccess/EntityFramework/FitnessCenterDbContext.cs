@@ -1631,6 +1631,7 @@ public partial class FitnessCenterDbContext :IdentityDbContext<ApplicationUser>
             entity.Property(e => e.FechaDeInscripcion).HasColumnName("fechaDeInscripcion");
             entity.Property(e => e.IdClaseProgramada).HasColumnName("idClaseProgramada");
             entity.Property(e => e.NombreClase).HasColumnName("nombreClase");
+            entity.Property(e => e.FkClase).HasColumnName("fkClase");
             entity.Property(e => e.FechaDeLaClase).HasColumnName("fechaDeLaClase");
             entity.Property(e => e.HoraInicio).HasColumnName("horaInicio");
             entity.Property(e => e.HoraFin).HasColumnName("horaFin");

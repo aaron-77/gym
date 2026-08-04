@@ -54,17 +54,15 @@ y devuelva la respuesta obtenida a la UI del frontend.
 
 1. Obtener ID del usuario desde el claim del token JWT (sin validar existencia ni formato)
 2. Recibir `idInscripcion`, `idClaseProgramada`, `idCliente` del body de la petición POST
-3. Agregar el `userId` (obtenido del token) a los datos de la petición
-4. Obtener token JWT para consumir la API
-5. Crear cliente HTTP con el token JWT
-6. Reenviar la petición POST a `api/inscripciones/reagendar` con todos los datos
-7. Devolver la misma respuesta obtenida del API (código de estado y body) a la UI del frontend
+3. Obtener token JWT para consumir la API
+4. Crear cliente HTTP con el token JWT
+5. Reenviar la petición POST a `api/inscripciones/reagendar` con todos los datos
+6. Devolver la misma respuesta obtenida del API (código de estado y body) a la UI del frontend
 
 ### 3.6 Patrones a aplicar
 
 - **Proxy Pattern:** El controller frontend actúa como proxy entre JavaScript UI y la API
 - **Response passthrough:** Devolver el mismo status code y body que respondió la API
-- **Token reenvío:** Usar el token JWT del usuario para autenticar contra la API
 - **Error Handling:** Try/catch con logging, devolver error JSON
 
 ## 4. Archivos a modificar
@@ -78,7 +76,6 @@ y devuelva la respuesta obtenida a la UI del frontend.
 - [ ] Endpoint POST con ruta `/inscripciones/reagendar`
 - [ ] Autenticación requerida (cookie JWT)
 - [ ] ID del usuario obtenido desde el claim del token
-- [ ] Se agrega userId del token a los datos de la petición
 - [ ] Reenvío de petición al API con token JWT
 - [ ] La respuesta del API se devuelve tal cual al frontend JavaScript
 - [ ] No realiza validaciones de usuario, rol ni GUID

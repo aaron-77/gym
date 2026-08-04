@@ -23,7 +23,7 @@ public class InscripcionRepository : IInscripcionRepository
         {
             return await _dbExecutor
                 .QueryAsync<DTOInscripcionDelCliente>(
-                    $"SELECT * FROM dbo.fn_obtenerInscripcionesDelCliente({idUsuario})");
+                    $"SELECT f.*, cp.fkClase FROM dbo.fn_obtenerInscripcionesDelCliente({idUsuario}) f INNER JOIN clasesProgramadas cp ON f.idClaseProgramada = cp.idProgramacionClase");
         }
         catch (Exception ex)
         {

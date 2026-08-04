@@ -97,7 +97,8 @@ public class E2eContainerHelper : IAsyncLifetime
                 ["DB_CONNECTION_STRING"] = ConnectionString,
                 ["SECRET_TOKEN_KEY"] = ConfigHelper.GetProperty("JwtSettings:SecretKey"),
                 ["Jwt:Issuer"] = ConfigHelper.GetProperty("JwtSettings:Issuer"),
-                ["Jwt:Audience"] = ConfigHelper.GetProperty("JwtSettings:BackendAudiencie")
+                ["Jwt:Audience"] = ConfigHelper.GetProperty("JwtSettings:BackendAudiencie"),
+                ["TZ"] = "America/Mexico_City"
             })
             .WithPortBinding(ApiInternalPort, true)
             .WithNetwork(_network)
@@ -119,7 +120,8 @@ public class E2eContainerHelper : IAsyncLifetime
                 ["ASPNETCORE_URLS"] = $"http://+:{FrontendInternalPort}",
                 ["DB_CONNECTION_STRING"] = ConnectionString,
                 ["ASPNETCORE_ENVIRONMENT"] = "Production",
-                ["SECRET_TOKEN_KEY"] = ConfigHelper.GetProperty("JwtSettings:SecretKey")
+                ["SECRET_TOKEN_KEY"] = ConfigHelper.GetProperty("JwtSettings:SecretKey"),
+                ["TZ"] = "America/Mexico_City"
             })
             .WithPortBinding(FrontendInternalPort, true)
             .WithNetwork(_network)

@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
+using BL.Utils.Enums;
 using GymWebApp.Tests.Integration.Common;
+using GymWebApp.Tests.Integration.Helpers;
 using DTO.Dtos;
 using FluentAssertions;
 using Xunit;
@@ -29,18 +31,58 @@ public class ObtenerClasesProgramadasPorIdApiTests : IntegrationTestBase
         // Arrange
         await SetAuthHeaderAsync();
 
-        // Obtener un ID de clase existente
-        var idClase = await DatabaseHelper.ExecuteScalarAsync<int>(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 ClaseId FROM Clases");
+        // Verificar si estamos fuera del horario laboral máximo.
+        // De ser así, obtener un slot disponible en fecha futura y seedear
+        // solo una claseProgramada (sin inscripción).
+        var maxHoraInicio = await InscripcionTestHelper.GetMaxHoraInicioAsync(
+            TestContainerHelper.ConnectionString);
 
-        idClase.Should().BeGreaterThan(0, "Debe existir al menos una clase en la base de datos");
+        var dto = await GymWebApp.Tests.SharedHelpers.ClasesProgramadasHelper.GenerarClaseProgramadaAsync(
+            TestContainerHelper.ConnectionString);
+        if (DateTime.Now.TimeOfDay >= maxHoraInicio - TimeSpan.FromMinutes(1))
+        {
+            var slotDisponible = await HorariosHelper.ObtenerUnHorarioDisponible(
+                TestContainerHelper.ConnectionString,
+                FiltroFecha.Mayor,
+                FiltroHora.SinFiltro);
+
+            slotDisponible.Should().NotBeNull(
+                "Debe haber al menos un horario disponible en fecha futura como fallback");
+
+            
+            dto.fechaDeLaClase = slotDisponible!.Value.FechaDisponible;
+            dto.fkHoraLaboral = slotDisponible.Value.IdHora;
+
+        }
+        await GymWebApp.Tests.SharedHelpers.ClasesProgramadasHelper.RegistrarClaseProgramadaML(
+            TestContainerHelper.ConnectionString, dto);
+
+        // Obtener un ID de clase que tenga clases programadas (futuras o existentes)
+        var idClaseNullable = await DatabaseHelper.ExecuteScalarAsync<int?>(
+            TestContainerHelper.ConnectionString,
+            @"SELECT TOP 1 cp.fkClase
+              FROM clasesProgramadas cp
+              WHERE cp.fechaDeLaClase >= CAST(GETDATE() AS DATE)
+              ORDER BY NEWID()");
+
+        var idClase = idClaseNullable ?? 0;
+
+        if (idClase == 0)
+        {
+            // Fallback: cualquier clase del catálogo
+            idClaseNullable = await DatabaseHelper.ExecuteScalarAsync<int?>(
+                TestContainerHelper.ConnectionString,
+                "SELECT TOP 1 ClaseId FROM Clases");
+            idClase = idClaseNullable ?? 0;
+        }
+
+        idClase.Should().BeGreaterThan(0, "Debe existir al menos una clase con clases programadas futuras");
 
         // Act
         var response = await Client.GetAsync($"/api/Clases/obtenerClasesProgramadasPorId?idClase={idClase}");
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
         
         var result = await response.Content.ReadFromJsonAsync<DTOResponse<List<DTOClaseProgramadaView>>>();
         

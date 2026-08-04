@@ -1,4 +1,4 @@
-import { realizarPeticionAPI, getSignalRBaseUrl } from './httpClient.js';
+import { realizarPeticionAPI, getSignalRBaseUrl, obtenerFechaReferencia } from './httpClient.js';
 import { Calendar } from './calendario.js';
 import { ScheduleViewer } from './horariosDelDia.js';
 import { showMessage, iconTypes } from './messageManager.mjs';
@@ -73,7 +73,7 @@ async function onClienteChange() {
         fillComboBox(comboInscripcion, inscripciones, 'Seleccione una inscripción...', ins => ({
             value: ins.idInscripcion,
             text: `${ins.nombreClase} — ${ins.fechaDeLaClase}`,
-            dataset: { idClaseProgramada: ins.idClaseProgramada }
+            dataset: { idClaseProgramada: ins.idClaseProgramada, fkClase: ins.fkClase }
         }));
     } catch {
         showMessage(iconTypes.error, 'Error al obtener inscripciones del cliente');
@@ -113,16 +113,16 @@ async function onReagendarToggle() {
 
 async function fetchClasesProgramadas() {
     const selected = comboInscripcion.options[comboInscripcion.selectedIndex];
-    const idClaseProgramada = selected?.dataset?.idClaseProgramada;
-    if (!idClaseProgramada) return;
+    const fkClase = selected?.dataset?.fkClase;
+    if (!fkClase) return;
 
     try {
-        const response = await realizarPeticionAPI('/clases/obtenerClasesProgramadasPorId', undefined, { idClase: idClaseProgramada });
+        const response = await realizarPeticionAPI('/clases/obtenerClasesProgramadasPorId', undefined, { idClase: fkClase, fecha: obtenerFechaReferencia() });
         const data = response.payload || response;
 
         horarios = {};
         (data || []).forEach(item => {
-            const fecha = new Date(item.fechaDisponible || item.fecha);
+            const fecha = new Date(item.fechaDeLaClase);
             const anio = fecha.getFullYear();
             const mes = fecha.getMonth();
             const dia = fecha.getDate();
@@ -133,6 +133,7 @@ async function fetchClasesProgramadas() {
 
             horarios[anio][mes][dia].push({
                 idHora: item.idHora,
+                idClaseProgramada: item.idClaseProgramada,
                 horaInicio: item.horaInicio,
                 horaFin: item.horaFin,
                 fecha,
@@ -140,6 +141,15 @@ async function fetchClasesProgramadas() {
                 estado: item.estado || 'disponible'
             });
         });
+
+        // Poblar hidden inputs requeridos por registrarPreReservaDeHorario
+        // (fkClase y fkEntrenador son los mismos para todos los horarios de esta clase)
+        if (data && data.length > 0) {
+            const inputClase = document.getElementById('inputClase');
+            const inputEntrenador = document.getElementById('inputEntrenador');
+            if (inputClase) inputClase.value = data[0].fkClase;
+            if (inputEntrenador) inputEntrenador.value = data[0].fkEntrenador;
+        }
 
         updateCalendarDisponibleDates();
         actualizarVistaFecha(calendarInstance?.selectedDate || new Date());
@@ -218,10 +228,13 @@ async function ejecutarCancelar(idInscripcion) {
 }
 
 async function ejecutarReagendar(idInscripcion) {
-    const selected = comboInscripcion.options[comboInscripcion.selectedIndex];
-    const idClaseProgramada = selected?.dataset?.idClaseProgramada;
     const idCliente = comboCliente.value;
-    const idNuevaClase = scheduleViewerInstance?.getSelectedScheduleId();
+
+    // La clase programada destino es la del horario seleccionado en el calendario.
+    // El id correcto es idClaseProgramada (IdProgramacionClase), NO idHora
+    // (que es el id de la franja de horario laboral).
+    const selectedEl = document.querySelector('.schedule-viewer__item--selected');
+    const idNuevaClase = selectedEl?.dataset?.idClaseProgramada;
 
     if (!idNuevaClase) {
         showMessage(iconTypes.warning, 'Seleccione un horario en el calendario');
@@ -231,7 +244,7 @@ async function ejecutarReagendar(idInscripcion) {
     try {
         const response = await realizarPeticionAPI('/inscripciones/reagendar', {
             idInscripcion,
-            idClaseProgramada,
+            idClaseProgramada: idNuevaClase,
             idCliente
         });
         if (response.success) {

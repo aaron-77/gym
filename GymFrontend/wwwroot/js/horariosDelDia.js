@@ -35,10 +35,14 @@ export class ScheduleViewer {
    * Configura los event listeners
    */
   bindEvents() {
-    this.checkElement.addEventListener("change", (event) => {
-      const ocultar = event.target.checked;
-      this.togglePreReservados(ocultar);
-    });
+    // Guard: el checkbox "ocultarPreReservados" solo existe cuando el partial
+    // _HorariosDelDia se renderiza con model="true" (ej. cancelar/reagendar usa false).
+    if (this.checkElement) {
+      this.checkElement.addEventListener("change", (event) => {
+        const ocultar = event.target.checked;
+        this.togglePreReservados(ocultar);
+      });
+    }
 
     
     
@@ -120,6 +124,7 @@ export class ScheduleViewer {
     const element = document.createElement("button")
     element.className = this.getScheduleElementClasses(schedule.estado)
     element.setAttribute("data-idhora", schedule.idHora)
+    element.dataset.idClaseProgramada = schedule.idClaseProgramada ?? ''
     element.textContent = schedule.labelHorario
     element.type = "button"
 

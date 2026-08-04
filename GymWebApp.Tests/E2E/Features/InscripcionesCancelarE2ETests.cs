@@ -42,6 +42,7 @@ public class InscripcionesCancelarE2ETests : PlaywrightTestBase
         await Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
         // GIVEN: datos de prueba en BD (retorna el ID del cliente creado)
+
         var clienteId = await InscripcionEndpointHelper.SeedFreshInscripcionAsync(E2eContainerHelper.Instance.HostConnectionString);
 
         // WHEN: navega a la vista de cancelar/reagendar

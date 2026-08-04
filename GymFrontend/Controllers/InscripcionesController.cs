@@ -114,5 +114,26 @@ namespace GymFrontend.Controllers
                 return StatusCode(500, new { success = false, message = "Error al cancelar inscripción" });
             }
         }
+
+        [Authorize(Roles = "empleado")]
+        [HttpPost]
+        [Route("reagendar")]
+        public async Task<IActionResult> ReagendarInscripcion([FromBody] ReagendarInscripcionRequest request)
+        {
+            try
+            {
+                _logger.LogInformation("Start InscripcionesController.ReagendarInscripcion (POST)");
+
+                var jsonContent = JsonContent.Create(request);
+                var apiResponse = await _httpClient.post("api/inscripciones/reagendar", jsonContent);
+
+                return Content(apiResponse ?? "{}", "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error ReagendarInscripcion (InscripcionesController)");
+                return StatusCode(500, new { success = false, message = "Error al reagendar inscripción" });
+            }
+        }
     }
 }

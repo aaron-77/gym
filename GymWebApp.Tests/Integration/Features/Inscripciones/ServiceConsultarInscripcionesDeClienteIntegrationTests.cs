@@ -64,7 +64,7 @@ public class ServiceConsultarInscripcionesDeClienteIntegrationTests : Integratio
 
 
         
-seedResult.Should().NotBeNull("El seed debería tener una inscripción disponible");
+        seedResult.Should().NotBeNull("El seed debería tener una inscripción disponible");
 
         var (clienteId, _) = seedResult!.Value;
         var service = CreateService();
