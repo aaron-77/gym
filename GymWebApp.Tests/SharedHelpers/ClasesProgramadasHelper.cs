@@ -291,12 +291,20 @@ public static class ClasesProgramadasHelper
     }
 
     /// <summary>
-    /// Registra una clase programada para el día y hora actual.
-    /// Orquesta <see cref="HorariosHelper.ObtenerUnHorarioDisponible"/> para obtener
-    /// un slot disponible hoy a la hora actual, consulta los datos necesarios
+    /// Registra una clase programada para la fecha actual ("Actual" refiere a la fecha, no a la hora).
+    /// Orquesta <see cref="HorariosHelper.ObtenerUnHorarioDisponible"/> con FiltroHora.Mayor
+    /// (referencia ceil a la próxima hora completa + guard de fin de jornada) para obtener
+    /// un slot disponible hoy con margen horario, consulta los datos necesarios
     /// (clase activa, entrenador disponible), y delega en <see cref="RegistrarClaseProgramadaML"/>
     /// que maneja la transacción completa (clase + horario).
     /// </summary>
+    /// <remarks>
+    /// Limitación conocida: el entrenador se consulta con la fecha/hora actual
+    /// (sp_obtenerEntrenadoresDisponibles @fechaReferencia = DateTime.Now). Si el guard de
+    /// fin de jornada desplaza la clase al día siguiente, el entrenador se elige por la
+    /// disponibilidad de hoy, no por la de la fecha efectiva de la clase. El método no tiene
+    /// callers activos en la suite; se documenta como limitación conocida y no se corrige.
+    /// </remarks>
     /// <param name="connectionString">Connection string para la base de datos</param>
     /// <returns>
     /// Tupla con:
@@ -310,11 +318,11 @@ public static class ClasesProgramadasHelper
     {
         try
         {
-            // Paso 1: Obtener un slot disponible para hoy a la hora actual
+            // Paso 1: Obtener un slot disponible para hoy con margen horario (filtro Mayor)
             var slotDisponible = await HorariosHelper.ObtenerUnHorarioDisponible(
                 connectionString,
                 FiltroFecha.Igual,
-                FiltroHora.Igual);
+                FiltroHora.Mayor);
 
             if (slotDisponible == null)
                 throw new InvalidOperationException(

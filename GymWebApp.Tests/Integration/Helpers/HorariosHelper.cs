@@ -33,6 +33,11 @@ public static class HorariosHelper
 
     /// <summary>
     /// Ejecuta sp_obtenerHorariosDisponibles y aplica filtros de fecha y hora.
+    /// Con <see cref="FiltroHora.Mayor"/>, la referencia de hora se redondea hacia arriba
+    /// (ceil) a la próxima hora completa cuando deriva de la hora actual; si la referencia
+    /// supera la última hora laboral, la fecha de referencia se desplaza al día siguiente
+    /// y la hora pasa a la primera hora laboral (guard de fin de jornada). Con una fecha
+    /// explícita la referencia se preserva (00:00 con DateOnly) y el guard no aplica.
     /// </summary>
     /// <param name="connectionString">Connection string de la BD de pruebas.</param>
     /// <param name="filtroFecha">Filtro de fecha a aplicar.</param>
@@ -48,6 +53,27 @@ public static class HorariosHelper
         // Normalizar la fecha de referencia y usarla tanto para el SP como para el filtro,
         // para mantener consistencia cuando la consulta se hace el último día del mes.
         var fechaRef = NormalizarFechaReferencia(fecha?.Date ?? DateTime.Today);
+        TimeSpan? horaRef = null;
+
+        // Con filtro de hora (único restante: Mayor): referencia ceil + guard de fin de jornada.
+        if (filtroHora != FiltroHora.SinFiltro)
+        {
+            // Referencia de hora: con fecha explícita se preserva la hora (00:00 con DateOnly);
+            // con la hora actual se redondea hacia arriba (ceil) a la próxima hora completa.
+            horaRef = fecha.HasValue
+                ? new TimeSpan(fecha.Value.Hour, 0, 0)
+                : CeilHoraActual(DateTime.Now);
+
+            // Guard de fin de jornada: si la referencia supera la última hora laboral,
+            // se desplaza la fecha al día siguiente y la hora a la primera hora laboral.
+            var (minHora, maxHora) = await GetRangoHoraInicioAsync(connectionString);
+            if (horaRef.Value > maxHora)
+            {
+                fechaRef = NormalizarFechaReferencia(fechaRef.AddDays(1));
+                horaRef = minHora;
+            }
+        }
+
         var horarios = await ObtenerHorariosDisponibles(connectionString, fechaRef);
 
         // Aplicar filtro de fecha usando la fecha normalizada como referencia
@@ -68,31 +94,44 @@ public static class HorariosHelper
             _ => horarios
         };
 
-        // Aplicar filtro de hora
-        if (filtroHora != FiltroHora.SinFiltro)
+        // Aplicar filtro de hora: horaInicio > horaRef (filtro único Mayor)
+        if (horaRef is not null)
         {
-            var horaActualFloored = new TimeSpan(fecha?.Hour ?? DateTime.Now.Hour, 0, 0);
-
-            horarios = filtroHora switch
-            {
-                FiltroHora.Igual => horarios
-                    .Where(r => r["horaInicio"] != null
-                                && (TimeSpan)r["horaInicio"] == horaActualFloored)
-                    .ToList(),
-                FiltroHora.Mayor => horarios
-                    .Where(r => r["horaInicio"] != null
-                                && (TimeSpan)r["horaInicio"] > horaActualFloored)
-                    .ToList(),
-                FiltroHora.MayorIgual => horarios
-                    .Where(r => r["horaInicio"] != null
-                                && (TimeSpan)r["horaInicio"] >= horaActualFloored)
-                    .ToList(),
-                _ => horarios
-            };
+            horarios = horarios
+                .Where(r => r["horaInicio"] != null
+                            && (TimeSpan)r["horaInicio"] > horaRef.Value)
+                .ToList();
         }
 
         return horarios;
     }
+
+    /// <summary>
+    /// Consulta la primera y última hora de inicio laboral (MIN/MAX de horaInicio)
+    /// en un solo round-trip a la BD. Usado por el guard de fin de jornada.
+    /// </summary>
+    /// <param name="connectionString">Connection string de la BD de pruebas.</param>
+    /// <returns>Tupla (MinHora, MaxHora) con el rango de horas laborales.</returns>
+    private static async Task<(TimeSpan MinHora, TimeSpan MaxHora)> GetRangoHoraInicioAsync(string connectionString)
+    {
+        var row = await DatabaseHelper.ExecuteQuerySingleAsync(
+            connectionString,
+            "SELECT MIN(horaInicio) AS MinHora, MAX(horaInicio) AS MaxHora FROM horasLaborales")
+            ?? throw new InvalidOperationException("No hay horas laborales registradas");
+
+        return ((TimeSpan)row["MinHora"], (TimeSpan)row["MaxHora"]);
+    }
+
+    /// <summary>
+    /// Redondea la hora actual hacia arriba (ceil) a la próxima hora completa.
+    /// Con minutos y segundos en cero devuelve la hora exacta (sin ceil).
+    /// </summary>
+    /// <param name="ahora">Marca de tiempo actual.</param>
+    /// <returns>Próxima hora completa (o la hora exacta si no hay minutos/segundos).</returns>
+    private static TimeSpan CeilHoraActual(DateTime ahora) =>
+        ahora.Minute > 0 || ahora.Second > 0
+            ? new TimeSpan(ahora.Hour + 1, 0, 0)
+            : new TimeSpan(ahora.Hour, 0, 0);
 
     /// <summary>
     /// Registra un horario para una clase programada.

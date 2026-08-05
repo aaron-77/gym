@@ -15,16 +15,14 @@ public enum FiltroFecha
 
 /// <summary>
 /// Enumeración para filtrar por hora en consultas de horarios disponibles.
-/// La hora de referencia se calcula como TimeOnly(DateTime.Now.Hour, 0, 0).
+/// La referencia de hora se redondea hacia arriba (ceil) a la próxima hora completa
+/// cuando deriva de la hora actual; si la referencia supera la última hora laboral,
+/// la consulta se desplaza al primer horario del día siguiente (guard de fin de jornada).
 /// </summary>
 public enum FiltroHora
 {
-    /// <summary>horaInicio == horaActualFloored</summary>
-    Igual,
-    /// <summary>horaInicio > horaActualFloored</summary>
+    /// <summary>horaInicio > referencia ceil (próxima hora completa)</summary>
     Mayor,
-    /// <summary>horaInicio >= horaActualFloored</summary>
-    MayorIgual,
     /// <summary>Sin filtro de hora</summary>
     SinFiltro
 }
