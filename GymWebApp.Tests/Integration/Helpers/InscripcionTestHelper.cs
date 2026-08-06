@@ -380,12 +380,13 @@ public static class InscripcionTestHelper
     }
 
     /// <summary>
-    /// Crea una inscripción con fecha de hoy y hora futura desde cero,
+    /// Crea una inscripción con fecha estrictamente futura y cualquier hora desde cero,
     /// usando sp_obtenerHorariosDisponibles para garantizar que el slot (fecha + hora) elegido
     /// esté realmente disponible (sin colisiones con clases, pre-reservas ni feriados):
-    /// 1. Obtiene un slot (fecha, idHora) disponible vía HorariosHelper.ObtenerUnHorarioDisponible,
-    ///    con FiltroFecha.MayorIgual y FiltroHora.Mayor
-    ///    (hora actual redondeada al inicio como referencia, busca hora estrictamente mayor).
+    /// 1. Obtiene el PRIMER slot (fecha, idHora) disponible vía HorariosHelper.ObtenerHorariosDisponiblesFiltrados,
+    ///    con FiltroFecha.Mayor y FiltroHora.SinFiltro (sin filtro de hora: al ser la fecha
+    ///    estrictamente futura, la hora queda automáticamente en el futuro, sin depender
+    ///    de márgenes de minutos). La selección es determinística (.First(), sin random).
     /// 2. Toma un cliente con rol 'cliente' y una clase existente.
     /// 3. Inserta en clasesProgramadas, horariosDeClasesProgramadas e inscripcionesDeClases.
     /// </summary>
@@ -395,16 +396,16 @@ public static class InscripcionTestHelper
     {
         // NOTA: HorariosHelper se llama con connectionString porque solo hace lecturas (SP de consulta).
         // Las escrituras (INSERTs) van dentro de WithTransactionAsync.
-        var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
-            connectionString,
-            FiltroFecha.Igual,
-            FiltroHora.Mayor,
-            fechaReferencia);
+        var horarios = await HorariosHelper.ObtenerHorariosDisponiblesFiltrados(
+            connectionString, FiltroFecha.Mayor, FiltroHora.SinFiltro,
+            fechaReferencia?.ToDateTime(TimeOnly.MinValue));
 
-        if (slot == null)
+        if (horarios.Count == 0)
             return null;
 
-        var (fechaDisponible, idHoraLaboral) = slot.Value;
+        var primerSlot = horarios.First();
+        var fechaDisponible = DateOnly.FromDateTime(Convert.ToDateTime(primerSlot["FechaDisponible"]));
+        var idHoraLaboral = Convert.ToInt32(primerSlot["idHora"]);
 
         var clienteRow = await DatabaseHelper.ExecuteQuerySingleAsync(
             connectionString,
@@ -1042,13 +1043,17 @@ public static class InscripcionTestHelper
     }
 
     /// <summary>
-    /// Crea una clase programada destino válida (misma fkClase, fecha futura, horario futuro)
-    /// para tests de ReagendarInscripcionAsync.
-    /// Útil para tests donde la inscripción original tiene fecha/hora pasada pero el destino
-    /// debe ser válido para pasar las validaciones del servicio.
+    /// Crea una clase programada destino válida (misma fkClase, fecha estrictamente futura
+    /// y posterior a la fecha de la inscripción original, cualquier hora) para tests de
+    /// ReagendarInscripcionAsync.
+    /// Usa el PRIMER slot disponible determinístico (.First(), sin random) vía
+    /// HorariosHelper.ObtenerHorariosDisponiblesFiltrados con FiltroFecha.Mayor y
+    /// FiltroHora.SinFiltro, filtrando además que la fecha destino sea estrictamente mayor
+    /// a la fecha de la clase original (requisito del Paso 10 de InscripcionesService:
+    /// original.Fecha &gt; destino.Fecha → 400).
     /// </summary>
     /// <param name="connectionString">Connection string de la BD de pruebas.</param>
-    /// <param name="idInscripcion">ID de la inscripción original (para obtener fkClase).</param>
+    /// <param name="idInscripcion">ID de la inscripción original (para obtener fkClase y fecha).</param>
     /// <param name="fecha">Fecha de referencia para buscar horarios disponibles (opcional, default null = hoy).</param>
     /// <returns>ID de la clase programada destino insertada, o null si no hay horarios disponibles.</returns>
     public static async Task<int?> CreateValidDestinationClassForReagendarAsync(
@@ -1057,7 +1062,7 @@ public static class InscripcionTestHelper
         // Lecturas fuera de transacción
         var claseOriginalRow = await DatabaseHelper.ExecuteQuerySingleAsync(
             connectionString,
-            @"SELECT cp.fkClase, cp.cupoMaximo
+            @"SELECT cp.fkClase, cp.cupoMaximo, cp.fechaDeLaClase
               FROM inscripcionesDeClases i
               INNER JOIN clasesProgramadas cp ON i.fkProgramacionClase = cp.idProgramacionClase
               WHERE i.idInscripcion = @IdInscripcion",
@@ -1066,14 +1071,23 @@ public static class InscripcionTestHelper
 
         var fkClaseOriginal = Convert.ToInt32(claseOriginalRow["fkClase"]);
         var cupoMaximo = Convert.ToInt32(claseOriginalRow["cupoMaximo"]);
+        var fechaOriginal = Convert.ToDateTime(claseOriginalRow["fechaDeLaClase"]).Date;
 
-        var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
-            connectionString, FiltroFecha.MayorIgual, FiltroHora.Mayor, fecha);
+        var horarios = await HorariosHelper.ObtenerHorariosDisponiblesFiltrados(
+            connectionString, FiltroFecha.Mayor, FiltroHora.SinFiltro,
+            fecha?.ToDateTime(TimeOnly.MinValue));
 
-        if (slot == null)
+        horarios = horarios
+            .Where(r => r["FechaDisponible"] != null
+                        && Convert.ToDateTime(r["FechaDisponible"]).Date > fechaOriginal)
+            .ToList();
+
+        if (horarios.Count == 0)
             return null;
 
-        var (fechaDisponible, idHoraLaboral) = slot.Value;
+        var primerSlot = horarios.First();
+        var fechaDisponible = DateOnly.FromDateTime(Convert.ToDateTime(primerSlot["FechaDisponible"]));
+        var idHoraLaboral = Convert.ToInt32(primerSlot["idHora"]);
 
         var idEstadoDisponible = await DatabaseHelper.ExecuteScalarAsync<int?>(
             connectionString,
