@@ -38,7 +38,7 @@ jornada que desplaza la referencia al día siguiente. Son el par de tests del sp
 
 | # | Prueba | Tipo | Descripción | Resultado |
 |---|--------|------|-------------|-----------|
-| 1 | FiltroHoraMayor con hora actual con minutos → ceil a próxima hora | Happy Path | Capturar DateTime.Now; si minutos/segundos > 0 la referencia esperada es hora+1 (si no, hora exacta); assert slots de hoy con horaInicio > referencia esperada | no-vacío, todos los slots con horaInicio > ref |
+| 1 | FiltroHoraMayor con hora actual con minutos → ceil a próxima hora | Happy Path | Capturar DateTime.Now; si minutos/segundos > 0 la referencia esperada es hora+1 (si no, hora exacta); assert slots de hoy con horaInicio >= referencia esperada | no-vacío, todos los slots con horaInicio >= ref |
 | 2 | FiltroHoraMayor con fecha explícita futura → referencia 00:00 preservada | Happy Path | Fecha futura explícita (DateOnly), sin ceil ni guard | slots del día solicitado |
 | 3 | FiltroHoraMayor fin de jornada → desplaza al día siguiente | Edge Case | Si DateTime.Now.TimeOfDay > maxHora de horasLaborales (patrón condicional tipo E2E), la consulta devuelve slots del día siguiente con horaInicio >= minHora; si no, assert día actual | día siguiente con primer slot >= minHora (o día actual) |
 | 4 | FiltroHoraMayor dentro de jornada → permanece día actual | Edge Case | Complemento del test 3: dentro de jornada → día actual no-vacío | día actual no-vacío |
