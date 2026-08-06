@@ -64,7 +64,7 @@ public class HorariosHelperFiltroHoraTests
             var fechaHoy = DateOnly.FromDateTime(DateTime.Today);
             horarios.Should().OnlyContain(r =>
                 DateOnly.FromDateTime(Convert.ToDateTime(r["FechaDisponible"])) == fechaHoy);
-            horarios.Should().OnlyContain(r => (TimeSpan)r["horaInicio"] > horaRefEsperada);
+            horarios.Should().OnlyContain(r => (TimeSpan)r["horaInicio"] >= horaRefEsperada);
         }
     }
 
@@ -134,7 +134,7 @@ public class HorariosHelperFiltroHoraTests
             var fechaHoy = DateOnly.FromDateTime(DateTime.Today);
             horarios.Should().OnlyContain(r =>
                 DateOnly.FromDateTime(Convert.ToDateTime(r["FechaDisponible"])) == fechaHoy);
-            horarios.Should().OnlyContain(r => (TimeSpan)r["horaInicio"] > horaRefEsperada);
+            horarios.Should().OnlyContain(r => (TimeSpan)r["horaInicio"] >= horaRefEsperada);
         }
     }
 
@@ -163,14 +163,14 @@ public class HorariosHelperFiltroHoraTests
             _connectionString, FiltroFecha.Igual, FiltroHora.Mayor);
 
         // Assert
-        if (horaRefEsperada < maxHora)
+        if (horaRefEsperada <= maxHora)
         {
             // Dentro de jornada: día actual no-vacío con horaInicio > referencia ceil
             var fechaHoy = DateOnly.FromDateTime(DateTime.Today);
             horarios.Should().NotBeEmpty("dentro de la jornada debe haber slots disponibles hoy");
             horarios.Should().OnlyContain(r =>
                 DateOnly.FromDateTime(Convert.ToDateTime(r["FechaDisponible"])) == fechaHoy);
-            horarios.Should().OnlyContain(r => (TimeSpan)r["horaInicio"] > horaRefEsperada);
+            horarios.Should().OnlyContain(r => (TimeSpan)r["horaInicio"] >= horaRefEsperada);
         }
         else
         {

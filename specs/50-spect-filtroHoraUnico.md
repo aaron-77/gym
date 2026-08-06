@@ -50,7 +50,7 @@ La referencia de hora para `FiltroHora.Mayor` debe redondearse hacia arriba a la
 
 ### 3.4 Guard de fin de jornada
 
-`HorariosHelper` debe consultar el MAX y MIN de `horaInicio` de `horasLaborales`. Si la referencia horaria supera la última hora laboral, la referencia pasa a la primera hora laboral del día siguiente (la fecha de referencia también se desplaza al día siguiente).
+`HorariosHelper` debe consultar el MAX y MIN de `horaInicio` de `horasLaborales`. El filtro de hora acepta slots con `horaInicio >= referencia` (igualar la última hora laboral es válido). Solo cuando la referencia SUPERA la última hora laboral, la referencia pasa a la primera hora laboral del día siguiente (la fecha de referencia también se desplaza al día siguiente).
 
 ### 3.5 Patrones a aplicar
 
@@ -95,10 +95,11 @@ La referencia de hora para `FiltroHora.Mayor` debe redondearse hacia arriba a la
 - [ ] El enum `FiltroHora` expone solo `Mayor` y `SinFiltro` (compile-time)
 - [ ] El switch de `HorariosHelper` no contiene cases `Igual`/`MayorIgual`
 - [ ] `RegistrarClaseProgramadaActual` usa `FiltroHora.Mayor` (sin rename — "Actual" refiere a la fecha, no a la hora)
-- [ ] Con hora actual 16:35, la referencia de `Mayor` es 17:00 y solo devuelve slots con horaInicio > 17:00
+- [ ] Con hora actual 16:35, la referencia de `Mayor` es 17:00 y solo devuelve slots con horaInicio >= 17:00
 - [ ] Con hora actual 16:00:00 exacta, la referencia es 16:00 (sin ceil)
 - [ ] Con fecha explícita (hora 0), la referencia es 00:00 (comportamiento preservado)
 - [ ] Con última hora laboral 21:00 y hora actual 22:10, la referencia pasa al primer slot del día siguiente
+- [ ] Con última hora laboral 18:00 y referencia ceil 18:00 (hora actual 17:29), se devuelve el slot de las 18:00 del día actual (igualar maxHora es válido)
 - [ ] Con hora actual dentro de la jornada, la referencia permanece en el día actual
 - [ ] El slot elegido por los seeds con `Mayor` tiene al menos ~1 hora de margen respecto a la hora actual
 - [ ] E2E `Reagendar_InscripcionValida_RetornaExito` pasa en corridas repetidas

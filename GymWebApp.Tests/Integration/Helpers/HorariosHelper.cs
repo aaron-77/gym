@@ -99,7 +99,7 @@ public static class HorariosHelper
         {
             horarios = horarios
                 .Where(r => r["horaInicio"] != null
-                            && (TimeSpan)r["horaInicio"] > horaRef.Value)
+                            && (TimeSpan)r["horaInicio"] >= horaRef.Value)
                 .ToList();
         }
 
