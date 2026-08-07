@@ -87,6 +87,7 @@ public class ObtenerClasesProgramadasPorIdApiTests : IntegrationTestBase
         var result = await response.Content.ReadFromJsonAsync<DTOResponse<List<DTOClaseProgramadaView>>>();
         
         result.Should().NotBeNull();
+
         result!.success.Should().BeTrue();
         result.payload.Should().NotBeNull();
         result.payload.Should().NotBeEmpty("Debe retornar al menos una clase programada");
