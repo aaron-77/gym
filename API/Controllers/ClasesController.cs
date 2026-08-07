@@ -836,7 +836,10 @@ namespace API.Controllers
         [HttpGet("obtenerClasesProgramadasPorId")]
         public async Task<
             ActionResult<DTOResponse<List<DTOClaseProgramadaView>>>
-        > obtenerClasesProgramadasPorId([FromQuery][Range(1, int.MaxValue)] int? idClase)
+        > obtenerClasesProgramadasPorId(
+            [FromQuery][Range(1, int.MaxValue)] int? idClase,
+            [FromQuery] DateOnly? fecha = null
+        )
         {
             // Validar el modelo
             if (!ModelState.IsValid)
@@ -859,11 +862,28 @@ namespace API.Controllers
                 );
             }
 
+            if (!idClase.HasValue)
+            {
+                return BadRequest(
+                    ResponseManager.BuildResponse<List<DTOClaseProgramadaView>>(
+                        false,
+                        400,
+                        "El id de la clase es obligatorio",
+                        new List<ErrorModel>
+                        {
+                            new ErrorModel { propiedad = "idClase", message = "El id de la clase es obligatorio." },
+                        },
+                        null
+                    )
+                );
+            }
+
             try
             {
+                // La fecha de referencia es opcional: si es null, la función SQL aplica su fecha actual por defecto
                 var resultado = await _context
                     .DTOClasesProgramadaView.FromSqlInterpolated(
-                        $"SELECT * FROM dbo.fn_obtenerClasesProgramadasPorIdClase({idClase})"
+                        $"SELECT * FROM dbo.fn_obtenerClasesProgramadasPorIdClase({idClase}, {fecha?.ToString("yyyy-MM-dd")})"
                     )
                     .ToListAsync();
                 return Ok(

@@ -546,7 +546,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE FUNCTION dbo.fn_obtenerClasesProgramadasPorIdClase(@idClase INT)
+CREATE FUNCTION dbo.fn_obtenerClasesProgramadasPorIdClase(@idClase INT, @fechaReferencia DATE = NULL)
 RETURNS TABLE
 AS
 RETURN
@@ -571,6 +571,7 @@ RETURN
         LEFT JOIN AspNetUsers u 
             ON cp.fkEntrenador = u.Id
     WHERE cp.fkClase = @idClase
+        AND cp.fechaDeLaClase >= COALESCE(@fechaReferencia, CAST(GETDATE() AS DATE))
 );
 GO
 

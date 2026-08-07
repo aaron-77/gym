@@ -616,7 +616,7 @@ RETURN
         AND (select dbo.fn_cupoDisponibleClaseProgramada(cp.idProgramacionClase)) > 0
 );
 GO
-CREATE         FUNCTION dbo.fn_obtenerClasesProgramadasPorIdClase(@idClase INT)
+CREATE         FUNCTION dbo.fn_obtenerClasesProgramadasPorIdClase(@idClase INT, @fechaReferencia DATE = NULL)
 RETURNS TABLE
 AS
 RETURN
@@ -640,6 +640,7 @@ RETURN
         INNER JOIN FitnessCenterDB.dbo.AspNetUsers u ON cp.fkEntrenador = u.Id
     WHERE
         cp.fkClase = @idClase
+        AND hcp.fechaDeLaClase >= COALESCE(@fechaReferencia, CAST(GETDATE() AS DATE))
 );
 GO
 CREATE   FUNCTION fn_obtenerEstadosDeClasesProgramdas()
