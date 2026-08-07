@@ -880,11 +880,26 @@ namespace API.Controllers
 
             try
             {
-                // La fecha de referencia es opcional: si es null, la función SQL aplica su fecha actual por defecto
+                // La fecha de referencia es opcional: si viene null, se pasa DEFAULT como literal
+                // para que la función use su valor por defecto (COALESCE con GETDATE()).
+                // FormattableString preserva los placeholders: la fecha viaja como parámetro date
+                // y DEFAULT queda como literal SQL (no puede ir dentro de un placeholder interpolado,
+                // porque EF lo parametrizaría como string y la conversión a date fallaría).
+                // Nota: NO se usa el operador ternario porque el condicional no propaga el target
+                // type FormattableString a las interpolated strings (resuelve cada rama como string
+                // y no hay conversión implícita string -> FormattableString, error CS0029).
+                FormattableString sql;
+                if (fecha.HasValue)
+                {
+                    sql = $"SELECT * FROM dbo.fn_obtenerClasesProgramadasPorIdClase({idClase}, {fecha.Value})";
+                }
+                else
+                {
+                    sql = $"SELECT * FROM dbo.fn_obtenerClasesProgramadasPorIdClase({idClase}, DEFAULT)";
+                }
+
                 var resultado = await _context
-                    .DTOClasesProgramadaView.FromSqlInterpolated(
-                        $"SELECT * FROM dbo.fn_obtenerClasesProgramadasPorIdClase({idClase}, {fecha?.ToString("yyyy-MM-dd")})"
-                    )
+                    .DTOClasesProgramadaView.FromSqlInterpolated(sql)
                     .ToListAsync();
                 return Ok(
                     ResponseManager.BuildResponse(

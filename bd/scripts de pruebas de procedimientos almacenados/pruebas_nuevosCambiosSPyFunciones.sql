@@ -28,7 +28,7 @@ BEGIN
 END
 ELSE
 BEGIN
-    SELECT * FROM dbo.fn_obtenerClasesProgramadasPorIdClase(@idClase_test);
+    SELECT * FROM dbo.fn_obtenerClasesProgramadasPorIdClase(@idClase_test, DEFAULT);
 END
 PRINT ' ';
 
