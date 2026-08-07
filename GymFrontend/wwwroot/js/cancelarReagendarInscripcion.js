@@ -151,6 +151,18 @@ async function fetchClasesProgramadas() {
             if (inputEntrenador) inputEntrenador.value = data[0].fkEntrenador;
         }
 
+        // Seleccionar el primer día con horarios al iniciar el calendario
+        // (el backend solo devuelve fechas desde hoy, así que el mínimo global es el primer día válido)
+        const primeraFecha = getPrimeraFechaConHorarios();
+        if (primeraFecha && calendarInstance) {
+            calendarInstance.selectedDate = primeraFecha;
+
+            // Sincronizar input oculto: selectedDate es property plana, no reactiva.
+            // La pre-reserva de horarios lee esta fecha al clickear un horario.
+            const inputFecha = document.getElementById('fechaDeLaClase');
+            if (inputFecha) inputFecha.value = primeraFecha.toLocaleDateString('sv-SE');
+        }
+
         updateCalendarDisponibleDates();
         actualizarVistaFecha(calendarInstance?.selectedDate || new Date());
     } catch (error) {
@@ -158,11 +170,36 @@ async function fetchClasesProgramadas() {
     }
 }
 
+/**
+ * Devuelve el arreglo plano de horarios del mes de la fecha dada.
+ * horarios[anio][mes] es un objeto agrupado por día: { [dia]: [horarios] }.
+ * disponibleDates requiere un arreglo plano de objetos con propiedad fecha.
+ */
+function getMonthSchedules(fecha) {
+    return Object.values(horarios[fecha.getFullYear()]?.[fecha.getMonth()] || {}).flat();
+}
+
+/**
+ * Obtiene el primer día con horarios cargados.
+ * El backend filtra fechas >= fecha de referencia (hoy), por lo que el mínimo
+ * global (año → mes → día) es el primer día válido del calendario.
+ */
+function getPrimeraFechaConHorarios() {
+    const anios = Object.keys(horarios).map(Number);
+    if (anios.length === 0) return null;
+
+    const anio = Math.min(...anios);
+    const meses = Object.keys(horarios[anio]).map(Number);
+    const mes = Math.min(...meses);
+    const dias = Object.keys(horarios[anio][mes]).map(Number);
+    const dia = Math.min(...dias);
+
+    return new Date(anio, mes, dia);
+}
+
 function updateCalendarDisponibleDates() {
     if (!calendarInstance) return;
-    const today = new Date();
-    const monthSchedules = Object.values(horarios[today.getFullYear()]?.[today.getMonth()] || {}).flat();
-    calendarInstance.disponibleDates = monthSchedules;
+    calendarInstance.disponibleDates = getMonthSchedules(calendarInstance.selectedDate);
     calendarInstance.render();
 }
 
@@ -182,13 +219,9 @@ function onFechaSeleccionada(event) {
 }
 
 function onChangedDate(event) {
-    const fecha = event.detail.fecha;
-    const monthSchedules = Object.values(horarios[fecha.getFullYear()]?.[fecha.getMonth()] || {}).flat();
-
-    if (calendarInstance) {
-        calendarInstance.disponibleDates = monthSchedules;
-        calendarInstance.render();
-    }
+    if (!calendarInstance) return;
+    calendarInstance.disponibleDates = getMonthSchedules(event.detail.fecha);
+    calendarInstance.render();
 }
 
 function actualizarVistaFecha(fecha) {
