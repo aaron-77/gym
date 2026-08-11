@@ -33,11 +33,16 @@ public static class HorariosHelper
 
     /// <summary>
     /// Ejecuta sp_obtenerHorariosDisponibles y aplica filtros de fecha y hora.
-    /// Con <see cref="FiltroHora.Mayor"/>, la referencia de hora se redondea hacia arriba
-    /// (ceil) a la próxima hora completa cuando deriva de la hora actual; si la referencia
-    /// supera la última hora laboral, la fecha de referencia se desplaza al día siguiente
-    /// y la hora pasa a la primera hora laboral (guard de fin de jornada). Con una fecha
-    /// explícita la referencia se preserva (00:00 con DateOnly) y el guard no aplica.
+    /// Al SP se le envía la fecha a secas (Date); el filtrado de horas no deseadas lo
+    /// hace este método en memoria con la referencia horaria resuelta.
+    /// Con <see cref="FiltroHora.Mayor"/>, la referencia de hora se resuelve con guard
+    /// clauses que solo modifican el valor de la referencia según su propio valor:
+    /// sin fecha explícita se redondea hacia arriba (ceil) a la próxima hora completa
+    /// desde la hora actual; con fecha explícita se conservan los minutos y segundos
+    /// para decidir (con minutos/segundos se aplica ceil a la próxima hora completa;
+    /// con hora exacta se toma tal cual). Si la referencia supera la última hora
+    /// laboral, la fecha de referencia se desplaza al día siguiente y la hora pasa a
+    /// la primera hora laboral (guard de fin de jornada).
     /// </summary>
     /// <param name="connectionString">Connection string de la BD de pruebas.</param>
     /// <param name="filtroFecha">Filtro de fecha a aplicar.</param>
@@ -58,11 +63,12 @@ public static class HorariosHelper
         // Con filtro de hora (único restante: Mayor): referencia ceil + guard de fin de jornada.
         if (filtroHora != FiltroHora.SinFiltro)
         {
-            // Referencia de hora: con fecha explícita se preserva la hora (00:00 con DateOnly);
-            // con la hora actual se redondea hacia arriba (ceil) a la próxima hora completa.
-            horaRef = fecha.HasValue
-                ? new TimeSpan(fecha.Value.Hour, 0, 0)
-                : CeilHoraActual(DateTime.Now);
+            // Referencia de hora con guard clauses: sin fecha explícita se redondea hacia
+            // arriba (ceil) de DateTime.Now; con fecha explícita se conservan los minutos y
+            // segundos para decidir — si hay minutos/segundos la hora señalada ya empezó y
+            // se aplica ceil a la próxima hora completa; con hora exacta (0 min, 0 seg) se
+            // toma tal cual.
+            horaRef = ResolverHoraReferencia(fecha, DateTime.Now);
 
             // Guard de fin de jornada: si la referencia supera la última hora laboral,
             // se desplaza la fecha al día siguiente y la hora a la primera hora laboral.
@@ -132,6 +138,31 @@ public static class HorariosHelper
         ahora.Minute > 0 || ahora.Second > 0
             ? new TimeSpan(ahora.Hour + 1, 0, 0)
             : new TimeSpan(ahora.Hour, 0, 0);
+
+    /// <summary>
+    /// Resuelve la referencia horaria del filtro aplicando guard clauses que solo
+    /// modifican el valor de la referencia según su propio valor:
+    /// 1. Sin fecha de referencia explícita → ceil de la hora actual (próxima hora completa).
+    /// 2. Fecha explícita con minutos o segundos → ceil a la próxima hora completa
+    ///    (la hora señalada ya empezó y sus slots quedan descartados por el filtro).
+    /// 3. Fecha explícita con hora exacta (0 minutos, 0 segundos) → se toma tal cual.
+    /// </summary>
+    /// <param name="fecha">Fecha de referencia explícita (opcional, null = usar hora actual).</param>
+    /// <param name="ahora">Marca de tiempo actual usada por la guard clause 1.</param>
+    /// <returns>Referencia horaria (TimeSpan) con minutos y segundos en cero.</returns>
+    private static TimeSpan ResolverHoraReferencia(DateTime? fecha, DateTime ahora)
+    {
+        // Guard 1: sin fecha explícita → ceil de la hora actual.
+        if (!fecha.HasValue)
+            return CeilHoraActual(ahora);
+
+        // Guard 2: fecha explícita con minutos o segundos → ceil a la próxima hora completa.
+        if (fecha.Value.Minute > 0 || fecha.Value.Second > 0)
+            return CeilHoraActual(fecha.Value);
+
+        // Guard 3: hora exacta (0 min, 0 seg) → se toma tal cual.
+        return new TimeSpan(fecha.Value.Hour, 0, 0);
+    }
 
     /// <summary>
     /// Registra un horario para una clase programada.
