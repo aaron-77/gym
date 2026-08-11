@@ -44,9 +44,17 @@ La solución es en infraestructura de tests (sin tocar producción): un único f
 
 El enum `FiltroHora` debe exponer únicamente `Mayor` y `SinFiltro`. Los valores `Igual` y `MayorIgual` NO deben existir (enforcement en compile-time: cualquier uso rompe la compilación).
 
-### 3.3 Referencia horaria (ceil)
+### 3.3 Referencia horaria (guard clauses)
 
-La referencia de hora para `FiltroHora.Mayor` debe redondearse hacia arriba a la próxima hora completa cuando la hora actual tenga minutos o segundos. Con minutos y segundos en cero, la referencia queda en la hora exacta (sin ceil). Con una fecha explícita (hora 0), la referencia queda en 00:00 y se preserva el comportamiento existente.
+La referencia de hora para `FiltroHora.Mayor` se resuelve con guard clauses que solo modifican el valor de la referencia según su propio valor:
+
+| # | Condición de la fecha de referencia | Acción sobre la referencia horaria |
+|---|-------------------------------------|------------------------------------|
+| 1 | Sin fecha de referencia explícita (fecha nula) | Se redondea hacia arriba (ceil) a la próxima hora completa tomando la hora actual como referencia |
+| 2 | Fecha explícita con minutos o segundos distintos de cero | Se redondea hacia arriba (ceil) a la próxima hora completa (la hora señalada ya empezó y sus slots quedan descartados) |
+| 3 | Fecha explícita con hora exacta (0 minutos y 0 segundos) | Se toma tal cual (hora con 0 min y 0 seg) |
+
+Los minutos y segundos de una fecha explícita se conservan para la decisión de la guard clause 2; la referencia horaria resultante siempre queda con minutos y segundos en cero. La fecha que se envía al stored procedure se mantiene a secas (solo la fecha, sin hora): el filtrado de horarios no deseados lo realiza el helper en memoria con la referencia horaria resuelta.
 
 ### 3.4 Guard de fin de jornada
 
@@ -56,7 +64,8 @@ La referencia de hora para `FiltroHora.Mayor` debe redondearse hacia arriba a la
 
 - **Choke point único:** el ceil y el guard se implementan en `ObtenerHorariosDisponiblesFiltrados` para que todos los seeds (`ObtenerUnHorarioDisponible` → `ObtenerHorariosDisponiblesFiltrados`) hereden el margen.
 - **Enforcement compile-time:** borrar los valores del enum para que el compilador falle ante cualquier uso de `Igual`/`MayorIgual`.
-- **Preservación de fecha explícita:** el ceil solo aplica cuando la referencia deriva de la hora actual (fecha null); con fecha futura explícita (hora 0) no se modifica nada.
+- **Guard clauses de referencia:** la referencia horaria solo se modifica según su propio valor: sin fecha se usa ceil de la hora actual; con fecha explícita con minutos/segundos se usa ceil de esa fecha; con hora exacta (0 min, 0 seg) se preserva tal cual.
+- **Fecha enviada al SP a secas:** el stored procedure recibe solo la fecha (Date); el filtrado de horas no deseadas se hace en memoria en el helper.
 
 ### 3.6 Detección y corrección de callers y tests afectados
 
@@ -98,6 +107,8 @@ La referencia de hora para `FiltroHora.Mayor` debe redondearse hacia arriba a la
 - [ ] Con hora actual 16:35, la referencia de `Mayor` es 17:00 y solo devuelve slots con horaInicio >= 17:00
 - [ ] Con hora actual 16:00:00 exacta, la referencia es 16:00 (sin ceil)
 - [ ] Con fecha explícita (hora 0), la referencia es 00:00 (comportamiento preservado)
+- [ ] Con fecha explícita 16:35 (con minutos), la referencia de `Mayor` es 17:00 (ceil por guard clause 2)
+- [ ] Con fecha explícita 16:00:00 exacta, la referencia es 16:00 (tal cual, guard clause 3)
 - [ ] Con última hora laboral 21:00 y hora actual 22:10, la referencia pasa al primer slot del día siguiente
 - [ ] Con última hora laboral 18:00 y referencia ceil 18:00 (hora actual 17:29), se devuelve el slot de las 18:00 del día actual (igualar maxHora es válido)
 - [ ] Con hora actual dentro de la jornada, la referencia permanece en el día actual

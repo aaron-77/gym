@@ -4,10 +4,12 @@
 
 Crear pruebas de integración para el filtro de hora único (`FiltroHora.Mayor`) del
 `HorariosHelper`, validando: el ceil de la referencia a la próxima hora completa, la
-preservación de la referencia 00:00 con fecha explícita futura, y el guard de fin de
-jornada que desplaza la referencia al día siguiente. Son el par de tests del spec 50
-(spec de implementación) y verifican el comportamiento del choke point
-`ObtenerHorariosDisponiblesFiltrados`.
+preservación de la referencia 00:00 con fecha explícita futura (guard clause de hora
+exacta), y el guard de fin de jornada que desplaza la referencia al día siguiente. El
+contrato completo de las guard clauses de la referencia horaria (incluida la fecha
+explícita con minutos/segundos, que aplica ceil a la próxima hora completa) se
+especifica en el spec 50. Son el par de tests del spec 50 (spec de implementación) y
+verifican el comportamiento del choke point `ObtenerHorariosDisponiblesFiltrados`.
 
 ## 2. Contexto
 
@@ -39,7 +41,7 @@ jornada que desplaza la referencia al día siguiente. Son el par de tests del sp
 | # | Prueba | Tipo | Descripción | Resultado |
 |---|--------|------|-------------|-----------|
 | 1 | FiltroHoraMayor con hora actual con minutos → ceil a próxima hora | Happy Path | Capturar DateTime.Now; si minutos/segundos > 0 la referencia esperada es hora+1 (si no, hora exacta); assert slots de hoy con horaInicio >= referencia esperada | no-vacío, todos los slots con horaInicio >= ref |
-| 2 | FiltroHoraMayor con fecha explícita futura → referencia 00:00 preservada | Happy Path | Fecha futura explícita (DateOnly), sin ceil ni guard | slots del día solicitado |
+| 2 | FiltroHoraMayor con fecha explícita futura → referencia 00:00 preservada | Happy Path | Fecha futura explícita (DateOnly → 0 min, 0 seg), guard clause 3 (hora exacta → tal cual), sin ceil ni guard de jornada | slots del día solicitado |
 | 3 | FiltroHoraMayor fin de jornada → desplaza al día siguiente | Edge Case | Si DateTime.Now.TimeOfDay > maxHora de horasLaborales (patrón condicional tipo E2E), la consulta devuelve slots del día siguiente con horaInicio >= minHora; si no, assert día actual | día siguiente con primer slot >= minHora (o día actual) |
 | 4 | FiltroHoraMayor dentro de jornada → permanece día actual | Edge Case | Complemento del test 3: dentro de jornada → día actual no-vacío | día actual no-vacío |
 
@@ -64,4 +66,4 @@ jornada que desplaza la referencia al día siguiente. Son el par de tests del sp
 - [ ] Asserts runtime-relativos: la referencia esperada se calcula desde el reloj y la BD, no con valores fijos
 - [ ] Sin lógica de helper dentro de la clase de test (se usan helpers existentes o se delega)
 - [ ] BD reseteada antes de cada prueba vía `TestContainerHelper`
-- [ ] SOLO los escenarios definidos en este spec — sin tests derivados (23:35→24:00, último día del mes + guard, horaRef == maxHora quedan fuera de alcance)
+- [ ] SOLO los escenarios definidos en este spec — sin tests derivados (23:35→24:00, último día del mes + guard, horaRef == maxHora, fecha explícita con minutos/segundos — guard clause 2 del spec 50 — quedan fuera de alcance)
