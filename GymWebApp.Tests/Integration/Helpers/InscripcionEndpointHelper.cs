@@ -1,5 +1,3 @@
-using Microsoft.Data.SqlClient;
-using BL.Utils.Enums;
 using GymWebApp.Tests.Integration.Common;
 
 namespace GymWebApp.Tests.Integration.Helpers;
@@ -11,78 +9,24 @@ public static class InscripcionEndpointHelper
 {
     /// <summary>
     /// Crea datos frescos de clases programadas e inscripciones via inserts directos.
-    /// Garantiza el estado de datos necesario para el test sin depender de SPs del negocio.
+    /// Usa <see cref="SlotDisponibleParaClaseProgramadaHelper"/> para armar por construcción
+    /// el dataset completo (slot realmente disponible con fecha futura, entrenador activo,
+    /// clase activa y cliente libre en ese horario).
     /// </summary>
     /// <returns>ID del cliente que fue inscrito.</returns>
     public static async Task<string> SeedFreshInscripcionAsync(string connectionString)
     {
-        // 1. Tomar un cliente activo sin inscripciones previas
-        var clienteRow = await DatabaseHelper.ExecuteQuerySingleAsync(
-            connectionString,
-            @"SELECT TOP 1 u.Id
-              FROM AspNetUsers u
-              JOIN AspNetUserRoles aur ON u.Id = aur.UserId
-              JOIN AspNetRoles r ON aur.RoleId = r.Id AND r.Name = 'cliente'
-              WHERE u.Estado = 'activo'
-                AND u.Id NOT IN (SELECT fkCliente FROM inscripcionesDeClases)
-              ORDER BY NEWID()");
+        // Dataset completo por construcción: slot libre (fecha futura) + entrenador activo + clase activa + cliente libre.
+        var dto = await SlotDisponibleParaClaseProgramadaHelper
+            .obtenerSlotDisponibleParaClaseProgramadaAsync(connectionString);
 
-        // Fallback: si todos los clientes activos ya tienen inscripciones,
-        // tomar un cliente activo con inscripciones en clases de hoy
-        if (clienteRow == null)
-        {
-            clienteRow = await DatabaseHelper.ExecuteQuerySingleAsync(
-                connectionString,
-                @"SELECT TOP 1 u.Id
-                  FROM AspNetUsers u
-                  JOIN AspNetUserRoles aur ON u.Id = aur.UserId
-                  JOIN AspNetRoles r ON aur.RoleId = r.Id AND r.Name = 'cliente'
-                  WHERE u.Estado = 'activo'
-                    AND u.Id IN (
-                        SELECT DISTINCT i.fkCliente
-                        FROM inscripcionesDeClases i
-                        INNER JOIN clasesProgramadas cp ON i.fkProgramacionClase = cp.idProgramacionClase
-                        WHERE cp.fechaDeLaClase = CAST(GETDATE() AS DATE)
-                    )
-                  ORDER BY NEWID()");
-
-            return clienteRow?["Id"]?.ToString()
-                ?? throw new InvalidOperationException("No se encontró ningún cliente activo en la BD");
-        }
-
-        var clienteId = clienteRow["Id"]?.ToString()
-            ?? throw new InvalidOperationException("El cliente seleccionado tiene Id nulo");
-
-        // 2. Obtener datos base para los INSERTs (lecturas fuera de transacción)
-        var claseRow = await DatabaseHelper.ExecuteQuerySingleAsync(
-            connectionString,
-            "SELECT TOP 1 claseId FROM Clases WHERE fkEstadoClase = 1");
-        var fkClase = Convert.ToInt32(claseRow?["claseId"] ?? 1);
-
-        var entrenadorRow = await DatabaseHelper.ExecuteQuerySingleAsync(
-            connectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers");
-        var fkEntrenador = entrenadorRow?["Id"]?.ToString()
-            ?? throw new InvalidOperationException("No users found in database");
-
-        var estadoRow = await DatabaseHelper.ExecuteQuerySingleAsync(
-            connectionString,
-            "SELECT TOP 1 idEstadoClaseProgramada FROM estadosClasesProgramadas");
-        var fkEstado = Convert.ToInt32(estadoRow?["idEstadoClaseProgramada"] ?? 1);
-
-        // 2. Obtener un slot realmente disponible vía sp_obtenerHorariosDisponibles
-        var horariosDisponibles = await HorariosHelper.ObtenerHorariosDisponiblesFiltrados(
-            connectionString,
-            FiltroFecha.Mayor,
-            FiltroHora.SinFiltro);
-
-        if (horariosDisponibles.Count == 0)
+        if (dto == null)
             throw new InvalidOperationException("No hay horarios disponibles para crear la inscripción de prueba");
 
-        var random = new Random();
-        var slot = horariosDisponibles[random.Next(horariosDisponibles.Count)];
-        var fechaDisponible = DateOnly.FromDateTime(Convert.ToDateTime(slot["FechaDisponible"]));
-        var idHorario = Convert.ToInt32(slot["idHora"]);
+        var idEstadoDisponible = await DatabaseHelper.ExecuteScalarAsync<int?>(
+            connectionString,
+            "SELECT idEstadoClaseProgramada FROM v_idEstadoDisponibleClasesProgramadas")
+            ?? 1;
 
         var estadoInscripcionRow = await DatabaseHelper.ExecuteQuerySingleAsync(
             connectionString,
@@ -95,14 +39,15 @@ public static class InscripcionEndpointHelper
             var idClaseProgramada = await DatabaseHelper.ExecuteScalarAsync<int>(
                 connection, transaction,
                 @"INSERT INTO clasesProgramadas (fkClase, cupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase, fkEntrenador) 
-                  VALUES (@FkClase, 20, @FkEstado, @Fecha, @FkEntrenador);
+                  VALUES (@FkClase, @CupoMaximo, @Estado, @Fecha, @FkEntrenador);
                   SELECT SCOPE_IDENTITY();",
                 new Dictionary<string, object?>
                 {
-                    ["@FkClase"] = fkClase,
-                    ["@FkEstado"] = fkEstado,
-                    ["@Fecha"] = fechaDisponible,
-                    ["@FkEntrenador"] = fkEntrenador
+                    ["@FkClase"] = dto.ClaseId,
+                    ["@CupoMaximo"] = dto.Cupo,
+                    ["@Estado"] = idEstadoDisponible,
+                    ["@Fecha"] = dto.FechaDisponible,
+                    ["@FkEntrenador"] = dto.EntrenadorId
                 });
 
             await DatabaseHelper.ExecuteNonQueryAsync(
@@ -111,7 +56,7 @@ public static class InscripcionEndpointHelper
                 new Dictionary<string, object?>
                 {
                     ["@FkClaseProg"] = idClaseProgramada,
-                    ["@FkHorario"] = idHorario
+                    ["@FkHorario"] = dto.IdHoraLaboral
                 });
 
             await DatabaseHelper.ExecuteNonQueryAsync(
@@ -122,12 +67,10 @@ public static class InscripcionEndpointHelper
                 {
                     ["@FkProgramacionClase"] = idClaseProgramada,
                     ["@FkEstadoInscripcion"] = fkEstadoInscripcion,
-                    ["@FkCliente"] = clienteId!
+                    ["@FkCliente"] = dto.ClienteId
                 });
 
-            return clienteId!;
+            return dto.ClienteId;
         });
-        
-        
     }
 }

@@ -29,7 +29,6 @@ Los seeds de inscripciones de los tests adivinan datos (entrenador, clase, clien
 | Change `fecha-referencia-datetime` | En flight | Overlap en `HorariosHelper` (guard clause 2); coordinar orden de apply — nuestros callers pasan null/00:00, guard 2 fuera del path |
 | `HorariosHelper.ObtenerUnHorarioDisponible` | Helper | Sin modificar (9 callers) |
 | SPs `sp_obtenerHorariosDisponibles` + `sp_obtenerEntrenadoresDisponibles` | BD | Sin modificar; fuente de verdad de disponibilidad |
-| Backup de pruebas | BD | Requiere ≥1 Empleado Activo y ≥1 Cliente con rol 'cliente' |
 
 ## ADDED Requirements
 
@@ -101,15 +100,15 @@ La clase SHALL resolverse así: si se recibió el parámetro `fkClase`, se usa e
 - WHEN se resuelve la clase
 - THEN se usa la primera clase con `fkEstadoClase = 1` y su `Cupo` real
 
-### Requirement: Requisito 6 — Cliente: rol 'cliente' libre en el slot, solo vigentes
+### Requirement: Requisito 6 — Cliente: una sola consulta desde inscripciones, sin rol, solo vigentes
 
-El helper SHALL invocar internamente el método público `obtenerClienteDisponibleParaSlotAsync(slot.FechaDisponible, slot.IdHoraLaboral)` de la misma clase. Este método SHALL buscar un usuario con rol 'cliente' (JOIN `AspNetUserRoles`/`AspNetRoles` filtrando por nombre de rol 'cliente'; NO existe vista de roles — verificado en `vistas.sql`) y SHALL filtrar solo aquellos con 0 inscripciones VIGENTES (vía `v_idEstadoVigenteInscripcionAClase`) en ese (fecha, horario), comparando contra `clasesProgramadas.fechaDeLaClase` + `horariosDeClasesProgramadas.fkHorarioLaboral` (NO contra `inscripcionesDeClases.fechaDeInscripcion`). Con 0 resultados SHALL retornar `ClienteId`. Si no hay cliente libre, SHALL lanzar la excepción con el texto literal: `El cliente con id {idCliente} ya está inscrito a una clase en ese horario` (guard defensivo inalcanzable: el EXCEPT de slots ocupados del SP de horarios garantiza que el slot elegido no tiene inscripciones).
+El helper SHALL invocar internamente el método público `obtenerClienteDisponibleParaSlotAsync(slot.FechaDisponible, slot.IdHoraLaboral)` de la misma clase. Este método SHALL hacer UNA sola consulta SELECT desde `inscripcionesDeClases` (JOIN `clasesProgramadas` + JOIN `horariosDeClasesProgramadas`), SHALL tener un filtro que excluya las inscripciones cuyo `(fechaDeLaClase, fkHorarioLaboral)` coincida con la (fecha, idHoraLaboral) pasadas al método (el cliente buscado es el que NO tiene inscripciones en clases programadas de la fecha y hora de referencia), y SHALL devolver `fkCliente` del primer cliente que cumpla la condición. SHALL filtrar SOLO inscripciones VIGENTES (vía `v_idEstadoVigenteInscripcionAClase`): las canceladas no bloquean. SHALL NOT filtrar por rol 'cliente' (todas las inscripciones son de clientes por construcción, no puede haber una inscripción de un no-cliente). Para el filtro de exclusión, el método SHALL usar `NOT EXISTS` sobre el conjunto de clientes ocupados en la (fecha, hora) de referencia (equivalentemente a `NOT IN`, pero sin el problema de NULLs: `fkCliente` es nullable en el esquema — verificado en `FitnessGymSchemaActual.sql` línea 870). Si ningún cliente cumple, SHALL lanzar la excepción con el texto literal: `El cliente con id {idCliente} ya está inscrito a una clase en ese horario` (guard defensivo inalcanzable: el EXCEPT de slots ocupados del SP de horarios garantiza que el slot elegido no tiene inscripciones).
 
-#### Scenario: Cliente con rol 'cliente' libre
+#### Scenario: Cliente sin inscripción vigente en el slot
 
-- GIVEN existe un usuario con rol 'cliente' sin inscripciones vigentes en el slot
+- GIVEN existe un cliente con inscripciones vigentes que no incluyen la (fecha, horario) del slot
 - WHEN se invoca `obtenerClienteDisponibleParaSlotAsync(fecha, idHoraLaboral)`
-- THEN retorna ese `ClienteId`
+- THEN retorna ese `fkCliente`
 
 #### Scenario: Cliente con inscripción cancelada sí es elegible
 
@@ -117,9 +116,15 @@ El helper SHALL invocar internamente el método público `obtenerClienteDisponib
 - WHEN se evalúa su disponibilidad
 - THEN la inscripción cancelada no cuenta y el cliente es elegible
 
-#### Scenario: Guard defensivo de cliente ocupado
+#### Scenario: Cliente ya inscrito en el slot no aparece
 
-- GIVEN ningún cliente con rol 'cliente' tiene 0 inscripciones vigentes en el slot
+- GIVEN un cliente con una inscripción vigente exactamente en la (fecha, horario) del slot
+- WHEN se evalúa su disponibilidad
+- THEN ese cliente NO se devuelve (excluido por el filtro de la consulta)
+
+#### Scenario: Guard defensivo sin clientes libres
+
+- GIVEN ningún cliente tiene 0 inscripciones vigentes fuera de la (fecha, horario) del slot
 - WHEN se invoca el método
 - THEN lanza una excepción cuyo mensaje contiene el texto literal de guard
 
@@ -179,10 +184,11 @@ El método SHALL refactorizarse para consumir el helper con `fkClase = fkClaseOr
 
 ### `obtenerClienteDisponibleParaSlotAsync(fecha, idHoraLaboral)`:
 
-1. Consultar usuarios con rol 'cliente' vía JOIN entre `AspNetUserRoles` y `AspNetRoles` (filtro por nombre de rol)
-2. Para cada candidato, contar inscripciones VIGENTES (vía `v_idEstadoVigenteInscripcionAClase`) en el (fecha, horario), comparando contra `clasesProgramadas.fechaDeLaClase` + `horariosDeClasesProgramadas.fkHorarioLaboral`
-3. Retornar el `Id` del primer cliente con 0 inscripciones vigentes
-4. Si ninguno cumple, lanzar excepción con el texto literal de guard
+1. Ejecutar UNA sola consulta SELECT desde `inscripcionesDeClases` con JOIN `clasesProgramadas` y JOIN `horariosDeClasesProgramadas`
+2. Filtrar solo inscripciones VIGENTES (vía `v_idEstadoVigenteInscripcionAClase`)
+3. Excluir con `NOT EXISTS` las inscripciones cuya (fecha, horario) coincida con la pasada al método (el cliente buscado es el que no tiene inscripciones vigentes en esa fecha y hora de referencia)
+4. Retornar el `fkCliente` del primer cliente que cumpla la condición
+5. Si ninguno cumple, lanzar excepción con el texto literal de guard
 
 ## 4. Archivos
 
@@ -199,7 +205,7 @@ El método SHALL refactorizarse para consumir el helper con `fkClase = fkClaseOr
 - [ ] Req 3: orquestación slot→entrenador→clase→cliente; null sin slots; sin filtrado manual
 - [ ] Req 4: SP de entrenadores con SOLO la fecha del slot; `EntrenadorId` + `NombreEntrenador` en el DTO
 - [ ] Req 5: clase por `fkClase` o primera con `fkEstadoClase = 1`, con `Cupo` real
-- [ ] Req 6: cliente con rol 'cliente' vía JOIN, filtro solo vigentes contra clase programada, guard con texto literal
+- [ ] Req 6: cliente con UNA consulta desde inscripciones, sin rol, solo vigentes, NOT EXISTS sobre (fecha, horario), guard con texto literal
 - [ ] Req 7: `SeedFreshInscripcionAsync` sin bloque de cliente propio ni SELECT de entrenador; estado por vista; cupo real; contrato `string` intacto
 - [ ] Req 8: `SeedSingleInscripcionConHoraFuturaAsync` sin `DateTime.Now`; cliente del DTO; contrato tupla intacto
 - [ ] Req 9: `CreateValidDestinationClassForReagendarAsync` con `fkClase`/`fecha` originales; sin `DateTime.Now`; contrato `int?` intacto

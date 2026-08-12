@@ -6,7 +6,7 @@ Los seeds de inscripciones de tests adivinan datos (entrenador/clase/cliente/est
 
 ## Intent
 
-Eliminar datos adivinados e inconsistentes en los seeds de inscripciones. Garantizar por construcción que slot, entrenador, clase y cliente son consistentes: slot real disponible del SP de horarios, entrenador activo del SP de entrenadores, clase con `fkEstadoClase = 1`, cliente con rol 'cliente' sin inscripción vigente en ese (fecha, horario).
+Eliminar datos adivinados e inconsistentes en los seeds de inscripciones. Garantizar por construcción que slot, entrenador, clase y cliente son consistentes: slot real disponible del SP de horarios, entrenador activo del SP de entrenadores, clase con `fkEstadoClase = 1`, cliente SIN inscripción vigente en ese (fecha, horario) — obtenido de la propia tabla de inscripciones en una sola consulta, sin filtro por rol.
 
 ## Scope
 
@@ -38,7 +38,7 @@ Orquestación interna en este orden:
 1. **Slot**: `HorariosHelper.ObtenerUnHorarioDisponible(conn, FiltroFecha.Mayor, FiltroHora.SinFiltro, fecha?)` → `null` si no hay horarios → retorna `null`. Sin filtrado manual (Mayor ya filtra `fecha > fechaBase` internamente).
 2. **Entrenador**: interno `EXEC sp_obtenerEntrenadoresDisponibles @fechaReferencia = slot.FechaDisponible` — SOLO la fecha (hora 00:00 → SP devuelve todos los activos; "disponible" == "activo", decisión consciente; `horaInicio` no se necesita). SP devuelve UsuarioID + Nombre + Apellido → DTO guarda `EntrenadorId` + `NombreEntrenador`.
 3. **Clase**: si `fkClase` param dado → se usa; si no → `SELECT TOP 1 ClaseID, Cupo FROM Clases WHERE fkEstadoClase = 1`.
-4. **Cliente**: llamada INTERNA a `obtenerClienteDisponibleParaSlotAsync(slot.FechaDisponible, slot.IdHoraLaboral)` (método público de la misma clase, orquestado internamente): cliente con rol 'cliente' (JOIN `AspNetUserRoles`/`AspNetRoles` — NO existe vista de roles, verificado en `vistas.sql`), con 0 inscripciones VIGENTES (`v_idEstadoVigenteInscripcionAClase`) en ese (fecha, horario) comparando contra `clasesProgramadas.fechaDeLaClase` + `horariosDeClasesProgramadas.fkHorarioLaboral` (NO `inscripcionesDeClases.fechaDeInscripcion`). 0 resultados → retorna `ClienteId`; si no → throw `"El cliente con id {idCliente} ya está inscrito a una clase en ese horario"` (guard defensivo INALCANZABLE: `sp_obtenerHorariosDisponibles` hace EXCEPT de OccupiedSlots, 96-118).
+4. **Cliente**: llamada INTERNA a `obtenerClienteDisponibleParaSlotAsync(slot.FechaDisponible, slot.IdHoraLaboral)` (método público de la misma clase, orquestado internamente): UNA sola consulta SELECT desde `inscripcionesDeClases` (JOIN `clasesProgramadas` + `horariosDeClasesProgramadas`), filtrando SOLO inscripciones VIGENTES (`v_idEstadoVigenteInscripcionAClase`), con `NOT EXISTS` que excluye inscripciones del (fecha, horario) pasados al método (comparando contra `clasesProgramadas.fechaDeLaClase` + `horariosDeClasesProgramadas.fkHorarioLaboral`, NO `inscripcionesDeClases.fechaDeInscripcion`). Devolver `fkCliente` del primer cliente que cumpla; sin filtro por rol 'cliente' (todas las inscripciones son de clientes por construcción). Si ninguno cumple → throw `"El cliente con id {idCliente} ya está inscrito a una clase en ese horario"` (guard defensivo INALCANZABLE: `sp_obtenerHorariosDisponibles` hace EXCEPT de OccupiedSlots, 96-118).
 5. **DTO** `SlotDisponibleParaClaseProgramadaDto`: `FechaDisponible`, `IdHoraLaboral`, `EntrenadorId`, `NombreEntrenador`, `ClaseId`, `Cupo`, `ClienteId`. Sin campo hora.
 
 ### Consumidores (3, mismo helper)
@@ -61,7 +61,7 @@ Orquestación interna en este orden:
 
 1. Fecha SOLO al SP de entrenadores (00:00 → todos los activos); `horaInicio` no se necesita.
 2. "Disponible" == "activo": decisión consciente (slot libre ⇒ nadie da clase ahí ⇒ todos los activos libres).
-3. Rol 'cliente' OBLIGATORIO vía JOIN `AspNetUserRoles`/`AspNetRoles` (no existe vista de roles en `vistas.sql`).
+3. Sin filtro por rol 'cliente' (UNA consulta desde `inscripcionesDeClases` con NOT EXISTS): todas las inscripciones son de clientes por construcción, no puede haber una inscripción de un no-cliente. `fkCliente` es nullable (verificado en `FitnessGymSchemaActual.sql` línea 870) → se usa NOT EXISTS (no NOT IN) para evitar el problema de NULLs.
 4. Solo inscripciones VIGENTES vía `v_idEstadoVigenteInscripcionAClase`; comparación contra clase programada (`fechaDeLaClase` + `fkHorarioLaboral`), no `fechaDeInscripcion`.
 5. Excepción de cliente ocupado = guard defensivo inalcanzable (EXCEPT del SP de horarios lo garantiza).
 6. Reuso de `ObtenerUnHorarioDisponible` (Mayor filtra interno; sin descarte manual).
@@ -86,7 +86,7 @@ Cambio 100% código de tests (sin esquema/SP/BD): revertir con git-workflow-mana
 
 - `sp_obtenerHorariosDisponibles` y `sp_obtenerEntrenadoresDisponibles` (sin modificar, fuente de verdad de disponibilidad).
 - `HorariosHelper.ObtenerUnHorarioDisponible` (sin modificar).
-- Backup con ≥1 Empleado Activo y ≥1 Cliente con rol 'cliente'.
+- Backup con ≥1 Empleado Activo y ≥1 cliente (los clientes son quienes tienen inscripciones; el helper los obtiene de `inscripcionesDeClases`, no de AspNetUsers).
 
 ## Success Criteria
 
@@ -94,5 +94,5 @@ Cambio 100% código de tests (sin esquema/SP/BD): revertir con git-workflow-mana
 - [ ] Ningún `DateTime.Now` al SP de entrenadores en los 3 métodos refactorizados.
 - [ ] EndpointHelper sin `SELECT` a AspNetUsers para entrenador; usa `Clases.Cupo` real y estado por vista.
 - [ ] Clase siempre con `fkEstadoClase = 1` en los 3 métodos.
-- [ ] Cliente con 0 inscripciones vigentes en el (fecha, horario) elegido.
+- [ ] Cliente sin inscripción vigente en el (fecha, horario) elegido (obtenido desde `inscripcionesDeClases`, sin filtro de rol).
 - [ ] Contratos intactos: suites E2E/Integración existentes (Cancelar, Reagendar, Consultar) pasan sin cambios en callers.
