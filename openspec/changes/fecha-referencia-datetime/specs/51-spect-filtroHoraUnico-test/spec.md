@@ -2,47 +2,58 @@
 
 ## Purpose
 
-El test 3 `FiltroHoraMayor_FinDeJornada_DesplazaAlDiaSiguiente` deja de depender del reloj runtime: pasa fecha y hora explícitas (hoy con una hora posterior a la última hora laboral) para que el salto de fin de jornada se dispare SIEMPRE por construcción, sin if/else sobre la hora actual. Las pruebas 1, 2 y 4 no cambian.
+Los tests 1, 3 y 4 dejan de depender del reloj runtime y de condiciones if/else sobre maxHora. Se aplica el patrón de doble llamada: primera para obtener una fecha de referencia segura (día 15 del mes actual), segunda con fecha+hora configurada según el motivo del test. Se elimina el guard `horaRef > maxHora` del helper.
 
 ## MODIFIED Requirements
 
-### Requirement: Test 3 determinista con fecha y hora explícitas
-
-La fila 3 de la tabla de pruebas del spec 51 SHALL quedar así (el resto de la tabla no cambia):
+### Requirement: Test 1 determinista — Ceil a próxima hora
 
 | # | Prueba | Tipo | Descripción | Resultado |
 |---|--------|------|-------------|-----------|
-| 3 | FiltroHoraMayor fin de jornada → desplaza al día siguiente (determinista) | Edge Case | Consultar minHora y maxHora a la BD; fecha explícita = hoy con hora = maxHora + 1 hora; sin seeding (el SP genera los slots vacíos del calendario) | todos los slots del día siguiente (aplicando fin de mes) con horaInicio >= minHora; sin ramas condicionales sobre el reloj |
+| 1 | FiltroHoraMayor con minutos → ceil a próxima hora (determinista) | Happy Path | Primera llamada con fecha fija (día 15) sin filtro de hora para obtener fecha de referencia segura; segunda con fecha de esa referencia + hora laboral con minutos | todos los slots de la fecha de referencia con horaInicio >= hora ceil; el slot de la hora iniciada se descarta |
 
-(Previously: la consulta se ejecutaba sin fecha explícita y el resultado esperado se decidía por if/else comparando la hora actual contra la última hora laboral)
+#### Scenario: Ceil con minutos descartando el slot actual
 
-#### Scenario: Salto de fin de jornada garantizado por construcción
+- GIVEN una fecha de referencia segura obtenida de la primera llamada (día 15 del mes actual)
+- AND horaConfigurada = hora laboral con minutos (ej: minHora + 30min) → ceil = minHora + 1h
+- WHEN se invoca `ObtenerHorariosDisponiblesFiltrados` con fechaConfigurada y FiltroHora.Mayor
+- THEN todos los slots devueltos tienen FechaDisponible == fechaRef
+- AND todos los slots tienen horaInicio >= hora ceil
+- AND ningún slot tiene horaInicio == horaConfigurada (el slot iniciado se descarta por el ceil)
 
-- GIVEN minHora y maxHora consultados a la BD (patrón de las demás pruebas del archivo)
-- AND la hora de referencia = maxHora más una hora (siempre mayor que maxHora)
-- AND la fecha explícita = la fecha de hoy con esa hora de referencia
-- AND no hay seeding: el SP genera los slots vacíos del calendario de la fecha consultada
-- WHEN se invoca `ObtenerHorariosDisponiblesFiltrados` con filtro de fecha Igual, filtro de hora Mayor y esa fecha explícita
-- THEN todos los slots devueltos pertenecen al día siguiente al de la fecha base
+### Requirement: Test 3 determinista — Desplaza al día siguiente
+
+| # | Prueba | Tipo | Descripción | Resultado |
+|---|--------|------|-------------|-----------|
+| 3 | FiltroHoraMayor fin de jornada → desplaza al día siguiente (determinista) | Edge Case | Primera llamada con fecha fija (día 15) para fecha de referencia; segunda con maxHora como hora | todos los slots del día siguiente a la fecha de referencia con horaInicio >= minHora |
+
+#### Scenario: Salto de fin de jornada garantizado
+
+- GIVEN una fecha de referencia segura obtenida de la primera llamada (día 15 del mes actual)
+- AND horaConfigurada = maxHora (última hora laboral)
+- WHEN se invoca `ObtenerHorariosDisponiblesFiltrados` con fechaConfigurada y FiltroHora.Mayor
+- THEN todos los slots devueltos tienen FechaDisponible == fechaRef + 1 día
 - AND todos los slots tienen horaInicio >= minHora
-- AND no existe rama condicional sobre la hora actual: el salto dispara por construcción
+- AND no existe rama condicional sobre la hora actual
 
-#### Scenario: Última hora laboral a las 23:00 (borde de medianoche)
+### Requirement: Test 4 determinista — Permanece en día actual
 
-- GIVEN maxHora = 23:00 y la hora de referencia = maxHora más una hora (24:00)
-- AND la fecha explícita se construye avanzando horas desde hoy, de modo que cruzar la medianoche rola al día siguiente con hora 00:00
-- WHEN se invoca el filtro con esa fecha explícita
-- THEN la consulta opera sobre el día siguiente y la aserción permanece sobre ese día
-- AND la fecha esperada del día siguiente se calcula aplicando la misma regla de fin de mes del helper (si cae en el último día del mes, se espera el primer día del mes posterior)
+| # | Prueba | Tipo | Descripción | Resultado |
+|---|--------|------|-------------|-----------|
+| 4 | FiltroHoraMayor dentro de jornada → permanece en día actual (determinista) | Happy Path | Primera llamada con fecha fija (día 15) para fecha de referencia; segunda con hora laboral exacta dentro del rango | todos los slots de la fecha de referencia con horaInicio >= horaConfigurada |
 
-#### Scenario: Regresión de las pruebas 1, 2 y 4
+#### Scenario: Dentro de jornada sin salto
 
-- GIVEN las pruebas 1 y 4 (sin fecha explícita, guard 1: ceil de la hora actual) y la prueba 2 (fecha futura con hora 00:00, guard 3: hora exacta preservada)
-- WHEN se ejecutan tras este cambio
-- THEN sus descripciones, resultados esperados y aserciones permanecen tal cual
-- AND ninguna de ellas depende de la fecha explícita con hora del test 3
+- GIVEN una fecha de referencia segura obtenida de la primera llamada (día 15 del mes actual)
+- AND horaConfigurada = hora laboral exacta dentro del rango (ej: minHora + 1h)
+- WHEN se invoca `ObtenerHorariosDisponiblesFiltrados` con fechaConfigurada y FiltroHora.Mayor
+- THEN todos los slots devueltos tienen FechaDisponible == fechaRef
+- AND todos los slots tienen horaInicio >= horaConfigurada
+- AND no existe rama condicional sobre la hora actual
 
 ## Notas
 
-- Siguen fuera de alcance los tests derivados: ceil de fecha explícita con minutos/segundos (guard 2 del spec 50), horaRef igual a maxHora en el borde exacto. El borde 23:00 queda documentado dentro del test 3; el fin de mes se cubre en la aserción de la fecha esperada del test 3.
-- La fecha con hora de referencia del test 3 es de hora exacta (minutos y segundos en cero): no ejercita el ceil de la guard 2, solo el salto de jornada.
+- Test 2 (`FiltroHoraMayor_FechaExplicitaFutura_Referencia00Preservada`) no cambia.
+- El guard `horaRef > maxHora` se elimina del helper — ObtenerHorariosDisponiblesFiltrados ya resuelve la normalización.
+- La fecha esperada del test 3 se calcula como `fechaRef.AddDays(1)` (con NormalizarFechaReferencia si corresponde), no contra DateTime.Today.AddDays(1).
+- La fecha fija (día 15) garantiza predictibilidad: nunca cae en fin de mes, evitando diferencia de 2 días.
