@@ -35,14 +35,12 @@ public static class HorariosHelper
     /// Ejecuta sp_obtenerHorariosDisponibles y aplica filtros de fecha y hora.
     /// Al SP se le envía la fecha a secas (Date); el filtrado de horas no deseadas lo
     /// hace este método en memoria con la referencia horaria resuelta.
-    /// Con <see cref="FiltroHora.Mayor"/>, la referencia de hora se resuelve con guard
-    /// clauses que solo modifican el valor de la referencia según su propio valor:
-    /// sin fecha explícita se redondea hacia arriba (ceil) a la próxima hora completa
-    /// desde la hora actual; con fecha explícita se conservan los minutos y segundos
-    /// para decidir (con minutos/segundos se aplica ceil a la próxima hora completa;
-    /// con hora exacta se toma tal cual). Si la referencia supera la última hora
-    /// laboral, la fecha de referencia se desplaza al día siguiente y la hora pasa a
-    /// la primera hora laboral (guard de fin de jornada).
+    /// Con <see cref="FiltroHora.Mayor"/>, la referencia de hora se resuelve con
+    /// ceil: sin fecha explícita se redondea hacia arriba (ceil) a la próxima hora
+    /// completa desde la hora actual; con fecha explícita se conservan los minutos y
+    /// segundos para decidir (con minutos/segundos se aplica ceil a la próxima hora
+    /// completa; con hora exacta se toma tal cual). La normalización de fin de mes y
+    /// año se resuelve en <see cref="NormalizarFechaReferencia"/>.
     /// </summary>
     /// <param name="connectionString">Connection string de la BD de pruebas.</param>
     /// <param name="filtroFecha">Filtro de fecha a aplicar.</param>
@@ -60,24 +58,18 @@ public static class HorariosHelper
         var fechaRef = NormalizarFechaReferencia(fecha?.Date ?? DateTime.Today);
         TimeSpan? horaRef = null;
 
-        // Con filtro de hora (único restante: Mayor): referencia ceil + guard de fin de jornada.
+        // Con filtro de hora (único restante: Mayor): ceil de hora si hay minutos/segundos.
         if (filtroHora != FiltroHora.SinFiltro)
         {
-            // Referencia de hora con guard clauses: sin fecha explícita se redondea hacia
-            // arriba (ceil) de DateTime.Now; con fecha explícita se conservan los minutos y
-            // segundos para decidir — si hay minutos/segundos la hora señalada ya empezó y
-            // se aplica ceil a la próxima hora completa; con hora exacta (0 min, 0 seg) se
-            // toma tal cual.
+            // Referencia de hora: sin fecha explícita se redondea hacia arriba (ceil)
+            // de DateTime.Now; con fecha explícita se conservan los minutos y segundos
+            // para decidir — si hay minutos/segundos la hora señalada ya empezó y se
+            // aplica ceil a la próxima hora completa; con hora exacta (0 min, 0 seg)
+            // se toma tal cual.
             horaRef = ResolverHoraReferencia(fecha, DateTime.Now);
 
-            // Guard de fin de jornada: si la referencia supera la última hora laboral,
-            // se desplaza la fecha al día siguiente y la hora a la primera hora laboral.
-            var (minHora, maxHora) = await GetRangoHoraInicioAsync(connectionString);
-            if (horaRef.Value > maxHora)
-            {
-                fechaRef = NormalizarFechaReferencia(fechaRef.AddDays(1));
-                horaRef = minHora;
-            }
+            // El salto de día ya está resuelto por NormalizarFechaReferencia al inicio.
+            // No se necesita guard adicional contra maxHora.
         }
 
         var horarios = await ObtenerHorariosDisponibles(connectionString, fechaRef);
