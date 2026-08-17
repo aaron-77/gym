@@ -35,22 +35,15 @@ public class InscribirAClaseApiTests : IntegrationTestBase
 
         var fkEstadoClaseProgramada = Convert.ToInt32(estadoClaseProgramada?["idEstadoClaseProgramada"] ?? 1);
 
-        // Get existing Clase from seed data
-        var clase = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 claseId FROM Clases WHERE fkEstadoClase = 1");
-
-        var fkClase = Convert.ToInt32(clase?["claseId"] ?? 1);
-
-        // Get existing Entrenador (empleado)
-        var entrenador = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'uno@gmail.com'");
-
-        var fkEntrenador = entrenador?["Id"]?.ToString() ?? throw new Exception("Entrenador not found");
-
-        // Create clase programada with cupoMaximo > 0
+        // Obtener slot disponible de forma segura (fecha futura +7 días)
         var fechaClase = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
+        var slot = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
+            TestContainerHelper.ConnectionString, fechaClase);
+
+        if (slot == null)
+            throw new InvalidOperationException("No se encontró slot disponible para la clase");
+
+        // Insertar clase programada con datos seguros
         var idClaseProgramada = await DatabaseHelper.ExecuteScalarAsync<int>(
             TestContainerHelper.ConnectionString,
             @"INSERT INTO clasesProgramadas (fkClase, cupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase, fkEntrenador) 
@@ -58,11 +51,22 @@ public class InscribirAClaseApiTests : IntegrationTestBase
               SELECT SCOPE_IDENTITY();",
             new Dictionary<string, object?>
             {
-                ["@FkClase"] = fkClase,
-                ["@cupoMaximo"] = 20,
+                ["@FkClase"] = slot.ClaseId,
+                ["@cupoMaximo"] = slot.Cupo,
                 ["@FkEstadoClaseProgramada"] = fkEstadoClaseProgramada,
-                ["@FechaDeLaClase"] = fechaClase,
-                ["@FkEntrenador"] = fkEntrenador
+                ["@FechaDeLaClase"] = slot.FechaDisponible,
+                ["@FkEntrenador"] = slot.EntrenadorId
+            });
+
+        // Insertar horario para la clase
+        await DatabaseHelper.ExecuteNonQueryAsync(
+            TestContainerHelper.ConnectionString,
+            @"INSERT INTO horariosDeClasesProgramadas (fkClaseProgramada, fkHorarioLaboral)
+              VALUES (@FkClaseProgramada, @FkHorarioLaboral)",
+            new Dictionary<string, object?>
+            {
+                ["@FkClaseProgramada"] = idClaseProgramada,
+                ["@FkHorarioLaboral"] = slot.IdHoraLaboral
             });
 
         idClaseProgramada.Should().BeGreaterThan(0, "La clase programada debe tener un ID válido");
@@ -138,22 +142,15 @@ public class InscribirAClaseApiTests : IntegrationTestBase
 
         var fkEstadoClaseProgramada = Convert.ToInt32(estadoClaseProgramada?["idEstadoClaseProgramada"] ?? 1);
 
-        // Get existing Clase from seed data
-        var clase = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 claseId FROM Clases WHERE fkEstadoClase = 1");
-
-        var fkClase = Convert.ToInt32(clase?["claseId"] ?? 1);
-
-        // Get existing Entrenador (empleado)
-        var entrenador = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'uno@gmail.com'");
-
-        var fkEntrenador = entrenador?["Id"]?.ToString() ?? throw new Exception("Entrenador not found");
-
-        // Create clase programada with cupoMaximo = 0
+        // Obtener slot disponible de forma segura (fecha futura +7 días)
         var fechaClase = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
+        var slot = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
+            TestContainerHelper.ConnectionString, fechaClase);
+
+        if (slot == null)
+            throw new InvalidOperationException("No se encontró slot disponible para la clase");
+
+        // Crear clase programada con cupoMaximo = 0 (sobreescribir el Cupo del slot seguro)
         var idClaseProgramada = await DatabaseHelper.ExecuteScalarAsync<int>(
             TestContainerHelper.ConnectionString,
             @"INSERT INTO clasesProgramadas (fkClase, cupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase, fkEntrenador) 
@@ -161,11 +158,22 @@ public class InscribirAClaseApiTests : IntegrationTestBase
               SELECT SCOPE_IDENTITY();",
             new Dictionary<string, object?>
             {
-                ["@FkClase"] = fkClase,
-                ["@cupoMaximo"] = 0,
+                ["@FkClase"] = slot.ClaseId,
+                ["@cupoMaximo"] = 0, // Cupo lleno para forzar el error
                 ["@FkEstadoClaseProgramada"] = fkEstadoClaseProgramada,
-                ["@FechaDeLaClase"] = fechaClase,
-                ["@FkEntrenador"] = fkEntrenador
+                ["@FechaDeLaClase"] = slot.FechaDisponible,
+                ["@FkEntrenador"] = slot.EntrenadorId
+            });
+
+        // Insertar horario para la clase
+        await DatabaseHelper.ExecuteNonQueryAsync(
+            TestContainerHelper.ConnectionString,
+            @"INSERT INTO horariosDeClasesProgramadas (fkClaseProgramada, fkHorarioLaboral)
+              VALUES (@FkClaseProgramada, @FkHorarioLaboral)",
+            new Dictionary<string, object?>
+            {
+                ["@FkClaseProgramada"] = idClaseProgramada,
+                ["@FkHorarioLaboral"] = slot.IdHoraLaboral
             });
 
         var requestDto = new DTOInscripcionAClase
@@ -230,22 +238,15 @@ public class InscribirAClaseApiTests : IntegrationTestBase
 
         var fkEstadoClaseProgramada = Convert.ToInt32(estadoClaseProgramada?["idEstadoClaseProgramada"] ?? 1);
 
-        // Get existing Clase from seed data
-        var clase = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 claseId FROM Clases WHERE fkEstadoClase = 1");
-
-        var fkClase = Convert.ToInt32(clase?["claseId"] ?? 1);
-
-        // Get existing Entrenador (empleado)
-        var entrenador = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'uno@gmail.com'");
-
-        var fkEntrenador = entrenador?["Id"]?.ToString() ?? throw new Exception("Entrenador not found");
-
-        // Create clase programada
+        // Obtener slot disponible de forma segura (fecha futura +7 días)
         var fechaClase = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
+        var slot = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
+            TestContainerHelper.ConnectionString, fechaClase);
+
+        if (slot == null)
+            throw new InvalidOperationException("No se encontró slot disponible para la clase");
+
+        // Crear clase programada con datos seguros
         var idClaseProgramada = await DatabaseHelper.ExecuteScalarAsync<int>(
             TestContainerHelper.ConnectionString,
             @"INSERT INTO clasesProgramadas (fkClase, cupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase, fkEntrenador) 
@@ -253,11 +254,22 @@ public class InscribirAClaseApiTests : IntegrationTestBase
               SELECT SCOPE_IDENTITY();",
             new Dictionary<string, object?>
             {
-                ["@FkClase"] = fkClase,
-                ["@cupoMaximo"] = 20,
+                ["@FkClase"] = slot.ClaseId,
+                ["@cupoMaximo"] = slot.Cupo,
                 ["@FkEstadoClaseProgramada"] = fkEstadoClaseProgramada,
-                ["@FechaDeLaClase"] = fechaClase,
-                ["@FkEntrenador"] = fkEntrenador
+                ["@FechaDeLaClase"] = slot.FechaDisponible,
+                ["@FkEntrenador"] = slot.EntrenadorId
+            });
+
+        // Insertar horario para la clase
+        await DatabaseHelper.ExecuteNonQueryAsync(
+            TestContainerHelper.ConnectionString,
+            @"INSERT INTO horariosDeClasesProgramadas (fkClaseProgramada, fkHorarioLaboral)
+              VALUES (@FkClaseProgramada, @FkHorarioLaboral)",
+            new Dictionary<string, object?>
+            {
+                ["@FkClaseProgramada"] = idClaseProgramada,
+                ["@FkHorarioLaboral"] = slot.IdHoraLaboral
             });
 
         // Use non-existent client ID (GUID format)

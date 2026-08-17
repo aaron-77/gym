@@ -42,29 +42,15 @@ public class ReagendarInscripcionAClaseApiTests : IntegrationTestBase
 
         var fkEstadoClaseProgramada = Convert.ToInt32(estadoClaseProgramada?["idEstadoClaseProgramada"] ?? 1);
 
-        // Get existing Clase from seed data
-        var clase = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 claseId FROM Clases WHERE fkEstadoClase = 1");
-
-        var fkClase = Convert.ToInt32(clase?["claseId"] ?? 1);
-
-        // Get existing HoraLaboral
-        var horaLaboral = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 idHora FROM horasLaborales");
-
-        var fkHoraLaboral = Convert.ToInt32(horaLaboral?["idHora"] ?? 1);
-
-        // Get existing Entrenador (empleado)
-        var entrenador = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'uno@gmail.com'");
-
-        var fkEntrenador = entrenador?["Id"]?.ToString() ?? throw new Exception("Entrenador not found");
-
-        // Create first clase programada (old class) - Using SCOPE_IDENTITY() to get the ID
+        // Obtener slot disponible para la clase ANTERIOR (fecha futura +7 días)
         var fechaClaseAnterior = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
+        var slotAnterior = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
+            TestContainerHelper.ConnectionString, fechaClaseAnterior);
+
+        if (slotAnterior == null)
+            throw new InvalidOperationException("No se encontró slot disponible para la clase anterior");
+
+        // Insertar clase programada ANTERIOR con datos seguros
         var idClaseProgramadaAnterior = await DatabaseHelper.ExecuteScalarAsync<int>(
             TestContainerHelper.ConnectionString,
             @"INSERT INTO clasesProgramadas (fkClase, cupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase, fkEntrenador) 
@@ -72,11 +58,22 @@ public class ReagendarInscripcionAClaseApiTests : IntegrationTestBase
               SELECT SCOPE_IDENTITY();",
             new()
             {
-                ["@FkClase"] = fkClase,
-                ["@CupoMaximo"] = 20,
+                ["@FkClase"] = slotAnterior.ClaseId,
+                ["@CupoMaximo"] = slotAnterior.Cupo,
                 ["@FkEstadoClaseProgramada"] = fkEstadoClaseProgramada,
-                ["@FechaDeLaClase"] = fechaClaseAnterior,
-                ["@FkEntrenador"] = fkEntrenador
+                ["@FechaDeLaClase"] = slotAnterior.FechaDisponible,
+                ["@FkEntrenador"] = slotAnterior.EntrenadorId
+            });
+
+        // Insertar horario para la clase anterior
+        await DatabaseHelper.ExecuteNonQueryAsync(
+            TestContainerHelper.ConnectionString,
+            @"INSERT INTO horariosDeClasesProgramadas (fkClaseProgramada, fkHorarioLaboral)
+              VALUES (@FkClaseProgramada, @FkHorarioLaboral)",
+            new Dictionary<string, object?>
+            {
+                ["@FkClaseProgramada"] = idClaseProgramadaAnterior,
+                ["@FkHorarioLaboral"] = slotAnterior.IdHoraLaboral
             });
 
         var inscripcion = InscripcionClaseFactory.Crear(
@@ -88,8 +85,15 @@ public class ReagendarInscripcionAClaseApiTests : IntegrationTestBase
             TestContainerHelper.ConnectionString,
             inscripcion);
 
-        // Create second clase programada (new class) - Using SCOPE_IDENTITY() to get the ID
+        // Obtener slot disponible para la clase NUEVA (fecha futura +14 días)
         var fechaClaseNueva = DateOnly.FromDateTime(DateTime.Now.AddDays(14));
+        var slotNuevo = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
+            TestContainerHelper.ConnectionString, fechaClaseNueva, slotAnterior.ClaseId);
+
+        if (slotNuevo == null)
+            throw new InvalidOperationException("No se encontró slot disponible para la clase nueva");
+
+        // Insertar clase programada NUEVA con datos seguros
         var idClaseProgramadaNueva = await DatabaseHelper.ExecuteScalarAsync<int>(
             TestContainerHelper.ConnectionString,
             @"INSERT INTO clasesProgramadas (fkClase, cupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase, fkEntrenador) 
@@ -97,11 +101,22 @@ public class ReagendarInscripcionAClaseApiTests : IntegrationTestBase
               SELECT SCOPE_IDENTITY();",
             new()
             {
-                ["@FkClase"] = fkClase,
-                ["@CupoMaximo"] = 20,
+                ["@FkClase"] = slotNuevo.ClaseId,
+                ["@CupoMaximo"] = slotNuevo.Cupo,
                 ["@FkEstadoClaseProgramada"] = fkEstadoClaseProgramada,
-                ["@FechaDeLaClase"] = fechaClaseNueva,
-                ["@FkEntrenador"] = fkEntrenador
+                ["@FechaDeLaClase"] = slotNuevo.FechaDisponible,
+                ["@FkEntrenador"] = slotNuevo.EntrenadorId
+            });
+
+        // Insertar horario para la clase nueva
+        await DatabaseHelper.ExecuteNonQueryAsync(
+            TestContainerHelper.ConnectionString,
+            @"INSERT INTO horariosDeClasesProgramadas (fkClaseProgramada, fkHorarioLaboral)
+              VALUES (@FkClaseProgramada, @FkHorarioLaboral)",
+            new Dictionary<string, object?>
+            {
+                ["@FkClaseProgramada"] = idClaseProgramadaNueva,
+                ["@FkHorarioLaboral"] = slotNuevo.IdHoraLaboral
             });
 
         // Verify both classes use the same fkClase

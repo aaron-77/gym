@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
 using GymWebApp.Tests.Factories;
+using GymWebApp.Tests.Integration.Helpers;
 using DTO.Dtos;
 using FluentAssertions;
 using Xunit;
@@ -26,15 +27,16 @@ public class CancelarClasesProgramadasTests : IntegrationTestBase
         var token = await Factory.AuthenticateAsync(Client);
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        // Get existing users
-        var (clienteId, entrenadorId) = await GetExistingUserIdsAsync();
+        // Get existing users (clienteId only - entrenador comes from slot)
+        var (clienteId, _) = await GetExistingUserIdsAsync();
 
-        // Create a clase activa and insert to database
-        var claseActiva = ClaseFactory.CrearClaseActiva();
-        var savedClase = await DatabaseHelper.NonQueryAsyncTyped(
-            TestContainerHelper.ConnectionString,
-            "Clases",
-            claseActiva);
+        // Obtener slot disponible de forma segura (fecha futura +7 días)
+        var fechaClase = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
+        var slot = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
+            TestContainerHelper.ConnectionString, fechaClase);
+
+        if (slot == null)
+            throw new InvalidOperationException("No se encontró slot disponible para la clase");
 
         // Get existing fkEstadoClaseProgramada
         var estadoClase = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -42,13 +44,13 @@ public class CancelarClasesProgramadasTests : IntegrationTestBase
             "SELECT TOP 1 idEstadoClaseProgramada FROM estadosClasesProgramadas");
         var fkEstadoClaseProgramada = Convert.ToInt32(estadoClase?["idEstadoClaseProgramada"] ?? 1);
 
-        // Get existing fkHoraLaboral
-        var horaLaboral = await DatabaseHelper.ExecuteQuerySingleAsync(
+        // Get existing fkEstadoHorarioClase
+        var estadoHorarioClase = await DatabaseHelper.ExecuteQuerySingleAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 idHora FROM horasLaborales");
-        var fkHoraLaboral = Convert.ToInt32(horaLaboral?["idHora"] ?? 1);
+            "SELECT TOP 1 idEstadoHorarioClase FROM estadosHorarioClaseProgramada");
+        var fkEstadoHorarioClase = Convert.ToInt32(estadoHorarioClase?["idEstadoHorarioClase"] ?? 1);
 
-        // Insert clase programada directly in DB (only columns that exist in clasesProgramadas table)
+        // Insert clase programada with datos seguros
         // Schema: idProgramacionClase, fkClase, cupoMaximo, fkEstadoClaseProgramada, fechaCreacion, 
         //         fechaModificacion, fkEntrenador, fechaDeLaClase
         await DatabaseHelper.ExecuteNonQueryAsync(
@@ -56,11 +58,11 @@ public class CancelarClasesProgramadasTests : IntegrationTestBase
             @"INSERT INTO clasesProgramadas (fkClase, fkEntrenador, CupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase)
               VALUES (@fkClase, @fkEntrenador, @cupoMaximo, @fkEstadoClaseProgramada, @fechaDeLaClase)",
             new() {
-                ["@fkClase"] = savedClase.ClaseId,
-                ["@fkEntrenador"] = Guid.Parse(entrenadorId),
-                ["@cupoMaximo"] = 20,
+                ["@fkClase"] = slot.ClaseId,
+                ["@fkEntrenador"] = Guid.Parse(slot.EntrenadorId),
+                ["@cupoMaximo"] = slot.Cupo,
                 ["@fkEstadoClaseProgramada"] = fkEstadoClaseProgramada,
-                ["@fechaDeLaClase"] = DateOnly.FromDateTime(DateTime.Now.AddDays(7))
+                ["@fechaDeLaClase"] = slot.FechaDisponible
             });
 
         // Get the created record ID
@@ -69,45 +71,48 @@ public class CancelarClasesProgramadasTests : IntegrationTestBase
             "SELECT TOP 1 idProgramacionClase FROM clasesProgramadas ORDER BY idProgramacionClase DESC");
         var idProgramacionClase = Convert.ToInt32(createdRecord["idProgramacionClase"]);
 
-        // Insert into horariosDeClasesProgramadas (required by the stored procedure)
+        // Insert into horariosDeClasesProgramadas with datos seguros
         // Schema: idHorarioDeClaseProgramada, fkClaseProgramada, fkHorarioLaboral, fkEstadoHorarioClase
-        var estadoHorarioClase = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 idEstadoHorarioClase FROM estadosHorarioClaseProgramada");
-        var fkEstadoHorarioClase = Convert.ToInt32(estadoHorarioClase?["idEstadoHorarioClase"] ?? 1);
-
         await DatabaseHelper.ExecuteNonQueryAsync(
             TestContainerHelper.ConnectionString,
             @"INSERT INTO horariosDeClasesProgramadas (fkClaseProgramada, fkHorarioLaboral, fkEstadoHorarioClase)
               VALUES (@fkClaseProgramada, @fkHorarioLaboral, @fkEstadoHorarioClase)",
             new() {
                 ["@fkClaseProgramada"] = idProgramacionClase,
-                ["@fkHorarioLaboral"] = fkHoraLaboral,
+                ["@fkHorarioLaboral"] = slot.IdHoraLaboral,
                 ["@fkEstadoHorarioClase"] = fkEstadoHorarioClase
             });
+
+        // Obtener slot para la clase reagendada (fecha futura +14 días)
+        var fechaClaseReagendada = DateOnly.FromDateTime(DateTime.Now.AddDays(14));
+        var slotReagendado = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
+            TestContainerHelper.ConnectionString, fechaClaseReagendada, slot.ClaseId);
+
+        if (slotReagendado == null)
+            throw new InvalidOperationException("No se encontró slot disponible para la clase reagendada");
 
         // Create cancel request
         var requestList = new List<DTOClaseCancelada>
         {
             DTOClaseCanceladaFactory.Crear(
                 idProgramacionClase: idProgramacionClase,
-                fkClase: savedClase.ClaseId,
-                fkEntrenador: Guid.Parse(entrenadorId).ToString(),
-                cupoMaximo: 20,
+                fkClase: slot.ClaseId,
+                fkEntrenador: slot.EntrenadorId,
+                cupoMaximo: slot.Cupo,
                 fkEstadoClaseProgramada: fkEstadoClaseProgramada,
-                fechaDeLaClase: DateOnly.FromDateTime(DateTime.Now.AddDays(7)),
+                fechaDeLaClase: slot.FechaDisponible,
                 idUsuarioQueReserva: clienteId,
-                fkHoraLaboral: fkHoraLaboral,
+                fkHoraLaboral: slot.IdHoraLaboral,
                 idPreservaDeHorario: 0,
                 claseReagendada: new DTODatosClaseProgramada
                 {
-                    fkClase = savedClase.ClaseId,
-                    fkEntrenador = Guid.Parse(entrenadorId).ToString(),
-                    cupoMaximo = 20,
+                    fkClase = slotReagendado.ClaseId,
+                    fkEntrenador = slotReagendado.EntrenadorId,
+                    cupoMaximo = slotReagendado.Cupo,
                     fkEstadoClaseProgramada = fkEstadoClaseProgramada,
-                    fechaDeLaClase = DateOnly.FromDateTime(DateTime.Now.AddDays(14)),
+                    fechaDeLaClase = slotReagendado.FechaDisponible,
                     idUsuarioQueReserva = clienteId,
-                    fkHoraLaboral = fkHoraLaboral
+                    fkHoraLaboral = slotReagendado.IdHoraLaboral
                 }
             )
         };

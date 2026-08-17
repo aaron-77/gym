@@ -66,33 +66,22 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
             ?? throw new InvalidOperationException("No se encontró la inscripción original");
 
         var fechaOriginal = DateOnly.FromDateTime((DateTime)claseOriginalRow["fechaDeLaClase"]);
+        var fkClaseOriginal = Convert.ToInt32(claseOriginalRow["fkClase"]);
 
-        // Crear una clase programada destino con fecha posterior a la original y el mismo fkClase
-        // Usamos ObtenerHorariosDisponiblesFiltrados y filtramos manualmente para garantizar
-        // que la fecha destino sea estrictamente posterior a la fecha original.
-        var horariosDisponibles = await HorariosHelper.ObtenerHorariosDisponiblesFiltrados(
-            TestContainerHelper.ConnectionString,
-            FiltroFecha.Mayor,
-            FiltroHora.SinFiltro);
+        // Obtener slot disponible para la clase destino con la MISMA clase y fecha > original
+        // El helper usa FiltroFecha.Mayor internamente, garantizando fecha estrictamente posterior
+        var slotDestino = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
+            TestContainerHelper.ConnectionString, fechaOriginal, fkClaseOriginal);
 
-        var horariosPosteriores = horariosDisponibles
-            .Where(h => h["FechaDisponible"] != null
-                        && DateOnly.FromDateTime(Convert.ToDateTime(h["FechaDisponible"])) > fechaOriginal)
-            .ToList();
-
-        var fechaDisponible = horariosPosteriores.Count > 0
-            ? DateOnly.FromDateTime(Convert.ToDateTime(
-                horariosPosteriores[new Random().Next(horariosPosteriores.Count)]["FechaDisponible"]))
-            : fechaOriginal.AddDays(30);
-
-        var idHoraFutura = await InscripcionTestHelper.GetIdHoraLaboralFuturaAsync(
-            TestContainerHelper.ConnectionString);
+        if (slotDestino == null)
+            throw new InvalidOperationException("No se encontró slot disponible para la clase destino");
 
         var idEstadoDisponible = await DatabaseHelper.ExecuteScalarAsync<int?>(
             TestContainerHelper.ConnectionString,
             "SELECT idEstadoClaseProgramada FROM v_idEstadoDisponibleClasesProgramadas")
             ?? 1;
 
+        // Insertar clase destino con datos seguros
         var destinoRow = await DatabaseHelper.ExecuteQuerySingleAsync(
             TestContainerHelper.ConnectionString,
             @"INSERT INTO clasesProgramadas (fkClase, cupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase, fkEntrenador)
@@ -100,18 +89,16 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
               VALUES (@FkClase, @CupoMaximo, @Estado, @FechaDisponible, @FkEntrenador)",
             new Dictionary<string, object?>
             {
-                ["@FkClase"] = claseOriginalRow!["fkClase"],
-                ["@CupoMaximo"] = claseOriginalRow["cupoMaximo"],
+                ["@FkClase"] = slotDestino.ClaseId,
+                ["@CupoMaximo"] = slotDestino.Cupo,
                 ["@Estado"] = idEstadoDisponible,
-                ["@FechaDisponible"] = fechaDisponible,
-                ["@FkEntrenador"] = (await DatabaseHelper.ExecuteQuerySingleAsync(
-                    TestContainerHelper.ConnectionString,
-                    "EXEC dbo.sp_obtenerEntrenadoresDisponibles @fechaReferencia = @Fecha",
-                    new Dictionary<string, object?> { ["@Fecha"] = DateTime.Now }))!["UsuarioID"]
+                ["@FechaDisponible"] = slotDestino.FechaDisponible,
+                ["@FkEntrenador"] = slotDestino.EntrenadorId
             });
 
         var idClaseDestino = Convert.ToInt32(destinoRow!["idProgramacionClase"]);
 
+        // Insertar horario para la clase destino
         await DatabaseHelper.ExecuteNonQueryAsync(
             TestContainerHelper.ConnectionString,
             @"INSERT INTO horariosDeClasesProgramadas (fkClaseProgramada, fkHorarioLaboral)
@@ -119,7 +106,7 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
             new Dictionary<string, object?>
             {
                 ["@FkClaseProgramada"] = idClaseDestino,
-                ["@FkHorarioLaboral"] = idHoraFutura
+                ["@FkHorarioLaboral"] = slotDestino.IdHoraLaboral
             });
 
         // Act
@@ -344,21 +331,31 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
         // Crear clase programada destino con tipo distinto y fecha futura (para pasar validación de fecha).
         // No necesita horariosDeClasesProgramadas porque la validación de fkClase (paso 11) ocurre
         // antes de ejecutar el SP.
+        // Usar sp_obtenerEntrenadoresDisponibles para elegir entrenador válido.
         var idEstadoDisponible = await DatabaseHelper.ExecuteScalarAsync<int?>(
             TestContainerHelper.ConnectionString,
             "SELECT idEstadoClaseProgramada FROM v_idEstadoDisponibleClasesProgramadas")
             ?? 1;
 
+        var entrenadorRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+            TestContainerHelper.ConnectionString,
+            "EXEC dbo.sp_obtenerEntrenadoresDisponibles @fechaReferencia = @Fecha",
+            new Dictionary<string, object?> { ["@Fecha"] = DateTime.Now });
+
+        var fkEntrenador = entrenadorRow?["UsuarioID"]?.ToString()
+            ?? throw new InvalidOperationException("No se encontró ningún entrenador disponible");
+
         var destinoRow = await DatabaseHelper.ExecuteQuerySingleAsync(
             TestContainerHelper.ConnectionString,
-            @"INSERT INTO clasesProgramadas (fkClase, cupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase)
+            @"INSERT INTO clasesProgramadas (fkClase, cupoMaximo, fkEstadoClaseProgramada, fechaDeLaClase, fkEntrenador)
               OUTPUT INSERTED.idProgramacionClase
-              VALUES (@FkClase, @CupoMaximo, @Estado, DATEADD(DAY, 1, CAST(GETDATE() AS DATE)))",
+              VALUES (@FkClase, @CupoMaximo, @Estado, DATEADD(DAY, 1, CAST(GETDATE() AS DATE)), @FkEntrenador)",
             new Dictionary<string, object?>
             {
                 ["@FkClase"] = fkClaseDistinta,
                 ["@CupoMaximo"] = cupoMaximo,
-                ["@Estado"] = idEstadoDisponible
+                ["@Estado"] = idEstadoDisponible,
+                ["@FkEntrenador"] = fkEntrenador
             });
 
         var idClaseDestino = Convert.ToInt32(destinoRow!["idProgramacionClase"]);
