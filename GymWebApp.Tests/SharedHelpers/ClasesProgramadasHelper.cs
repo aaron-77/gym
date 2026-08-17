@@ -18,66 +18,30 @@ public static class ClasesProgramadasHelper
     /// <returns>DTODatosClaseProgramada con datos de prueba</returns>
     public static async Task<DTODatosClaseProgramada> GenerarClaseProgramadaAsync(string connectionString)
     {
-        int claseId = 0;
-        string entrenadorId = string.Empty;
-        int horaLaboralId = 0;
-
         try
         {
-            using var connection = new SqlConnection(connectionString);
-            await connection.OpenAsync();
-            
-            // Consulta 1: Obtener ClaseID activa
-            using (var cmd1 = connection.CreateCommand())
+            // Delegar en el helper de slot que resuelve por construcción:
+            // slot libre + entrenador alineado a la fecha + clase activa + cupo real
+            var slot = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
+                connectionString);
+
+            if (slot == null)
             {
-                cmd1.CommandText = "SELECT TOP 1 ClaseID FROM Clases WHERE fkEstadoClase = 1";
-                var result1 = await cmd1.ExecuteScalarAsync();
-                if (result1 != null && result1 != DBNull.Value)
-                {
-                    claseId = Convert.ToInt32(result1);
-                }
+                throw new InvalidOperationException(
+                    "No hay horarios disponibles para generar una clase programada de prueba.");
             }
 
-            // Consulta 2: Obtener primera hora laboral orden por idHora
-            TimeSpan horaInicio = TimeSpan.Zero;
-            using (var cmd3 = connection.CreateCommand())
-            {
-                cmd3.CommandText = "SELECT TOP 1 idHora, horaInicio FROM horasLaborales ORDER BY idHora";
-                using (var reader = await cmd3.ExecuteReaderAsync())
-                {
-                    if (await reader.ReadAsync())
-                    {
-                        horaLaboralId = reader.GetInt32(0);
-                        horaInicio = reader.GetTimeSpan(1);
-                    }
-                }
-            }
-
-            // Consulta 3: Obtener entrenador disponible usando SP
-            var fechaReferencia = DateTime.Now.Date.AddDays(1).Add(horaInicio);
-            using (var cmd2 = connection.CreateCommand())
-            {
-                cmd2.CommandText = "sp_obtenerEntrenadoresDisponibles";
-                cmd2.CommandType = CommandType.StoredProcedure;
-                cmd2.Parameters.AddWithValue("@fechaReferencia", fechaReferencia);
-                
-                var result2 = await cmd2.ExecuteScalarAsync();
-                if (result2 != null && result2 != DBNull.Value)
-                {
-                    entrenadorId = result2.ToString()!;
-                }
-            }
-
-            // Crear y retornar el DTO
+            // Mapear el dataset del slot al DTO de clase programada
             var dto = new DTODatosClaseProgramada
             {
-                fkClase = claseId,
-                fkEntrenador = entrenadorId,
+                fkClase = slot.ClaseId,
+                fkEntrenador = slot.EntrenadorId,
+                fkHoraLaboral = slot.IdHoraLaboral,
+                fechaDeLaClase = slot.FechaDisponible,
+                cupoMaximo = slot.Cupo,
                 fkEstadoClaseProgramada = 1, // Disponible
-                fechaDeLaClase = DateOnly.FromDateTime(DateTime.Now),
-                idUsuarioQueReserva = null, // Para pre-reserva sin cliente
-                fkHoraLaboral = horaLaboralId,
-                cupoMaximo = 20
+                idUsuarioQueReserva = null,  // Pre-reserva sin cliente
+                idPreservaDeHorario = null
             };
 
             return dto;

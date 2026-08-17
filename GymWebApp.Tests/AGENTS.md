@@ -155,6 +155,14 @@ Helpers base disponibles en el proyecto de tests para todas las pruebas:
 | **E2eContainerHelper** | `E2E/Common/` | Gestión de contenedores E2E (SQL Server + API + Frontend + Nginx) |
 | **PlaywrightTestBase** | `E2E/Common/` | Clase base para tests E2E con Playwright (browser lifecycle) |
 
+### Page Models vs Component Objects
+
+- `E2E/PageModels/` contiene abstracciones de páginas completas. Sus clases reciben `IPage`, encapsulan navegación y controles de la página y pueden componer componentes.
+- `E2E/Components/` contiene comportamiento reutilizable de widgets. Sus clases reciben `IPage` y encapsulan selectores, waits e interacciones del widget.
+- `E2E/Helpers/` contiene utilidades que no representan una página ni un widget de UI. Un helper no reemplaza un Page Model o Component Object.
+- Los tests E2E deben conservar el flujo del escenario y las aserciones; no deben duplicar lógica interna de Page Models o Components.
+- Los selectores deben priorizar ids, atributos de datos y roles accesibles, con waits explícitos y aserciones sobre contenido real.
+
 ## Patron de dependencia de arquitectura de pruebas
 
 Para garantizar la estabilidad y el aislamiento de los tests de integración, se debe seguir estrictamente este esquema de jerarquía y flujo de inicialización.

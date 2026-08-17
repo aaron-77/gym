@@ -150,7 +150,7 @@ namespace GymFrontend.Controllers
         }
 
         [HttpGet("obtenerClasesProgramadasPorId")]
-        public async Task<IActionResult> ObtenerClasesProgramadasPorId([FromQuery] int? idClase = null, [FromQuery] DateOnly? fecha = null)
+        public async Task<IActionResult> ObtenerClasesProgramadasPorId([FromQuery] int? idClase = null, [FromQuery] DateTime? fecha = null)
         {
             // Validar el modelo (defensivo; una fecha malformada ya cortocircuita con 400 por [ApiController])
             if (!ModelState.IsValid)

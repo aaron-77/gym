@@ -838,7 +838,7 @@ namespace API.Controllers
             ActionResult<DTOResponse<List<DTOClaseProgramadaView>>>
         > obtenerClasesProgramadasPorId(
             [FromQuery][Range(1, int.MaxValue)] int? idClase,
-            [FromQuery] DateOnly? fecha = null
+            [FromQuery] DateTime? fecha = null
         )
         {
             // Validar el modelo

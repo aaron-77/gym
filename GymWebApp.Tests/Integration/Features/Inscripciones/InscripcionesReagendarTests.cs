@@ -72,17 +72,17 @@ public class InscripcionesReagendarTests : IntegrationTestBase
         var (clienteId, idInscripcion) = seedResult!.Value;
 
         // Crear clase destino válida para el reagendamiento (con fechaReferencia si aplica)
-        var idClaseDestino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
+        var destino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
             TestContainerHelper.ConnectionString, idInscripcion, fechaReferencia);
 
-        idClaseDestino.Should().NotBeNull("No se pudo crear la clase destino para el reagendamiento");
+        destino.Should().NotBeNull("No se pudo crear la clase destino para el reagendamiento");
 
         await SetAuthHeaderAsync();
 
         var request = new ReagendarInscripcionRequest
         {
             IdInscripcion = idInscripcion,
-            IdClaseProgramada = idClaseDestino!.Value,
+            IdClaseProgramada = destino!.IdClaseProgramada,
             IdCliente = clienteId
         };
 

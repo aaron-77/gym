@@ -51,6 +51,16 @@ E2E tests cover **critical user paths only**. They are the slowest and most brit
 - Do NOT add edge cases or variations without proposing them first
 - If you identify a missing scenario, propose it and wait for confirmation
 
+### Page Model + Component Object Architecture
+
+- Cada página E2E compleja debe tener un Page Model con responsabilidad exclusiva sobre su navegación, controles y acciones de página.
+- Cada widget reutilizable debe tener un Component Object independiente, como el calendario, que encapsule sus selectores, waits y comportamiento.
+- Los Page Models reciben IPage y componen los Component Objects que necesiten.
+- Los tests conservan la preparación de datos, las credenciales, el flujo del escenario y las aserciones de contenido real.
+- Se deben preferir selectores estables por id, atributo de datos o rol accesible; no se deben duplicar selectores internos del componente en los tests.
+- No se debe usar un Helper como sustituto de un Page Model o Component Object cuando la clase representa UI y recibe IPage.
+- No se deben agregar métodos que introduzcan escenarios no aprobados ni mover lógica de negocio al modelo.
+
 ---
 
 ## Scenario Group: Authentication

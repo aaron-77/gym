@@ -52,16 +52,18 @@ async function realizarPeticionAPI(endpointPath, body, params) {
 
 
 /**
- * Obtiene la fecha de referencia del browser en formato yyyy-MM-dd (sv-SE)
- * @param {Date|string} [fecha] - Fecha a formatear. Default: hoy del browser. Si ya es string se devuelve tal cual.
- * @returns {string} Fecha en formato yyyy-MM-dd
+ * Obtiene la fecha y hora de referencia del browser en formato yyyy-MM-dd HH:mm:ss.
+ * @param {Date|string} [fecha] - Fecha a formatear. Default: ahora del browser. Si ya es string se devuelve tal cual.
+ * @returns {string} Fecha y hora en formato yyyy-MM-dd HH:mm:ss
  */
 function obtenerFechaReferencia(fecha = new Date()) {
-    // Si ya viene formateada como string (yyyy-MM-dd), se devuelve sin cambios
+    // Si ya viene formateada como string, se devuelve sin cambios
     if (typeof fecha === 'string') {
         return fecha;
     }
-    return fecha.toLocaleDateString('sv-SE');
+    return fecha
+        .toLocaleString('sv-SE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+        .replace(',', '');
 }
 
 /**

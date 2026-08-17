@@ -3,6 +3,7 @@ using BL.Utils.Enums;
 using DTO.Dtos;
 using Microsoft.Playwright;
 using GymWebApp.Tests.E2E.Common;
+using GymWebApp.Tests.E2E.PageModels;
 using GymWebApp.Tests.Integration.Common;
 using GymWebApp.Tests.Integration.Helpers;
 using Xunit;
@@ -206,10 +207,13 @@ public class InscripcionesReagendarE2ETests : PlaywrightTestBase
         Assert.NotNull(seedResult);
         var (clienteId, idInscripcion) = seedResult!.Value;
 
-        // CreateValidDestinationClassForReagendarAsync siembra datos para que
-        // fetchClasesProgramadas() tenga horarios que mostrar en el calendario.
-        await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
+        // CreateValidDestinationClassForReagendarAsync crea la clase destino
+        // y retorna su ID + fecha + hora para selección explícita en la UI.
+        var destino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
             connectionString, idInscripcion, fechaReferencia);
+        Assert.True(destino.IdClaseProgramada > 0, "No se pudo crear la clase programada destino; no hay horarios disponibles.");
+        var idClaseProgramadaDestino = destino.IdClaseProgramada;
+        var fechaDestino = destino.FechaDeLaClase;
 
         // GIVEN: empleado logueado en el sistema (UI natural)
         await Page.GotoAsync($"{BaseUrl}/signIn");
@@ -228,76 +232,35 @@ public class InscripcionesReagendarE2ETests : PlaywrightTestBase
         await Page.EvaluateAsync(
             "() => localStorage.setItem('idTokenExpiration', JSON.stringify(Math.floor(Date.now() / 1000) + 3600))");
 
-        // WHEN: navega a la vista de cancelar/reagendar (UI natural)
-        await Page.GotoAsync($"{BaseUrl}/Inscripciones/cancelarReagendar");
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        // WHEN: navega a la vista de cancelar/reagendar usando el Page Model (UI natural)
+        var cancelarReagendarPage = new CancelarReagendarPage(Page);
+        await cancelarReagendarPage.GoToAsync(BaseUrl);
 
         // THEN: la vista se renderiza
-        await Expect(Page.Locator("h1")).ToContainTextAsync("Cancelar / Reagendar Inscripción");
+        await Expect(cancelarReagendarPage.Title).ToContainTextAsync("Cancelar / Reagendar Inscripción");
 
         // WHEN: selecciona el cliente en el combo (UI natural)
-      
-        
-        
-        var comboCliente = Page.Locator("#comboCliente");
-        await comboCliente.SelectOptionAsync(clienteId);
+        await cancelarReagendarPage.SelectClientAsync(clienteId);
 
-        // WHEN: espera inscripciones y selecciona una (UI natural)
-        var comboInscripcion = Page.Locator("#comboInscripcion");
-        await Expect(comboInscripcion).ToBeEnabledAsync(new LocatorAssertionsToBeEnabledOptions
-        {
-            Timeout = 15_000
-        });
+        // WHEN: espera inscripciones y selecciona exactamente la inscripción creada por el seed
+        await cancelarReagendarPage.SelectEnrollmentAsync(idInscripcion.ToString());
 
-        var firstInscripcionOption = comboInscripcion.Locator("option:not([value=''])").First;
-        var inscripcionValue = await firstInscripcionOption.GetAttributeAsync("value");
-        await comboInscripcion.SelectOptionAsync(inscripcionValue!);
-
-        // WHEN: marca el checkbox de reagendar (UI natural)
-        await Page.Locator("#checkReagendar").CheckAsync();
-
-        // WHEN: espera que se carguen los horarios disponibles en el calendario
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-        // WHEN: selecciona el primer día disponible en el calendario (UI natural)
-        var primerDiaDisponible = Page.Locator("button.calendar-cell:not([disabled])").First;
-
-        await primerDiaDisponible.ClickAsync();
-        await Page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        // WHEN: marca el checkbox de reagendar (muestra calendario y scheduler)
+        await cancelarReagendarPage.EnableReschedulingAsync();
 
         // WHEN: espera a que el scheduler renderice un horario con idClaseProgramada.
-        // El render es asíncrono (fetch + animación escalonada): NetworkIdle no basta,
-        // y un horario sin idClaseProgramada (franja libre) no sirve para reagendar.
-        var horarioSeleccionable = Page.Locator(
-            ".schedule-viewer__item:not(.schedule-viewer__item--ocupado)[data-id-clase-programada]:not([data-id-clase-programada=''])");
-        await horarioSeleccionable.First.WaitForAsync(new LocatorWaitForOptions
-        {
-            State = WaitForSelectorState.Attached,
-            Timeout = 15_000
-        });
+        // El render es asíncrono (fetch + animación escalonada) y un horario sin
+        // idClaseProgramada (franja libre) no sirve para reagendar.
+        await cancelarReagendarPage.WaitForSchedulesLoadedAsync();
 
-        // WHEN: selecciona el primer horario disponible en el scheduler.
-        // Inyección puntual vía JS: el click natural dispararía la pre-reserva
-        // (handleScheduleClick → registrarPreReservaDeHorario) que SIEMPRE falla
-        // porque la clase destino es una clase YA programada (sp_preReservarHorario
-        // → yaExisteClaseProgramada=1 → RAISERROR), dejando un SweetAlert de error
-        // modal sin timer que bloquearía la página. Ejecutar reagendar solo necesita
-        // el elemento con clase --selected + data-id-clase-programada.
-        var idClaseProgramadaSeleccionada = await Page.EvaluateAsync<string?>(
-            @"() => {
-                const items = Array.from(document.querySelectorAll(
-                    '.schedule-viewer__item:not(.schedule-viewer__item--ocupado)'));
-                const el = items.find(i => i.dataset.idClaseProgramada);
-                if (!el) return null;
-                el.classList.add('schedule-viewer__item--selected');
-                return el.dataset.idClaseProgramada;
-            }");
-
-        Assert.False(string.IsNullOrEmpty(idClaseProgramadaSeleccionada),
-            "El horario seleccionado debe exponer data-id-clase-programada para que ejecutarReagendar lo lea.");
+        // WHEN: navegar al día destino y seleccionar el horario con el ID exacto sembrado.
+        // Esto garantiza que se envía el ID de la clase programada correcta, no el de
+        // cualquier otra programación de la misma fkClase que el calendario haya cargado.
+        await cancelarReagendarPage.SelectDestinationByIdAsync(
+            idClaseProgramadaDestino.ToString(), fechaDestino);
 
         // WHEN: click en el botón Reagendar (UI natural)
-        await Page.Locator("#btnEjecutar").ClickAsync();
+        await cancelarReagendarPage.ExecuteAsync();
 
         // THEN: muestra SweetAlert2 con mensaje de éxito
         var swalTitle = Page.Locator(".swal2-title");

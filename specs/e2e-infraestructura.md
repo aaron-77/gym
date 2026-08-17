@@ -131,9 +131,21 @@ GymWebApp.Tests/
     │   ├── E2eContainerHelper.cs      # Container management
     │   ├── PlaywrightTestBase.cs      # Base class for tests
     │   └── nginx.conf                 # Nginx reverse proxy config
+    ├── Components/                     # Reusable widget behavior
+    │   └── {ComponentName}.cs         # Component Objects receiving IPage
+    ├── PageModels/                     # Page abstractions
+    │   └── {PageName}Page.cs           # Page Models receiving IPage
     └── Features/
         └── {FeatureName}E2ETests.cs   # Test files per feature
 ```
+
+### Page Model y Component Object
+
+- Los Page Models representan una página y reciben IPage en su constructor.
+- Los Component Objects representan widgets reutilizables y reciben IPage en su constructor.
+- Un Page Model puede componer Component Objects cuando una página contiene el widget correspondiente.
+- La lógica de interacción con un widget reutilizable debe vivir en Components/, no duplicarse dentro de los tests.
+- Helpers/ queda reservado para utilidades que no representan una página ni dependen de IPage.
 
 ## Port Configuration
 

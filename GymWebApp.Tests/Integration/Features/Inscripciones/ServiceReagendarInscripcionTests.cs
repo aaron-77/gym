@@ -202,12 +202,12 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
             fechaReferencia = slotDisponible.FechaDisponible;
         }
 
-        var idClaseDestino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
+        var destino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
             TestContainerHelper.ConnectionString, idInscripcion, fechaReferencia)
             ?? throw new InvalidOperationException("No se pudo crear una clase destino para el test");
 
         // Act
-        var result = await _service.ReagendarInscripcionAsync(idInscripcion, idClaseDestino, idCliente);
+        var result = await _service.ReagendarInscripcionAsync(idInscripcion, destino.IdClaseProgramada, idCliente);
 
         // Assert
         result.success.Should().BeFalse();
@@ -255,12 +255,12 @@ public class ServiceReagendarInscripcionTests : IntegrationTestBase
         }
 
         // Crear clase destino válida (misma fkClase, fecha futura, horario futuro)
-        var idClaseDestino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
+        var destino = await InscripcionTestHelper.CreateValidDestinationClassForReagendarAsync(
             TestContainerHelper.ConnectionString, idInscripcion)
             ?? throw new InvalidOperationException("No se pudo crear una clase destino para el test");
 
         // Act
-        var result = await _service.ReagendarInscripcionAsync(idInscripcion, idClaseDestino, idCliente);
+        var result = await _service.ReagendarInscripcionAsync(idInscripcion, destino.IdClaseProgramada, idCliente);
 
         // Assert
         result.success.Should().BeFalse();

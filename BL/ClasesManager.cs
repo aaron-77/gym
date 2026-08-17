@@ -118,7 +118,7 @@ namespace BL
             }
         }
 
-        public async Task<DTOResponse<List<DTOClaseProgramadaView>>> ObtenerClasesProgramadasPorId(int? idClase = null, DateOnly? fecha = null)
+        public async Task<DTOResponse<List<DTOClaseProgramadaView>>> ObtenerClasesProgramadasPorId(int? idClase = null, DateTime? fecha = null)
         {
             try
             {
@@ -130,7 +130,7 @@ namespace BL
                 // La fecha de referencia se agrega solo si viene con valor; si es null, el server aplica su fecha actual por defecto
                 if (fecha.HasValue)
                 {
-                    endpoint += (idClase.HasValue ? "&" : "?") + "fecha=" + fecha.Value.ToString("yyyy-MM-dd");
+                    endpoint += (idClase.HasValue ? "&" : "?") + "fecha=" + Uri.EscapeDataString(fecha.Value.ToString("yyyy-MM-ddTHH:mm:ss"));
                 }
                 string response = await _httpClient.get(endpoint);
                 return JsonSerializer.Deserialize<DTOResponse<List<DTOClaseProgramadaView>>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<List<DTOClaseProgramadaView>> { success = false, message = "Error de deserialización o respuesta vacía." };

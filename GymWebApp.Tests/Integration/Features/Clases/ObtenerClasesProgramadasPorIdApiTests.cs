@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using BL.Utils.Enums;
 using GymWebApp.Tests.Integration.Common;
 using GymWebApp.Tests.Integration.Helpers;
 using DTO.Dtos;
@@ -31,29 +30,8 @@ public class ObtenerClasesProgramadasPorIdApiTests : IntegrationTestBase
         // Arrange
         await SetAuthHeaderAsync();
 
-        // Verificar si estamos fuera del horario laboral máximo.
-        // De ser así, obtener un slot disponible en fecha futura y seedear
-        // solo una claseProgramada (sin inscripción).
-        var maxHoraInicio = await InscripcionTestHelper.GetMaxHoraInicioAsync(
-            TestContainerHelper.ConnectionString);
-
         var dto = await GymWebApp.Tests.SharedHelpers.ClasesProgramadasHelper.GenerarClaseProgramadaAsync(
             TestContainerHelper.ConnectionString);
-        if (DateTime.Now.TimeOfDay >= maxHoraInicio - TimeSpan.FromMinutes(1))
-        {
-            var slotDisponible = await HorariosHelper.ObtenerUnHorarioDisponible(
-                TestContainerHelper.ConnectionString,
-                FiltroFecha.Mayor,
-                FiltroHora.SinFiltro);
-
-            slotDisponible.Should().NotBeNull(
-                "Debe haber al menos un horario disponible en fecha futura como fallback");
-
-            
-            dto.fechaDeLaClase = slotDisponible!.Value.FechaDisponible;
-            dto.fkHoraLaboral = slotDisponible.Value.IdHora;
-
-        }
         await GymWebApp.Tests.SharedHelpers.ClasesProgramadasHelper.RegistrarClaseProgramadaML(
             TestContainerHelper.ConnectionString, dto);
 

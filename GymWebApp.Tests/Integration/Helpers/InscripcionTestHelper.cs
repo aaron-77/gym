@@ -12,6 +12,16 @@ namespace GymWebApp.Tests.Integration.Helpers;
 public static class InscripcionTestHelper
 {
     /// <summary>
+    /// Resultado de crear una clase programada destino para tests de reagendación.
+    /// Contiene los datos necesarios para que el test seleccione explícitamente
+    /// ese horario en la UI en lugar de confiar en la selección del primer disponible.
+    /// </summary>
+    public sealed record ClaseProgramadaDestinoResult(
+        int IdClaseProgramada,
+        DateOnly FechaDeLaClase,
+        TimeSpan HoraInicio);
+
+    /// <summary>
     /// Busca una inscripción existente para hoy con clase futura que todavía no haya comenzado.
     /// Si no existe, genera clases programadas (sp_cron_generarClasesProgramadas),
     /// selecciona un cliente (con rol cliente) y lo inscribe
@@ -1015,8 +1025,11 @@ public static class InscripcionTestHelper
     /// <param name="idInscripcion">ID de la inscripción original (para obtener fkClase y fecha).</param>
     /// <param name="fecha">Fecha de referencia conservada por compatibilidad de contrato con callers
     /// (la fecha base real del helper es la fecha de la clase original).</param>
-    /// <returns>ID de la clase programada destino insertada, o null si no hay horarios disponibles.</returns>
-    public static async Task<int?> CreateValidDestinationClassForReagendarAsync(
+    /// <returns>
+    /// <see cref="ClaseProgramadaDestinoResult"/> con el ID, fecha y hora de la clase creada,
+    /// o null si no hay horarios disponibles.
+    /// </returns>
+    public static async Task<ClaseProgramadaDestinoResult?> CreateValidDestinationClassForReagendarAsync(
         string connectionString, int idInscripcion, DateOnly? fecha = null)
     {
         // Lectura fuera de transacción: fkClase y fecha de la clase original, que se pasan al helper
@@ -1040,6 +1053,15 @@ public static class InscripcionTestHelper
 
         if (dto == null)
             return null;
+
+        // Obtener horaInicio del horario laboral para el resultado
+        var horaRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+            connectionString,
+            "SELECT horaInicio FROM horasLaborales WHERE idHora = @IdHora",
+            new Dictionary<string, object?> { ["@IdHora"] = dto.IdHoraLaboral })
+            ?? throw new InvalidOperationException("No se encontró el horario laboral");
+
+        var horaInicio = (TimeSpan)horaRow["horaInicio"];
 
         var idEstadoDisponible = await DatabaseHelper.ExecuteScalarAsync<int?>(
             connectionString,
@@ -1075,7 +1097,10 @@ public static class InscripcionTestHelper
                     ["@FkHorarioLaboral"] = dto.IdHoraLaboral
                 });
 
-            return idClaseDestino;
+            return new ClaseProgramadaDestinoResult(
+                idClaseDestino,
+                DateOnly.FromDateTime(dto.FechaDisponible.ToDateTime(TimeOnly.MinValue)),
+                horaInicio);
         });
     }
 
