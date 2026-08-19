@@ -5,7 +5,6 @@ using API.Services;
 using DTO.Dtos;
 using GymWebApp.Tests.Integration.Common;
 using GymWebApp.Tests.Integration.Helpers;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using FluentAssertions;
@@ -42,10 +41,12 @@ public class PreReservarHorarioReagendacionServiceTests : IntegrationTestBase
         try
         {
             // Act
-            var idPreReserva = await service.PreReservarHorarioReagendacion(dto);
+            var result = await service.preReservarHorarioInscripcion(dto);
 
             // Assert
-            idPreReserva.Should().BeGreaterThan(0, "El ID de pre-reserva debe ser mayor a 0");
+            result.success.Should().BeTrue();
+            result.httpCode.Should().Be(200);
+            result.payload.Should().BeGreaterThan(0, "El ID de pre-reserva debe ser mayor a 0");
         }
         finally
         {
@@ -59,7 +60,7 @@ public class PreReservarHorarioReagendacionServiceTests : IntegrationTestBase
     #region Sad Paths
 
     [Fact]
-    public async Task PreReservarHorarioReagendacion_PreReservaDuplicada_LanzaExcepcion()
+    public async Task PreReservarHorarioReagendacion_PreReservaDuplicada_RetornaError()
     {
         // Arrange
         var slot = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
@@ -80,12 +81,17 @@ public class PreReservarHorarioReagendacionServiceTests : IntegrationTestBase
         try
         {
             // Primera llamada exitosa
-            var idPreReserva = await service.PreReservarHorarioReagendacion(dto);
-            idPreReserva.Should().BeGreaterThan(0);
+            var firstResult = await service.preReservarHorarioInscripcion(dto);
+            firstResult.success.Should().BeTrue();
+            firstResult.payload.Should().BeGreaterThan(0);
 
-            // Act & Assert
-            var ex = await Assert.ThrowsAsync<SqlException>(() => service.PreReservarHorarioReagendacion(dto));
-            ex.Message.Should().Contain("Ya existe una pre-reserva vigente");
+            // Act
+            var result = await service.preReservarHorarioInscripcion(dto);
+
+            // Assert
+            result.success.Should().BeFalse();
+            result.httpCode.Should().Be(500);
+            result.errors![0].message.Should().Contain("Ya existe una pre-reserva vigente");
         }
         finally
         {
@@ -95,7 +101,7 @@ public class PreReservarHorarioReagendacionServiceTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task PreReservarHorarioReagendacion_SinCupo_LanzaExcepcion()
+    public async Task PreReservarHorarioReagendacion_SinCupo_RetornaError()
     {
         // Arrange
         var slot = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
@@ -139,9 +145,13 @@ public class PreReservarHorarioReagendacionServiceTests : IntegrationTestBase
 
         try
         {
-            // Act & Assert
-            var ex = await Assert.ThrowsAsync<SqlException>(() => service.PreReservarHorarioReagendacion(dto));
-            ex.Message.Should().Contain("No hay cupo disponible");
+            // Act
+            var result = await service.preReservarHorarioInscripcion(dto);
+
+            // Assert
+            result.success.Should().BeFalse();
+            result.httpCode.Should().Be(500);
+            result.errors![0].message.Should().Contain("No hay cupo disponible");
         }
         finally
         {

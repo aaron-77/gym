@@ -37,7 +37,7 @@ Endpoint HTTP en `HorariosController` que expone la creación de pre-reservas de
 ```csharp
 [Authorize(Roles = "empleado")]
 [HttpPost("preReservarHorarioInscripcion")]
-public async Task<ActionResult<DTOResponse<int>>> registrarPreReservaDeInscripcion([FromBody] DTOPreReservaDeHorarioInscripcion preReserva)
+public async Task<IActionResult> registrarPreReservaDeInscripcion([FromBody] DTOPreReservaDeHorarioInscripcion preReserva)
 ```
 
 ### 3.3 Parámetros de entrada
@@ -48,7 +48,7 @@ public async Task<ActionResult<DTOResponse<int>>> registrarPreReservaDeInscripci
 
 ### 3.4 Retorno
 
-- `ActionResult<DTOResponse<int>>` — Respuesta HTTP cuyo código coincide con el `httpCode` del `DTOResponse<int>` devuelto por el servicio.
+- `IActionResult` — Respuesta HTTP cuyo código coincide con el `httpCode` del `DTOResponse<int>` devuelto por el servicio.
 
 ### 3.5 Acciones que debe realizar
 

@@ -1,6 +1,7 @@
 // File: API/Controllers/HorariosController.cs
 using Microsoft.AspNetCore.Mvc;
 using API.Services;
+using API.Infraestructure;
 using DTO.Dtos;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -147,6 +148,17 @@ namespace API.Controllers
                 };
                 return StatusCode(500, response);
             }
+        }
+
+        [Authorize(Roles = "empleado")]
+        [HttpPost("preReservarHorarioInscripcion")]
+        public async Task<IActionResult> registrarPreReservaDeInscripcion([FromBody] DTOPreReservaDeHorarioInscripcion preReserva)
+        {
+            _logger.LogInformation("Start registrarPreReservaDeInscripcion userId={UserId} fecha={Fecha}", preReserva?.idUsuarioQueReserva, preReserva?.fechaTentativa);
+
+            var result = await _horariosService.preReservarHorarioInscripcion(preReserva);
+
+            return this.Responder(result);
         }
     }
 }

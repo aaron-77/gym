@@ -8,6 +8,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
+using BL.Utils;
 
 namespace API.Services
 {
@@ -124,7 +125,7 @@ namespace API.Services
             }
         }
 
-        public async Task<int> PreReservarHorarioReagendacion(DTOPreReservaDeHorarioInscripcion preReserva)
+        public async Task<DTOResponse<int>> preReservarHorarioInscripcion(DTOPreReservaDeHorarioInscripcion preReserva)
         {
             try
             {
@@ -151,14 +152,14 @@ namespace API.Services
 
                 int idPreReserva = (int)parametros[parametros.Length - 1].Value;
 
-                return idPreReserva;
+                return ResponseManager.Ok<int>("Pre-reserva de inscripción registrada correctamente", idPreReserva);
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: PreReservarHorarioReagendacion(HorariosService) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | PreReserva.UserId: {preReserva?.idUsuarioQueReserva} | Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] Método: preReservarHorarioInscripcion(HorariosService) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | PreReserva.UserId: {preReserva?.idUsuarioQueReserva} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
 
-                throw;
+                return ResponseManager.InternalServerError<int>(ex, "Error al registrar la pre-reserva de inscripción");
             }
         }
 
