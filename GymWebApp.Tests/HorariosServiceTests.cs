@@ -1,6 +1,8 @@
 // File: Tests/Services/HorariosServiceTests.cs
 using API.Services;
+using API.Services.Validaciones;
 using DataAccess.EntityFramework;
+using DataAccess.Identity;
 using Moq;
 using System;
 using System.Threading.Tasks;
@@ -11,19 +13,34 @@ namespace Tests.Services
     public class HorariosServiceTests
     {
         private readonly Mock<FitnessCenterDbContext> _mockContext;
+        private readonly Mock<IValidadorUsuarioExistente> _mockValidadorUsuario;
+        private readonly Mock<IValidadorClaseExistente> _mockValidadorClase;
+        private readonly Mock<IValidadorClaseProgramadaExistente> _mockValidadorClaseProgramada;
         private readonly HorariosService _horariosService;
 
         public HorariosServiceTests()
         {
             _mockContext = new Mock<FitnessCenterDbContext>();
-            _horariosService = new HorariosService(_mockContext.Object);
+            _mockValidadorUsuario = new Mock<IValidadorUsuarioExistente>();
+            _mockValidadorClase = new Mock<IValidadorClaseExistente>();
+            _mockValidadorClaseProgramada = new Mock<IValidadorClaseProgramadaExistente>();
+
+            _horariosService = new HorariosService(
+                _mockContext.Object,
+                _mockValidadorUsuario.Object,
+                _mockValidadorClase.Object,
+                _mockValidadorClaseProgramada.Object);
         }
 
         [Fact]
         public void HorariosService_CanBeInstantiated()
         {
             // Arrange & Act
-            var service = new HorariosService(_mockContext.Object);
+            var service = new HorariosService(
+                _mockContext.Object,
+                _mockValidadorUsuario.Object,
+                _mockValidadorClase.Object,
+                _mockValidadorClaseProgramada.Object);
 
             // Assert
             Assert.NotNull(service);

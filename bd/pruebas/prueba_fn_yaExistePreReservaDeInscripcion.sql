@@ -259,4 +259,4 @@ DELETE FROM clasesProgramadas WHERE idProgramacionClase = @idClaseProgramada;
 PRINT 'Limpieza completada.';
 PRINT 'Todas las pruebas pasaron correctamente.';
 
-GO
+

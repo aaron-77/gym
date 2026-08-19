@@ -23,8 +23,7 @@ public class HorariosServiceTests : IntegrationTestBase
         public async Task consultarHorariosDisponibles_ConFechaActual_DevuelveHorarios()
         {
             // Arrange
-            var context = Factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
-            var service = new HorariosService(context);
+            var service = Factory.Services.GetRequiredService<HorariosService>();
 
             // Act
             var result = await service.consultarHorariosDisponibles(DateTime.Now);
@@ -55,8 +54,7 @@ public class HorariosServiceTests : IntegrationTestBase
                 fechaTentativa = DateOnly.FromDateTime(fkData.FechaReservada)
             };
 
-            var context =Factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
-            var service = new HorariosService(context);
+            var service = Factory.Services.GetRequiredService<HorariosService>();
 
             // Act
             var idPreReserva = await service.RegistrarPreReservaDeHorario(dto);
@@ -82,8 +80,7 @@ public class HorariosServiceTests : IntegrationTestBase
                 fechaTentativa = DateOnly.FromDateTime(fkData.FechaReservada)
             };
 
-            var context = Factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
-            var service = new HorariosService(context);
+            var service = Factory.Services.GetRequiredService<HorariosService>();
             var idPreReserva = await service.RegistrarPreReservaDeHorario(dto);
 
             // Act
@@ -113,8 +110,7 @@ public class HorariosServiceTests : IntegrationTestBase
             }
 
             int idProgramacionClase = idProgramacionClaseObj;
-            var context = Factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
-            var service = new HorariosService(context);
+            var service = Factory.Services.GetRequiredService<HorariosService>();
 
             // Act
             var result = await service.obtenerClaseProgramadaConNuevoCupo(idProgramacionClase);

@@ -9,16 +9,27 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using BL.Utils;
+using API.Services.Validaciones;
 
 namespace API.Services
 {
     public class HorariosService
     {
         private readonly FitnessCenterDbContext _context;
+        private readonly IValidadorUsuarioExistente _validadorUsuario;
+        private readonly IValidadorClaseExistente _validadorClase;
+        private readonly IValidadorClaseProgramadaExistente _validadorClaseProgramada;
 
-        public HorariosService(FitnessCenterDbContext context)
+        public HorariosService(
+            FitnessCenterDbContext context,
+            IValidadorUsuarioExistente validadorUsuario,
+            IValidadorClaseExistente validadorClase,
+            IValidadorClaseProgramadaExistente validadorClaseProgramada)
         {
             _context = context;
+            _validadorUsuario = validadorUsuario;
+            _validadorClase = validadorClase;
+            _validadorClaseProgramada = validadorClaseProgramada;
         }
 
         public async Task<List<DTOHorarioVisualizacion>> ObtenerPreReservasDeHorario(DateTime? fecha = null)
@@ -129,6 +140,32 @@ namespace API.Services
         {
             try
             {
+                // Guard clause 1: cliente
+                var (clienteExiste, _) = await _validadorUsuario.ValidarAsync(preReserva.idUsuarioQueReserva!);
+                if (!clienteExiste)
+                    return ResponseManager.NotFound<int>("Cliente no encontrado", "idUsuarioQueReserva|El cliente especificado no existe.");
+
+                // Guard clause 2: entrenador (opcional)
+                if (!string.IsNullOrEmpty(preReserva.idEntrenador))
+                {
+                    var (entrenadorExiste, _) = await _validadorUsuario.ValidarAsync(preReserva.idEntrenador);
+                    if (!entrenadorExiste)
+                        return ResponseManager.NotFound<int>("Entrenador no encontrado", "idEntrenador|El entrenador especificado no existe.");
+                }
+
+                // Guard clause 3: clase (opcional)
+                if (preReserva.idClase.HasValue)
+                {
+                    var (claseExiste, _) = await _validadorClase.ValidarAsync(preReserva.idClase.Value);
+                    if (!claseExiste)
+                        return ResponseManager.NotFound<int>("Clase no encontrada", "idClase|La clase especificada no existe.");
+                }
+
+                // Guard clause 4: clase programada
+                var (claseProgramadaExiste, _) = await _validadorClaseProgramada.ValidarAsync(preReserva.idClaseProgramada);
+                if (!claseProgramadaExiste)
+                    return ResponseManager.NotFound<int>("Clase programada no encontrada", "idClaseProgramada|La clase programada especificada no existe.");
+
                 var fechaDateTime = preReserva.fechaTentativa.ToDateTime(TimeOnly.MinValue);
 
                 var parametros = new SqlParameter[]

@@ -35,8 +35,7 @@ public class PreReservarHorarioReagendacionServiceTests : IntegrationTestBase
 
         var dto = PreReservarHorarioReagendacionTestHelper.ConstruirDto(slot, idClaseProgramada, slot.ClienteId);
 
-        var context = Factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
-        var service = new HorariosService(context);
+        var service = Factory.Services.GetRequiredService<HorariosService>();
 
         try
         {
@@ -75,8 +74,7 @@ public class PreReservarHorarioReagendacionServiceTests : IntegrationTestBase
 
         var dto = PreReservarHorarioReagendacionTestHelper.ConstruirDto(slot, idClaseProgramada, slot.ClienteId);
 
-        var context = Factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
-        var service = new HorariosService(context);
+        var service = Factory.Services.GetRequiredService<HorariosService>();
 
         try
         {
@@ -140,8 +138,7 @@ public class PreReservarHorarioReagendacionServiceTests : IntegrationTestBase
 
         var dto = PreReservarHorarioReagendacionTestHelper.ConstruirDto(slot, idClaseProgramada, segundoClienteId);
 
-        var context = Factory.Services.GetRequiredService<DataAccess.EntityFramework.FitnessCenterDbContext>();
-        var service = new HorariosService(context);
+        var service = Factory.Services.GetRequiredService<HorariosService>();
 
         try
         {

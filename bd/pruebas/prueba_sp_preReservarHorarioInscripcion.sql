@@ -1,3 +1,4 @@
+use fitnessCenterDB
 -- =============================================
 -- Script de prueba: sp_preReservarHorarioInscripcion
 -- Objetivo: Verificar que el SP crea pre-reservas para inscripciones
@@ -283,4 +284,4 @@ DELETE FROM clasesProgramadas WHERE idProgramacionClase = @idClaseProgramada;
 PRINT 'Limpieza completada.';
 PRINT 'Todas las pruebas pasaron correctamente.';
 
-GO
+

@@ -1,3 +1,4 @@
+use fitnessCenterDB
 -- =============================================
 -- FUNCTION: fn_yaExistePreReservaDeInscripcion
 -- Spec: 61-spect-fn_yaExistePreReservaDeInscripcion

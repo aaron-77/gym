@@ -30,14 +30,14 @@ DTO que representa los datos necesarios para crear una pre-reserva de horario as
 
 ### 3.2 Propiedades
 
-| Propiedad | Tipo | Requerido | Descripción |
-|-----------|------|-----------|-------------|
-| idUsuarioQueReserva | `string?` | Sí | ID del cliente que realiza la pre-reserva |
-| fechaTentativa | `DateOnly` | Sí | Fecha para la cual se reserva el horario |
-| idHoraLaboral | `int` | Sí | ID del horario laboral seleccionado |
-| idClase | `int?` | No | ID de la clase genérica |
-| idEntrenador | `string?` | No | ID del entrenador asignado |
-| idClaseProgramada | `int` | Sí | ID de la clase programada destino (para validar cupo) |
+| Propiedad | Tipo | Requerido | Validaciones | Descripción |
+|-----------|------|-----------|--------------|-------------|
+| idUsuarioQueReserva | `string?` | Sí | `[Required]`, `[StringLength(36, MinimumLength = 36)]` | ID del cliente que realiza la pre-reserva |
+| fechaTentativa | `DateOnly` | Sí | `[Required]`, `[DataType(DataType.Date)]`, `[FechaMinimaValida(1890)]` | Fecha para la cual se reserva el horario |
+| idHoraLaboral | `int` | Sí | `[Required]`, `[Range(1, int.MaxValue)]` | ID del horario laboral seleccionado |
+| idClase | `int?` | No | `[Range(1, int.MaxValue)]` | ID de la clase genérica |
+| idEntrenador | `string?` | No | `[StringLength(36, MinimumLength = 36)]` | ID del entrenador asignado |
+| idClaseProgramada | `int` | Sí | `[Required]`, `[Range(1, int.MaxValue)]` | ID de la clase programada destino (para validar cupo) |
 
 ### 3.3 Diferencias con DTOPreReservaDeHorario
 
@@ -61,3 +61,9 @@ DTO que representa los datos necesarios para crear una pre-reserva de horario as
 - [ ] Usa tipos consistentes con `DTOPreReservaDeHorario`
 - [ ] Está en el namespace `DTO.Dtos`
 - [ ] No contiene lógica de negocio, solo propiedades
+- [ ] `idUsuarioQueReserva` tiene `[Required]` y `[StringLength(36, MinimumLength = 36)]`
+- [ ] `fechaTentativa` tiene `[Required]`, `[DataType(DataType.Date)]` y `[FechaMinimaValida(1890)]`
+- [ ] `idHoraLaboral` tiene `[Required]` y `[Range(1, int.MaxValue)]`
+- [ ] `idClase` tiene `[Range(1, int.MaxValue)]`
+- [ ] `idEntrenador` tiene `[StringLength(36, MinimumLength = 36)]`
+- [ ] `idClaseProgramada` tiene `[Required]` y `[Range(1, int.MaxValue)]`

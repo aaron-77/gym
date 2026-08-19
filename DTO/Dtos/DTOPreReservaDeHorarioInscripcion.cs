@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using DTO.CustomValidations;
 
 namespace DTO.Dtos
 {
@@ -11,6 +12,7 @@ namespace DTO.Dtos
 
         [Required(ErrorMessage = "La fecha tentativa es requerida")]
         [DataType(DataType.Date, ErrorMessage = "La fecha tentativa no tiene un formato válido")]
+        [FechaMinimaValida(1890, ErrorMessage = "La fecha tentativa debe tener un año válido (1890 o posterior)")]
         public DateOnly fechaTentativa { get; set; }
 
         [Required(ErrorMessage = "El horario laboral es requerido")]

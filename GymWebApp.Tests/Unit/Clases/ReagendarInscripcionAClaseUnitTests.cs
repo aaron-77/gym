@@ -1,6 +1,7 @@
 using API.Controllers;
 using API.Hubs;
 using API.Services;
+using API.Services.Validaciones;
 using BL;
 using DataAccess.EntityFramework;
 using DataAccess.Identity;
@@ -45,10 +46,19 @@ public class ReagendarInscripcionAClaseUnitTests
 
         // UserRoleService - espera FitnessCenterDbContext y UserManager<ApplicationUser>
         _mockUserRoleService = Substitute.For<UserRoleService>(_mockContext, null!);
-        
-        // HorariosService - necesita FitnessCenterDbContext en constructor
-        var mockHorariosService = new Mock<HorariosService>(_mockContext);
-        
+
+        // Validadores para HorariosService
+        var mockValidadorUsuario = new Mock<IValidadorUsuarioExistente>();
+        var mockValidadorClase = new Mock<IValidadorClaseExistente>();
+        var mockValidadorClaseProgramada = new Mock<IValidadorClaseProgramadaExistente>();
+
+        // HorariosService - necesita context + 3 validadores
+        var mockHorariosService = new Mock<HorariosService>(
+            _mockContext,
+            mockValidadorUsuario.Object,
+            mockValidadorClase.Object,
+            mockValidadorClaseProgramada.Object);
+
         // ServicioActualizacionesDeHorariosRealTime - espera FitnessCenterDbContext, IHubContext<ReservacionesHub>, HorariosService
         var mockHubContext = new Mock<IHubContext<ReservacionesHub>>();
         _mockServicioActualizaciones = Substitute.For<ServicioActualizacionesDeHorariosRealTime>(

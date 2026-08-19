@@ -67,4 +67,47 @@ public static class PreReservarHorarioApiTestHelper
         await GymWebApp.Tests.Integration.Common.DatabaseHelper.ExecuteNonQueryAsync(
             connectionString, sql, parameters);
     }
+
+    /// <summary>
+    /// Elimina las pre-reservas de horario que coincidan con la combinación del DTO.
+    /// Versión para DTOPreReservaDeHorarioInscripcion. Limpia por fkHoraLaboral, fechaReservada,
+    /// idClase e idEntrenador. El campo idClaseProgramada no se usa para cleanup
+    /// porque no se almacena en preReservasDeHorario.
+    /// </summary>
+    public static async Task LimpiarPreReservasDeHorarioAsync(
+        string connectionString, DTOPreReservaDeHorarioInscripcion preReserva)
+    {
+        var whereClauses = new List<string>
+        {
+            "fkHoraLaboral = @IdHoraLaboral",
+            "fechaReservada = @FechaReservada"
+        };
+
+        if (preReserva.idClase.HasValue)
+            whereClauses.Add("idClase = @IdClase");
+        else
+            whereClauses.Add("idClase IS NULL");
+
+        if (!string.IsNullOrEmpty(preReserva.idEntrenador))
+            whereClauses.Add("idEntrenador = @IdEntrenador");
+        else
+            whereClauses.Add("(idEntrenador = '' OR idEntrenador IS NULL)");
+
+        var sql = $"DELETE FROM preReservasDeHorario WHERE {string.Join(" AND ", whereClauses)}";
+
+        var parameters = new Dictionary<string, object?>
+        {
+            ["@IdHoraLaboral"] = preReserva.idHoraLaboral,
+            ["@FechaReservada"] = preReserva.fechaTentativa.ToDateTime(TimeOnly.MinValue)
+        };
+
+        if (preReserva.idClase.HasValue)
+            parameters["@IdClase"] = preReserva.idClase.Value;
+
+        if (!string.IsNullOrEmpty(preReserva.idEntrenador))
+            parameters["@IdEntrenador"] = preReserva.idEntrenador;
+
+        await GymWebApp.Tests.Integration.Common.DatabaseHelper.ExecuteNonQueryAsync(
+            connectionString, sql, parameters);
+    }
 }
