@@ -29,6 +29,14 @@ RETURN
             ON cp.fkEntrenador = u.Id
     WHERE cp.fkClase = @idClase
         AND cp.fechaDeLaClase >= COALESCE(@fechaReferencia, CAST(GETDATE() AS DATE))
+        AND (
+            cp.fechaDeLaClase > CAST(GETDATE() AS DATE)
+            OR (
+                cp.fechaDeLaClase = CAST(GETDATE() AS DATE)
+                AND hl.horaInicio > CAST(GETDATE() AS TIME)
+            )
+        )
+        AND dbo.fn_validarCupoDeClase(cp.idProgramacionClase) = 1
 );
 
 -- Modified function adapted to schema V6

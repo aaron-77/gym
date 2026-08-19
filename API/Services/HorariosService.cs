@@ -124,6 +124,44 @@ namespace API.Services
             }
         }
 
+        public async Task<int> PreReservarHorarioReagendacion(DTOPreReservaDeHorarioInscripcion preReserva)
+        {
+            try
+            {
+                var fechaDateTime = preReserva.fechaTentativa.ToDateTime(TimeOnly.MinValue);
+
+                var parametros = new SqlParameter[]
+                {
+                    new SqlParameter("@idUsuarioQueReserva", preReserva.idUsuarioQueReserva ?? (object)DBNull.Value),
+                    new SqlParameter("@fechaTentativa", fechaDateTime),
+                    new SqlParameter("@idHoraLaboral", preReserva.idHoraLaboral),
+                    new SqlParameter("@idClase", preReserva.idClase ?? (object)DBNull.Value),
+                    new SqlParameter("@idEntrenador", preReserva.idEntrenador ?? (object)DBNull.Value),
+                    new SqlParameter("@idClaseProgramada", preReserva.idClaseProgramada),
+                    new SqlParameter("@idPrereservaOut", SqlDbType.Int)
+                    {
+                        Direction = ParameterDirection.Output
+                    }
+                };
+
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_preReservarHorarioInscripcion @idUsuarioQueReserva, @fechaTentativa, @idHoraLaboral, @idClase, @idEntrenador, @idClaseProgramada, @idPrereservaOut OUTPUT",
+                    parametros
+                );
+
+                int idPreReserva = (int)parametros[parametros.Length - 1].Value;
+
+                return idPreReserva;
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: PreReservarHorarioReagendacion(HorariosService) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | PreReserva.UserId: {preReserva?.idUsuarioQueReserva} | Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                throw;
+            }
+        }
+
         public async Task<List<DTOClaseProgramadaView>> obtenerClaseProgramadaConNuevoCupo(int idProgramacionClase)
         {
             try

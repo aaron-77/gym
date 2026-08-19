@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
+using GymWebApp.Tests.Integration.Helpers;
 using DTO.Dtos;
 using FluentAssertions;
 using Xunit;
@@ -184,51 +185,33 @@ public class PreReservarHorarioApiTests : IntegrationTestBase
         // Arrange
         await SetAuthHeaderAsync();
 
-        // Get valid idHoraLaboral
-        var horaResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+        var slot = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 idHora FROM horasLaborales",
-            new());
-        var idHoraLaboral = Convert.ToInt32(horaResult["idHora"]);
+            DateOnly.FromDateTime(DateTime.Now.AddDays(7)));
 
-        // Get valid idClase
-        var claseResult = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 ClaseID FROM Clases",
-            new());
-        var idClase = Convert.ToInt32(claseResult["ClaseID"]);
+        if (slot == null)
+            throw new InvalidOperationException("No se encontró slot disponible para la prueba");
 
-        // Get valid idEntrenador
-        var trainerResult = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            @"SELECT TOP 1 u.Id FROM AspNetUsers u 
-              INNER JOIN AspNetUserRoles ur ON u.Id = ur.UserId 
-              INNER JOIN AspNetRoles r ON ur.RoleId = r.Id 
-              WHERE r.Name = 'empleado'",
-            new());
-        var idEntrenador = trainerResult["Id"]!.ToString()!;
+        var preReserva = PreReservarHorarioApiTestHelper.ConstruirDto(slot, slot.ClienteId);
 
-        var preReserva = new DTOPreReservaDeHorario
+        try
         {
-            idUsuarioQueReserva = "test-user-id",
-            fechaTentativa = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
-            idHoraLaboral = idHoraLaboral,
-            idClase = idClase,
-            idEntrenador = idEntrenador
-        };
+            // Act
+            var response = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva);
 
-        // Act
-        var response = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva);
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        
-        var result = await response.Content.ReadFromJsonAsync<DTOResponse<int>>();
-        result.Should().NotBeNull();
-        result!.success.Should().BeTrue();
-        result.payload.Should().BeGreaterThan(0);
-        
-        
+            var result = await response.Content.ReadFromJsonAsync<DTOResponse<int>>();
+            result.Should().NotBeNull();
+            result!.success.Should().BeTrue();
+            result.payload.Should().BeGreaterThan(0);
+        }
+        finally
+        {
+            await PreReservarHorarioApiTestHelper.LimpiarPreReservasDeHorarioAsync(
+                TestContainerHelper.ConnectionString, preReserva);
+        }
     }
 
     #endregion
@@ -279,78 +262,73 @@ public class PreReservarHorarioApiTests : IntegrationTestBase
         // Arrange
         await SetAuthHeaderAsync();
 
-        // Get valid ids
-        var horaResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+        var slot = await SlotDisponibleParaClaseProgramadaHelper.obtenerSlotDisponibleParaClaseProgramadaAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 idHora FROM horasLaborales",
-            new());
-        var idHora = Convert.ToInt32(horaResult["idHora"]);
+            DateOnly.FromDateTime(DateTime.Now.AddDays(7)));
 
-        var claseResult = await DatabaseHelper.ExecuteQuerySingleAsync(
+        if (slot == null)
+            throw new InvalidOperationException("No se encontró slot disponible para la prueba");
+
+        var preReserva1 = PreReservarHorarioApiTestHelper.ConstruirDto(slot, slot.ClienteId);
+
+        var segundoClienteRow = await GymWebApp.Tests.Integration.Common.DatabaseHelper.ExecuteQuerySingleAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 ClaseID FROM Clases",
-            new());
-        var idClase = Convert.ToInt32(claseResult["ClaseID"]);
+            @"SELECT TOP 1 u.Id 
+              FROM AspNetUsers u
+              INNER JOIN AspNetUserRoles ur ON u.Id = ur.UserId
+              INNER JOIN AspNetRoles r ON ur.RoleId = r.Id
+              WHERE r.Name = 'cliente' AND u.Id <> @ClienteId",
+            new Dictionary<string, object?> { ["@ClienteId"] = slot.ClienteId });
 
-        var trainerResult = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            @"SELECT TOP 1 u.Id FROM AspNetUsers u 
-              INNER JOIN AspNetUserRoles ur ON u.Id = ur.UserId 
-              INNER JOIN AspNetRoles r ON ur.RoleId = r.Id 
-              WHERE r.Name = 'empleado'",
-            new());
-        var idEntrenador = trainerResult["Id"]!.ToString()!;
+        var segundoClienteId = segundoClienteRow?["Id"]?.ToString();
+        if (string.IsNullOrEmpty(segundoClienteId))
+            throw new InvalidOperationException("No se encontró un segundo cliente para la prueba");
 
-        var testDate = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
+        var preReserva2 = PreReservarHorarioApiTestHelper.ConstruirDto(slot, segundoClienteId);
 
-        // Act 1: Create first pre-reservation (should succeed)
-        var preReserva1 = new DTOPreReservaDeHorario
+        try
         {
-            idUsuarioQueReserva = "test-user-1",
-            fechaTentativa = testDate,
-            idHoraLaboral = idHora,
-            idClase = idClase,
-            idEntrenador = idEntrenador
-        };
-        var response1 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva1);
-        response1.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result1 = await response1.Content.ReadFromJsonAsync<DTOResponse<int>>();
-        result1!.payload.Should().BeGreaterThan(0);
+            // Act 1: Create first pre-reservation (should succeed)
+            var response1 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva1);
+            response1.StatusCode.Should().Be(HttpStatusCode.OK);
+            var result1 = await response1.Content.ReadFromJsonAsync<DTOResponse<int>>();
+            result1!.payload.Should().BeGreaterThan(0);
 
-        // Act 2: Try to create duplicate (should fail)
-        var preReserva2 = new DTOPreReservaDeHorario
+            // Act 2: Try to create duplicate (should fail)
+            var response2 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva2);
+
+            // Assert
+            response2.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+
+            var result2 = await response2.Content.ReadFromJsonAsync<DTOResponse<int>>();
+            result2.Should().NotBeNull();
+            result2!.success.Should().BeFalse();
+            result2.errors.Should().NotBeNullOrEmpty();
+            result2.errors![0].message.Should().Contain("Ya existe una pre-reserva vigente");
+
+            // Verify only one record exists in database
+            var countResult = await GymWebApp.Tests.Integration.Common.DatabaseHelper.ExecuteQuerySingleAsync(
+                TestContainerHelper.ConnectionString,
+                @"SELECT COUNT(*) as Total FROM preReservasDeHorario 
+                  WHERE fkHoraLaboral = @IdHora 
+                    AND fechaReservada = @Fecha 
+                    AND idClase = @IdClase 
+                    AND idEntrenador = @IdEntrenador",
+                new Dictionary<string, object?>
+                {
+                    ["@IdHora"] = slot.IdHoraLaboral,
+                    ["@Fecha"] = slot.FechaDisponible.ToDateTime(TimeOnly.MinValue),
+                    ["@IdClase"] = slot.ClaseId,
+                    ["@IdEntrenador"] = slot.EntrenadorId
+                });
+            var count = Convert.ToInt32(countResult["Total"]);
+            count.Should().Be(1, "Only one pre-reservation should exist for this combination");
+        }
+        finally
         {
-            idUsuarioQueReserva = "test-user-2",
-            fechaTentativa = testDate,
-            idHoraLaboral = idHora,
-            idClase = idClase,
-            idEntrenador = idEntrenador
-        };
-        var response2 = await Client.PostAsJsonAsync("/api/horarios/preReservarHorario", preReserva2);
-
-        // Assert
-        response2.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-        
-        var result2 = await response2.Content.ReadFromJsonAsync<DTOResponse<int>>();
-        result2.Should().NotBeNull();
-        result2!.success.Should().BeFalse();
-
-        // Verify only one record exists in database
-        var countResult = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            @"SELECT COUNT(*) as Total FROM preReservasDeHorario 
-              WHERE fkHoraLaboral = @IdHora 
-                AND fechaReservada = @Fecha 
-                AND idClase = @IdClase 
-                AND idEntrenador = @IdEntrenador",
-            new() { 
-                ["@IdHora"] = idHora, 
-                ["@Fecha"] = testDate.ToDateTime(TimeOnly.MinValue),
-                ["@IdClase"] = idClase,
-                ["@IdEntrenador"] = idEntrenador
-            });
-        var count = Convert.ToInt32(countResult["Total"]);
-        count.Should().Be(1, "Only one pre-reservation should exist for this combination");
+            await PreReservarHorarioApiTestHelper.LimpiarPreReservasDeHorarioAsync(
+                TestContainerHelper.ConnectionString, preReserva1);
+        }
     }
 
     /// <summary>

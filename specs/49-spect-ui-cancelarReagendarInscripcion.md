@@ -186,8 +186,8 @@ En ambos casos:
 - [ ] Checkbox "Reagendar" muestra/oculta calendario y scheduler
 - [ ] Calendario reutiliza `Calendar` de `calendario.js` (mismo que RegistroDeClasesProgramadas)
 - [ ] Scheduler reutiliza `ScheduleViewer` de `horariosDelDia.js` (mismo que RegistroDeClasesProgramadas)
-- [ ] Al marcar reagendar, se consultan clases programadas para la clase programada de la inscripción
-- [ ] Al seleccionar fecha en calendario, se actualiza el scheduler con horarios disponibles
+- [ ] Al marcar reagendar, se consultan clases programadas para la clase programada de la inscripción (solo se muestran las que tienen cupo disponible)
+- [ ] Al seleccionar fecha en calendario, se actualiza el scheduler con horarios disponibles de clases con cupo
 - [ ] Botón ejecutar cambia texto: "Cancelar" o "Reagendar" según el check
 - [ ] Botón limpiar resetea todos los campos
 - [ ] Petición cancelación POST a nginx → frontend proxy (spec 45) → API
