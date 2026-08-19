@@ -262,6 +262,8 @@ try
     builder.Services.AddScoped<IInscripcionesService, InscripcionesService>();
     builder.Services.AddScoped<IValidadorUsuarioExistente, ValidadorUsuarioExistente>();
     builder.Services.AddScoped<IValidadorFechasInscripcionesYClasesProgramadas, ValidadorFechasInscripcionesYClasesProgramadas>();
+    builder.Services.AddScoped<IValidadorClaseExistente, ValidadorClaseExistente>();
+    builder.Services.AddScoped<IValidadorClaseProgramadaExistente, ValidadorClaseProgramadaExistente>();
     Console.WriteLine("Servicios personalizados registrados");
 
     // Quartz
