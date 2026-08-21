@@ -81,8 +81,28 @@ namespace BL
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
-                
+
                 return new DTOResponse<int> { success = false, message = "Error al pre-reservar horario." };
+            }
+        }
+
+        public async Task<DTOResponse<object?>> PreReservarHorarioInscripcion(DTOPreReservaDeHorarioInscripcion preReserva)
+        {
+            try
+            {
+                JsonContent jsonCon = JsonContent.Create(preReserva);
+                string response = await _httpClient.post("api/Horarios/preReservarHorarioInscripcion", jsonCon);
+                return JsonSerializer.Deserialize<DTOResponse<object?>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new DTOResponse<object?> { success = false, message = "Error de deserialización o respuesta vacía." };
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Método: PreReservarHorarioInscripcion | " +
+                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                return new DTOResponse<object?> { success = false, message = "Error al pre-reservar horario inscripción." };
             }
         }
     }

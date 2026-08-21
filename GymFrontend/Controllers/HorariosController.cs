@@ -15,7 +15,7 @@ namespace GymFrontend.Controllers
     public class HorariosController : Controller
     {
         private readonly HorariosManager _horariosManager;
-        private JwtTokenGenerator jwtTokenGenerator;
+        private JwtTokenGenerator _jwtTokenGenerator;
         private readonly Microsoft.Extensions.Logging.ILogger<HorariosController> _logger;
 
         public HorariosController(
@@ -25,7 +25,7 @@ namespace GymFrontend.Controllers
         )
         {
             _horariosManager = horariosManager;
-            this.jwtTokenGenerator = jwtTokenGenerator;
+            this._jwtTokenGenerator = jwtTokenGenerator;
             _logger = logger;
         }
 
@@ -45,10 +45,10 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: ObtenerHorariosDisponibles | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: ObtenerHorariosDisponibles | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
-                    $"Parámetro - Fecha: {fecha} | " +
+                    $"Parï¿½metro - Fecha: {fecha} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 
@@ -78,10 +78,10 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: ObtenerPreReservas | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: ObtenerPreReservas | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
-                    $"Parámetro - Fecha: {fecha} | " +
+                    $"Parï¿½metro - Fecha: {fecha} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
                 
@@ -105,7 +105,7 @@ namespace GymFrontend.Controllers
             try
             {
                 var token = Request.Cookies["AuthToken"];
-                var claims = jwtTokenGenerator.ValidateIdToken(token);
+                var claims = _jwtTokenGenerator.ValidateIdToken(token);
                 var UsuarioId = claims
                     .FirstOrDefault(c =>
                         c.Key == ClaimTypes.NameIdentifier || c.Key == JwtRegisteredClaimNames.Sub
@@ -113,7 +113,7 @@ namespace GymFrontend.Controllers
                     .Value;
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 preReserva.idUsuarioQueReserva = UsuarioId;
-                
+
                 var result = await _horariosManager.PreReservarHorario(preReserva);
                 if (result.success)
                 {
@@ -123,18 +123,61 @@ namespace GymFrontend.Controllers
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: PreReservarHorario | " +
-                    $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                string logMessage = $"[ERROR] Mï¿½todo: PreReservarHorario | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
                     $"Causa: {ex.GetType().Name} - {ex.Message} | " +
                     $"Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
-                
+
                 return StatusCode(
                     500,
                     new DTOResponse<string>
                     {
                         success = false,
                         message = "Error interno del servidor al pre-reservar horario.",
+                        errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } },
+                    }
+                );
+            }
+        }
+
+        [HttpPost("preReservarHorarioInscripcion")]
+        public async Task<IActionResult> registrarPreReservaDeHorarioInscripcion(
+            [FromBody] DTOPreReservaDeHorarioInscripcion preReserva
+        )
+        {
+            try
+            {
+                var token = Request.Cookies["AuthToken"];
+                var claims = _jwtTokenGenerator.ValidateIdToken(token);
+                var usuarioId = claims
+                    .FirstOrDefault(c =>
+                        c.Key == ClaimTypes.NameIdentifier || c.Key == JwtRegisteredClaimNames.Sub
+                    )
+                    .Value;
+                preReserva.idUsuarioQueReserva = usuarioId;
+
+                var result = await _horariosManager.PreReservarHorarioInscripcion(preReserva);
+                if (result.success)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                string logMessage = $"[ERROR] Mï¿½todo: registrarPreReservaDeHorarioInscripcion | " +
+                    $"Lï¿½nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                    $"Causa: {ex.GetType().Name} - {ex.Message} | " +
+                    $"Stack Trace: {ex.StackTrace}";
+                Console.WriteLine(logMessage);
+
+                return StatusCode(
+                    500,
+                    new DTOResponse<string>
+                    {
+                        success = false,
+                        message = "Error interno del servidor al pre-reservar horario inscripciÃ³n.",
                         errors = new List<ErrorModel> { new ErrorModel { message = ex.Message } },
                     }
                 );

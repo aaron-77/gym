@@ -1,6 +1,6 @@
 import { realizarPeticionAPI, getSignalRBaseUrl, obtenerFechaReferencia } from './httpClient.js';
 import { Calendar } from './calendario.js';
-import { ScheduleViewer } from './horariosDelDia.js';
+import { ScheduleViewer } from './horariosDelDiaInscripcion.js';
 import { showMessage, iconTypes } from './messageManager.mjs';
 
 let calendarInstance = null;
