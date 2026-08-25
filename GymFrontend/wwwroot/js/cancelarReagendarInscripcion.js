@@ -73,7 +73,7 @@ async function onClienteChange() {
         fillComboBox(comboInscripcion, inscripciones, 'Seleccione una inscripción...', ins => ({
             value: ins.idInscripcion,
             text: `${ins.nombreClase} — ${ins.fechaDeLaClase}`,
-            dataset: { idClaseProgramada: ins.idClaseProgramada, fkClase: ins.fkClase }
+            dataset: { idClaseProgramada: ins.idClaseProgramada, fkClase: ins.fkClase, fechaDeLaClase: ins.fechaDeLaClase }
         }));
     } catch {
         showMessage(iconTypes.error, 'Error al obtener inscripciones del cliente');
@@ -114,10 +114,11 @@ async function onReagendarToggle() {
 async function fetchClasesProgramadas() {
     const selected = comboInscripcion.options[comboInscripcion.selectedIndex];
     const fkClase = selected?.dataset?.fkClase;
+    const fechaClaseOriginal = selected?.dataset?.fechaDeLaClase;
     if (!fkClase) return;
 
     try {
-        const response = await realizarPeticionAPI('/clases/obtenerClasesProgramadasPorId', undefined, { idClase: fkClase, fecha: obtenerFechaReferencia() });
+        const response = await realizarPeticionAPI('/clases/obtenerClasesProgramadasPorId', undefined, { idClase: fkClase, fecha: obtenerFechaReferencia(fechaClaseOriginal ? new Date(fechaClaseOriginal) : new Date()) });
         const data = response.payload || response;
 
         horarios = {};
@@ -152,7 +153,7 @@ async function fetchClasesProgramadas() {
         }
 
         // Seleccionar el primer día con horarios al iniciar el calendario
-        // (el backend solo devuelve fechas desde hoy, así que el mínimo global es el primer día válido)
+        // (el backend devuelve fechas desde la fecha de la inscripción seleccionada, así que el mínimo global es el primer día válido)
         const primeraFecha = getPrimeraFechaConHorarios();
         if (primeraFecha && calendarInstance) {
             calendarInstance.selectedDate = primeraFecha;
@@ -181,7 +182,7 @@ function getMonthSchedules(fecha) {
 
 /**
  * Obtiene el primer día con horarios cargados.
- * El backend filtra fechas >= fecha de referencia (hoy), por lo que el mínimo
+ * El backend filtra fechas >= fecha de la inscripción seleccionada, por lo que el mínimo
  * global (año → mes → día) es el primer día válido del calendario.
  */
 function getPrimeraFechaConHorarios() {

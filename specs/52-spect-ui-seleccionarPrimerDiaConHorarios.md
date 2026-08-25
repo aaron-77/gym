@@ -23,7 +23,7 @@ Modificar el JavaScript de la vista "CancelarReagendarInscripcion" para que, al 
 | Dependencia | Tipo | Descripción |
 |-------------|------|-------------|
 | `horarios` | Estado JS | Objeto de 3 niveles `horarios[anio][mes][dia]` que se construye en `fetchClasesProgramadas` con las clases programadas devueltas por la API |
-| `obtenerClasesProgramadasPorId` | Endpoint | Devuelve SOLO clases programadas con fecha mayor o igual a la fecha de referencia (hoy) — verificado en `fn_obtenerClasesProgramadasPorIdClase` |
+| `obtenerClasesProgramadasPorId` | Endpoint | Devuelve SOLO clases programadas con fecha mayor o igual a la fecha de la inscripción seleccionada (enviada como `fecha` de referencia) — verificado en `fn_obtenerClasesProgramadasPorIdClase` |
 
 ## 3. Cambios a realizar
 
@@ -46,7 +46,7 @@ Además, si el primer día con horarios cae en un mes distinto al de hoy, `updat
 ### 3.3 Comportamiento deseado
 
 Al ejecutarse `fetchClasesProgramadas`:
-1. Se determina el primer día con horarios dentro del objeto `horarios` (la fecha mínima global, considerando que el backend solo devuelve fechas desde hoy).
+1. Se determina el primer día con horarios dentro del objeto `horarios` (la fecha mínima global, considerando que el backend devuelve fechas desde la fecha de la inscripción seleccionada enviada como `fecha` de referencia).
 2. Se asigna esa fecha a `selectedDate` de la instancia del calendario.
 3. Se sincroniza el input oculto `fechaDeLaClase` con esa fecha (el input no se actualiza solo: `selectedDate` es una propiedad plana sin setter/reactividad; solo lo escriben el constructor y el handler de click del día).
 4. Se actualiza `disponibleDates` con los horarios del mes de `selectedDate` y se renderiza el calendario (esto navega al mes correcto y marca el día seleccionado).
@@ -61,7 +61,7 @@ Al ejecutarse `fetchClasesProgramadas`:
    - Con ese año, obtener las claves (meses) y calcular el mes mínimo.
    - Con ese mes, obtener las claves (días) y calcular el día mínimo.
    - Devolver la fecha construida con el año, mes y día mínimos.
-   - La lógica funciona porque el backend garantiza que solo hay fechas desde hoy, y el mínimo global (año → mes → día) es el primer día con horarios.
+    - La lógica funciona porque el backend devuelve fechas desde la fecha de la inscripción seleccionada, y el mínimo global (año → mes → día) es el primer día con horarios.
 2. Crear una función helper que reciba una fecha y devuelva el arreglo plano de horarios del mes de esa fecha:
    - Acceder al objeto de meses con el año de la fecha.
    - Acceder al objeto de días con el mes de la fecha.
@@ -90,7 +90,7 @@ Al ejecutarse `fetchClasesProgramadas`:
 - **No se modifica `calendario.js` ni `horariosDelDia.js`:** el cambio se resuelve seteando `selectedDate` (propiedad existente) y dejando que el render existente del calendario navegue al mes y marque el día.
 - **El input `fechaDeLaClase` se sincroniza manualmente** porque la pre-reserva de horarios lee esa fecha al clickear un horario en el scheduler. Sin sincronización, la pre-reserva se registraría con la fecha equivocada.
 - **No se usa click programático sobre el día del calendario** para evitar el scroll automático hacia el scheduler que ejecuta el handler de click, y para no acoplarse a que el día esté habilitado.
-- **No hay cambios en el backend:** la TVF `fn_obtenerClasesProgramadasPorIdClase` ya filtra fechas desde la fecha de referencia, garantizando que el objeto `horarios` solo contenga fechas desde hoy.
+- **No hay cambios en el backend:** la TVF `fn_obtenerClasesProgramadasPorIdClase` ya filtra fechas desde la fecha de referencia, garantizando que el objeto `horarios` solo contenga fechas desde la fecha de la inscripción seleccionada (fecha de referencia enviada por el frontend).
 
 ## 4. Archivos a modificar
 

@@ -47,7 +47,7 @@ La vista se organiza en un formulario con las siguientes secciones, en orden de 
 
 **ComboCliente:** Selector de clientes. Las opciones se llenan en Razor desde los datos que pasa el controller (spec 48). El value de cada opción es el ID del cliente (GUID).
 
-**ComboInscripcion:** Selector de inscripciones. Se llena dinámicamente desde JavaScript al seleccionar un cliente. Cada opción muestra el nombre de la clase y la fecha de la clase programada separados por un guión. El value de la opción es el idInscripcion. Cada opción tiene un data attribute `idClaseProgramada` que almacena el ID de la clase programada de esa inscripción.
+**ComboInscripcion:** Selector de inscripciones. Se llena dinámicamente desde JavaScript al seleccionar un cliente. Cada opción muestra el nombre de la clase y la fecha de la clase programada separados por un guión. El value de la opción es el idInscripcion. Cada opción tiene un data attribute `idClaseProgramada` que almacena el ID de la clase programada de esa inscripción, y un data attribute `fechaDeLaClase` con la fecha de la clase de esa inscripción (usada como fecha de referencia al consultar las clases programadas disponibles para reagendar).
 
 **Checkbox "Reagendar":** Control que muestra u oculta el calendario y scheduler. Al marcarlo, se consultan las clases programadas disponibles para la clase de la inscripción seleccionada.
 
@@ -66,6 +66,7 @@ La vista se organiza en un formulario con las siguientes secciones, en orden de 
 | `idCliente` | Del value del comboCliente |
 | `idInscripcion` | Del value del comboInscripcion |
 | `idClaseProgramada` | Del data attribute `idClaseProgramada` de la opción seleccionada en comboInscripcion |
+| `fechaDeLaClase` | Del data attribute `fechaDeLaClase` de la opción seleccionada en comboInscripcion |
 
 No se usan inputs ocultos para estos valores.
 
@@ -118,10 +119,11 @@ Crear `cancelarReagendarInscripcion.js` como módulo ES6 (`type="module"`), reut
 **Al seleccionar una inscripción:**
 - Se obtiene el idInscripcion del value del comboInscripcion
 - Se obtiene el idClaseProgramada del data attribute de la opción seleccionada
-- Si el check "Reagendar" está marcado, se consultan las clases programadas para ese idClaseProgramada
+- Se obtiene la fechaDeLaClase del data attribute de la opción seleccionada
+- Si el check "Reagendar" está marcado, se consultan las clases programadas para ese idClaseProgramada, enviando como `fecha` la fechaDeLaClase de la inscripción seleccionada (no la fecha de hoy), de modo que el backend solo devuelva clases con fecha mayor o igual a la de la inscripción que se quiere reagendar
 
 **Al marcar/desmarcar el check "Reagendar":**
-- Si se marca: se muestra el calendario y scheduler, se consultan las clases programadas para la clase programada de la inscripción seleccionada (reusando funciones de `agendarioDeHorarios.js`), se inicializa el calendario con `Calendar`, se inicializa el scheduler con `ScheduleViewer`, y el texto del botón ejecutar cambia a "Reagendar"
+- Si se marca: se muestra el calendario y scheduler, se consultan las clases programadas para la clase programada de la inscripción seleccionada enviando como `fecha` la fechaDeLaClase de dicha inscripción (reusando funciones de `agendarioDeHorarios.js`), se inicializa el calendario con `Calendar`, se inicializa el scheduler con `ScheduleViewer`, y el texto del botón ejecutar cambia a "Reagendar"
 - Si se desmarca: se oculta el calendario y scheduler, y el texto del botón ejecutar vuelve a "Cancelar"
 
 **Al seleccionar una fecha en el calendario:**
@@ -165,7 +167,7 @@ En ambos casos:
 | Acción | Método | Ruta (nginx) | Descripción |
 |--------|--------|-------------|-------------|
 | Obtener inscripciones del cliente | GET | `/inscripciones/cliente?idCliente=X` | Se pasa idCliente como query param |
-| Obtener clases programadas | GET | `/clases/obtenerClasesProgramadasPorId?idClase=X` | Se pasa idClaseProgramada como query param |
+| Obtener clases programadas | GET | `/clases/obtenerClasesProgramadasPorId?idClase=X` | Se pasa idClaseProgramada como query param y `fecha` con la fechaDeLaClase de la inscripción seleccionada, para que el backend devuelva solo clases con fecha mayor o igual a la de la inscripción que se quiere reagendar |
 | Cancelar inscripción | POST | `/inscripciones/cancelar` | Body: `{ idInscripcion }` |
 | Reagendar inscripción | POST | `/inscripciones/reagendar` | Body: `{ idInscripcion, idClaseProgramada, idCliente }` |
 
@@ -181,7 +183,7 @@ En ambos casos:
 
 - [ ] comboCliente se llena en Razor desde los datos del controller
 - [ ] Al seleccionar cliente, JS consulta inscripciones vía API y llena comboInscripcion
-- [ ] comboInscripcion muestra: "nombreClase — fechaDeLaClase" con value=idInscripcion y data attribute idClaseProgramada
+- [ ] comboInscripcion muestra: "nombreClase — fechaDeLaClase" con value=idInscripcion y data attributes idClaseProgramada y fechaDeLaClase
 - [ ] No hay inputs ocultos para idInscripcion ni idCliente — se obtienen de los combobox
 - [ ] Checkbox "Reagendar" muestra/oculta calendario y scheduler
 - [ ] Calendario reutiliza `Calendar` de `calendario.js` (mismo que RegistroDeClasesProgramadas)
@@ -194,3 +196,4 @@ En ambos casos:
 - [ ] Petición reagendación POST a nginx → frontend proxy (spec 47) → API
 - [ ] SignalR activo para actualizaciones en tiempo real (mismo patrón que agendarioDeHorarios.js)
 - [ ] Reutiliza los mismos JS que RegistroDeClasesProgramadas (calendario.js, horariosDelDia.js, agendarioDeHorarios.js)
+- [ ] El query param `fecha` enviado a `obtenerClasesProgramadasPorId` es la fechaDeLaClase de la inscripción seleccionada (no la fecha de hoy), de modo que solo se devuelven clases con fecha mayor o igual a la de la inscripción que se quiere reagendar

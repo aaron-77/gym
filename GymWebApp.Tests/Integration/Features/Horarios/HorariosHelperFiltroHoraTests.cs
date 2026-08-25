@@ -85,8 +85,15 @@ public class HorariosHelperFiltroHoraTests : IAsyncLifetime
     [Fact]
     public async Task FiltroHoraMayor_FechaExplicitaFutura_Referencia00Preservada()
     {
-        // Arrange
-        var fechaExplicita = DateOnly.FromDateTime(DateTime.Today.AddDays(7));
+
+        // Arrange — obtener una fecha futura con horarios disponibles garantizados
+        var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
+            _connectionString,
+            FiltroFecha.Mayor,
+            FiltroHora.SinFiltro);
+
+        slot.Should().NotBeNull("debe existir al menos un horario disponible en una fecha futura");
+        var fechaExplicita = slot!.Value.FechaDisponible;
 
         // Act
         var horarios = await HorariosHelper.ObtenerHorariosDisponiblesFiltrados(
@@ -94,6 +101,12 @@ public class HorariosHelperFiltroHoraTests : IAsyncLifetime
             FiltroFecha.Igual,
             FiltroHora.Mayor,
             fechaExplicita.ToDateTime(TimeOnly.MinValue));
+
+        Console.WriteLine($"[Test 2] Horarios disponibles para {fechaExplicita:yyyy-MM-dd}: {horarios.Count}");
+        foreach (var h in horarios)
+        {
+            Console.WriteLine($"  - Fecha: {h["FechaDisponible"]}, Hora: {h["horaInicio"]}-{h["horaFin"]}");
+        }
 
         // Assert
         horarios.Should().NotBeEmpty("debe haber slots disponibles para la fecha futura solicitada");
