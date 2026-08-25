@@ -285,8 +285,14 @@ async function handleClaseSelected(ev) {
 
             const clasesProgramadas = await obtenerClasesProgramadas(idClaseSeleccionada);
             const clasesProgramadasFormateadas = obtenerHorariosDisponiblesFormateados(clasesProgramadas);
-            agregarHorarios(clasesProgramadasFormateadas); 
-            
+            agregarHorarios(clasesProgramadasFormateadas);
+
+            // Llenar inputs hidden necesarios para la pre-reserva
+            document.getElementById('inputClase').value = idClaseSeleccionada;
+            if (clasesProgramadasFormateadas.length > 0) {
+                document.getElementById('inputEntrenador').value =
+                    clasesProgramadasFormateadas[0].fkEntrenador || '';
+            }
         }
         let clasesProgramadasMensualesDeClaseSeleccionada = obtenerClasesDelMes(new Date()).filter(clase => clase.fkClase === idClaseSeleccionada);
         inicializarCalendario('calendar', clasesProgramadasMensualesDeClaseSeleccionada, null, hayClasesDisponibles);
@@ -563,6 +569,7 @@ function handleSelectedSchedule(event) {
     if (horario) {
         asignarValorLabelEntrenador(horario.nombreEntrenador)
         asignarValorLabelEspaciosDisponibles(horario.cupoDisponible);
+        document.getElementById('inputEntrenador').value = horario.fkEntrenador || '';
     } else {
         asignarValorLabelEntrenador("no has seleccionado una clase");
         asignarValorLabelEspaciosDisponibles("no has seleccionado una clase");
@@ -769,6 +776,13 @@ async function inscribirAClase(event) {
 
         // Convertir FormData a objeto JSON usando la función importada
         const datosClaseProgramada = formDataToJson(formData);
+
+        // Incluir idPreReserva si existe en localStorage
+        const idPreReserva = localStorage.getItem('idPreReserva');
+        if (idPreReserva) {
+            datosClaseProgramada.idPreReserva = parseInt(idPreReserva, 10);
+        }
+
         console.log('Datos a enviar:', datosClaseProgramada);
         // Realizar la petición POST al endpoint
         const response = await realizarPeticionAPI('/clases/inscripcionAClases', datosClaseProgramada);
@@ -788,6 +802,8 @@ async function inscribirAClase(event) {
             const labelEspaciosDisponibles = document.getElementById('labelEspaciosDisponibles');
             labelEntrenador.textContent = 'Selecciona una clase';
             labelEspaciosDisponibles.textContent = '0';
+            // Limpiar idPreReserva del localStorage
+            localStorage.removeItem('idPreReserva');
         } else {
             showMessage(iconTypes.error,response.message || 'Error al inscribir el cliente');
             let detailedError = 'La inscripcion ha fallado';

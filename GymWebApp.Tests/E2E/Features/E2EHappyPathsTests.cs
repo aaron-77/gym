@@ -294,20 +294,33 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         var datosClase = await ClasesProgramadasHelper.GenerarClaseProgramadaAsync(
             E2eContainerHelper.HostConnectionString);
 
-        var claseRegistrada = await ClasesProgramadasHelper.RegistrarClaseProgramadaAsync(
+        var (claseRegistrada, idClaseProgramada) = await ClasesProgramadasHelper.RegistrarClaseProgramadaAsync(
             E2eContainerHelper.HostConnectionString, datosClase);
 
         // When: Navega a inscripción de clases y selecciona cliente y clase
-        await Page.GotoAsync($"{BaseUrl}/Clases/inscripcionAClases");
-        await Assertions.Expect(Page.Locator("#comboCliente")).ToBeVisibleAsync();
+        var inscripcionPage = new PageModels.InscripcionAClasesPage(Page);
+        await inscripcionPage.GoToAsync(BaseUrl);
+        await Assertions.Expect(inscripcionPage.ClientSelect).ToBeVisibleAsync();
 
         // Seleccionar un cliente
-        await Page.Locator("#comboCliente").SelectOptionAsync(new SelectOptionValue { Index = 1 });
+        await inscripcionPage.SelectClientAsync(new SelectOptionValue { Index = 1 });
 
-// Seleccionar la clase exacta que registramos
-        await Page.SelectOptionAsync("#comboClases", claseRegistrada.fkClase!.Value.ToString());
-        await Page.Locator("button.schedule-viewer__item[data-idhora]").First.ClickAsync();
-        await Page.ClickAsync("button.btn-primary[type='submit']");
+        // Seleccionar la clase exacta que registramos. La UI posiciona automáticamente
+        // el calendario en la fecha de la clase y renderiza el horario correspondiente.
+        await inscripcionPage.SelectClassAsync(claseRegistrada.fkClase!.Value.ToString());
+
+        // Seleccionar el horario exacto por ID de clase programada
+        await inscripcionPage.SelectScheduleByIdAsync(idClaseProgramada.ToString());
+
+        // Aceptar el diálogo de confirmación de pre-reserva
+        var modalConfirmacion = Page.Locator("button.swal2-confirm.swal2-styled");
+        await Assertions.Expect(modalConfirmacion).ToBeVisibleAsync();
+        await modalConfirmacion.ClickAsync();
+
+        // Esperar a que la pre-reserva termine y el hidden input #idProgramacionClase se setee
+        await inscripcionPage.WaitForScheduleSelectionAsync();
+
+        await inscripcionPage.SubmitAsync();
         await Page.Locator("div.swal2-container").WaitForAsync();
         // Then: Verificar mensaje de éxito en SweetAlert
         var pageContent = await Page.ContentAsync();

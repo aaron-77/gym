@@ -17,6 +17,7 @@
 
 
 import { realizarPeticionAPI } from './httpClient.js';
+import { showMessage, iconTypes, showComplexDialog } from './messageManager.mjs';
 
 
 
@@ -45,10 +46,9 @@ export class ScheduleViewerInscripciones {
     this.gridElement = null
     this.inputFkHoraLaboral = null
     this.selectedScheduleId = null
+    this.selectedIdClaseProgramada = null
     this.schedules = []
     this.checkElement = null
-
-    
   }
 
   /**
@@ -74,10 +74,14 @@ export class ScheduleViewerInscripciones {
    * Configura los event listeners
    */
   bindEvents() {
-    this.checkElement.addEventListener("change", (event) => {
-      const ocultar = event.target.checked;
-      this.togglePreReservados(ocultar);
-    });
+    // Guard: el checkbox "ocultarPreReservados" solo existe cuando el partial
+    // _HorariosDelDia se renderiza con model="true" (ej. inscripción usa false).
+    if (this.checkElement) {
+      this.checkElement.addEventListener("change", (event) => {
+        const ocultar = event.target.checked;
+        this.togglePreReservados(ocultar);
+      });
+    }
 
     
     
@@ -159,6 +163,7 @@ export class ScheduleViewerInscripciones {
     const element = document.createElement("button")
     element.className = this.getScheduleElementClasses(schedule.estado)
     element.setAttribute("data-idhora", schedule.idHora)
+    element.dataset.idClaseProgramada = schedule.idClaseProgramada ?? ''
     element.textContent = schedule.labelHorario
     element.type = "button"
 
@@ -199,79 +204,108 @@ export class ScheduleViewerInscripciones {
    * @param {Event} event - Evento de click
    */
   async handleScheduleClick(event) {
-    
     const element = event.currentTarget
     const scheduleId = element.getAttribute("data-idhora")
-    this.updateHiddenInput(scheduleId)
-    // Ejecutar pre-reserva antes de continuar
-    
+    const idClaseProgramada = element.dataset.idClaseProgramada
+
     if (!scheduleId) {
       console.error("ID de horario no encontrado")
       return
     }
 
-    // Remover selección anterior
+    // 1. Mostrar confirmación antes de pre-reserva
+    const confirmacion = await showComplexDialog(
+      iconTypes.warning,
+      "¿Deseas reservar ese horario?, la reserva dura solo 5 minutos"
+    );
+    if (!confirmacion.isConfirmed) {
+      return
+    }
+
+    // 2. Extraer y guardar idClaseProgramada
+    this.selectedIdClaseProgramada = idClaseProgramada
+
+    // 3. Actualizar hidden inputs
+    this.updateHiddenInput(scheduleId)
+
+    // 4. Ejecutar pre-reserva
+    const idPreReserva = await this.registrarPreReservaDeHorario()
+    if (idPreReserva <= 0) {
+      showMessage(iconTypes.error, "No se pudo reservar el horario, aun asi puedes intentar programar tu clase")
+      return
+    }
+
+    // 5. Guardar idPreReserva en localStorage
+    localStorage.setItem("idPreReserva", idPreReserva.toString())
+
+    // 6. Remover selección anterior
     this.clearSelection()
 
-    // Seleccionar nuevo elemento
+    // 7. Seleccionar nuevo elemento
     this.selectSchedule(element, scheduleId)
 
-    // Disparar evento personalizado
+    // 8. Disparar evento personalizado
     this.dispatchSelectionEvent(scheduleId)
-        
+
+    // 9. Scroll hacia el label de horario seleccionado
+    this.scrollToSelectedLabel()
   }
 
   /**
-   * Método para registrar una pre-reserva de horario
-   * @returns {Promise<boolean>} true si fue exitosa, false si hubo error
+   * Registra una pre-reserva de horario de inscripción.
+   * @returns {Promise<number>} idPreReserva si fue exitosa, 0 si hubo error
    */
   async registrarPreReservaDeHorario() {
-    // Validar que haya un horario seleccionado
-    const inputFkHoraLaboral = document.getElementById('fkHoraLaboral');
-    
-    const inputFecha = document.getElementById('fechaDeLaClase');
+    const inputFkHoraLaboral = document.getElementById('fkHoraLaboral')
+    const inputFecha = document.getElementById('fechaDeLaClase')
+    const inputClase = document.getElementById('inputClase')
+    const inputEntrenador = document.getElementById('inputEntrenador')
 
-    
-    if (!inputFecha.reportValidity()) {
-      return false;
-    }
-    if (!inputFkHoraLaboral.reportValidity()) {
-      return false;
-    }
-    
-
-    // Obtener los datos pertinentes
-    
-    const idUsuarioQueReserva = 16; // Aquí puedes cambiar por el usuario real si lo tienes
-    const fechaTentativa = inputFecha.value;
-    const idHoraLaboral = parseInt(inputFkHoraLaboral.value);
+    if (!inputFkHoraLaboral?.reportValidity()) return 0
+    if (!inputFecha?.reportValidity()) return 0
+    if (!inputClase?.reportValidity()) return 0
+    if (!inputEntrenador?.reportValidity()) return 0
 
     const body = {
-      idUsuarioQueReserva,
-      fechaTentativa,
-      idHoraLaboral
-    };
+      fechaTentativa: inputFecha.value,
+      idHoraLaboral: parseInt(inputFkHoraLaboral.value),
+      idClase: parseInt(inputClase.value),
+      idEntrenador: inputEntrenador.value,
+      idClaseProgramada: parseInt(this.selectedIdClaseProgramada || '0')
+    }
 
     try {
-      const response = await realizarPeticionAPI('Horarios/preReservarHorario', body, undefined, 'POST');
+      const endpointPath = window.AppConfig?.EndPoints?.preReservaHorarioInscripcion
+                           || '/Horarios/preReservarHorarioInscripcion'
+      const response = await realizarPeticionAPI(endpointPath, body, undefined, 'POST')
       if (response.success) {
-        // Se puede mostrar un mensaje si se desea
-        // alert('Pre-reserva registrada exitosamente.');
-        return true;
+        return response.payload ?? 0
       } else {
-        let errorMessage = 'Error al registrar la pre-reserva';
-        if (response.errors && response.errors.length > 0) {
-          errorMessage += ': ' + response.errors.map(e => e.message).join(', ');
+        let errorMessage = 'Error al registrar la pre-reserva'
+        if (response.errors?.length > 0) {
+          errorMessage += ': ' + response.errors.map(e => e.message).join(', ')
         } else if (response.message) {
-          errorMessage += ': ' + response.message;
+          errorMessage += ': ' + response.message
         }
-        alert(errorMessage);
-        return false;
+        console.error(errorMessage)
+        return 0
       }
     } catch (error) {
-      console.error('Error al registrar pre-reserva:', error);
-      alert('Error al registrar la pre-reserva: ' + error.message);
-      return false;
+      console.error('Error al registrar pre-reserva:', error)
+      return 0
+    }
+  }
+
+  /**
+   * Desplaza el scroll suavemente hacia el label de horario seleccionado
+   */
+  scrollToSelectedLabel() {
+    const label = document.getElementById('labelHorarioSeleccionado')
+    const offset = 60
+    if (label) {
+      const rect = label.getBoundingClientRect()
+      const y = rect.top + window.pageYOffset - offset
+      window.scrollTo({ top: y, behavior: 'smooth' })
     }
   }
 

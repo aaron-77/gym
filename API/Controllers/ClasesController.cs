@@ -1006,6 +1006,106 @@ namespace API.Controllers
                         )
                     );
                 }
+
+                // ── Guard clause: verificar si el cliente ya está inscrito ──
+                // Obtener fechaDeClase e idHora de la clase programada
+                var claseProgramadaInfo = await _context.ClasesProgramadas
+                    .Where(cp => cp.IdProgramacionClase == modelo.IdProgramacionClase)
+                    .Select(cp => new
+                    {
+                        cp.FechaDeLaClase,
+                        HorarioId = cp.HorariosDeClasesProgramada
+                            .Select(h => h.FkHorarioLaboral)
+                            .FirstOrDefault()
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (claseProgramadaInfo == null)
+                {
+                    return BadRequest(
+                        ResponseManager.BuildResponse<int>(
+                            false,
+                            400,
+                            "Clase programada no encontrada",
+                            new List<ErrorModel>
+                            {
+                                new ErrorModel
+                                {
+                                    propiedad = "IdProgramacionClase",
+                                    message = "No se encontró la clase programada especificada.",
+                                },
+                            },
+                            0
+                        )
+                    );
+                }
+
+                if (!claseProgramadaInfo.FechaDeLaClase.HasValue || claseProgramadaInfo.HorarioId == 0)
+                {
+                    _logger?.LogError(
+                        "[InscribirAClase] La clase programada {IdProgramacionClase} no tiene fecha u horario asignado.",
+                        modelo.IdProgramacionClase);
+                    return StatusCode(
+                        500,
+                        ResponseManager.BuildResponse<int>(
+                            false,
+                            500,
+                            "Error interno del servidor",
+                            new List<ErrorModel>
+                            {
+                                new ErrorModel { propiedad = "NONE", message = "La clase programada no tiene fecha u horario asignado." },
+                            },
+                            0
+                        )
+                    );
+                }
+
+                // Invocar fn_yaEstaInscritoElCliente
+                var yaInscritoResult = await DataAccess.Infraestructure.DatabaseExecutor.ExecuteStoredProcedureAsync(
+                    _context.Database.GetDbConnection(),
+                    "dbo.fn_yaEstaInscritoElCliente",
+                    new Dictionary<string, object>
+                    {
+                        {
+                            "idCliente",
+                            new DatabaseParameter(modelo.IdCliente, ParameterDirection.Input, DbType.String)
+                        },
+                        {
+                            "idHora",
+                            new DatabaseParameter(claseProgramadaInfo.HorarioId, ParameterDirection.Input, DbType.Int32)
+                        },
+                        {
+                            "fechaDeClase",
+                            new DatabaseParameter(claseProgramadaInfo.FechaDeLaClase.Value, ParameterDirection.Input, DbType.Date)
+                        },
+                        {
+                            "resultado",
+                            new DatabaseParameter(null, ParameterDirection.ReturnValue, DbType.Boolean)
+                        },
+                    }
+                );
+
+                var yaInscrito = (bool)yaInscritoResult.OutputParameters["resultado"];
+                if (yaInscrito)
+                {
+                    return Conflict(
+                        ResponseManager.BuildResponse<int>(
+                            false,
+                            409,
+                            "El cliente ya está inscrito en esta clase",
+                            new List<ErrorModel>
+                            {
+                                new ErrorModel
+                                {
+                                    propiedad = "IdCliente",
+                                    message = "El cliente ya tiene una inscripción vigente para esta clase, hora y fecha.",
+                                },
+                            },
+                            0
+                        )
+                    );
+                }
+
                 // Ejecutar el procedimiento almacenado usando ExecuteSqlInterpolatedAsync
                 idInscripcion = await _context.Database.ExecuteSqlInterpolatedAsync(
                    $@"EXEC dbo.sp_registrarInsrcipcionAClase 

@@ -59,7 +59,11 @@ public static class ClasesProgramadasHelper
     /// </summary>
     /// <param name="connectionString">Connection string para la base de datos</param>
     /// <param name="datos">Datos de la clase programada</param>
-    public static async Task<DTODatosClaseProgramada> RegistrarClaseProgramadaAsync(string connectionString, DTODatosClaseProgramada datos)
+    /// <returns>
+    /// Tupla con los datos de la clase programada y el <c>idClaseProgramada</c> generado.
+    /// </returns>
+    public static async Task<(DTODatosClaseProgramada datos, int idClaseProgramada)> RegistrarClaseProgramadaAsync(
+        string connectionString, DTODatosClaseProgramada datos)
     {
         try
         {
@@ -100,13 +104,14 @@ public static class ClasesProgramadasHelper
             };
             cmd.Parameters.Add(sqlParam);
 
-            await cmd.ExecuteNonQueryAsync();
+            var result = await cmd.ExecuteScalarAsync();
+            var idClaseProgramada = result is null ? 0 : Convert.ToInt32(result);
 
-            return datos;
+            return (datos, idClaseProgramada);
         }
         catch (Exception ex)
         {
-            
+
             Console.WriteLine($"ERROR en [ClasesProgramadasHelper.RegistrarClaseProgramadaAsync]: {ex.Message}");
             Console.WriteLine($"Causa: {ex.InnerException?.Message ?? "N/A"}");
             throw;

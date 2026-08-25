@@ -61,7 +61,7 @@ public class PreReservarHorarioInscripcionManagerTests : IntegrationTestBase
         try
         {
             // Act
-            var result = await manager.preReservarHorarioInscripcion(dto);
+            var result = await manager.PreReservarHorarioInscripcion(dto);
 
             // Assert
             result.success.Should().BeTrue();
@@ -118,7 +118,7 @@ public class PreReservarHorarioInscripcionManagerTests : IntegrationTestBase
         };
 
         // Act
-        var result = await manager.preReservarHorarioInscripcion(dto);
+        var result = await manager.PreReservarHorarioInscripcion(dto);
 
         // Assert
         result.success.Should().BeFalse();
@@ -165,7 +165,7 @@ public class PreReservarHorarioInscripcionManagerTests : IntegrationTestBase
         };
 
         // Act
-        var result = await manager.preReservarHorarioInscripcion(dto);
+        var result = await manager.PreReservarHorarioInscripcion(dto);
 
         // Assert
         result.success.Should().BeFalse();
@@ -206,7 +206,7 @@ public class PreReservarHorarioInscripcionManagerTests : IntegrationTestBase
         };
 
         // Act
-        var result = await manager.preReservarHorarioInscripcion(dto);
+        var result = await manager.PreReservarHorarioInscripcion(dto);
 
         // Assert
         result.success.Should().BeFalse();
@@ -247,7 +247,7 @@ public class PreReservarHorarioInscripcionManagerTests : IntegrationTestBase
         };
 
         // Act
-        var result = await manager.preReservarHorarioInscripcion(dto);
+        var result = await manager.PreReservarHorarioInscripcion(dto);
 
         // Assert
         result.success.Should().BeFalse();
@@ -296,7 +296,7 @@ public class PreReservarHorarioInscripcionManagerTests : IntegrationTestBase
         };
 
         // Act
-        var result = await manager.preReservarHorarioInscripcion(dto);
+        var result = await manager.PreReservarHorarioInscripcion(dto);
 
         // Assert
         result.success.Should().BeFalse();

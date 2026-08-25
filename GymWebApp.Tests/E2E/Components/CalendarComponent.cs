@@ -99,10 +99,19 @@ public sealed class CalendarComponent
 
             await YearCell(targetDate.Year).ClickAsync();
             await _page.WaitForTimeoutAsync(250);
-
+            await MonthButton.ClickAsync();
+            await _page.WaitForTimeoutAsync(250);
             await MonthCell(targetDate.Month).ClickAsync();
             await _page.WaitForTimeoutAsync(250);
         }
+        else if (visible.Month != targetDate.Month)
+        {
+            await MonthButton.ClickAsync();
+            await _page.WaitForTimeoutAsync(250);
+            await MonthCell(targetDate.Month).ClickAsync();
+            await _page.WaitForTimeoutAsync(250);
+        }
+
 
         var dateSelector = $"button[data-fecha='{targetDate:yyyy-MM-dd}']";
         await _page.Locator(dateSelector).ClickAsync();

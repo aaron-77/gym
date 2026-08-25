@@ -229,7 +229,29 @@ NO incluyen código — solo descripciones, tablas y listas.
 Para crear un spec, seguir la estructura en [specs/spect-skeleton.md](specs/spect-skeleton.md).
 
 ## Schema de Base de Datos
-El esquema de la base de datos está disponible en: [bd/esquemaBdsDeReferenciaParaIa/FitnessGymSchemaActual.sql](bd/esquemaBdsDeReferenciaParaIa/FitnessGymSchemaActual.sql). Este archivo es la fuente de verdad y se mantiene actualizado copiando el archivo con la fecha más reciente en el mismo directorio.
+
+### Directorio de scripts de migración: `bd/scripsOrdenadosParaMigrarBd/`
+
+Este directorio contiene los scripts de creación de todos los objetos de base de datos (tablas, funciones, procedimientos almacenados, vistas, seeds) organizados en subcarpetas por tipo:
+
+```
+bd/scripsOrdenadosParaMigrarBd/
+├── 3tablas/           # Scripts de creación de tablas
+├── 4datos/            # Seeds y datos iniciales
+├── 8vistas/           # Vistas
+├── 9funciones/
+│   ├── sqlServer/      # Funciones SQL Server
+│   └── postgres/       # Funciones PostgreSQL
+└── 10procedimientos/
+    ├── sqlServer/      # Stored procedures SQL Server
+    └── postgres/       # Stored procedures PostgreSQL
+```
+
+Cada objeto (función, SP, tabla, etc.) tiene su archivo individual. Este directorio es la **fuente de verdad** para los objetos de BD.
+
+### Archivo de referencia de esquema
+
+El esquema de la base de datos de referencia está disponible en: [bd/esquemaBdsDeReferenciaParaIa/FitnessGymSchemaActual.sql](bd/esquemaBdsDeReferenciaParaIa/FitnessGymSchemaActual.sql). Este archivo es la fuente de verdad y se mantiene actualizado copiando el archivo con la fecha más reciente en el mismo directorio.
 
 ## app Configuration
 

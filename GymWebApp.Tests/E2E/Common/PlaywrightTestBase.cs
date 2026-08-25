@@ -4,6 +4,7 @@ using Xunit;
 
 namespace GymWebApp.Tests.E2E.Common;
 
+[WithTestName]
 public abstract class PlaywrightTestBase : IAsyncLifetime
 {
     protected E2eContainerHelper E2eContainerHelper { get; }
@@ -23,15 +24,39 @@ public abstract class PlaywrightTestBase : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
+        
+        
         var (context, page) = await PlaywrightHelper.CreateNewContextAndPageAsync();
         _context = context;
         _page = page;
-
+        
+        await _context.Tracing.StartAsync(new()
+        {
+            Title = $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}",
+            Screenshots = true,
+            Snapshots = true,
+            Sources = true
+        });
         await E2eContainerHelper.ResetDatabaseAsync();
     }
 
     public async Task DisposeAsync()
     {
+        
+        if (_context != null)
+        {
+            var tracesDir = Path.Combine(Environment.CurrentDirectory, "playwright-traces");
+            Directory.CreateDirectory(tracesDir);
+
+            await _context.Tracing.StopAsync(new()
+            {
+                Path = Path.Combine(
+                    tracesDir,
+                    $"{WithTestNameAttribute.CurrentClassName}.{WithTestNameAttribute.CurrentTestName}.zip"
+                )
+            });
+        }
+        
         if (_page != null)
             await _page.CloseAsync();
         if (_context != null)

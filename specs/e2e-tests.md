@@ -133,6 +133,51 @@ E2E tests cover **critical user paths only**. They are the slowest and most brit
 
 ---
 
+## Scenario Group: Calendar Navigation
+
+Tests that verify the calendar component navigation and schedule selection behavior in the Cancelar/Reagendar Inscripción page. These scenarios intentionally stop before executing the reschedule action; they only assert that the calendar can be navigated to a target date and that a schedule is correctly selected.
+
+### Scenario: Navigate calendar to a later day in the same month and select a schedule
+
+| # | Test Name | GIVEN | WHEN | THEN |
+|---|---|-----------|-------|------|------|
+| 11 | `Calendar_NavigateSameMonthLaterDay_SelectsSchedule` | Employee user is logged in. An enrollment is seeded via existing helpers at a future available date later this month; that reference date is obtained from `ObtenerHorariosDisponiblesFiltrados` and validated with `ObtenerUnHorarioDisponible`. The enrollment's own scheduled class is the selectable schedule. No other data is written. | Navigate to the Cancelar/Reagendar page, select the client and enrollment, enable rescheduling, navigate the calendar to the seeded class date, and select its schedule by id. | Calendar displays the destination month and year, the destination day is selected, the seeded schedule is marked selected, and no reschedule execution occurs. |
+
+#### Implementation notes:
+- Obtain the reference date by calling `ObtenerHorariosDisponiblesFiltrados` with a strictly-greater date filter and the first day of the current month as base; pick the first result after today within that month. Validate it with `ObtenerUnHorarioDisponible` using an equal-date filter. If either step yields nothing, fail with an explicit message.
+- Seed the enrollment through the existing enrollment helper passing that reference date; this is the only data write. The seeded class program lands in the target period and its own schedule is what the calendar exposes.
+- Read back the actual class date and scheduled-class id created by the seed; navigation and assertions use those real values, not assumptions.
+- Use the reusable `CalendarComponent` to navigate to the read-back date and select the schedule by its id, without submitting the reschedule form.
+- Assert on the visible month/year, the selected day data attribute, the selected schedule data attribute, and the absence of any success or error modal.
+
+### Scenario: Navigate calendar to a date in another month and select a schedule
+
+| # | Test Name | GIVEN | WHEN | THEN |
+|---|---|-----------|-------|------|------|
+| 12 | `Calendar_NavigateOtherMonth_SelectsSchedule` | Employee user is logged in. An enrollment is seeded via existing helpers at a future available date next month; that reference date is obtained from `ObtenerHorariosDisponiblesFiltrados` with base at the first day of next month and validated with `ObtenerUnHorarioDisponible`. The enrollment's own scheduled class is the selectable schedule. No other data is written. | Navigate to the Cancelar/Reagendar page, select the client and enrollment, enable rescheduling, navigate the calendar to the seeded class date crossing a month boundary, and select its schedule by id. | Calendar displays the destination month and year, the destination day is selected, the seeded schedule is marked selected, and no reschedule execution occurs. |
+
+#### Implementation notes:
+- Obtain the reference date by calling `ObtenerHorariosDisponiblesFiltrados` with a strictly-greater date filter and the first day of next month as base (the underlying stored procedure only generates dates within the month of its parameter). Validate it with `ObtenerUnHorarioDisponible` using an equal-date filter. If either step yields nothing, fail with an explicit message.
+- Seed the enrollment through the existing enrollment helper passing that reference date; this is the only data write.
+- Read back the actual class date and scheduled-class id created by the seed; navigation and assertions use those real values.
+- Calendar navigation must cross at least one month boundary using the month/year picker or the previous/next controls.
+- Assert on the visible month/year, the selected day data attribute, the selected schedule data attribute, and the absence of any success or error modal.
+
+### Scenario: Navigate calendar to a date in another year and select a schedule
+
+| # | Test Name | GIVEN | WHEN | THEN |
+|---|---|-----------|-------|------|------|
+| 13 | `Calendar_NavigateOtherYear_SelectsSchedule` | Employee user is logged in. An enrollment is seeded via existing helpers at a future available date in January of next year; that reference date is obtained from `ObtenerHorariosDisponiblesFiltrados` with base at January 1st of next year and validated with `ObtenerUnHorarioDisponible`. The enrollment's own scheduled class is the selectable schedule. No other data is written. | Navigate to the Cancelar/Reagendar page, select the client and enrollment, enable rescheduling, navigate the calendar to the seeded class date crossing a year boundary, and select its schedule by id. | Calendar displays the destination month and year, the destination day is selected, the seeded schedule is marked selected, and no reschedule execution occurs. |
+
+#### Implementation notes:
+- Obtain the reference date by calling `ObtenerHorariosDisponiblesFiltrados` with a strictly-greater date filter and January 1st of next year as base. Validate it with `ObtenerUnHorarioDisponible` using an equal-date filter. If either step yields nothing, fail with an explicit message.
+- Seed the enrollment through the existing enrollment helper passing that reference date; this is the only data write.
+- Read back the actual class date and scheduled-class id created by the seed; navigation and assertions use those real values.
+- Calendar navigation must cross at least one year boundary using the year picker.
+- Assert on the visible month/year, the selected day data attribute, the selected schedule data attribute, and the absence of any success or error modal.
+
+---
+
 ## Scenario Group: API Health (Integration Test, NOT E2E)
 
 > **NOTE:** These tests do NOT require Playwright or browser automation. They SHOULD be implemented as integration tests, not E2E tests. The scenarios are documented here for completeness but should live in `Integration/Features/Api/`.
@@ -174,6 +219,7 @@ The following scenarios are identified as critical paths NOT currently covered. 
 | Authentication | 2 | Approved |
 | Homepage | 3 | Approved |
 | Navigation | 3 | Approved |
+| Calendar Navigation | 3 | Approved |
 | API Health | 2 | Approved (as integration tests) |
-| **Total Approved** | **10** | |
+| **Total Approved** | **13** | |
 | Proposed (pending) | 5 | Pending approval |

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BL;
 using BL.Utils;
 using DTO.Dtos;
+using GymFrontend.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GymFrontend.Controllers
@@ -143,7 +144,7 @@ namespace GymFrontend.Controllers
 
         [HttpPost("preReservarHorarioInscripcion")]
         public async Task<IActionResult> registrarPreReservaDeHorarioInscripcion(
-            [FromBody] DTOPreReservaDeHorarioInscripcion preReserva
+            [FromBody] PreReservaDeHorarioInscripcionViewModel preReservaViewModel
         )
         {
             try
@@ -155,7 +156,16 @@ namespace GymFrontend.Controllers
                         c.Key == ClaimTypes.NameIdentifier || c.Key == JwtRegisteredClaimNames.Sub
                     )
                     .Value;
-                preReserva.idUsuarioQueReserva = usuarioId;
+
+                var preReserva = new DTOPreReservaDeHorarioInscripcion
+                {
+                    idUsuarioQueReserva = usuarioId,
+                    fechaTentativa = preReservaViewModel.fechaTentativa,
+                    idHoraLaboral = preReservaViewModel.idHoraLaboral,
+                    idClase = preReservaViewModel.idClase,
+                    idEntrenador = preReservaViewModel.idEntrenador,
+                    idClaseProgramada = preReservaViewModel.idClaseProgramada,
+                };
 
                 var result = await _horariosManager.PreReservarHorarioInscripcion(preReserva);
                 if (result.success)

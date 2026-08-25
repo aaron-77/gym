@@ -119,10 +119,36 @@ Las credenciales se leen de `appsettings.Testing.json`:
 | Campo | Valor |
 |-------|-------|
 | **Test** | `Empleado_InscribirClienteAClase` |
-| **Nombre en spec** | Empleado puede inscribir cliente a clase |
-| **Given** | Empleado logueado, navega a `/inscripcionAClases` |
-| **When** | Selecciona cliente y clase, confirma inscripción |
-| **Then** | Cliente inscrito exitosamente |
+| **Nombre en spec** | Empleado puede inscribir cliente a clase con pre-reserva |
+| **Given** | Empleado logueado, navega a `/inscripcionAClases` via `InscripcionAClasesPage.GoToAsync(baseUrl)` |
+| **When** | Selecciona clase, selecciona horario (con confirmación de pre-reserva), selecciona cliente, envía formulario |
+| **Then** | Pre-reserva registrada, cliente inscrito exitosamente |
+
+#### Pasos detallados del flujo E2E
+
+| Paso | Acción | Método Page Model o API |
+|------|---------|------------------------|
+| 1 | Login como empleado | Directo (Page) |
+| 2 | Navegar a `/Clases/inscripcionAClases` | `InscripcionAClasesPage.GoToAsync(baseUrl)` |
+| 3 | Seleccionar una clase del combo | `InscripcionAClasesPage.SelectClassAsync(idClase)` |
+| 4 | Seleccionar un horario disponible | Click natural en `ScheduleItems` → dispara `showComplexDialog` de confirmación |
+| 5 | Aceptar diálogo de pre-reserva | `Page.On<Dialog>(dialog => dialog.AcceptAsync())` antes del click |
+| 6 | Seleccionar cliente del combo | `InscripcionAClasesPage.SelectClientAsync(idCliente)` |
+| 7 | Enviar formulario de inscripción | `InscripcionAClasesPage.SubmitAsync()` |
+| 8 | Verificar mensaje de éxito | SweetAlert visible con texto "Inscripción exitosa" |
+
+#### Notas sobre el Page Model
+
+- El test usa `InscripcionAClasesPage` para navegación y selección de cliente/clase.
+- La selección de horario se hace con click natural sobre `ScheduleItems` (dispara el diálogo de confirmación).
+- El handler de `Dialog` se registra ANTES del click en el horario con `Page.On<Dialog>`.
+- `SelectFirstScheduleAsync()` del Page Model NO sirve para este flujo porque internamente hace click sin manejar el diálogo; el test debe hacer click directamente sobre el locator `ScheduleItems.First` y manejar el diálogo inline.
+
+#### Notas sobre la pre-reserva
+
+- Al hacer click en un horario, `ScheduleViewerInscripciones.handleScheduleClick` muestra `showComplexDialog` con mensaje "¿Deseas reservar ese horario?, la reserva dura solo 5 minutos".
+- El test debe escuchar el `Dialog` de Playwright y aceptarlo para que la pre-reserva se registre.
+- El `idPreReserva` se guarda en `localStorage` y se envía con el body de la inscripción.
 
 ---
 
@@ -182,6 +208,10 @@ GymWebApp.Tests/
 │   ├── Common/
 │   │   ├── E2eContainerHelper.cs     # Infraestructura
 │   │   └── PlaywrightTestBase.cs    # Clase base
+│   ├── Components/
+│   │   └── CalendarComponent.cs     # Component Object del calendario
+│   ├── PageModels/
+│   │   └── InscripcionAClasesPage.cs # Page Model de inscripción
 │   ├── Features/
 │   │   └── E2EHappyPathsTests.cs   # Todas las pruebas
 │   └── specs/
@@ -195,3 +225,6 @@ GymWebApp.Tests/
 - **Colección**: `Collection("E2E HappyPaths")`
 - **Setup**: `IAsyncLifetime` con `InitializeAsync` y `DisposeAsync`
 - **Credenciales**: Se leen de `appsettings.Testing.json`
+- **Page Models**: Ubicados en `E2E/PageModels/`; abstraen navegación y controles de página
+- **Components**: Ubicados en `E2E/Components/`; encapsulan comportamiento de widgets reutilizables (ej. calendario)
+- **Dialog handlers**: Se registran con `Page.On<Dialog>()` antes de la acción que dispara el diálogo

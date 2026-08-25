@@ -225,14 +225,11 @@ export class ScheduleViewer {
     
 
     // Obtener los datos pertinentes
-    
-    const idUsuarioQueReserva = ''; // Aquí puedes cambiar por el usuario real si lo tienes
     const fechaTentativa = inputFecha.value;
     const idHoraLaboral = parseInt(inputFkHoraLaboral.value);
-    const idEntrenador = inputFkEntrenador.value;     
+    const idEntrenador = inputFkEntrenador.value;
     const idClase = parseInt(inputIdClase.value);
     const body = {
-      idUsuarioQueReserva,
       fechaTentativa,
       idHoraLaboral,
       idClase,
