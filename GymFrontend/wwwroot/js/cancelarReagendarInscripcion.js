@@ -1,4 +1,4 @@
-import { realizarPeticionAPI, getSignalRBaseUrl, obtenerFechaReferencia } from './httpClient.js';
+import { realizarPeticionAPI, getSignalRBaseUrl, obtenerFechaReferencia, obtenerEndpoint } from './httpClient.js';
 import { Calendar } from './calendario.js';
 import { ScheduleViewer } from './horariosDelDiaInscripcion.js';
 import { showMessage, iconTypes } from './messageManager.mjs';
@@ -67,7 +67,7 @@ async function onClienteChange() {
     }
 
     try {
-        const response = await realizarPeticionAPI('/inscripciones/cliente', undefined, { idCliente });
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_INSCRIPCIONES_CLIENTE', '/inscripciones/cliente'), undefined, { idCliente });
         const inscripciones = response.payload || response;
 
         fillComboBox(comboInscripcion, inscripciones, 'Seleccione una inscripción...', ins => ({
@@ -118,7 +118,7 @@ async function fetchClasesProgramadas() {
     if (!fkClase) return;
 
     try {
-        const response = await realizarPeticionAPI('/clases/obtenerClasesProgramadasPorId', undefined, { idClase: fkClase, fecha: obtenerFechaReferencia(fechaClaseOriginal ? new Date(fechaClaseOriginal) : new Date()) });
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_CLASES_OBTENERCLASESPROGRAMADASPORID', '/clases/obtenerClasesProgramadasPorId'), undefined, { idClase: fkClase, fecha: obtenerFechaReferencia(fechaClaseOriginal ? new Date(fechaClaseOriginal) : new Date()) });
         const data = response.payload || response;
 
         horarios = {};
@@ -249,7 +249,7 @@ async function onEjecutarClick() {
 
 async function ejecutarCancelar(idInscripcion) {
     try {
-        const response = await realizarPeticionAPI('/inscripciones/cancelar', { idInscripcion });
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_INSCRIPCIONES_CANCELAR', '/inscripciones/cancelar'), { idInscripcion });
         if (response.success) {
             showMessage(iconTypes.success, 'Inscripción cancelada exitosamente');
             resetUI();
@@ -276,7 +276,7 @@ async function ejecutarReagendar(idInscripcion) {
     }
 
     try {
-        const response = await realizarPeticionAPI('/inscripciones/reagendar', {
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_INSCRIPCIONES_REAGENDAR', '/inscripciones/reagendar'), {
             idInscripcion,
             idClaseProgramada: idNuevaClase,
             idCliente
@@ -317,7 +317,7 @@ async function initSignalR() {
 
         const baseUrl = getSignalRBaseUrl();
         signalRConnection = new signalR.HubConnectionBuilder()
-            .withUrl(`${baseUrl}/reservacionesHub`)
+            .withUrl(`${baseUrl}${obtenerEndpoint('ENDPOINT_RESERVACIONESHUB', '/reservacionesHub')}`)
             .withAutomaticReconnect([0, 2000, 10000, 30000])
             .configureLogging(signalR.LogLevel.Information)
             .build();
