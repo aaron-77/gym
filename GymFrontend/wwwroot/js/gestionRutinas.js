@@ -1,4 +1,5 @@
 import { showMessage, iconTypes } from './messageManager.mjs';
+import { obtenerEndpoint } from './httpClient.js';
 
 let clients = [];
 let rutinas = [];
@@ -24,7 +25,7 @@ export async function enviarFormularioRutina(event) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
-        const path = "/gestionRutinas";
+        const path = obtenerEndpoint('ENDPOINT_RUTINAS_GESTIONRUTINAS', "/gestionRutinas");
         const response = await fetch(path, {
             method: 'POST',
             body: formData
@@ -73,7 +74,7 @@ export async function enviarFormularioAsignacionEjercicio(event) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
-        const path = "/asignarEjercicios";
+        const path = obtenerEndpoint('ENDPOINT_RUTINAS_ASIGNAREJERCICIOS', "/asignarEjercicios");
         const response = await fetch(path, {
             method: 'POST',
             body: formData
@@ -156,7 +157,7 @@ const disableElements = () => {
 }
 const getClientes = async() => {
     // Usar ruta relativa ya que es un endpoint del frontend
-    const response = await fetch("/obtenerUsuariosPorRol");
+    const response = await fetch(obtenerEndpoint('ENDPOINT_USUARIOS_OBTENERUSUARIOSPORROL', "/obtenerUsuariosPorRol"));
     const jsonResponse = await response.json();
     if (!jsonResponse.ok) {
         console.log(jsonResponse.message);
@@ -166,7 +167,7 @@ const getClientes = async() => {
 }
 const getRutinas = async (clientId) => {
     if (clientId != null) {
-        const response = await fetch("/obtenerRutinasDeCliente?UsuarioID=" + clientId); // MODIFICADO: Usar endpoint del frontend
+        const response = await fetch(obtenerEndpoint('ENDPOINT_RUTINAS_OBTENERRUTINASDECLIENTE', "/obtenerRutinasDeCliente") + "?UsuarioID=" + clientId); // MODIFICADO: Usar endpoint del frontend
         const jsonResponse = await response.json();
         if (!jsonResponse.success) {
             console.log(jsonResponse.message)
@@ -177,7 +178,7 @@ const getRutinas = async (clientId) => {
 }
 const getEjercicios = async() => {
     if (rutinaId != null && rutinaId > 0) {
-        const response = await fetch("/Ejercicios/obtenerEjercicios"); // MODIFICADO: Usar endpoint del frontend
+        const response = await fetch(obtenerEndpoint('ENDPOINT_EJERCICIOS_OBTENEREJERCICIOS', "/Ejercicios/obtenerEjercicios")); // MODIFICADO: Usar endpoint del frontend
         const jsonResponse = await response.json();
         if (!jsonResponse.success) {
             console.log(jsonResponse.message)
