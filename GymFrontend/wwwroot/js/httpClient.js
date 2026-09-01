@@ -151,6 +151,17 @@ function getSignalRBaseUrl() {
     return getNginxBaseUrl();
 }
 
+/**
+ * Resuelve la ruta de un endpoint BFF desde window.AppConfig.EndPoints
+ * @param {string} key - Nombre de la key ENDPOINT_* registrada en appsettings.json (ej: "ENDPOINT_CLASES_OBTENERCLASES")
+ * @param {string} fallback - Ruta literal exacta a usar cuando la config no está disponible o el valor es vacío/nulo
+ * @returns {string} Ruta del endpoint configurada, o el fallback si no hay valor válido
+ */
+function obtenerEndpoint(key, fallback) {
+    const value = window?.AppConfig?.EndPoints?.[key];
+    return value ? value : fallback;
+}
+
 // Hacer las funciones disponibles globalmente para scripts no-module
 if (typeof window !== 'undefined') {
     window.getApiBaseUrl = getApiBaseUrl;
@@ -159,7 +170,8 @@ if (typeof window !== 'undefined') {
     window.getSignalRBaseUrl = getSignalRBaseUrl;
     window.realizarPeticionAPI = realizarPeticionAPI;
     window.obtenerFechaReferencia = obtenerFechaReferencia;
+    window.obtenerEndpoint = obtenerEndpoint;
 }
 
 // Exportar las funciones para uso en otros módulos
-export { realizarPeticionAPI, getApiBaseUrl, getFrontendBaseUrl, getNginxBaseUrl, getSignalRBaseUrl, obtenerFechaReferencia }; 
+export { realizarPeticionAPI, getApiBaseUrl, getFrontendBaseUrl, getNginxBaseUrl, getSignalRBaseUrl, obtenerFechaReferencia, obtenerEndpoint }; 
