@@ -247,6 +247,7 @@ public static class HorariosHelper
     {
         var fechaSolo = fecha.Date;
 
+        
         // Si es el último día del mes, mover la referencia al primer día del mes siguiente.
         // AddMonths maneja el fin de año de forma nativa (diciembre → enero del año siguiente).
         if (fechaSolo.Day == DateTime.DaysInMonth(fechaSolo.Year, fechaSolo.Month))

@@ -301,7 +301,20 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         var inscripcionPage = new PageModels.InscripcionAClasesPage(Page);
         await inscripcionPage.GoToAsync(BaseUrl);
         await Assertions.Expect(inscripcionPage.ClientSelect).ToBeVisibleAsync();
-
+        var connectionString = E2eContainerHelper.Instance.HostConnectionString;
+        var minHoraRow = await DatabaseHelper.ExecuteQuerySingleAsync(
+            connectionString,
+            "SELECT horaInicio AS MinHora FROM horasLaborales WHERE idHora = @idHora",
+            new Dictionary<string, object?>
+            {
+                { "@idHora", claseRegistrada.fkHoraLaboral }
+            }
+        );
+        var minHora = (TimeSpan)minHoraRow!["MinHora"];
+        
+        var clockDate = claseRegistrada.fechaDeLaClase.Value
+            .ToDateTime(TimeOnly.FromTimeSpan(minHora));
+        await Page.Clock.SetFixedTimeAsync(clockDate);
         // Seleccionar un cliente
         await inscripcionPage.SelectClientAsync(new SelectOptionValue { Index = 1 });
 

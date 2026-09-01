@@ -1,4 +1,10 @@
-import { realizarPeticionAPI, getApiBaseUrl, getNginxBaseUrl ,getSignalRBaseUrl} from './httpClient.js';
+import {
+    realizarPeticionAPI,
+    getApiBaseUrl,
+    getNginxBaseUrl,
+    getSignalRBaseUrl,
+    obtenerFechaReferencia
+} from './httpClient.js';
 import { CalendarInscripcion } from './calendarioInscripcion.js';
 import { ScheduleViewerInscripciones } from './inscriptorDeClasesScheduler.js';
 import { formDataToJson } from './formDataToJson.js';
@@ -94,9 +100,10 @@ function obtenerHorariosPorFecha(fechaSeleccionada) {
 }
 
 function obtenerClasesDelMes(fechaSeleccionada) {
-    const mes = fechaSeleccionada.getMonth();
+    const mes = fechaSeleccionada.getMonth() ;
     const año = fechaSeleccionada.getFullYear();
-    const clasesDelMes = Object.values(horarios[año][mes]).flat();
+    const horariosDelMes =     horarios[año][mes];
+    const clasesDelMes = Object.values(horariosDelMes).flat();
     return clasesDelMes;
 }
 
@@ -139,14 +146,16 @@ async function obtenerClasesDisponibles() {
 /**
  * Obtiene clases programadas para un idClase específico
  * @param {number} idClase - ID de la clase a consultar
+ * @param {string} fecha - Fecha de referencia (yyyy-MM-dd HH:mm:ss); por defecto, hoy del navegador
  * @returns {Object} Objeto con clasesProgramadas
  */
-async function obtenerClasesProgramadas(idClase = null) {
+async function obtenerClasesProgramadas(idClase = null, fecha = obtenerFechaReferencia()) {
     try {
         const params = {};
         if (idClase) {
             params.idClase = idClase;
         }
+        params.fecha = fecha;
         const response = await realizarPeticionAPI('/clases/obtenerClasesProgramadasPorId', undefined, params);
         const clasesProgramadas = response.payload || response;
 
@@ -283,7 +292,7 @@ async function handleClaseSelected(ev) {
         }
         if (!existeClaseEnHorarios(horarios, 'fkClase', idClaseSeleccionada)) {
 
-            const clasesProgramadas = await obtenerClasesProgramadas(idClaseSeleccionada);
+            const clasesProgramadas = await obtenerClasesProgramadas(idClaseSeleccionada, obtenerFechaReferencia());
             const clasesProgramadasFormateadas = obtenerHorariosDisponiblesFormateados(clasesProgramadas);
             agregarHorarios(clasesProgramadasFormateadas);
 
@@ -294,6 +303,7 @@ async function handleClaseSelected(ev) {
                     clasesProgramadasFormateadas[0].fkEntrenador || '';
             }
         }
+        
         let clasesProgramadasMensualesDeClaseSeleccionada = obtenerClasesDelMes(new Date()).filter(clase => clase.fkClase === idClaseSeleccionada);
         inicializarCalendario('calendar', clasesProgramadasMensualesDeClaseSeleccionada, null, hayClasesDisponibles);
         inicializarAgendador();
@@ -303,7 +313,8 @@ async function handleClaseSelected(ev) {
             }
         }));
 
-    } catch (error) {obtenerHorariosPorFecha
+    } catch (error) {
+        
         console.error('Error en handleClaseSelected:', error);
     }
 }

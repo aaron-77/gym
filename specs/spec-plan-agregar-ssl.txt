@@ -1,0 +1,568 @@
+================================================================================
+SPEC: Plan para agregar HTTPS/SSL al proyecto FitnessGym
+================================================================================
+
+Fecha: 2026-08-28
+Proyectos afectados: API, GymFrontend, nginx reverse proxy, DTO
+Estado: Analisis - sin implementacion aun
+
+--------------------------------------------------------------------------------
+1. PROPOSITO
+--------------------------------------------------------------------------------
+
+Describir paso a paso las modificaciones necesarias para que la aplicacion
+FitnessGym pueda servir por HTTPS en desarrollo local y en produccion,
+cubriendo dos escenarios:
+
+  A) Desarrollo local con HTTPS (Kestrel directo, sin nginx)
+  B) Produccion/Staging con HTTPS via nginx (SSL Termination)
+  C) Produccion con SSL Termination en nginx y comunicacion interna HTTP
+     (patron recomendado para contenedores Docker)
+
+--------------------------------------------------------------------------------
+2. ESTADO ACTUAL - COMO DETECTAN SSL LAS APPS HOY
+--------------------------------------------------------------------------------
+
+Ambos Program.cs usan DOS mecanismos independientes para decidir si estan
+en modo HTTPS:
+
+  1. UseSsl (bool desde appsettings) -> controla UseHttpsRedirection()
+  2. ASPNETCORE_URLS (env var) -> si contiene "https", cambia el audience
+     del JWT y el BaseAddress del HttpClient
+
+Esto es un anti-pattern: dos flags que tienen que mantenerse sincronizados
+manualmente. Si uno dice HTTP y el otro HTTPS, hay un bug silencioso.
+
+El nginx actual SOLO escucha en puerto 80 (HTTP). No tiene listen 443,
+no tiene ssl_certificate, no hay terminacion SSL. Todo el trafico interno
+va por HTTP (http://api:5274, http://frontend:5062).
+
+El certificado dev de .NET esta generado pero NO esta marcado como trusted
+en este Linux. Sin trust, el navegador muestra pantalla de certificado no
+confiable en cada request HTTPS.
+
+--------------------------------------------------------------------------------
+3. PROBLEMAS ENCONTRADOS (13)
+--------------------------------------------------------------------------------
+
+  #1  UseSsl: false en TODOS los appsettings (Dev/Staging/Prod de ambos
+      proyectos). UseHttpsRedirection() no se ejecuta.
+
+  #2  ASPNETCORE_URLS es HTTP-only en launch profiles (API y Frontend
+      launchSettings). El codigo Contains("https") siempre da false ->
+      audience y endpoints caen al no-SSL.
+
+  #3  JwtSettings.Issuer es HTTP en todos lados. No hay IssuerSsl. El
+      issuer no cambia con SSL. Si se cambia a HTTPS, ambos proyectos
+      tienen que usar el mismo valor.
+
+  #4  EndPoints.frontend.external (CORS origin) es HTTP en API appsettings
+      (Dev/Prod/Staging). CRITICO: el navegador manda Origin: https://...
+      y el API lo compara contra http://... -> 403 Forbidden en todo.
+
+  #5  signalEndpoint es HTTP o vacio en Frontend appsettings. Mixed
+      content: browser bloquea WebSocket HTTP desde pagina HTTPS.
+
+  #6  nginx no tiene config SSL. No hay HTTPS externo sin agregar
+      terminacion SSL.
+
+  #7  API Development siempre llama UseHttpsRedirection() sin chequar
+      UseSsl (Program.cs lineas 332-334). Redirect loops o errores si se
+      corre Dev sin HTTPS.
+
+  #8  Frontend lee ASPNETCORE_URLS de builder.Configuration, API lo lee
+      de Environment.GetEnvironmentVariable. Deteccion de SSL
+      inconsistente entre proyectos.
+
+  #9  CookieService defaultea Secure = false (GymFrontend/Services/
+      CookieService.cs linea 41). Si request.IsHttps es false (nginx sin
+      ForwardedHeaders bien configurado), la cookie de auth NO se marca
+      como Secure.
+
+  #10 ForwardedHeaders solo se configura en Production/Staging (ambos
+      Program.cs). En Development detras de proxy, request.IsHttps es
+      false -> cookies no-secure, HTTPS redirection no funciona.
+
+  #11 KnownProxies solo tiene 127.0.0.1 (ambos Program.cs). Si nginx
+      corre en Docker, su IP no es 127.0.0.1 -> ForwardedHeaders se
+      ignora.
+
+  #12 Frontend launchSettings develepmenthttp es contradictorio:
+      ASPNETCORE_URLS: "http://..." pero applicationUrl: "https://..."
+      y ASPNETCORE_HTTPS_PORT: "7700" - puertos y protocolos no
+      coinciden.
+
+  #13 Dev cert no esta trusted en Linux. Browser muestra warning de
+      cert no confiable en cada HTTPS request local.
+
+--------------------------------------------------------------------------------
+4. ESCENARIO A: DESARROLLO LOCAL CON HTTPS (Kestrel directo, sin nginx)
+--------------------------------------------------------------------------------
+
+Paso A1: Confiar el dev cert en Linux
+    Comando: dotnet dev-certs https --trust
+    Sin esto, el navegador bloquea cada request HTTPS en desarrollo.
+
+Paso A2: Arreglar launchSettings del API
+    Archivo: API/Properties/launchSettings.json
+    Accion: Agregar o modificar un perfil HTTPS.
+      - ASPNETCORE_URLS: cambiar a "https://localhost:7269"
+        (puerto que ya esta en EndPoints.api.ssl)
+      - applicationUrl: cambiar a "https://localhost:7269"
+      - Mantener ASPNETCORE_ENVIRONMENT: Development y SECRET_TOKEN_KEY
+    Por que: El codigo lineas 105-106 y 147 del API lee ASPNETCORE_URLS
+    para decidir el audience JWT y el BaseAddress del HttpClient. Si no
+    contiene "https", NUNCA usa las variantes SSL.
+
+Paso A3: Arreglar launchSettings del Frontend
+    Archivo: GymFrontend/Properties/launchSettings.json
+    Accion: El perfil develepmenthttp esta roto. Crear uno nuevo
+    coherente:
+      - ASPNETCORE_URLS: "https://localhost:7700"
+        (puerto de EndPoints.frontend.ssl)
+      - applicationUrl: "https://localhost:7700" (que coincida con
+        ASPNETCORE_URLS)
+      - ASPNETCORE_HTTPS_PORT: sacar o cambiar a "7700"
+      - BACKEND_BASE_ADDRESS: "https://localhost:7269" (que coincida
+        con el API HTTPS)
+    Por que: Hoy el perfil dice HTTP en el env var pero HTTPS en
+    applicationUrl - Kestrel no sabe en que modo correr.
+
+Paso A4: UseSsl: true en appsettings.Development.json de ambos proyectos
+    Archivos:
+      - API/appsettings.Development.json
+      - GymFrontend/appsettings.Development.json
+    Accion: Cambiar "UseSsl": false -> "UseSsl": true
+    Por que: Controla UseHttpsRedirection() en el API (linea 325) y en
+    el Frontend (linea 253).
+
+Paso A5: Arreglar JwtSettings.Issuer en Development
+    Archivos:
+      - API/appsettings.Development.json
+      - GymFrontend/appsettings.Development.json
+    Accion: Issuer cambiar de "http://localhost:5274" a
+      "https://localhost:7269"
+    Por que: El issuer es la identidad del token. El API lo usa para
+    GENERAR tokens y el Frontend lo usa para VALIDAR. Ambos tienen que
+    usar el mismo valor. Si el API sirve por HTTPS en el puerto 7269,
+    el issuer deberia ser esa URL. Hoy no hay un IssuerSsl - es un solo
+    campo que hay que cambiar manualmente.
+    Ojo: Esto implica que si se corre el API en HTTP a veces y HTTPS a
+    veces, el issuer cambia y los tokens viejos dejan de validar. Una
+    alternativa seria agregar logica en Program.cs que seleccione el
+    issuer segun aspnetcore_urls.Contains("https"), igual que hace con
+    el audience.
+
+Paso A6: Arreglar CORS origin en el API
+    Archivo: API/appsettings.Development.json
+    Accion: EndPoints.frontend.external cambiar de
+      "http://localhost:5062" a "https://localhost:7700"
+    Por que CRITICO: El API usa este valor en dos lugares:
+      1. Linea 170: policy.WithOrigins(frontendUrl) - la policy CORS
+      2. Linea 350: if (origin != frontendUrl) - middleware custom que
+         bloquea origins no autorizados
+    Si el Frontend sirve por HTTPS en https://localhost:7700, el browser
+    manda Origin: https://localhost:7700. Si el API compara contra
+    http://localhost:5062 -> 403 Forbidden en todo.
+
+Paso A7: Arreglar signalEndpoint en el Frontend
+    Archivo: GymFrontend/appsettings.Development.json
+    Accion: signalEndpoint cambiar de "http://localhost:5274" a
+      "https://localhost:7269"
+    Por que: Mixed content policy. Si la pagina carga por HTTPS, el
+    browser bloquea conexiones WebSocket por HTTP (ws://). Tienen que
+    ser wss:// (HTTPS).
+
+Paso A8: Arreglar la inconsistencia de UseHttpsRedirection() en el API
+    Archivo: API/Program.cs lineas 332-334
+    Accion: Hoy:
+        if (app.Environment.IsDevelopment()) {
+            app.UseHttpsRedirection();
+        }
+    Deberia respetar UseSsl igual que Production:
+        if (app.Environment.IsDevelopment() && useSsl) {
+            app.UseHttpsRedirection();
+        }
+    Por que: Si se quiere correr Development sin HTTPS a veces, hoy
+    fuerza redirect igual. Inconsistencia con Production (lineas
+    323-330) que si chequa useSsl.
+
+--------------------------------------------------------------------------------
+5. ESCENARIO B: PRODUCCION/STAGING CON HTTPS VIA NGINX (SSL Termination)
+--------------------------------------------------------------------------------
+
+Patron estandar: nginx termina SSL, las apps corren HTTP internamente,
+y leen los headers X-Forwarded-* para saber que el cliente original
+vin por HTTPS.
+
+Paso B1: Configurar SSL en nginx
+    Archivo: nginx.conf (symlink -> nginxconfln)
+    Accion: Agregar un server block para HTTPS:
+      - listen 443 ssl;
+      - ssl_certificate y ssl_certificate_key apuntando a los
+        certificados
+      - Mover las location blocks al server de 443
+      - Agregar un server block en puerto 80 que redirija a HTTPS (301)
+    Por que: Sin esto no hay HTTPS externo. nginx es el unico punto de
+    entrada.
+
+Paso B2: UseSsl: true en appsettings.Production.json y Staging.json
+    Archivos:
+      - API/appsettings.Production.json
+      - API/appsettings.Staging.json
+      - GymFrontend/appsettings.Production.json
+      - GymFrontend/appsettings.Staging.json
+    Ojo: En el patron de SSL termination en nginx, las apps corren HTTP
+    internamente. UseHttpsRedirection() podria no ser necesario si nginx
+    ya redirige del 80 al 443. Pero tenerlo activado no deberia doler si
+    ForwardedHeaders esta bien configurado.
+    Decision: si se deja UseSsl: false y nginx maneja todo el redirect,
+    se evitan redirects dobles. Si se pone true, la app tambien redirige.
+
+Paso B3: Arreglar ForwardedHeaders - KnownProxies
+    Archivos:
+      - API/Program.cs lineas 80-85
+      - GymFrontend/Program.cs lineas 59-64
+    Accion: Hoy tiene:
+        options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
+    Si nginx corre en un contenedor Docker, su IP NO es 127.0.0.1.
+    Opciones:
+      - Mejor: Quitar el KnownProxies.Add y en su lugar setear
+        options.KnownNetworks con el rango de Docker
+      - Alternativa: Usar options.KnownProxies.Clear() para aceptar de
+        cualquier IP (aceptable en red interna de Docker)
+    Por que: Si la IP del proxy no coincide, ASP.NET Core IGNORA los
+    headers X-Forwarded-*. Entonces request.IsHttps da false,
+    request.Scheme da "http", y todo se rompe: cookies no-secure,
+    redirects incorrectos, CORS mal.
+
+Paso B4: Arreglar JwtSettings.Issuer en Production/Staging
+    Archivos:
+      - API/appsettings.Production.json
+      - GymFrontend/appsettings.Production.json
+    Accion: Issuer cambiar de "http://apicontainer" a la URL HTTPS
+    publica real (ej: "https://tudominio.com")
+    Lo mismo para Staging con su URL correspondiente.
+    Por que: El issuer deberia reflejar la URL publica por la que se
+    accede al API. Si el cliente accede por HTTPS, el issuer deberia ser
+    HTTPS.
+
+Paso B5: Arreglar CORS origin en el API para Production/Staging
+    Archivo: API/appsettings.Production.json
+    Accion: EndPoints.frontend.external cambiar de
+      "http://localhost:8091" a la URL HTTPS publica del frontend
+    Archivo: API/appsettings.Staging.json
+    Accion: EndPoints.frontend.external cambiar de "http://localhost"
+      a la URL HTTPS del frontend en staging
+    Por que: Igual que el paso A6 - el navegador manda el Origin HTTPS
+    y el API lo compara contra este valor.
+
+Paso B6: Arreglar signalEndpoint en el Frontend para Production/Staging
+    Archivo: GymFrontend/appsettings.Production.json
+    Accion: signalEndpoint setear a la URL HTTPS del API
+      (ej: "https://tudominio.com/reservacionesHub")
+    Archivo: GymFrontend/appsettings.Staging.json
+    Accion: signalEndpoint setear a la URL HTTPS de staging
+    Por que: Mixed content policy, igual que paso A7.
+
+Paso B7: Verificar que request.IsHttps funcione con nginx
+    Esto es la CONSECUENCIA de los pasos B1+B3. Cuando nginx termina
+    SSL:
+      1. nginx recibe HTTPS del cliente
+      2. nginx hace proxy_pass por HTTP interno al contenedor
+      3. nginx manda X-Forwarded-Proto: https
+      4. ASP.NET Core lee ese header (si KnownProxies esta bien) y
+         setea request.IsHttps = true, request.Scheme = "https"
+    Esto hace que:
+      - CookieService linea 46 (if (request.IsHttps)) funcione
+        correctamente -> Secure = true en la cookie
+      - UseHttpsRedirection() (si esta activado) redirija al HTTPS
+        correcto
+      - Cualquier codigo que genere URLs use HTTPS
+    Si ForwardedHeaders no funciona, request.IsHttps da false y la
+    cookie de auth se setea sin Secure = true, lo que es un problema de
+    seguridad.
+
+--------------------------------------------------------------------------------
+6. ESCENARIO C: SSL TERMINATION EN NGINX, APPS POR HTTP INTERNO
+--------------------------------------------------------------------------------
+
+Este es el escenario recomendado para contenedores Docker. HTTPS solo
+existe entre el cliente y nginx. Dentro de la red de Docker, todo va
+por HTTP. nginx termina el SSL y reenvia por HTTP plano a los
+contenedores.
+
+Es el patron mas usado y el mas simple de mantener porque:
+  - Los certificados viven solo en nginx (un solo lugar para renovar)
+  - Las apps no necesitan certificados ni config HTTPS
+  - Menos surface area de errores (no hay que sincronizar cert en
+    cada contenedor)
+  - Performance: el handshake SSL lo hace nginx, las apps procesan
+    mas rapido sin overhead criptografico
+
+IMPORTANTISIMO: Aunque las apps corren por HTTP internamente, tienen
+que SABER que el cliente original vino por HTTPS. Esto se logra con
+los headers X-Forwarded-* que nginx envia. Sin esto, las apps piensan
+que todo es HTTP y se rompe: cookies no-secure, redirects incorrectos,
+CORS falla.
+
+Pasos especificos para este escenario:
+
+Paso C1: Configurar nginx con SSL Termination
+    Archivo: nginx.conf
+    Accion:
+      - Server block puerto 80: redirect 301 a HTTPS
+        server {
+            listen 80;
+            server_name tudominio.com;
+            return 301 https://$host$request_uri;
+        }
+      - Server block puerto 443 con SSL:
+        server {
+            listen 443 ssl;
+            server_name tudominio.com;
+            ssl_certificate     /ruta/al/cert.pem;
+            ssl_certificate_key /ruta/al/key.pem;
+            # ... resto de location blocks (api, frontend, signalr,
+            # health) iguales a las actuales pero dentro de este
+            # server block
+        }
+    Los proxy_pass internos se mantienen por HTTP:
+      - proxy_pass http://api:5274;
+      - proxy_pass http://frontend:5062;
+    Por que: nginx termina SSL, los contenedores reciben HTTP plano.
+    Los headers X-Forwarded-Proto ya estan en el nginx.conf actual:
+      proxy_set_header X-Forwarded-Proto $scheme;
+    Esto le avisa a las apps que el cliente original uso HTTPS.
+
+Paso C2: UseSsl: false en TODOS los appsettings de Production/Staging
+    Archivos:
+      - API/appsettings.Production.json
+      - API/appsettings.Staging.json
+      - GymFrontend/appsettings.Production.json
+      - GymFrontend/appsettings.Staging.json
+    Accion: Mantener "UseSsl": false
+    Por que: Las apps corren HTTP internamente. No tienen que hacer
+    HTTPS redirection porque nginx ya redirige del 80 al 443. Si se
+    activa UseHttpsRedirection() aca, puede haber redirects dobles o
+    loops porque la app recibe HTTP del nginx y trata de redirigir a
+    HTTPS, pero el cliente ya esta en HTTPS.
+
+Paso C3: ASPNETCORE_URLS debe ser HTTP en los contenedores
+    Archivo: Dockerfiles o docker-compose.yml o variables de entorno
+    del contenedor
+    Accion: Asegurar que ASPNETCORE_URLS sea HTTP dentro de los
+    contenedores:
+      - API: ASPNETCORE_URLS=http://+:5274
+      - Frontend: ASPNETCORE_URLS=http://+:5062
+    Por que: Las apps escuchan HTTP. nginx se conecta a ellas por
+    HTTP. Si ASPNETCORE_URLS tuviera https, el codigo Contains("https")
+    seleccionaria las variantes SSL de audience y endpoints, que no
+    corresponden al trafico interno.
+
+    ATENCION - este es el punto mas sutil de todo el plan:
+    Si ASPNETCORE_URLS es HTTP, el codigo que selecciona el audience
+    (API linea 147, Frontend linea 135) usa el audience NO-SSL.
+    Pero el cliente accede por HTTPS. Esto significa que:
+      - El token se genera con audience HTTP (ej: "http://apicontainer")
+      - El cliente recibe el token y lo manda de vuelta por HTTPS
+      - La validacion usa el mismo audience HTTP -> funciona
+    Siempre y cuando API y Frontend usen el MISMO audience, valida.
+    El audience no tiene que ser HTTPS necesariamente, tiene que ser
+    CONSISTENTE entre quien genera y quien valida.
+
+Paso C4: ForwardedHeaders OBLIGATORIO y KnownProxies correcto
+    Archivos:
+      - API/Program.cs lineas 78-86
+      - GymFrontend/Program.cs lineas 57-65
+    Accion:
+      - Asegurar que UseForwardedHeaders() se llama en el pipeline
+        (API linea 324, Frontend linea 210)
+      - Arreglar KnownProxies:
+          options.KnownProxies.Clear(); // aceptar cualquier proxy
+        o mejor:
+          options.KnownNetworks.Add(new IPNetwork(
+              IPAddress.Parse("172.16.0.0"), 12)); // rango Docker
+      - Setear options.ForwardLimit = null; // confiar en todos los
+        hops
+    Por que CRITICO: Sin ForwardedHeaders funcionando, las apps no
+    saben que el cliente vino por HTTPS. request.IsHttps da false.
+    Consecuencias:
+      - CookieService: Secure = false en la cookie de auth (inseguro)
+      - Cualquier URL generada con request.Scheme usa "http" en vez
+        de "https"
+      - Anti-forgery tokens pueden fallar
+      - Redirects generados por la app usan HTTP en vez de HTTPS
+
+Paso C5: JwtSettings.Issuer - decision clave
+    Archivos: appsettings.Production.json de ambos proyectos
+    Opciones:
+      Opcion 1 (recomendada): Issuer con la URL HTTPS publica
+        - Issuer: "https://tudominio.com"
+        - API y Frontend usan el mismo
+        - El token dice "fui emitido por https://tudominio.com"
+        - Es lo mas correcto semanticamente
+      Opcion 2: Issuer con URL interna HTTP
+        - Issuer: "http://apicontainer" (como esta hoy)
+        - Funciona porque API y Frontend validan con el mismo valor
+        - Menos correcto semanticamente pero operativo
+    Recomendacion: Opcion 1. El issuer deberia reflejar la identidad
+    publica del servicio.
+
+Paso C6: CORS origin DEBE ser HTTPS
+    Archivo: API/appsettings.Production.json
+    Accion: EndPoints.frontend.external cambiar a la URL HTTPS publica:
+      "https://tudominio.com"
+    Por que CRITICO: El navegador manda Origin: https://tudominio.com.
+    El API compara contra este valor en:
+      - Linea 170: policy.WithOrigins(frontendUrl)
+      - Linea 350: if (origin != frontendUrl) -> 403 Forbidden
+    Si el origin es HTTP, TODO falla con 403.
+
+Paso C7: signalEndpoint DEBE ser HTTPS
+    Archivo: GymFrontend/appsettings.Production.json
+    Accion: signalEndpoint setear a la URL HTTPS publica:
+      "https://tudominio.com/reservacionesHub"
+    Por que: El navegador carga la pagina por HTTPS. Una conexion
+    WebSocket a ws:// (HTTP) es mixed content y el browser la bloquea.
+    Tiene que ser wss:// (HTTPS). El navegador se conecta a nginx por
+    wss:// y nginx hace proxy por ws:// interno al API.
+
+Paso C8: CookieService - verificar que Secure funcione
+    Archivo: GymFrontend/Services/CookieService.cs
+    Estado actual: Ya tiene logica (linea 46):
+        if (request.IsHttps) {
+            cookieOptions = new CookieOptions {
+                Secure = true,
+                ...
+            };
+        }
+    Esto FUNCIONA correctamente SI ForwardedHeaders esta bien
+    configurado (paso C4). Cuando nginx manda X-Forwarded-Proto:
+    https, ASP.NET Core setea request.IsHttps = true y la cookie se
+    marca como Secure.
+    Accion: No requiere cambio de codigo. Solo verificar que
+    ForwardedHeaders funcione (paso C4).
+    Consideracion adicional: SameSite=Strict ya esta seteado, lo cual
+    es correcto para HTTPS.
+
+Paso C9: EndPoints internos se mantienen HTTP
+    Archivos: appsettings.Production.json de ambos proyectos
+    Accion: Los EndPoints internos (los que usan los contenedores
+    para comunicarse entre si) se mantienen HTTP:
+      - EndPoints.api.nossl: "http://fitnessgym_api:5274"
+      - EndPoints.frontend.nossl: "http://fitnessgym_frontend:5062"
+    Por que: La comunicacion entre contenedores es por HTTP en la red
+    interna de Docker. No hay SSL ahi.
+    Los EndPoints SSL (EndPoints.api.ssl, EndPoints.frontend.ssl) se
+    usan solo si ASPNETCORE_URLS contiene "https", lo cual no pasa en
+    este escenario (paso C3).
+
+Paso C10: HSTS - opcional pero recomendado
+    Archivo: GymFrontend/Program.cs linea 244
+    Estado actual: app.UseHsts() ya esta en !IsDevelopment()
+    Accion: No requiere cambio. HSTS se activa automaticamente en
+    Production/Staging.
+    Por que: HSTS le dice al navegador "siempre usa HTTPS para este
+    dominio". Esto previene downgrade attacks. Como nginx termina SSL
+    y manda X-Forwarded-Proto: https, ASP.NET Core sabe que el cliente
+    esta en HTTPS y HSTS se aplica correctamente (siempre que
+    ForwardedHeaders funcione).
+
+--------------------------------------------------------------------------------
+7. PASOS COMUNES A TODOS LOS ESCENARIOS
+--------------------------------------------------------------------------------
+
+Paso CC1: Unificar la lectura de ASPNETCORE_URLS
+    El API usa Environment.GetEnvironmentVariable("ASPNETCORE_URLS")
+    (linea 105).
+    El Frontend usa builder.Configuration["ASPNETCORE_URLS"]
+    (linea 75).
+    Estos no son equivalentes. builder.Configuration incluye providers
+    de env vars, pero el orden y el provider importan.
+    Accion: Que ambos usen el mismo metodo - preferentemente
+    Environment.GetEnvironmentVariable que es mas explicito y no
+    depende del orden de providers.
+
+Paso CC2: Considerar agregar IssuerSsl a JwtSettings
+    Archivo: DTO/Dtos/JwtSettings.cs
+    Hoy el Issuer es un solo campo que no cambia con SSL. Los
+    audiences si tienen variantes SSL (BackendAudienceSsl,
+    FrontendAudienceSsl). Para consistencia:
+      1. Agregar propiedad IssuerSsl a JwtSettings.cs
+      2. En Program.cs, seleccionar:
+         aspnetcore_urls.Contains("https") ? jwtSettings.IssuerSsl
+                                           : jwtSettings.Issuer
+    Esto evita tener que cambiar manualmente el Issuer entre HTTP y
+    HTTPS.
+    Tradeoff: Mas codigo pero mas robusto. La alternativa (cambiar
+    manualmente el Issuer en cada appsettings) es mas simple pero
+    propensa a errores.
+
+--------------------------------------------------------------------------------
+8. RESUMEN - ORDEN RECOMENDADO
+--------------------------------------------------------------------------------
+
+Desarrollo local (Escenario A):
+  1. Dev cert trust          (dotnet dev-certs https --trust)
+  2. Launch profiles HTTPS   (API y Frontend launchSettings)
+  3. UseSsl: true            (appsettings.Development.json ambos)
+  4. JwtSettings.Issuer HTTPS (appsettings.Development.json ambos)
+  5. CORS origin HTTPS        (API appsettings.Development.json)
+  6. signalEndpoint HTTPS     (Frontend appsettings.Development.json)
+  7. Arreglar UseHttpsRedirection en Dev  (API Program.cs)
+
+Produccion con nginx SSL Termination, apps HTTP interno (Escenario C):
+  1. nginx SSL config        (nginx.conf - listen 443 + redirect 80)
+  2. ForwardedHeaders        (KnownProxies/KnownNetworks en ambos
+                              Program.cs)
+  3. ASPNETCORE_URLS HTTP    (Docker env vars / docker-compose)
+  4. UseSsl: false           (appsettings.Production.json ambos)
+  5. JwtSettings.Issuer HTTPS (URL publica, ambos appsettings)
+  6. CORS origin HTTPS        (API appsettings.Production.json)
+  7. signalEndpoint HTTPS     (Frontend appsettings.Production.json)
+  8. EndPoints internos HTTP  (se mantienen como estan)
+  9. Verificar CookieService  (request.IsHttps via ForwardedHeaders)
+
+Comun a ambos:
+  10. Unificar lectura ASPNETCORE_URLS  (ambos Program.cs)
+  11. Considerar IssuerSsl en JwtSettings  (DTO + Program.cs)
+
+--------------------------------------------------------------------------------
+9. ARCHIVOS AFECTADOS
+--------------------------------------------------------------------------------
+
+  API/Program.cs
+  API/appsettings.json
+  API/appsettings.Development.json
+  API/appsettings.Production.json
+  API/appsettings.Staging.json
+  API/Properties/launchSettings.json
+  GymFrontend/Program.cs
+  GymFrontend/appsettings.json
+  GymFrontend/appsettings.Development.json
+  GymFrontend/appsettings.Production.json
+  GymFrontend/appsettings.Staging.json
+  GymFrontend/Properties/launchSettings.json
+  GymFrontend/Services/CookieService.cs  (solo verificar, no cambio)
+  DTO/Dtos/JwtSettings.cs  (solo si se agrega IssuerSsl)
+  nginx.conf  (symlink: nginx/nginxconfln)
+
+--------------------------------------------------------------------------------
+10. NOTAS DE SEGURIDAD
+--------------------------------------------------------------------------------
+
+  - NUNCA commitear certificados SSL ni keys privadas al repo
+  - NUNCA commitear el SECRET_TOKEN_KEY en appsettings (hoy esta en
+    launchSettings.json como env var - deberia ir a user secrets o
+    env vars del sistema)
+  - Las cookies de auth DEBEN tener Secure=true cuando se sirve por
+    HTTPS. Sin ForwardedHeaders funcionando, esto no pasa y es una
+    vulnerabilidad
+  - HSTS debe estar activado en produccion (ya lo esta en el Frontend)
+  - Considerar agregar HSTS tambien en el API si se accede
+    directamente por HTTPS (no via nginx)
+
+================================================================================
+FIN DEL SPEC
+================================================================================

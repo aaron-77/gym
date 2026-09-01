@@ -141,7 +141,7 @@ public class HorariosHelperFiltroHoraTests : IAsyncLifetime
         var maxHora = (TimeSpan)horaRow["MaxHora"];
 
         // Configurar fechaRef + 1 día con maxHora
-        var fechaHoraConfigurada = fechaRef.AddDays(1).ToDateTime(TimeOnly.FromTimeSpan(maxHora));
+        var fechaHoraConfigurada = fechaRef.ToDateTime(TimeOnly.FromTimeSpan(maxHora));
 
         // Act - Segunda llamada con maxHora
         var horarios = await HorariosHelper.ObtenerHorariosDisponiblesFiltrados(
