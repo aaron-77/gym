@@ -3,7 +3,7 @@
  * Maneja la integración entre el calendario y el visualizador de horarios
  */
 
-import { realizarPeticionAPI, getApiBaseUrl, getNginxBaseUrl, getSignalRBaseUrl, obtenerFechaReferencia } from './httpClient.js';
+import { realizarPeticionAPI, getApiBaseUrl, getNginxBaseUrl, getSignalRBaseUrl, obtenerFechaReferencia, obtenerEndpoint } from './httpClient.js';
 import { Calendar } from './calendario.js';
 import { ScheduleViewer } from './horariosDelDia.js';
 import { formDataToJson } from './formDataToJson.js';
@@ -285,8 +285,8 @@ async function obtenerHorariosNuevos(fecha = obtenerFechaReferencia()) {
     try {
         // La fecha de referencia se envía SIEMPRE (default = hoy del browser)
         const params = { fecha };
-        const responseHorariosDisponibles = await realizarPeticionAPI('/Horarios/obtenerHorariosDisponibles', undefined, params);
-        const responsePreReservas = await realizarPeticionAPI('/Horarios/obtenerPreReservas', undefined, params);
+        const responseHorariosDisponibles = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_HORARIOS_OBTENERHORARIOSDISPONIBLES', '/Horarios/obtenerHorariosDisponibles'), undefined, params);
+        const responsePreReservas = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_HORARIOS_OBTENERPRERESERVAS', '/Horarios/obtenerPreReservas'), undefined, params);
         
         // Extraer los datos del payload si la respuesta tiene estructura DTOResponse
         const horariosDisponibles = responseHorariosDisponibles.payload || responseHorariosDisponibles;
@@ -494,7 +494,7 @@ async function obtenerEntrenadores() {
             rol: 'empleado',
             estado: 'activo'
         };
-        const response = await realizarPeticionAPI('/obtenerUsuariosPorRol', undefined, params);
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_USUARIOS_OBTENERUSUARIOSPORROL', '/obtenerUsuariosPorRol'), undefined, params);
         return response.payload || [];
     } catch (error) {
         console.error('Error al obtener entrenadores:', error);
@@ -511,7 +511,7 @@ async function obtenerClases() {
         const params = {
             activa: true
         };
-        const response = await realizarPeticionAPI('/Clases/obtenerClases', undefined, params);
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_CLASES_OBTENERCLASES', '/Clases/obtenerClases'), undefined, params);
         return response.payload || [];
     } catch (error) {
         console.error('Error al obtener clases:', error);
@@ -525,7 +525,7 @@ async function obtenerClases() {
  */
 async function obtenerEstadosClasesProgramadas() {
     try {
-        const response = await realizarPeticionAPI('/Clases/obtenerEstadosDeClasesProgramdas');
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_CLASES_OBTENERESTADOSDECLASESPROGRAMDAS', '/Clases/obtenerEstadosDeClasesProgramdas'));
         return response.payload || [];
     } catch (error) {
         console.error('Error al obtener estados de clases programadas:', error);
@@ -569,7 +569,7 @@ async function registrarClaseProgramada(event) {
         console.log('Datos a enviar:', datosClaseProgramada);
         
         // Realizar la petición POST al endpoint
-        const response = await realizarPeticionAPI('/clases/registrarClaseProgramada', datosClaseProgramada);
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_CLASES_REGISTRARCLASEPROGRAMADA', '/clases/registrarClaseProgramada'), datosClaseProgramada);
         
         if (response.success) {
             showMessage(iconTypes.success,'Clase programada registrada exitosamente con ID: ');
@@ -620,7 +620,7 @@ async function inicializarSignalR() {
 
         // Obtener la URL base del API desde la configuración
         const apiBaseUrl = getSignalRBaseUrl();
-        const signalRUrl = `${apiBaseUrl}/reservacionesHub`;
+        const signalRUrl = `${apiBaseUrl}${obtenerEndpoint('ENDPOINT_RESERVACIONESHUB', '/reservacionesHub')}`;
         
         // Crear la conexión al hub
         signalRConnection = new signalR.HubConnectionBuilder()
