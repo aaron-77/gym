@@ -1,4 +1,4 @@
-import { realizarPeticionAPI } from './httpClient.js';
+import { realizarPeticionAPI, obtenerEndpoint } from './httpClient.js';
 import { showMessage,iconTypes,showSimpleDialog,showComplexDialog } from './messageManager.mjs';
 export class ScheduleViewer {
   constructor(containerId) {
@@ -238,8 +238,7 @@ export class ScheduleViewer {
     };
 
     try {
-      const endpointPath = window.AppConfig?.EndPoints?.preReservaHorarioInscripcion 
-                           || '/Horarios/preReservarHorarioInscripcion';
+      const endpointPath = obtenerEndpoint('ENDPOINT_HORARIOS_PRERESERVARHORARIOINSCRIPCION', '/Horarios/preReservarHorarioInscripcion');
       const response = await realizarPeticionAPI(endpointPath, body, undefined, 'POST');
       if (response.success) {
         // Se puede mostrar un mensaje si se desea
