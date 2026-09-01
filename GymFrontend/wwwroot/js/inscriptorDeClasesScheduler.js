@@ -16,7 +16,7 @@
 
 
 
-import { realizarPeticionAPI } from './httpClient.js';
+import { realizarPeticionAPI, obtenerEndpoint } from './httpClient.js';
 import { showMessage, iconTypes, showComplexDialog } from './messageManager.mjs';
 
 
@@ -275,8 +275,7 @@ export class ScheduleViewerInscripciones {
     }
 
     try {
-      const endpointPath = window.AppConfig?.EndPoints?.preReservaHorarioInscripcion
-                           || '/Horarios/preReservarHorarioInscripcion'
+      const endpointPath = obtenerEndpoint('ENDPOINT_HORARIOS_PRERESERVARHORARIOINSCRIPCION', '/Horarios/preReservarHorarioInscripcion')
       const response = await realizarPeticionAPI(endpointPath, body, undefined, 'POST')
       if (response.success) {
         return response.payload ?? 0
