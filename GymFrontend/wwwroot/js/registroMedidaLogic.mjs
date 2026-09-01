@@ -1,4 +1,5 @@
 import { showMessage, iconTypes } from './messageManager.mjs';
+import { obtenerEndpoint } from './httpClient.js';
 
 async function enviarFormularioMedida(event) {
     event.preventDefault();
@@ -18,7 +19,7 @@ async function enviarFormularioMedida(event) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
-        const path = "/registrar";
+        const path = obtenerEndpoint('ENDPOINT_MEDIDAS_REGISTRAR', "/registrar");
         const response = await fetch(path, {
             method: 'POST',
             body: formData
