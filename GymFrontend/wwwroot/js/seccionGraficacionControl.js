@@ -1,4 +1,5 @@
 import { ObservadorSujeto } from "./observerPattern.js"
+import { obtenerEndpoint } from "./httpClient.js"
 let dataForCharts = null;
 // Method to obtain the month of the current date in number format
 let $chartContainer = document.querySelector(".chart-container");
@@ -202,7 +203,7 @@ function setSelectedParameter(idParametro) {
 
 async function fetchEjerciciosYParametrosDelCliente(idCliente) {
   try {
-    let serverResponse = await fetch(`/obtenerEjerciciosYParametrosDelCliente?idCliente=${idCliente}`);
+    let serverResponse = await fetch(`${obtenerEndpoint('ENDPOINT_MEDIDAS_OBTENEREJERCICIOSYPARAMETROSDELCLIENTE', "/obtenerEjerciciosYParametrosDelCliente")}?idCliente=${idCliente}`);
     const jsonServerResponse = await serverResponse.json();
     if (!jsonServerResponse.success) {
       throw new Error('Error al consultar los ejercicios y parametros del cliente: ' + (jsonServerResponse.message || ''));
@@ -251,7 +252,7 @@ async function fetchProgressDetails() {
             selectedYears
         ).toString();
 
-        const response = await fetch(`/obtenerDetallesDeProgreso?${queryParams}`);
+        const response = await fetch(`${obtenerEndpoint('ENDPOINT_MEDIDAS_OBTENERDETALLESDEPROGRESO', "/obtenerDetallesDeProgreso")}?${queryParams}`);
         if (!response.ok) {
             throw new Error('Error al consultar los detalles de progreso');
         }
