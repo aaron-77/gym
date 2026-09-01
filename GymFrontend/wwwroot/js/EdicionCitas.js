@@ -1,5 +1,5 @@
 import { showMessage, iconTypes } from './messageManager.mjs';
-import { getNginxBaseUrl, realizarPeticionAPI } from './httpClient.js';
+import { getNginxBaseUrl, realizarPeticionAPI, obtenerEndpoint } from './httpClient.js';
 
 let clients = [];
 let citas = [];
@@ -35,7 +35,7 @@ export async function enviarFormularioModificarCita(event) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
-        const data = await realizarPeticionAPI('/modificarCita', citaData);
+        const data = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_CITAS_MODIFICARCITA', '/modificarCita'), citaData);
 
         // El API devuelve DTOResponse, verificar success
         if (data.success) {
@@ -144,7 +144,7 @@ const disableElements = () => {
     }
 }
 const getCitasAgendadas = async () => {
-    const response = await fetch("/obtenerCitasAgendadasDelCliente?idUsuario=" + clientId);
+    const response = await fetch(obtenerEndpoint('ENDPOINT_CITAS_OBTENERCITASAGENDADASDELCLIENTE', "/obtenerCitasAgendadasDelCliente") + "?idUsuario=" + clientId);
     const jsonResponse = await response.json();
     if (!jsonResponse.success) {
         console.log(jsonResponse.message);
@@ -157,7 +157,7 @@ import { convertirADateLocal, formatLocalDateTimeForQuery } from './dateUtils.mj
 const getEntrenadoresDisponibles = async () => {
     const fechaInicio = convertirADateLocal(document.getElementById("inputFechaInicio").value);
     const fechaInicioForQueryParameter = formatLocalDateTimeForQuery(fechaInicio);
-    const response = await fetch("/obtenerEntrenadoresDisponibles?fechaReferencia=" + fechaInicioForQueryParameter);
+    const response = await fetch(obtenerEndpoint('ENDPOINT_CITAS_OBTENERENTRENADORESDISPONIBLES', "/obtenerEntrenadoresDisponibles") + "?fechaReferencia=" + fechaInicioForQueryParameter);
 
     const jsonResponse = await response.json();
     if (!jsonResponse.success) {
@@ -212,7 +212,7 @@ function fillEstados() {
 }
 const getDuracionCitas = async () => {
     // Usar ruta relativa ya que es un endpoint del frontend
-    const path = "/getDuracionCita";
+    const path = obtenerEndpoint('ENDPOINT_CITAS_GETDURACIONCITA', "/getDuracionCita");
     
     const response = await fetch(path);
     const jsonResponse = await response.json();
