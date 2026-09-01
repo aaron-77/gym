@@ -1,4 +1,5 @@
 import { showMessage, iconTypes } from './messageManager.mjs';
+import { obtenerEndpoint } from './httpClient.js';
 let clients = [];
 let entrenadores = [];
 let duracionCita = null;
@@ -25,7 +26,7 @@ export async function enviarFormularioRegistrarCita(event) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
-        const path = "/registrarCita";
+        const path = obtenerEndpoint('ENDPOINT_CITAS_REGISTRARCITA', "/registrarCita");
         const response = await fetch(path, {
             method: 'POST',
             body: formData
@@ -80,7 +81,7 @@ export async function enviarFormularioDuracionCitas(event) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
-        const path = "/duracionCitasMedicionPage";
+        const path = obtenerEndpoint('ENDPOINT_CITAS_DURACIONCITASMEDICIONPAGE', "/duracionCitasMedicionPage");
         const response = await fetch(path, {
             method: 'POST',
             body: formData
@@ -163,7 +164,7 @@ const disableElements = () => {
     }
 }
 const getDuracionCitas = async () => {
-    const response = await fetch("/getDuracionCita"); // MODIFICADO: Usar endpoint del frontend sin /api
+    const response = await fetch(obtenerEndpoint('ENDPOINT_CITAS_GETDURACIONCITA', "/getDuracionCita")); // MODIFICADO: Usar endpoint del frontend sin /api
     const jsonResponse = await response.json();
     if (!jsonResponse.success) { // MODIFICADO: Usar success
         console.log(jsonResponse.message);
@@ -176,7 +177,7 @@ import { convertirADateLocal, formatLocalDateTimeForQuery } from './dateUtils.mj
 const getEntrenaoresDisponibles = async () => {
     const fechaInicio = convertirADateLocal(document.getElementById("inputFechaInicio").value);
     const fechaInicioForQueryParameter = formatLocalDateTimeForQuery(fechaInicio);
-    const response = await fetch("/obtenerEntrenadoresDisponibles?fechaReferencia=" + encodeURIComponent(fechaInicioForQueryParameter)); // send local datetime string
+    const response = await fetch(obtenerEndpoint('ENDPOINT_CITAS_OBTENERENTRENADORESDISPONIBLES', "/obtenerEntrenadoresDisponibles") + "?fechaReferencia=" + encodeURIComponent(fechaInicioForQueryParameter)); // send local datetime string
 
     const jsonResponse = await response.json();
     if (!jsonResponse.success) { // MODIFICADO: Usar success
