@@ -3,7 +3,8 @@ import {
     getApiBaseUrl,
     getNginxBaseUrl,
     getSignalRBaseUrl,
-    obtenerFechaReferencia
+    obtenerFechaReferencia,
+    obtenerEndpoint
 } from './httpClient.js';
 import { CalendarInscripcion } from './calendarioInscripcion.js';
 import { ScheduleViewerInscripciones } from './inscriptorDeClasesScheduler.js';
@@ -131,7 +132,7 @@ async function obtenerClasesDisponibles() {
         const params = {};
         params.activa = true;
 
-        const response = await realizarPeticionAPI('/clases/obtenerClases', undefined, params);
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_CLASES_OBTENERCLASES', '/Clases/obtenerClases'), undefined, params);
         const clasesDisponibles = response.payload || response;
         console.log("CLASES DISPONIBLES CONSULTADAS:", clasesDisponibles);
         return clasesDisponibles
@@ -156,7 +157,7 @@ async function obtenerClasesProgramadas(idClase = null, fecha = obtenerFechaRefe
             params.idClase = idClase;
         }
         params.fecha = fecha;
-        const response = await realizarPeticionAPI('/clases/obtenerClasesProgramadasPorId', undefined, params);
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_CLASES_OBTENERCLASESPROGRAMADASPORID', '/clases/obtenerClasesProgramadasPorId'), undefined, params);
         const clasesProgramadas = response.payload || response;
 
         return clasesProgramadas
@@ -362,7 +363,7 @@ async function inicializarSignalR() {
 
         // Obtener la URL base del API desde la configuración  |
         const apiBaseUrl = getSignalRBaseUrl();
-        const signalRUrl = `${apiBaseUrl}/reservacionesHub`;
+        const signalRUrl = `${apiBaseUrl}${obtenerEndpoint('ENDPOINT_RESERVACIONESHUB', '/reservacionesHub')}`;
         
         // Crear la conexión al hub
         signalRConnection = new signalR.HubConnectionBuilder()
@@ -796,7 +797,7 @@ async function inscribirAClase(event) {
 
         console.log('Datos a enviar:', datosClaseProgramada);
         // Realizar la petición POST al endpoint
-        const response = await realizarPeticionAPI('/clases/inscripcionAClases', datosClaseProgramada);
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_CLASES_INSCRIPCIONACLASES', '/clases/inscripcionAClases'), datosClaseProgramada);
 
         if (response.success) {
             showMessage(iconTypes.success,'Inscripción exitosa' );
@@ -844,7 +845,7 @@ async function obtenerClientes(rol, estado = "activo") {
             estado: estado
         };
 
-        const response = await realizarPeticionAPI('/obtenerUsuariosPorRol', undefined, params);
+        const response = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_USUARIOS_OBTENERUSUARIOSPORROL', '/obtenerUsuariosPorRol'), undefined, params);
         const clientes = response.payload || response;
         console.log("CLIENTES CONSULTADOS:", clientes);
         return clientes;
