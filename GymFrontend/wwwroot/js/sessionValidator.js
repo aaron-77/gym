@@ -1,4 +1,4 @@
-import { realizarPeticionAPI } from './httpClient.js';
+import { realizarPeticionAPI, obtenerEndpoint } from './httpClient.js';
 import { logout } from './Logout.js';
 // ====== Configuración ======
 const inactivityCheckTime = 10 * 1000; // 10 segundos
@@ -56,7 +56,7 @@ export function startSession(tokensExpirationDate) {
 // ====== Renovar sesión ======
 async function renewSession() {
   console.log("✅ Usuario activo → renovar token con refresh");
-  const responseJson = await realizarPeticionAPI("/updateIdAndAccessTokens",{updateTokens:true});
+  const responseJson = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_USUARIOS_UPDATEIDANDACCESSTOKENS', "/updateIdAndAccessTokens"),{updateTokens:true});
   removeFromLocalStorage("idTokenExpiration");
   saveToLocalStorage("idTokenExpiration", responseJson.payload.expDateIdToken);
   if(!responseJson.success){
@@ -88,7 +88,7 @@ async function getSessionTimeExpiration() {
     let responseJson;
     if (!fechaDeExpiracionTokens) {
         console.log("no hay storedSessionTimeExpiration");
-        responseJson = await realizarPeticionAPI("/getSessionTimeExpiration");
+        responseJson = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_USUARIOS_GETSESSIONTIMEEXPIRATION', "/getSessionTimeExpiration"));
     }else{
         return fechaDeExpiracionTokens;
     }
