@@ -53,9 +53,30 @@ public static class HorariosHelper
         FiltroHora filtroHora,
         DateTime? fecha = null)
     {
-        // Normalizar la fecha de referencia y usarla tanto para el SP como para el filtro,
-        // para mantener consistencia cuando la consulta se hace el último día del mes.
-        var fechaRef = NormalizarFechaReferencia(fecha?.Date ?? DateTime.Today);
+        // Guard de fin de jornada: si la hora de la fecha de referencia entrante es igual o
+        // mayor a la última hora laboral, no quedan horarios disponibles ese día. Se salta
+        // a la siguiente fecha disponible calculada, cuya fecha devuelta es segura (solo
+        // contiene días con horarios anteriores a la hora máxima laboral). La fecha a usar
+        // se decide AQUÍ, antes de normalizar, para que la normalización ocurra UNA sola vez.
+        var (_, maxHoraLaboral) = await GetRangoHoraInicioAsync(connectionString);
+
+        var fechaRefBase = fecha ?? DateTime.Today;
+
+        if (fechaRefBase.Hour >= maxHoraLaboral.Hours)
+        {
+            var siguiente = await CalcularSiguienteFechaDisponible(
+                connectionString, DateOnly.FromDateTime(fechaRefBase));
+
+            // Solo se reemplaza la fecha base si hay una siguiente fecha disponible.
+            if (siguiente.HasValue)
+            {
+                fechaRefBase = siguiente.Value.ToDateTime(TimeOnly.MinValue);
+            }
+        }
+
+        // Normalizar UNA sola vez la fecha (la original o la calculada por el guard).
+        var fechaRef = NormalizarFechaReferencia(fechaRefBase);
+
         TimeSpan? horaRef = null;
 
         // Con filtro de hora (único restante: Mayor): ceil de hora si hay minutos/segundos.
@@ -134,25 +155,32 @@ public static class HorariosHelper
     /// <summary>
     /// Resuelve la referencia horaria del filtro aplicando guard clauses que solo
     /// modifican el valor de la referencia según su propio valor:
-    /// 1. Sin fecha de referencia explícita → ceil de la hora actual (próxima hora completa).
-    /// 2. Fecha explícita con minutos o segundos → ceil a la próxima hora completa
+    /// 1. Si la hora suministrada es la hora 0 (00:00, medianoche) → devuelve null,
+    ///    ya que significa que no hay hora configurada.
+    /// 2. Sin fecha de referencia explícita → ceil de la hora actual (próxima hora completa).
+    /// 3. Fecha explícita con minutos o segundos → ceil a la próxima hora completa
     ///    (la hora señalada ya empezó y sus slots quedan descartados por el filtro).
-    /// 3. Fecha explícita con hora exacta (0 minutos, 0 segundos) → se toma tal cual.
+    /// 4. Fecha explícita con hora exacta (0 minutos, 0 segundos) → se toma tal cual.
     /// </summary>
     /// <param name="fecha">Fecha de referencia explícita (opcional, null = usar hora actual).</param>
-    /// <param name="ahora">Marca de tiempo actual usada por la guard clause 1.</param>
-    /// <returns>Referencia horaria (TimeSpan) con minutos y segundos en cero.</returns>
-    private static TimeSpan ResolverHoraReferencia(DateTime? fecha, DateTime ahora)
+    /// <param name="ahora">Marca de tiempo actual usada por la guard clause 2.</param>
+    /// <returns>Referencia horaria (TimeSpan) con minutos y segundos en cero, o null si la
+    /// hora suministrada es la hora 0 (no hay hora configurada).</returns>
+    private static TimeSpan? ResolverHoraReferencia(DateTime? fecha, DateTime ahora)
     {
-        // Guard 1: sin fecha explícita → ceil de la hora actual.
+        // Guard 1: hora 0 (00:00) → no hay hora configurada, devolver null.
+        if (fecha.HasValue && fecha.Value.Hour == 0 && fecha.Value.Minute == 0 && fecha.Value.Second == 0)
+            return null;
+
+        // Guard 2: sin fecha explícita → ceil de la hora actual.
         if (!fecha.HasValue)
             return CeilHoraActual(ahora);
 
-        // Guard 2: fecha explícita con minutos o segundos → ceil a la próxima hora completa.
+        // Guard 3: fecha explícita con minutos o segundos → ceil a la próxima hora completa.
         if (fecha.Value.Minute > 0 || fecha.Value.Second > 0)
             return CeilHoraActual(fecha.Value);
 
-        // Guard 3: hora exacta (0 min, 0 seg) → se toma tal cual.
+        // Guard 4: hora exacta (0 min, 0 seg) → se toma tal cual.
         return new TimeSpan(fecha.Value.Hour, 0, 0);
     }
 
@@ -199,6 +227,36 @@ public static class HorariosHelper
 
             return Convert.ToInt32(result);
         });
+    }
+
+    /// <summary>
+    /// Calcula la siguiente fecha disponible (mínima única) estrictamente posterior a la fecha base,
+    /// sin filtrar por hora. Delega la consulta a <see cref="ObtenerHorariosDisponiblesFiltrados"/>
+    /// con filtro de fecha Mayor y filtro de hora SinFiltro, agrupa los resultados por día,
+    /// los ordena de menor a mayor y devuelve la fecha del primer día.
+    /// </summary>
+    /// <param name="connectionString">Connection string de la BD de pruebas.</param>
+    /// <param name="fecha">Fecha base de tipo <see cref="DateOnly"/> desde la cual buscar el próximo día disponible.</param>
+    /// <returns>La fecha mínima única (día) con al menos un horario disponible posterior a la fecha base,
+    /// o null si no hay ningún horario disponible.</returns>
+    public static async Task<DateOnly?> CalcularSiguienteFechaDisponible(
+        string connectionString,
+        DateOnly fecha)
+    {
+        var horarios = await ObtenerHorariosDisponiblesFiltrados(
+            connectionString, FiltroFecha.Mayor, FiltroHora.SinFiltro,
+            fecha.ToDateTime(TimeOnly.MinValue));
+
+        // Agrupar por día y quedarnos con los días únicos que tienen disponibilidad.
+        var diasDisponibles = horarios
+            .Where(r => r["FechaDisponible"] != null)
+            .Select(r => DateOnly.FromDateTime(Convert.ToDateTime(r["FechaDisponible"])))
+            .Distinct()
+            .OrderBy(d => d)
+            .ToList();
+
+        // Devolver la fecha mínima única, o null si no hay nada.
+        return diasDisponibles.Count > 0 ? diasDisponibles[0] : null;
     }
 
     /// <summary>

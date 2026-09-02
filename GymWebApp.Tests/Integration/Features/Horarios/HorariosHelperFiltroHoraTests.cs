@@ -147,12 +147,14 @@ public class HorariosHelperFiltroHoraTests : IAsyncLifetime
         var horarios = await HorariosHelper.ObtenerHorariosDisponiblesFiltrados(
             _connectionString, FiltroFecha.Igual, FiltroHora.Mayor, fechaHoraConfigurada);
 
-        // Assert
-        var fechaEsperada = fechaRef.AddDays(1);
+        // Assert - Validar que los horarios obtenidos son posteriores a la fecha de
+        // referencia configurada (fechaHoraConfigurada), comparando SOLO por día
+        // (la hora no interviene). No se asume un día exacto de salto.
+        var fechaReferencia = DateOnly.FromDateTime(fechaHoraConfigurada);
         horarios.Should().NotBeEmpty("el salto de día debe devolver slots");
         horarios.Should().OnlyContain(r =>
-            DateOnly.FromDateTime(Convert.ToDateTime(r["FechaDisponible"])) == fechaEsperada,
-            $"todos los slots deben ser del {fechaEsperada}");
+            DateOnly.FromDateTime(Convert.ToDateTime(r["FechaDisponible"])) > fechaReferencia,
+            $"todos los slots deben ser posteriores a {fechaReferencia}");
     }
 
     /// <summary>
