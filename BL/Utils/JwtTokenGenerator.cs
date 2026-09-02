@@ -173,9 +173,7 @@ public class JwtTokenGenerator
                 { "userId", user.Id },
                 { "userName", user.UserName! }
             };
-            string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
-            bool useSsl = aspnetcore_urls.StartsWith("https", StringComparison.OrdinalIgnoreCase);
-            //bool useSsl = _httpContextAccessor.HttpContext?.Request.IsHttps ?? false;//
+            bool useSsl = false;
             var token = CreateTokenWithConfig(TokenType.BackendToken, useSsl, userValues, roles);
 
             var accessToken = new AccessToken
@@ -222,9 +220,7 @@ public class JwtTokenGenerator
                 { "nombreCompleto", user.NombreCompleto },
                 { "curp", user.Curp }
             };
-            string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
-            bool useSsl = aspnetcore_urls.StartsWith("https", StringComparison.OrdinalIgnoreCase);
-            //  bool useSsl = _httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
+            bool useSsl = false;
             var token = CreateTokenWithConfig(TokenType.FrontendToken, useSsl, userValues, roles);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -378,8 +374,7 @@ public class JwtTokenGenerator
             var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY"));
 
             // Determinar si la petición es SSL
-            bool requestIsHttps = _httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
-            string audience = requestIsHttps ? _jwtSettings.BackendAudienceSsl : _jwtSettings.BackendAudiencie;
+            string audience = _jwtSettings.BackendAudiencie;
             
             var validationParameters = new TokenValidationParameters
             {
@@ -421,8 +416,7 @@ public class JwtTokenGenerator
             var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY"));
 
             // Determinar si la petición es SSL
-            bool requestIsHttps = _httpContextAccessor.HttpContext?.Request.IsHttps ?? false;
-            string audience = requestIsHttps ? _jwtSettings.FrontendAudienceSsl : _jwtSettings.FrontAudiencie;
+            string audience = _jwtSettings.FrontAudiencie;
             
             var validationParameters = new TokenValidationParameters
             {

@@ -61,6 +61,7 @@ namespace GymFrontend
                         options.ForwardedHeaders =
                             ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
                         options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
+                        options.KnownProxies.Add(IPAddress.Parse("172.17.0.1")); // gateway del bridge Docker (verificado con ip route)
                     });
                 }
 
@@ -132,10 +133,6 @@ namespace GymFrontend
                 }).AddJwtBearer(options =>
                 {
                     string audience = jwtSettings.FrontAudiencie;
-                    if (aspnetcoreUrls.Contains("https"))
-                    {
-                        audience = jwtSettings.FrontendAudienceSsl;
-                    }
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
@@ -247,13 +244,6 @@ namespace GymFrontend
                 else
                 {
                     Log.Logger.Information("Modo Development");
-                }
-                if (app.Environment.IsDevelopment())
-                {
-                    if (useSsl)
-                    {
-                        app.UseHttpsRedirection();
-                    }
                 }
 
                 Log.Logger.Information("HTTPS Redirection configurado");

@@ -144,10 +144,6 @@ try
     }).AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
     {
         string audience = jwtSettings.BackendAudiencie;
-        if (aspnetcore_urls.Contains("https"))
-        {
-            audience = jwtSettings.BackendAudienceSsl;
-        }
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -322,15 +318,6 @@ try
     }
     if (app.Environment.IsProduction() ) {
         app.UseForwardedHeaders();
-        if (useSsl)
-        {            
-            app.UseHttpsRedirection();
-
-        }
-    }
-
-    if (app.Environment.IsDevelopment()) {
-        app.UseHttpsRedirection();
     }
     
     Console.WriteLine("HTTPS Redirection configurado");
