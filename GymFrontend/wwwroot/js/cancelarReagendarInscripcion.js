@@ -2,6 +2,7 @@ import { realizarPeticionAPI, getSignalRBaseUrl, obtenerFechaReferencia, obtener
 import { Calendar } from './calendario.js';
 import { ScheduleViewer } from './horariosDelDiaInscripcion.js';
 import { showMessage, iconTypes } from './messageManager.mjs';
+import { formatearFechaSlashFormat } from './dateUtils.mjs';
 
 let calendarInstance = null;
 let scheduleViewerInstance = null;
@@ -72,7 +73,7 @@ async function onClienteChange() {
 
         fillComboBox(comboInscripcion, inscripciones, 'Seleccione una inscripción...', ins => ({
             value: ins.idInscripcion,
-            text: `${ins.nombreClase} — ${ins.fechaDeLaClase}`,
+            text: `${ins.nombreClase} — ${formatearFechaSlashFormat(ins.fechaDeLaClase)} — ${ins.horaInicio}`,
             dataset: { idClaseProgramada: ins.idClaseProgramada, fkClase: ins.fkClase, fechaDeLaClase: ins.fechaDeLaClase }
         }));
     } catch {
