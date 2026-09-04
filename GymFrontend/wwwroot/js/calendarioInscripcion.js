@@ -278,7 +278,7 @@ export class CalendarInscripcion {
                     this.showDaysView(index)
                 });
             } else {
-                button.classList.add('.calendar-month-cell--disabled')
+                button.classList.add('calendar-month-cell--disabled')
                 button.disabled = true;
             }
             grid.appendChild(button);

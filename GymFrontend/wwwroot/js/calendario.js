@@ -39,13 +39,38 @@ export class Calendar {
   }
 // param newDate recibe el nuevo objeto fecha que se pretende aisgnar
   isValidPrevNavigation(newDate){
-    let validationResult = true;
-    
-    if(newDate < this.calendarCurrentDate){
-        validationResult = false;
+    const current = this.calendarCurrentDate;
+
+    // Comparar solo día, mes y año (sin horas). Compara año, luego mes, luego día.
+    if (newDate.getFullYear() !== current.getFullYear()) {
+        return newDate.getFullYear() > current.getFullYear();
     }
-    return validationResult;
-    
+    if (newDate.getMonth() !== current.getMonth()) {
+        return newDate.getMonth() > current.getMonth();
+    }
+    return newDate.getDate() >= current.getDate();
+  }
+
+  /**
+   * Calcula la fecha objetivo evitando el "rebalse" de setMonth/setFullYear.
+   * Recibe la fecha de partida (que conserva su día) y la fecha objetivo
+   * (que ya tiene el mes/año destino aplicado). Si el día de la fecha de
+   * partida existe en el mes/año objetivo, devuelve esa fecha; si no existe
+   * (ej. 31 en febrero), devuelve el último día del mes/año objetivo.
+   * Solo es de referencia: no modifica el estado del calendario.
+   * @param {Date} fechaPartida - Fecha de partida (aporta el día).
+   * @param {Date} fechaObjetivo - Fecha que ya tiene mes/año destino aplicado.
+   * @returns {Date} Fecha calculada sin rebalse.
+   */
+  calcularFechaObjetivo(fechaPartida, fechaObjetivo) {
+      const anio = fechaObjetivo.getFullYear();
+      const mes = fechaObjetivo.getMonth();
+      // Último día del mes objetivo (el día 0 del mes siguiente es el último de este mes)
+      const diaMaximo = new Date(anio, mes + 1, 0).getDate();
+      const diaPartida = fechaPartida.getDate();
+      const diaResultante = diaPartida <= diaMaximo ? diaPartida : diaMaximo;
+
+      return new Date(anio, mes, diaResultante);
   }
   // if supply subtracted months must be negative number
   simulateChangeMonth(addedOrSubstractedMonths){
@@ -326,8 +351,10 @@ export class Calendar {
       this.monthNames.forEach((month, index) => {
           const button = this.createElement('button', 'calendar-cell calendar-cell--month', month);
           button.type = 'button';
-          const possibleNewMonth = new Date(this.selectedDate);
-          possibleNewMonth.setMonth(index); 
+          // Construir la fecha objetivo con el mes destino aplicado
+          const fechaObjetivo = new Date(this.selectedDate);
+          fechaObjetivo.setMonth(index);
+          const possibleNewMonth = this.calcularFechaObjetivo(this.selectedDate, fechaObjetivo);
           const resultValidation = this.isValidPrevNavigation(possibleNewMonth);
             if (resultValidation) {
                 button.addEventListener('click', (ev) => { 
@@ -342,7 +369,7 @@ export class Calendar {
                     this.showDaysView(index)
                 });      
             }else{
-                button.classList.add('.calendar-month-cell--disabled')
+                button.classList.add('calendar-month-cell--disabled')
                 button.disabled= true;
             }
           
@@ -540,8 +567,9 @@ export class Calendar {
 }
 
 // Inicialización automática cuando el DOM esté listo
+/*
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('calendar')) {
       new Calendar('calendar');
   }
-});
+});*/
