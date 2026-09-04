@@ -93,7 +93,7 @@ public class E2eContainerHelper : IAsyncLifetime
             .WithEnvironment(new Dictionary<string, string>
             {
                 ["ASPNETCORE_URLS"] = $"http://+:{ApiInternalPort}",
-                ["ASPNETCORE_ENVIRONMENT"] = "Production",
+                ["ASPNETCORE_ENVIRONMENT"] = "Staging",
                 ["DB_CONNECTION_STRING"] = ConnectionString,
                 ["SECRET_TOKEN_KEY"] = ConfigHelper.GetProperty("JwtSettings:SecretKey"),
                 ["Jwt:Issuer"] = ConfigHelper.GetProperty("JwtSettings:Issuer"),
@@ -119,7 +119,7 @@ public class E2eContainerHelper : IAsyncLifetime
             {
                 ["ASPNETCORE_URLS"] = $"http://+:{FrontendInternalPort}",
                 ["DB_CONNECTION_STRING"] = ConnectionString,
-                ["ASPNETCORE_ENVIRONMENT"] = "Production",
+                ["ASPNETCORE_ENVIRONMENT"] = "Staging",
                 ["SECRET_TOKEN_KEY"] = ConfigHelper.GetProperty("JwtSettings:SecretKey"),
                 ["TZ"] = "America/Mexico_City"
             })
@@ -150,6 +150,7 @@ public class E2eContainerHelper : IAsyncLifetime
 
         // Initialize Respawn after DB restore
         await InitializeRespawnAsync();
+        
     }
 
         Task IAsyncLifetime.InitializeAsync() => InitializeImplAsync();

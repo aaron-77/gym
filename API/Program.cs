@@ -17,8 +17,10 @@ using Serilog;
 
 using API.Controllers;
 using API.Hubs;
+using API.Infraestructure;
 using API.Infraestructure.Auth;
 using API.Services;
+using CorsConfig = API.Infraestructure.CorsServiceCollectionExtensions;
 using API.Services.Validaciones;
 using BL.Validaciones;
 using BL;
@@ -155,27 +157,17 @@ try
             IssuerSigningKey = new SymmetricSecurityKey(key)
         };
     });
+    
     Console.WriteLine("JWT Authentication configurado");
 
-    var frontendUrl = builder.Configuration["EndPoints:frontend:external"] ?? string.Empty;
-    // CORS
-    builder.Services.AddCors(options =>
-    {
-    options.AddPolicy("originsPolicyOne", policy =>
-    {
-        policy.WithOrigins(frontendUrl)
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
+    //allowed oriogins contiene el dns de amazon
+    var allowedOrigins = builder.Configuration
+        .GetSection("AllowedCorsOrigins")
+        .Get<string[]>() ?? Array.Empty<string>();
+    Console.WriteLine($"CORS allowed origins: {string.Join(", ", allowedOrigins)}");
 
-    options.AddPolicy("public", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
+    // CORS
+    builder.Services.AddCorsConfiguration(builder.Environment.IsStaging(), allowedOrigins);
     Console.WriteLine("CORS configurado");
 
     // Controllers y SignalR
@@ -332,9 +324,19 @@ try
             await next();
             return;
         }
-        
+
         var origin = context.Request.Headers["Origin"].ToString();
-        if (!string.IsNullOrEmpty(origin) && origin != frontendUrl)
+        if (string.IsNullOrEmpty(origin))
+        {
+            await next();
+            return;
+        }
+
+        var origenPermitido = app.Environment.IsStaging()
+            ? CorsConfig.EsOrigenPermitido(origin)
+            : allowedOrigins.Contains(origin);
+
+        if (!origenPermitido)
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             return;
