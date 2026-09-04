@@ -2,7 +2,7 @@
 
 ## 1. Resumen
 
-Pruebas unitarias que fijan el contrato definido en `spect-79-seguridad-https-ssl-edge-jwt-cookies`:
+Pruebas unitarias que fijan el contrato definido en `79-spect-seguridad-https-ssl-edge-jwt-cookies`:
 
 - Los tokens JWT se generan SIEMPRE con audiencias HTTP (`BackendAudiencie` / `FrontAudiencie`), nunca con las variantes SSL.
 - La validación manual de tokens acepta SOLO audiencias HTTP y rechaza las variantes SSL.
