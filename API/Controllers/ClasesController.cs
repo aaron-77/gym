@@ -37,6 +37,7 @@ namespace API.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
 
         private readonly IClasesService _clasesService;
+        private readonly IInscripcionesService _servicioInscripciones;
         private readonly ILogger<ClasesController> _logger;
 
         public ClasesController(
@@ -45,6 +46,7 @@ namespace API.Controllers
             UserRoleService userRoleService,
             ServicioActualizacionesDeHorariosRealTime servicioActualizaciones,
             IClasesService clasesService,
+            IInscripcionesService servicioInscripciones,
             UserManager<ApplicationUser> userManager,
             ILogger<ClasesController> logger
         )
@@ -54,6 +56,7 @@ namespace API.Controllers
             _userRoleService = userRoleService;
             _servicioActualizaciones = servicioActualizaciones;
             _clasesService = clasesService;
+            _servicioInscripciones = servicioInscripciones;
             _userManager = userManager;
             _logger = logger;
         }
@@ -1016,7 +1019,9 @@ namespace API.Controllers
                         cp.FechaDeLaClase,
                         HorarioId = cp.HorariosDeClasesProgramada
                             .Select(h => h.FkHorarioLaboral)
-                            .FirstOrDefault()
+                            .FirstOrDefault(),
+                        cp.FkClase,
+                        cp.FkEntrenador
                     })
                     .FirstOrDefaultAsync();
 
@@ -1118,6 +1123,24 @@ namespace API.Controllers
                     modelo.IdProgramacionClase
                 );
                 _logger?.LogInformation("InscribirAClase completed idInscripcion={IdInscripcion}", idInscripcion);
+
+                // Limpieza de pre-reservas tras inscripción exitosa (best-effort)
+                // La inscripción ya está registrada: si la limpieza falla, no se rompe el flujo.
+                if (claseProgramadaInfo.HorarioId > 0 && claseProgramadaInfo.FechaDeLaClase.HasValue)
+                {
+                    try
+                    {
+                        await _servicioInscripciones.LimpiarPreReservasEspecificasAsync(
+                            claseProgramadaInfo.HorarioId,           // fkHoraLaboral
+                            claseProgramadaInfo.FechaDeLaClase.Value, // fechaReservada
+                            claseProgramadaInfo.FkClase,             // idClase
+                            claseProgramadaInfo.FkEntrenador!);      // idEntrenador
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger?.LogError(ex, "[InscribirAClase] Error al limpiar pre-reservas tras la inscripción IdProgramacionClase={IdProgramacionClase}", modelo.IdProgramacionClase);
+                    }
+                }
 
                 return Ok(
                     ResponseManager.BuildResponse(

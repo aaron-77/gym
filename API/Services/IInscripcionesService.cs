@@ -31,4 +31,10 @@ public interface IInscripcionesService
     /// <param name="idCliente">ID del cliente.</param>
     /// <returns>DTOResponse con true si se reagendó exitosamente.</returns>
     Task<DTOResponse<bool>> ReagendarInscripcionAsync(int idInscripcion, int idClaseProgramada, string idCliente);
+
+    /// <summary>
+    /// Busca y elimina las pre-reservas de horario que coinciden con los datos de una clase programada
+    /// tras una inscripción exitosa.
+    /// </summary>
+    Task<DTOResponse<bool>> LimpiarPreReservasEspecificasAsync(int fkHoraLaboral, DateOnly fechaReservada, int idClase, string idEntrenador);
 }

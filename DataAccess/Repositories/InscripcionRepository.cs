@@ -97,4 +97,37 @@ public class InscripcionRepository : IInscripcionRepository
                 $"Error al ejecutar reagendación de inscripción {idInscripcion}.", ex);
         }
     }
+
+    public async Task<List<PreReservasDeHorario>> EncontrarPreReservasAsync(int fkHoraLaboral, DateOnly fechaReservada, int idClase, string idEntrenador)
+    {
+        try
+        {
+            return await _dbExecutor.QueryAsync<PreReservasDeHorario>(
+                $@"SELECT * FROM dbo.preReservasDeHorario
+                   WHERE fkHoraLaboral = {fkHoraLaboral}
+                     AND fechaReservada = {fechaReservada}
+                     AND idClase = {idClase}
+                     AND idEntrenador = {idEntrenador}");
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"Error al obtener pre-reservas para horaLaboral {fkHoraLaboral}, clase {idClase}.", ex);
+        }
+    }
+
+    public async Task<int> EliminarPreReservasEspecificasAsync(ICollection<int> idsPreReserva)
+    {
+        try
+        {
+            return await _context.PreReservasDeHorarios
+                .Where(p => idsPreReserva.Contains(p.IdPreReserva))
+                .ExecuteDeleteAsync();
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                "Error al eliminar las pre-reservas específicas.", ex);
+        }
+    }
 }

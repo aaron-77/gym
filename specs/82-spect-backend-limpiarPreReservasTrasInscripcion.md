@@ -67,10 +67,12 @@ El wrapper **orquesta** dos llamadas al repositorio `EncontrarPreReservasAsync` 
 
 ### 4.1 `InscripcionRepository.EncontrarPreReservasAsync`
 
-1. Construir la consulta SQL sobre la tabla `PreReservasDeHorarios` filtrando por los 4 datos: `FkHoraLaboral`, `FechaReservada`, `IdClase`, `IdEntrenador`.
+1. Construir la consulta SQL sobre la tabla `dbo.preReservasDeHorario` (nombre **singular**, físicamente en SQL) filtrando por los 4 datos: `fkHoraLaboral`, `fechaReservada`, `idClase`, `idEntrenador`.
 2. Ejecutar la consulta usando `_dbExecutor.QueryAsync<PreReservasDeHorario>(FormattableString)`.
 3. Devolver **todas** las pre-reservas que coincidan (pueden ser varias).
 4. Envolver en `try/catch` y relanzar como `InvalidOperationException` con mensaje descriptivo (patrón existente del repositorio).
+
+> **Nota técnica:** la tabla física en SQL es `dbo.preReservasDeHorario` (singular), aunque el `DbSet` de EF Core en `FitnessCenterDbContext` se llama `PreReservasDeHorarios` (plural). `QueryAsync<T>` usa `FromSqlInterpolated` sobre el `DbSet`, por lo que la query debe referenciar el **nombre físico real de la tabla** (`dbo.preReservasDeHorario`), no el nombre del `DbSet`.
 
 ### 4.2 `InscripcionRepository.EliminarPreReservasEspecificasAsync`
 

@@ -272,4 +272,87 @@ public class InscripcionesService : IInscripcionesService
             return ResponseManager.InternalServerError<bool>("Error interno del servidor");
         }
     }
+
+    // ──────────────────────────────────────────────
+    //  LimpiarPreReservasEspecificasAsync
+    //  Spec 82: Limpieza de pre-reservas tras inscripción exitosa
+    // ──────────────────────────────────────────────
+
+    public async Task<DTOResponse<bool>> LimpiarPreReservasEspecificasAsync(int fkHoraLaboral, DateOnly fechaReservada, int idClase, string idEntrenador)
+    {
+        try
+        {
+            // Paso 1: Buscar las pre-reservas que coinciden con los datos de la clase programada
+            var preReservas = await _repository.EncontrarPreReservasAsync(
+                fkHoraLaboral, fechaReservada, idClase, idEntrenador);
+
+            // Paso 2: Si no hay pre-reservas, no hay nada que limpiar
+            if (preReservas.Count == 0)
+            {
+                _logger.LogInformation(
+                    "[LimpiarPreReservasEspecificasAsync] No hay pre-reservas para limpiar fkHoraLaboral={FkHoraLaboral} fechaReservada={FechaReservada} idClase={IdClase} idEntrenador={IdEntrenador}",
+                    fkHoraLaboral, fechaReservada, idClase, idEntrenador);
+                return ResponseManager.Ok<bool>("No hay pre-reservas para limpiar", true);
+            }
+
+            // Paso 3: Logear las pre-reservas encontradas que van a procesarse
+            var idsEncontrados = preReservas.Select(p => p.IdPreReserva).ToList();
+            _logger.LogInformation(
+                "[LimpiarPreReservasEspecificasAsync] Se encontraron {Cantidad} pre-reservas para limpiar: {Ids}",
+                idsEncontrados.Count, string.Join(", ", idsEncontrados));
+
+            // Paso 4: Regla de negocio — las pre-reservas con IdEntrenador null son un error
+            //         de negocio: se ignoran (no se eliminan) y se loguean como no-procesables
+            var idsNoProcesables = preReservas
+                .Where(p => p.IdEntrenador is null)
+                .Select(p => p.IdPreReserva)
+                .ToList();
+
+            if (idsNoProcesables.Count > 0)
+            {
+                _logger.LogError(
+                    "[LimpiarPreReservasEspecificasAsync] Pre-reservas con IdEntrenador null (error de negocio, no-procesables, NO se eliminan): {Ids}",
+                    string.Join(", ", idsNoProcesables));
+            }
+
+            var idsValidos = preReservas
+                .Where(p => p.IdEntrenador is not null)
+                .Select(p => p.IdPreReserva)
+                .ToList();
+
+            if (idsValidos.Count == 0)
+            {
+                _logger.LogWarning(
+                    "[LimpiarPreReservasEspecificasAsync] No hay pre-reservas válidas para eliminar (todas tienen IdEntrenador null) fkHoraLaboral={FkHoraLaboral} idClase={IdClase}",
+                    fkHoraLaboral, idClase);
+                return ResponseManager.Ok<bool>("No hay pre-reservas válidas para limpiar", true);
+            }
+
+            // Paso 5: Eliminar las pre-reservas válidas vía repository
+            int eliminadas = await _repository.EliminarPreReservasEspecificasAsync(idsValidos);
+
+            // Paso 6: Si se eliminaron todas las esperadas → éxito
+            if (eliminadas == idsValidos.Count)
+            {
+                _logger.LogInformation(
+                    "[LimpiarPreReservasEspecificasAsync] Pre-reservas eliminadas correctamente: {Ids}",
+                    string.Join(", ", idsValidos));
+                return ResponseManager.Ok<bool>("Pre-reservas limpiadas correctamente", true);
+            }
+
+            // Paso 7: Si alguna no se eliminó → loguear ids no eliminados y retornar false
+            _logger.LogError(
+                "[LimpiarPreReservasEspecificasAsync] No se pudieron eliminar todas las pre-reservas. Esperadas={Esperadas} Eliminadas={Eliminadas}. Pre-reservas pendientes de revisión: {Ids}",
+                idsValidos.Count, eliminadas, string.Join(", ", idsValidos));
+            return ResponseManager.Ok<bool>("No se pudieron eliminar todas las pre-reservas", false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "[LimpiarPreReservasEspecificasAsync] Error al limpiar pre-reservas fkHoraLaboral={FkHoraLaboral} fechaReservada={FechaReservada} idClase={IdClase} idEntrenador={IdEntrenador}",
+                fkHoraLaboral, fechaReservada, idClase, idEntrenador);
+
+            return ResponseManager.InternalServerError<bool>("Error interno del servidor");
+        }
+    }
 }

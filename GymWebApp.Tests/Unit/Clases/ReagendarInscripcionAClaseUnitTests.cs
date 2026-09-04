@@ -27,6 +27,7 @@ public class ReagendarInscripcionAClaseUnitTests
     private readonly UserRoleService _mockUserRoleService;
     private readonly ServicioActualizacionesDeHorariosRealTime _mockServicioActualizaciones;
     private readonly IClasesService _mockClasesService;
+    private readonly IInscripcionesService _mockServicioInscripciones;
     private readonly ILogger<ClasesController> _mockLogger;
     private readonly UserManager<ApplicationUser> _mockUserManager;
     private readonly ClasesController _sut;
@@ -67,6 +68,7 @@ public class ReagendarInscripcionAClaseUnitTests
             mockHorariosService.Object);
 
         _mockClasesService = new Mock<IClasesService>().Object;
+        _mockServicioInscripciones = new Mock<IInscripcionesService>().Object;
         _mockLogger = new Mock<ILogger<ClasesController>>().Object;
         // UserManager<ApplicationUser> - usa NSubstitute (no Moq)
         _mockUserManager = Substitute.For<UserManager<ApplicationUser>>(
@@ -79,6 +81,7 @@ public class ReagendarInscripcionAClaseUnitTests
             _mockUserRoleService,
             _mockServicioActualizaciones,
             _mockClasesService,
+            _mockServicioInscripciones,
             _mockUserManager,
             _mockLogger
         );

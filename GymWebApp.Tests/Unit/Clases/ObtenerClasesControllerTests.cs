@@ -23,6 +23,7 @@ public class ObtenerClasesControllerTests
     private readonly UserRoleService _mockUserRoleService;
     private readonly ServicioActualizacionesDeHorariosRealTime _mockServicioActualizaciones;
     private readonly IClasesService _mockClasesService;
+    private readonly IInscripcionesService _mockServicioInscripciones;
     private readonly ILogger<ClasesController> _mockLogger;
     private readonly UserManager<ApplicationUser> _mockUserManager;
     private readonly ClasesController _sut;
@@ -35,6 +36,7 @@ public class ObtenerClasesControllerTests
         _mockUserRoleService = Substitute.For<UserRoleService>(_mockContext, null!);
         _mockServicioActualizaciones = Substitute.For<ServicioActualizacionesDeHorariosRealTime>(_mockContext, null!, null!); 
         _mockClasesService = Substitute.For<IClasesService>();
+        _mockServicioInscripciones = Substitute.For<IInscripcionesService>();
         _mockLogger = Substitute.For<ILogger<ClasesController>>();
         _mockUserManager = Substitute.For<UserManager<ApplicationUser>>(
             Substitute.For<IUserStore<ApplicationUser>>(),
@@ -46,6 +48,7 @@ public class ObtenerClasesControllerTests
             _mockUserRoleService,
             _mockServicioActualizaciones,
             _mockClasesService,
+            _mockServicioInscripciones,
             _mockUserManager,
             _mockLogger
         );
