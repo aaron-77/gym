@@ -334,10 +334,9 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         await inscripcionPage.WaitForScheduleSelectionAsync();
 
         await inscripcionPage.SubmitAsync();
-        await Page.Locator("div.swal2-container").WaitForAsync();
-        // Then: Verificar mensaje de éxito en SweetAlert
-        var pageContent = await Page.ContentAsync();
-        var successMessage = pageContent.Contains("Inscripción exitosa");
+        string innerHtml = await Page.Locator("div.swal2-container").InnerHTMLAsync();
+        //var pageContent = await Page.ContentAsync();
+        var successMessage = innerHtml.Contains("Inscripción exitosa");
 
         Assert.True(
             successMessage,

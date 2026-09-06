@@ -22,7 +22,7 @@
 
 /* Separación antes del botón */
 .section .row:last-child {
-    /* margin-top: 1rem; */
+     margin-top: 1rem; 
 } 
 
 .administrative-form{

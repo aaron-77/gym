@@ -415,12 +415,12 @@ export class Calendar {
    * Desplaza el scroll suavemente hacia el header del visualizador de horarios
    */
   scrollToScheduleViewer() {
-    const scheduleViewer = document.getElementById('scheduleViewer');
+    const inputClase = document.getElementById('inputClase');
     const offset = 60; // Ajusta este valor según la altura de tu menú fijo
     
-    if (scheduleViewer) {
+    if (inputClase) {
         // Obtener la posición del contenedor completo del schedule-viewer
-        const rect = scheduleViewer.getBoundingClientRect();
+        const rect = inputClase.getBoundingClientRect();
         const y = rect.top + window.pageYOffset - offset;
         window.scrollTo({ top: y, behavior: 'smooth' });
     }
@@ -467,7 +467,7 @@ export class Calendar {
     document.dispatchEvent(fechaSeleccionadaEvent);
     
     // Scroll suave hacia el header del visualizador de horarios
-    this.scrollToScheduleViewer();
+    //this.scrollToScheduleViewer();
   }
 
   /**
