@@ -51,6 +51,7 @@ public static class HorariosHelper
         string connectionString,
         FiltroFecha filtroFecha,
         FiltroHora filtroHora,
+        
         DateTime? fecha = null)
     {
         // Guard de fin de jornada: si la hora de la fecha de referencia entrante es igual o

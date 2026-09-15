@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 
+using BL.Utils.Enums;
 using GymWebApp.Tests.E2E.Common;
+using GymWebApp.Tests.Integration.Helpers;
 using GymWebApp.Tests.SharedHelpers;
 
 namespace GymWebApp.Tests.E2E.Features;
@@ -249,9 +251,15 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         // Then: Calendario visible (usa locator que tiene espera implícita)
         await Assertions.Expect(Page.Locator("#calendarGrid")).ToBeVisibleAsync();
 
-        // When: Selecciona día disponible del calendario
-        var diaDisponible = Page.Locator(".calendar-cell:not(.calendar-cell--disabled)").Nth(0);
-        await diaDisponible.ClickAsync();
+        // When: Obtiene un horario disponible futuro desde la BD para robustez ante días festivos
+        var connectionString = E2eContainerHelper.Instance.HostConnectionString;
+        var slot = await HorariosHelper.ObtenerUnHorarioDisponible(
+            connectionString!, FiltroFecha.Mayor, FiltroHora.SinFiltro);
+        Assert.True(slot.HasValue, "No hay horarios disponibles posteriores a hoy en la BD.");
+
+        // And: Navega el calendario a la fecha obtenida y selecciona el día exacto
+        var registroPage = new PageModels.RegistroClasesProgramadasPage(Page);
+        await registroPage.SelectDateAsync(slot.Value.FechaDisponible);
 
         // Then: ScheduleViewer se renderiza con horarios
         await Assertions.Expect(Page.Locator(".schedule-viewer__item").Nth(0)).ToBeVisibleAsync();
@@ -337,6 +345,7 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         string innerHtml = await Page.Locator("div.swal2-container").InnerHTMLAsync();
         //var pageContent = await Page.ContentAsync();
         var successMessage = innerHtml.Contains("Inscripción exitosa");
+
 
         Assert.True(
             successMessage,
