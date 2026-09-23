@@ -1,8 +1,8 @@
 @model DTO.Dtos.UserCredentials;
 
 @{
-    ViewData["Title"] = "GymPower - Iniciar Sesión";
-    ViewData["Description"] = "Inicia sesión en GymPower y accede a tu cuenta para reservar clases y más.";
+    ViewData["Title"] = "FitnessGym - Iniciar Sesión";
+    ViewData["Description"] = "Inicia sesión en FitnessGym y accede a tu cuenta para reservar clases y más.";
     ViewData["BodyClass"] = "login-page";
     Layout = "_NavbarLayout";
 }
@@ -14,7 +14,31 @@
         <div class="main-container">
             <div class="form-container" id="loginform">
                 <p class="title">Iniciar Sesión</p>
-                
+                <div class="test-credentials">
+                    <p class="test-credentials-title">Usuarios de prueba</p>
+                    <div class="test-credentials-section">
+                        <p class="test-credentials-section-title">Empleado</p>
+                        <div class="test-credentials-field">
+                            <span class="test-credentials-label">User:</span>
+                            <code class="test-credentials-value">uno@gmail.com</code>
+                        </div>
+                        <div class="test-credentials-field">
+                            <span class="test-credentials-label">Password:</span>
+                            <code class="test-credentials-value">Password123*</code>
+                        </div>
+                    </div>
+                    <div class="test-credentials-section">
+                        <p class="test-credentials-section-title">Cliente</p>
+                        <div class="test-credentials-field">
+                            <span class="test-credentials-label">User:</span>
+                            <code class="test-credentials-value">litercatlitercat@gmail.com</code>
+                        </div>
+                        <div class="test-credentials-field">
+                            <span class="test-credentials-label">Password:</span>
+                            <code class="test-credentials-value">Password123*</code>
+                        </div>
+                    </div>
+                </div>
                 <form class="form" method="post" action="signIn">
                     <span id="validationSumary" class="validation-error">@ViewBag.message</span>
                     <div class="input-group">
