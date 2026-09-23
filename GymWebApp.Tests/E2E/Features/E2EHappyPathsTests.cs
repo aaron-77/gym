@@ -40,9 +40,9 @@ public class E2EHappyPathsTests : PlaywrightTestBase
     #region 1. Público - Registro de Cuenta
 
     [Fact]
-    public async Task CrearCuenta()
+    public async Task Cliente_CrearCuenta()
     {
-        // Given: Usuario en página de registro /crearCuenta
+        // Given: Usuario en página de registro /signUp
         await Page.GotoAsync($"{BaseUrl}/signUp");
 
         // When: Completa formulario con email, contraseña y datos requeridos, envía formulario
@@ -60,11 +60,10 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         await Page.FillAsync("input[name='telefono']", "5551234567");
         await Page.ClickAsync("button.sign");
 
-        // Then: Redirige a página de login o muestra mensaje de éxito en validation-error
+        // Then: Muestra el mensaje de éxito exacto del backend en #validationSummary
         var validationError = Page.Locator("#validationSummary");
         await Assertions.Expect(validationError).ToBeVisibleAsync();
-        var validationText = await validationError.InnerTextAsync();
-        Assert.False(string.IsNullOrEmpty(validationText), "Expected a success message from the API");
+        await Assertions.Expect(validationError).ToHaveTextAsync("Usuario registrado exitosamente");
     }
 
     #endregion
