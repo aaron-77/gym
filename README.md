@@ -1,4 +1,3 @@
-
 # FitnessGym
 
 FitnessGym es un sistema de administración de gimnasios que permite a los clientes visualizar su progreso mediante un dashboard, mientras que los empleados pueden administrar las citas y rutinas de ejercicios de los clientes.
@@ -7,45 +6,13 @@ Los empleados también pueden gestionar los horarios de las clases para los inst
 
 **Stack tecnológico:** .NET 8, SignalR, SQL, SQL Server 2022, procedimientos almacenados, Razor, JavaScript, CSS, Bootstrap 5.3, Nginx 1.28, Docker 20.10 y 29, ASP.NET Core Identity, AWS (EC2, RDS y S3) y SSL.
 
-## Preview de app desplegada
-
-![Diagrama de despliegue](docsgit/diagrama%20de%20despluiegue.jpeg)
-
 ## Arquitectura
 
 FitnessGym utiliza una **arquitectura por capas**, lo que permite separar responsabilidades y facilita el mantenimiento, las pruebas y la evolución del sistema.
 
 El app esta desplegada  en contendores docker,concretamente **la API y el frontend se ejecutan en contenedores Docker** y están protegidos por un **reverse proxy con Nginx** que corre en el host. Todo el sistema se ejecuta dentro del mismo sistema operativo. La base de datos SQL Server se encuentra directamnete en el host 
-Diagrama de flujo de las peticiones http:
 
-```text
-            Usuario (navegador)
-
-                   │
-
-                   ▼
-
-        ┌─────────────────────┐
-        │   Nginx (proxy)     │
-        └─────────┬───────────┘
-                  │
-        ┌─────────▼───────────┐
-        │  Frontend (Docker)  │
-        │    ASP.NET MVC      │
-        └─────────┬───────────┘
-                  │ HTTP
-                  │
-        ┌─────────▼───────────┐       ┌──────────────────┐
-        │    API (Docker)     │──────▶│    DataAccess    │
-        │ Web API + SignalR   │  EF   │    (EF Core)     │
-        └─────────────────────┘ Core  └────────┬─────────┘
-                                               │
-                                               ▼
-                                        ┌──────────────┐
-                                        │  SQL Server  │
-                                        │     2022     │
-                                        └──────────────┘
-```
+![Diagrama de despliegue](docsgit/diagrama%20de%20despluiegue.jpeg)
 
 ### Frontend
 
