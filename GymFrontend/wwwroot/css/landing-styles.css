@@ -192,6 +192,10 @@ ul {
     gap: 3rem;
 }
 
+.about-grid > * {
+    min-width: 0; /* permite que los grid items se encojan contra el viewport */
+}
+
 .section-title {
     font-size: 2rem;
     font-weight: 700;
@@ -201,6 +205,8 @@ ul {
 .section-text {
     color: var(--color-gray-400);
     margin-bottom: 1.5rem;
+    overflow-wrap: break-word; /* parte palabras largas que no entran */
+    word-wrap: break-word; /* legacy */
 }
 
 .features-grid {
@@ -588,6 +594,16 @@ ul {
 }
 
 /* Media Queries */
+@media (max-width: 640px) {
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .section-text {
+        font-size: 0.95rem;
+    }
+}
+
 @media (min-width: 640px) {
     .hero-title {
         font-size: 3.5rem;
