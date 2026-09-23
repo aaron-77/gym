@@ -205,7 +205,7 @@ namespace API.Controllers
                 );
                 if (registerResult == null)
                 {
-                    ResponseManager.BuildResponse<DTOCreatedUser>(
+                    respuesta = ResponseManager.BuildResponse<DTOCreatedUser>(
                         success: false,
                         httpCode: 500,
                         message: "Hubo un problema al registrar el usuario",

@@ -176,18 +176,18 @@ namespace GymFrontend.Controllers
 
         [HttpGet]
         [Route("signUp")]
-        public IActionResult crearCuenta()
+        public IActionResult CrearCuenta()
         {
             try
             {
-                _logger?.LogInformation("Start UsersController.crearCuenta");
+                _logger?.LogInformation("Start UsersController.CrearCuenta");
                 return View();
             }
             catch (Exception ex)
             {
-                string logMessage = $"[ERROR] Método: crearCuenta (GET signUp) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
+                string logMessage = $"[ERROR] Método: CrearCuenta (GET signUp) | Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | Causa: {ex.GetType().Name} - {ex.Message} | Stack Trace: {ex.StackTrace}";
                 Console.WriteLine(logMessage);
-                _logger?.LogError(ex, "Error crearCuenta (UsersController) GET signUp");
+                _logger?.LogError(ex, "Error CrearCuenta (UsersController) GET signUp");
                 ViewBag.message = "Error al cargar la página de creación de cuenta.";
                 return View();
             }
@@ -195,7 +195,7 @@ namespace GymFrontend.Controllers
 
         [HttpPost]
         [Route("signUp")]
-        public IActionResult postCrearCuenta([FromForm] User usuario)
+        public async Task<IActionResult> postCrearCuenta([FromForm] User usuario)
         {
             if (!ModelState.IsValid)
             {
@@ -204,13 +204,21 @@ namespace GymFrontend.Controllers
             try
             {
                 _logger?.LogInformation("Start UsersController.postCrearCuenta");
-                ResponseHttp respuesta = manager.registrarUsuario(usuario).Result;
-                ViewBag.message = respuesta.message;
-                if (!respuesta.ok)
+                DTOResponse<DTOCreatedUser> respuesta = await manager.registrarUsuario(usuario);
+
+                if (respuesta == null)
                 {
-                    _logger?.LogError($"Error en backend al intentar regostrar la cuenta: {respuesta.message}");
-                    ViewBag.message = "Ha ocurrido un error intenta mas tarde";
+                    ViewBag.message = "Ha ocurrido un error, intenta más tarde";
+                    return View("CrearCuenta");
                 }
+                if (!respuesta.success)
+                {
+                    _logger?.LogError($"Error en backend al intentar registrar la cuenta: {respuesta.message}");
+                    ViewBag.message = respuesta.message ?? "Ha ocurrido un error, intenta más tarde";
+                    return View("CrearCuenta");
+                }
+
+                ViewBag.message = respuesta.message;
 
                 return View("CrearCuenta");
             }

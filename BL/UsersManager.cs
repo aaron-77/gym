@@ -83,7 +83,7 @@ namespace BL
             }
         }
 
-        public async Task<ResponseHttp> registrarUsuario(User newUser)
+public async Task<DTOResponse<DTOCreatedUser>> registrarUsuario(User newUser)
         {
             
             NewUser userForBody = new NewUser(newUser.Nombre,
@@ -97,11 +97,10 @@ namespace BL
 
             JsonContent jsonCon = JsonContent.Create(userForBody);
             string categoriasResponse = await httpClient.post("api/RegistrarUsuario", jsonCon);
-            ResponseHttp usuario = JsonSerializer.Deserialize<ResponseHttp>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             try
             {
-                return usuario;
+                return JsonSerializer.Deserialize<DTOResponse<DTOCreatedUser>>(categoriasResponse, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
             catch (ArgumentNullException ex)
             {
