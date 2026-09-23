@@ -12,6 +12,7 @@ namespace GymWebApp.Tests
         public EmailManagerTests()  
         {
             // Configura el EmailManager con datos de prueba
+            
             _emailManager = new EmailManagerMailKit("smtp.gmail.com", 587, "aaronlarabonfil@gmail.com", "kayxfchmpquogjgg");
         }
 

@@ -67,7 +67,7 @@ namespace API.Controllers
 
                 if (usuarioDeLaCita != null)
                 {
-                    var emailManager = new EmailManagerMailKit("smtp.server.com", 587, "aaronlarabonfil@gmail.com", "kayxfchmpquogjgg");
+                    var emailManager = new EmailManagerMailKit("smtp.gmail.com", 587, "aaronlarabonfil@gmail.com", "kayxfchmpquogjgg");
                     var message = emailManager.crearEmail("Fitness Gym", "aaronlarabonfil@gmail.com", usuarioDeLaCita.NombreCompleto + usuarioDeLaCita.Apellido, usuarioDeLaCita.Email, "Has Agendado una cita", "recuerda venir a tu cita el dia " + cita.fechaInicioCita.ToString());
                     emailManager.EnviarEmail(message);
                 }
