@@ -1,4 +1,4 @@
-import { realizarPeticionAPI, getSignalRBaseUrl, obtenerFechaReferencia, obtenerEndpoint } from './httpClient.js';
+import { realizarPeticionAPI, getSignalRBaseUrl, obtenerFechaReferencia, obtenerEndpoint, setButtonLoading, restoreButton, setButtonLabel } from './httpClient.js';
 import { Calendar } from './calendario.js';
 import { ScheduleViewer } from './horariosDelDiaInscripcion.js';
 import { showMessage, iconTypes } from './messageManager.mjs';
@@ -91,7 +91,7 @@ async function onReagendarToggle() {
     if (checkReagendar.checked) {
         contenedorCalendario.classList.remove('d-none');
         contenedorScheduler.classList.remove('d-none');
-        btnEjecutar.textContent = 'Reagendar';
+        setButtonLabel(btnEjecutar, 'Reagendar');
 
         if (!calendarInstance) {
             calendarInstance = new Calendar('calendar');
@@ -108,7 +108,7 @@ async function onReagendarToggle() {
     } else {
         contenedorCalendario.classList.add('d-none');
         contenedorScheduler.classList.add('d-none');
-        btnEjecutar.textContent = 'Cancelar';
+        setButtonLabel(btnEjecutar, 'Cancelar');
     }
 }
 
@@ -241,10 +241,17 @@ async function onEjecutarClick() {
         return;
     }
 
-    if (checkReagendar.checked) {
-        await ejecutarReagendar(idInscripcion);
-    } else {
-        await ejecutarCancelar(idInscripcion);
+    setButtonLoading(btnEjecutar);
+    try {
+        if (checkReagendar.checked) {
+            await ejecutarReagendar(idInscripcion);
+        } else {
+            await ejecutarCancelar(idInscripcion);
+        }
+    } finally {
+        // El label depende del checkbox, no del snapshot del click: se re-deriva
+        // del estado real al momento de restituir.
+        restoreButton(btnEjecutar, { label: checkReagendar.checked ? 'Reagendar' : 'Cancelar' });
     }
 }
 
@@ -299,7 +306,7 @@ function resetUI() {
     checkReagendar.checked = false;
     contenedorCalendario.classList.add('d-none');
     contenedorScheduler.classList.add('d-none');
-    btnEjecutar.textContent = 'Cancelar';
+    setButtonLabel(btnEjecutar, 'Cancelar');
     horarios = {};
     if (scheduleViewerInstance) {
         scheduleViewerInstance.clearSelection();

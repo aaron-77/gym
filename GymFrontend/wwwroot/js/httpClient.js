@@ -162,6 +162,138 @@ function obtenerEndpoint(key, fallback) {
     return value ? value : fallback;
 }
 
+// Estado de carga de botones de acción
+/** @type {WeakMap<HTMLElement, {original: string, originalWidth: string, pendingLabel: string|null, loading: boolean}>} */
+const buttonState = new WeakMap();
+
+const BUTTON_SPINNER = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+/**
+ * Resuelve un botón a partir de un elemento, un selector CSS o un id.
+ * No lanza excepciones: devuelve null si no se puede resolver.
+ * @param {HTMLElement|string|null} target - Elemento, selector CSS o id del botón
+ * @returns {HTMLElement|null} El botón resuelto, o null
+ */
+function resolveButton(target) {
+    try {
+        if (!target) return null;
+        if (typeof target === 'string') return document.querySelector(target);
+        return target instanceof HTMLElement ? target : null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Deshabilita el botón y muestra un spinner sin texto visible mientras dura la operación.
+ * Idempotente: si el botón ya está en carga, no hace nada.
+ * @param {HTMLElement|string|null} target - Elemento, selector CSS o id del botón
+ * @returns {HTMLElement|null} El botón en estado de carga, o null si no se pudo resolver
+ */
+function setButtonLoading(target) {
+    const button = resolveButton(target);
+    if (!button) return null;
+
+    let state = buttonState.get(button);
+    if (state?.loading) return null;
+
+    // Registrar el original solo la primera vez: nunca sobreescribirlo con el spinner
+    if (!state) {
+        state = {
+            original: button.innerHTML,
+            originalWidth: button.style.width,
+            pendingLabel: null,
+            loading: false
+        };
+        buttonState.set(button, state);
+    } else {
+        // Ciclo nuevo: descartar cualquier label pendiente de la carga anterior
+        state.pendingLabel = null;
+    }
+
+    // Medir antes de deshabilitar, pinear antes de mutar: evita el salto de ancho
+    const width = button.offsetWidth;
+    button.style.width = `${width}px`;
+    button.disabled = true;
+    button.innerHTML = BUTTON_SPINNER;
+    button.setAttribute('aria-busy', 'true');
+    state.loading = true;
+
+    return button;
+}
+
+/**
+ * Restituye el botón a su estado original: contenido, ancho y habilitación.
+ * No-op si el botón no está en estado de carga.
+ * @param {HTMLElement|string|null} target - Elemento, selector CSS o id del botón
+ * @param {{label?: string}} [options] - label explícito a restaurar (tiene prioridad sobre el pendiente)
+ * @returns {void}
+ */
+function restoreButton(target, options = {}) {
+    try {
+        const button = resolveButton(target);
+        if (!button) return;
+
+        const state = buttonState.get(button);
+        if (!state?.loading) return;
+
+        // Gana el pendiente si hubo cambio de estado durante la carga, luego el explícito, luego el original
+        if (state.pendingLabel !== null) {
+            button.innerHTML = state.pendingLabel;
+        } else if (options.label !== undefined) {
+            button.innerHTML = options.label;
+        } else {
+            button.innerHTML = state.original;
+        }
+
+        button.style.width = state.originalWidth;
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+        buttonState.delete(button);
+    } catch {
+        // El helper nunca puede romper el flujo del handler que lo usa
+    }
+}
+
+/**
+ * Ejecuta una acción con el botón en estado de carga y lo restituye siempre,
+ * incluso si la acción lanza una excepción.
+ * @param {HTMLElement|string|null} target - Elemento, selector CSS o id del botón
+ * @param {Function} action - Acción asíncrona a ejecutar
+ * @returns {Promise<any>} El resultado de la acción
+ */
+async function withButtonLoading(target, action) {
+    const button = setButtonLoading(target);
+    try {
+        return await action();
+    } finally {
+        restoreButton(button);
+    }
+}
+
+/**
+ * Escribe el label del botón respetando si está en estado de carga.
+ * Si está cargando, difiere la escritura como label pendiente para no destruir el spinner.
+ * @param {HTMLElement|string|null} target - Elemento, selector CSS o id del botón
+ * @param {string} html - Contenido HTML nuevo del botón
+ * @returns {void}
+ */
+function setButtonLabel(target, html) {
+    try {
+        const button = resolveButton(target);
+        if (!button) return;
+
+        const state = buttonState.get(button);
+        if (state?.loading) {
+            state.pendingLabel = html;
+            return;
+        }
+        button.innerHTML = html;
+    } catch {
+        // No-op defensivo
+    }
+}
+
 // Hacer las funciones disponibles globalmente para scripts no-module
 if (typeof window !== 'undefined') {
     window.getApiBaseUrl = getApiBaseUrl;
@@ -171,7 +303,12 @@ if (typeof window !== 'undefined') {
     window.realizarPeticionAPI = realizarPeticionAPI;
     window.obtenerFechaReferencia = obtenerFechaReferencia;
     window.obtenerEndpoint = obtenerEndpoint;
+    window.resolveButton = resolveButton;
+    window.setButtonLoading = setButtonLoading;
+    window.restoreButton = restoreButton;
+    window.withButtonLoading = withButtonLoading;
+    window.setButtonLabel = setButtonLabel;
 }
 
 // Exportar las funciones para uso en otros módulos
-export { realizarPeticionAPI, getApiBaseUrl, getFrontendBaseUrl, getNginxBaseUrl, getSignalRBaseUrl, obtenerFechaReferencia, obtenerEndpoint }; 
+export { realizarPeticionAPI, getApiBaseUrl, getFrontendBaseUrl, getNginxBaseUrl, getSignalRBaseUrl, obtenerFechaReferencia, obtenerEndpoint, resolveButton, setButtonLoading, restoreButton, withButtonLoading, setButtonLabel }; 

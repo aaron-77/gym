@@ -3,7 +3,7 @@
  * Maneja la integración entre el calendario y el visualizador de horarios
  */
 
-import { realizarPeticionAPI, getApiBaseUrl, getNginxBaseUrl, getSignalRBaseUrl, obtenerFechaReferencia, obtenerEndpoint } from './httpClient.js';
+import { realizarPeticionAPI, getApiBaseUrl, getNginxBaseUrl, getSignalRBaseUrl, obtenerFechaReferencia, obtenerEndpoint, setButtonLoading, restoreButton } from './httpClient.js';
 import { Calendar } from './calendario.js';
 import { ScheduleViewer } from './horariosDelDia.js';
 import { formDataToJson } from './formDataToJson.js';
@@ -545,6 +545,9 @@ async function registrarClaseProgramada(event) {
         return;
     }
     formulario.classList.add('was-validated');
+    // El botón vive fuera del form (atributo HTML5 form="claseProgramadaForm"),
+    // por eso se resuelve por id y no con form.querySelector
+    const btnRegistrar = setButtonLoading(document.getElementById('registrarClaseProgramadaBtn'));
     try {
         // Obtener el formulario
         const formulario = event.target;
@@ -588,7 +591,7 @@ async function registrarClaseProgramada(event) {
             }
             
         } else {
-            showMessage(iconTypes.success,response.message);
+            showMessage(iconTypes.error, response.message || 'Error al registrar la clase programada');
             let detailedErrors = '';
             if (response.errors && response.errors.length > 0) {
                 detailedErrors += ': ' + response.errors.map(e => e.message).join(', ');
@@ -598,8 +601,10 @@ async function registrarClaseProgramada(event) {
         }
         formulario.classList.remove('was-validated');
     } catch (error) {
-        showMessage(iconTypes.success,response.message);
+        showMessage(iconTypes.error, error.message || 'Error al registrar la clase programada');
         console.error('Error al registrar clase programada:', error);
+    } finally {
+        restoreButton(btnRegistrar);
     }
 } 
 

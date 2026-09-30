@@ -1,5 +1,5 @@
 import { showMessage, iconTypes } from './messageManager.mjs';
-import { obtenerEndpoint } from './httpClient.js';
+import { obtenerEndpoint, setButtonLoading, restoreButton } from './httpClient.js';
 
 async function enviarFormularioMedida(event) {
     event.preventDefault();
@@ -12,13 +12,9 @@ async function enviarFormularioMedida(event) {
     }
 
     const formData = new FormData(form);
+    const submitBtn = setButtonLoading(form.querySelector('button[type="submit"]'));
 
     try {
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
-
         const path = obtenerEndpoint('ENDPOINT_MEDIDAS_REGISTRAR', "/registrar");
         const response = await fetch(path, {
             method: 'POST',
@@ -42,9 +38,7 @@ async function enviarFormularioMedida(event) {
         console.error('Error:', error);
         await showMessage(iconTypes.error, error.message || 'Error al registrar la medida');
     } finally {
-        const submitBtn = form.querySelector('button[type="submit"]');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Guardar';
+        restoreButton(submitBtn);
     }
 }
 

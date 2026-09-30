@@ -1,5 +1,5 @@
 import { showMessage, iconTypes } from './messageManager.mjs';
-import { obtenerEndpoint } from './httpClient.js';
+import { obtenerEndpoint, setButtonLoading, restoreButton } from './httpClient.js';
 let clients = [];
 let entrenadores = [];
 let duracionCita = null;
@@ -21,11 +21,9 @@ export async function enviarFormularioRegistrarCita(event) {
 
     const formData = new FormData(form);
 
-    try {
-        const submitBtn = form.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+    const submitBtn = setButtonLoading(form.querySelector('button[type="submit"]'));
 
+    try {
         const path = obtenerEndpoint('ENDPOINT_CITAS_REGISTRARCITA', "/registrarCita");
         const response = await fetch(path, {
             method: 'POST',
@@ -54,11 +52,7 @@ export async function enviarFormularioRegistrarCita(event) {
         console.error('Error:', error);
         await showMessage(iconTypes.error, error.message || 'Error al registrar la cita');
     } finally {
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Agendar';
-        }
+        restoreButton(submitBtn);
     }
 }
 
@@ -74,13 +68,9 @@ export async function enviarFormularioDuracionCitas(event) {
 
     const formData = new FormData(form);
 
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
+    const submitBtn = setButtonLoading(form.querySelector('button[type="submit"]'));
 
     try {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
-
         const path = obtenerEndpoint('ENDPOINT_CITAS_DURACIONCITASMEDICIONPAGE', "/duracionCitasMedicionPage");
         const response = await fetch(path, {
             method: 'POST',
@@ -103,10 +93,7 @@ export async function enviarFormularioDuracionCitas(event) {
         console.error('Error:', error);
         await showMessage(iconTypes.error, error.message || 'Error al guardar la duracion');
     } finally {
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-        }
+        restoreButton(submitBtn);
     }
 }
 

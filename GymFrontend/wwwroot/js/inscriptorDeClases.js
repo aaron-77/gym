@@ -4,7 +4,9 @@ import {
     getNginxBaseUrl,
     getSignalRBaseUrl,
     obtenerFechaReferencia,
-    obtenerEndpoint
+    obtenerEndpoint,
+    setButtonLoading,
+    restoreButton
 } from './httpClient.js';
 import { CalendarInscripcion } from './calendarioInscripcion.js';
 import { ScheduleViewerInscripciones } from './inscriptorDeClasesScheduler.js';
@@ -772,6 +774,7 @@ async function inscribirAClase(event) {
         return;
     }
     formulario.classList.add('was-validated');
+    const btnInscribir = setButtonLoading(formulario.querySelector('button[type="submit"]'));
     try {
         // Crear objeto FormData con los datos del formulario
         const formData = new FormData(formulario);
@@ -829,6 +832,8 @@ async function inscribirAClase(event) {
         showMessage(iconTypes.error,'No se pudo inscribir el cliente');
         console.error('Error al registrar clase programada:', error);
         
+    } finally {
+        restoreButton(btnInscribir);
     }
 }
 

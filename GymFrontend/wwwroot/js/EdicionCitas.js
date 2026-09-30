@@ -1,5 +1,5 @@
 import { showMessage, iconTypes } from './messageManager.mjs';
-import { getNginxBaseUrl, realizarPeticionAPI, obtenerEndpoint } from './httpClient.js';
+import { getNginxBaseUrl, realizarPeticionAPI, obtenerEndpoint, setButtonLoading, restoreButton } from './httpClient.js';
 
 let clients = [];
 let citas = [];
@@ -30,11 +30,9 @@ export async function enviarFormularioModificarCita(event) {
     // Convertir FormData a objeto JSON directamente
     const citaData = Object.fromEntries(formData.entries());
 
-    try {
-        const submitBtn = form.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+    const submitBtn = setButtonLoading(form.querySelector('button[type="submit"]'));
 
+    try {
         const data = await realizarPeticionAPI(obtenerEndpoint('ENDPOINT_CITAS_MODIFICARCITA', '/modificarCita'), citaData);
 
         // El API devuelve DTOResponse, verificar success
@@ -48,11 +46,7 @@ export async function enviarFormularioModificarCita(event) {
         console.error('Error:', error);
         await showMessage(iconTypes.error, error.message || 'Error al modificar la cita');
     } finally {
-        const submitBtn = form.querySelector('button[type="submit"]');
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Modificar';
-        }
+        restoreButton(submitBtn);
     }
 }
 
