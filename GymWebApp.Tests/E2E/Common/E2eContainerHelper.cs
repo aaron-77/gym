@@ -34,7 +34,6 @@ public class E2eContainerHelper : IAsyncLifetime
 
     // Backup configuration
     private const string BackupHostPath = "/mnt/archivos/estudio/proyectos/gym/bd/respaldosbd";
-    private const string BackupFileName = "FitnessGymBackup20260906.bak";
 
     // Nginx configuration
     private const string NginxConfPath = "/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/E2E/Common/nginx.conf";
@@ -242,7 +241,9 @@ public class E2eContainerHelper : IAsyncLifetime
 
     private async Task RestoreDatabaseFromBackupAsync(string masterConnectionString, string sqlPassword)
     {
-        var backupPath = "/backup/" + BackupFileName;
+        var backupFileName = ConfigHelper.GetPropertyOrDefault(
+            "TestContainers:BackupFile", "FitnessGymBackup20260906.bak");
+        var backupPath = "/backup/" + backupFileName;
         var databaseName = "FitnessCenterDB";
 
         try

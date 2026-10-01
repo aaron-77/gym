@@ -30,6 +30,13 @@ public static class ConfigHelper
         return value;
     }
 
+    public static string GetPropertyOrDefault(string key, string defaultValue)
+    {
+        var value = _configuration?[key];
+
+        return string.IsNullOrEmpty(value) ? defaultValue : value;
+    }
+
     public static IConfigurationSection GetSection(string sectionName)
     {
         var section = _configuration?.GetSection(sectionName);
