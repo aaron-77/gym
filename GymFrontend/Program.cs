@@ -116,6 +116,7 @@ namespace GymFrontend
                 var pagesSection = builder.Configuration.GetSection("pages");
                 builder.Services.Configure<JwtSettings>(jwtSection);
                 builder.Services.Configure<PagesSettings>(pagesSection);
+                builder.Services.Configure<TestCredentialsForRealUsers>(builder.Configuration.GetSection("TestCredentialsForRealUsers"));
                 Log.Logger.Information("Configuracion JWT y Pages cargada");
 
                 var jwtSettings = jwtSection.Get<JwtSettings>();
