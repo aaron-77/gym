@@ -180,16 +180,17 @@ public class InscripcionesReagendarE2ETests : PlaywrightTestBase
 
         DateOnly? fechaReferencia = null;
 
+        var slotDisponible = await HorariosHelper.ObtenerUnHorarioDisponible(
+            connectionString,
+            FiltroFecha.Mayor,
+            FiltroHora.SinFiltro);
+
+        Assert.NotNull(slotDisponible);
+        fechaReferencia = slotDisponible!.Value.FechaDisponible;
+
         if (DateTime.Now.TimeOfDay >= maxHoraInicio - TimeSpan.FromMinutes(1))
         {
-            var slotDisponible = await HorariosHelper.ObtenerUnHorarioDisponible(
-                connectionString,
-                FiltroFecha.Mayor,
-                FiltroHora.SinFiltro);
-
-            Assert.NotNull(slotDisponible);
-            fechaReferencia = slotDisponible!.Value.FechaDisponible;
-
+         
             // Fijar el reloj del browser para que coincida con la fecha seedeada
             // y el calendario JS renderice correctamente los días disponibles.
             var minHoraRow = await DatabaseHelper.ExecuteQuerySingleAsync(

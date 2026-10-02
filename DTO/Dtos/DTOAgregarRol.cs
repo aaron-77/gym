@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 // DTO para recibir la información
-public class DTOAgregarRol
+public class  DTOAgregarRol
 {
 
     [Required(ErrorMessage = "El ID de usuario es obligatorio")]
