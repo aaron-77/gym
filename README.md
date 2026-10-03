@@ -4,7 +4,7 @@ FitnessGym es un sistema de administración de gimnasios que permite a los clien
 
 Los empleados también pueden gestionar los horarios de las clases para los instructores y administrar las inscripciones de los clientes en tiempo real. El sistema permite reagendar las inscripciones a las clases y envía notificaciones por correo electrónico relacionadas con las citas de los clientes.
 
-**Stack tecnológico:** .NET 8, SignalR, SQL, SQL Server 2022, procedimientos almacenados, Razor, JavaScript, CSS, Bootstrap 5.3, Nginx 1.28, Docker 20.10 y 29, ASP.NET Core Identity, AWS (EC2, RDS y S3) y SSL.
+**Stack tecnológico:** .NET 8, SignalR, SQL, SQL Server 2022, procedimientos almacenados, Razor, JavaScript, CSS, Bootstrap 5.3, Nginx 1.28, Docker 20.10 y 29, ASP.NET Core Identity, AWS (EC2, RDS y S3),Azure(azure vm) y SSL.
 
 ## Arquitectura
 
@@ -18,7 +18,7 @@ El app esta desplegada  en contendores docker,concretamente **la API y el fronte
 
 Es la **capa de presentación** del sistema. Está construida con **ASP.NET Core MVC**, **Razor**, **JavaScript**, **CSS** y **Bootstrap 5.3**.
 
-Se encarga de es mostrar la UI al usuario . Esta contruido con el patron  **Backend for Frontend (BFF)**. Las peticiones del navegador llegan primero a Nginx y después al frontend. Cuando el frontend necesita información de la API, realiza la petición desde el servidor mediante la capa .De esta forma, el navegador no necesita comunicarse directamente con la API. El frontend recibe la respuesta de la API, prepara la información necesaria para la vista y finalmente devuelve la respuesta al navegador a través de Nginx.
+Se encarga de es mostrar la UI al usuario . Las peticiones del navegador llegan primero a Nginx y después al frontend. Cuando el frontend necesita información de la API, realiza la petición desde el servidor mediante la capa .De esta forma, el navegador no necesita comunicarse directamente con la API. El frontend recibe la respuesta de la API, prepara la información necesaria para la vista y finalmente devuelve la respuesta al navegador a través de Nginx, esto se hace para evitar la exposicion de los tokens en javascript por medio del uso de cookies seguras http only.
 
 ### BL (Business Logic)
 
@@ -28,7 +28,6 @@ Esta capa incluye:
 
 * Lógica organizada por dominio.
 * Un cliente HTTP centralizado para realizar las llamadas a la API.
-* Gestión de tokens.
 * Generación de respuestas con un formato uniforme.
 * Validaciones personalizadas.
 * Manejo centralizado de errores.
@@ -77,6 +76,6 @@ Esta separación permite que las diferentes capas compartan los mismos modelos d
 
 ### Base de datos
 
-El sistema utiliza **SQL Server 2022** como base de datos.
+El sistema utiliza **SQL Server 2022** como base de datos.Esta no es una capa formal de la aplicacion,es solo para compartir el esquema y los procedimeitnos almacanedos que conforman la base de datos y hacer visisble el trabajo realizado en la base de datos. tambien srive como respaldo de la bd y apoyo para migraciones posteriores a otros motores de bd.
 
 La base de datos contiene tablas, procedimientos almacenados y funciones utilizados por la aplicación y todos los objetos utilizados en la bd, esta capa es solamnete para facilitar la gestion de los scripts de bd del sistemay su respaldo, no contiene proyectos .csproj ejecutables.
