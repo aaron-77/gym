@@ -61,9 +61,8 @@ public class CitasApiWebApplicationFactory<TProgram> : WebApplicationFactory<TPr
         try
         {
 
-        var testUserSection = ConfigHelper.GetSection("TestUser");
-        var email = testUserSection["Email"] ?? throw new InvalidOperationException("Test user email not configured");
-        var password = testUserSection["Password"] ?? throw new InvalidOperationException("Test user password not configured");
+        var email = TestUsersOptions.EmpleadoEmail;
+        var password = TestUsersOptions.EmpleadoPassword;
 
         var loginRequest = new UserCredentials
         {
@@ -98,9 +97,8 @@ public class CitasApiWebApplicationFactory<TProgram> : WebApplicationFactory<TPr
 
     public async Task<string> AuthenticateAsClienteAsync(HttpClient client)
     {
-        var testUserSection = ConfigHelper.GetSection("TestUserCliente");
-        var email = testUserSection["Email"] ?? throw new InvalidOperationException("Test cliente email not configured");
-        var password = testUserSection["Password"] ?? throw new InvalidOperationException("Test cliente password not configured");
+        var email = TestUsersOptions.ClienteEmail;
+        var password = TestUsersOptions.ClientePassword;
         
         var loginRequest = new UserCredentials
         {

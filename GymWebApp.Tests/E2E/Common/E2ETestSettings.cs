@@ -1,33 +1,25 @@
-using Microsoft.Extensions.Configuration;
+using GymWebApp.Tests.Integration.Common;
 
 namespace GymWebApp.Tests.E2E.Common;
 
 /// <summary>
 /// Provides test configuration from appsettings.Testing.json.
-/// Singleton that loads configuration once on first access.
+/// Facade over the typed "TestUsers" list — property names are unchanged, so the
+/// existing call sites keep working without edits. No fallback values: a missing
+/// setting fails immediately instead of degrading silently.
 /// </summary>
 public static class E2ETestSettings
 {
-    private static IConfiguration? _configuration;
+    public static string TestUserEmail => TestUsersOptions.EmpleadoEmail;
 
-    private static IConfiguration Configuration
-    {
-        get
-        {
-            if (_configuration == null)
-            {
-                var basePath = AppContext.BaseDirectory;
-                _configuration = new ConfigurationBuilder()
-                    .SetBasePath(basePath)
-                    .AddJsonFile("appsettings.Testing.json", optional: false, reloadOnChange: false)
-                    .Build();
-            }
-            return _configuration;
-        }
-    }
+    public static string TestUserPassword => TestUsersOptions.EmpleadoPassword;
 
-    public static string TestUserEmail => Configuration["TestUser:Email"] ?? throw new InvalidOperationException("TestUser:Email not configured");
-    public static string TestUserPassword => Configuration["TestUser:Password"] ?? throw new InvalidOperationException("TestUser:Password not configured");
-    public static string TestUserClienteEmail => Configuration["TestUserCliente:Email"] ?? throw new InvalidOperationException("TestUserCliente:Email not configured");
-    public static string TestUserClientePassword => Configuration["TestUserCliente:Password"] ?? throw new InvalidOperationException("TestUserCliente:Password not configured");
+    public static string TestUserClienteEmail => TestUsersOptions.ClienteEmail;
+
+    public static string TestUserClientePassword => TestUsersOptions.ClientePassword;
+
+    /// <summary>
+    /// Account that is only ever used to resolve user identifiers; it never authenticates.
+    /// </summary>
+    public static string ClienteRebecaEmail => TestUsersOptions.ClienteRebecaEmail;
 }

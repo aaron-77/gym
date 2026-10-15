@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Playwright;
 
 using BL.Utils.Enums;
@@ -11,29 +10,8 @@ namespace GymWebApp.Tests.E2E.Features;
 [Collection("E2E HappyPaths")]
 public class E2EHappyPathsTests : PlaywrightTestBase
 {
-    private readonly IConfiguration _configuration;
-    private readonly string _employeeEmail;
-    private readonly string _employeePassword;
-    private readonly string _clientEmail;
-    private readonly string _clientPassword;
-
     public E2EHappyPathsTests(E2eContainerHelper e2eContainerHelper, PlaywrightHelper playwrightHelper) 
-        : base(e2eContainerHelper, playwrightHelper)
-    {
-        var configPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "appsettings.Testing.json");
-        if (!File.Exists(configPath))
-        {
-            configPath = Path.Combine(AppContext.BaseDirectory, "appsettings.Testing.json");
-        }
-        _configuration = new ConfigurationBuilder()
-            .AddJsonFile(configPath, optional: false, reloadOnChange: true)
-            .AddEnvironmentVariables()
-            .Build();
-        _employeeEmail = _configuration["TestUser:Email"] ?? "uno@gmail.com";
-        _employeePassword = _configuration["TestUser:Password"] ?? "Password123*";
-        _clientEmail = _configuration["TestUserCliente:Email"] ?? "aaronhl1313@gmail.com";
-        _clientPassword = _configuration["TestUserCliente:Password"] ?? "Password123*";
-    }
+        : base(e2eContainerHelper, playwrightHelper) { }
 
     private string BaseUrl => E2eContainerHelper.NginxBaseUrl;
 
@@ -77,8 +55,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         await Page.GotoAsync($"{BaseUrl}/signIn");
 
         // When: Ingresa credenciales de cliente y envía formulario
-        await Page.FillAsync("input[name='correo']", _clientEmail);
-        await Page.FillAsync("input[name='contrasena']", _clientPassword);
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserClienteEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserClientePassword);
         await Page.ClickAsync("button.sign");
         
         // Then: espera a que este visible la barra de menu latera
@@ -100,8 +78,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase
     {
         // Given: Cliente logueado en dashboard /clientes
         await Page.GotoAsync($"{BaseUrl}/signIn");
-        await Page.FillAsync("input[name='correo']", _clientEmail);
-        await Page.FillAsync("input[name='contrasena']", _clientPassword);
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserClienteEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserClientePassword);
         await Page.ClickAsync("button.sign");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
@@ -141,8 +119,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase
         await Page.GotoAsync($"{BaseUrl}/signIn");
 
         // When: Ingresa credenciales de empleado y envía formulario
-        await Page.FillAsync("input[name='correo']", _employeeEmail);
-        await Page.FillAsync("input[name='contrasena']", _employeePassword);
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserPassword);
         await Page.ClickAsync("button.sign");
         // Then: Redirige a /empleados
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
@@ -164,8 +142,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase
     {
         // Given: Empleado logueado en dashboard /empleados
         await Page.GotoAsync($"{BaseUrl}/signIn");
-        await Page.FillAsync("input[name='correo']", _employeeEmail);
-        await Page.FillAsync("input[name='contrasena']", _employeePassword);
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserPassword);
         await Page.ClickAsync("button.sign");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
@@ -202,8 +180,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase
     {
         // Given: Empleado logueado
         await Page.GotoAsync($"{BaseUrl}/signIn");
-        await Page.FillAsync("input[name='correo']", _employeeEmail);
-        await Page.FillAsync("input[name='contrasena']", _employeePassword);
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserPassword);
         await Page.ClickAsync("button.sign");
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
@@ -239,8 +217,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase
     {
         // Given: Empleado logueado
         await Page.GotoAsync($"{BaseUrl}/signIn");
-        await Page.FillAsync("input[name='correo']", _employeeEmail);
-        await Page.FillAsync("input[name='contrasena']", _employeePassword);
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserPassword);
         await Page.ClickAsync("button.sign");
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
@@ -292,8 +270,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase
     {
         // Given: Empleado logueado, navega a /Clases/inscripcionAClases
         await Page.GotoAsync($"{BaseUrl}/signIn");
-        await Page.FillAsync("input[name='correo']", _employeeEmail);
-        await Page.FillAsync("input[name='contrasena']", _employeePassword);
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserPassword);
         await Page.ClickAsync("button.sign");
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
@@ -356,8 +334,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase
     {
         // Given: Empleado logueado, navega a /Citas/registrarCita
         await Page.GotoAsync($"{BaseUrl}/signIn");
-        await Page.FillAsync("input[name='correo']", _employeeEmail);
-        await Page.FillAsync("input[name='contrasena']", _employeePassword);
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserPassword);
         await Page.ClickAsync("button.sign");
         // When: Completa formulario de cita y envía
         await Page.GotoAsync($"{BaseUrl}/registrarCita?page=asignar");
@@ -396,8 +374,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase
     {
         // Given: Empleado logueado
         await Page.GotoAsync($"{BaseUrl}/signIn");
-        await Page.FillAsync("input[name='correo']", _employeeEmail);
-        await Page.FillAsync("input[name='contrasena']", _employeePassword);
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserPassword);
         await Page.ClickAsync("button.sign");
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 
@@ -448,8 +426,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase
     {
         // Given: Empleado logueado
         await Page.GotoAsync($"{BaseUrl}/signIn");
-        await Page.FillAsync("input[name='correo']", _employeeEmail);
-        await Page.FillAsync("input[name='contrasena']", _employeePassword);
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserPassword);
         await Page.ClickAsync("button.sign");
         await Page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
 
@@ -484,8 +462,8 @@ public class E2EHappyPathsTests : PlaywrightTestBase
     {
         // Given: Empleado logueado
         await Page.GotoAsync($"{BaseUrl}/signIn");
-        await Page.FillAsync("input[name='correo']", _employeeEmail);
-        await Page.FillAsync("input[name='contrasena']", _employeePassword);
+        await Page.FillAsync("input[name='correo']", E2ETestSettings.TestUserEmail);
+        await Page.FillAsync("input[name='contrasena']", E2ETestSettings.TestUserPassword);
         await Page.ClickAsync("button.sign");
         await Assertions.Expect(Page.Locator("#sidebar")).ToBeVisibleAsync();
 

@@ -7,6 +7,7 @@ using Respawn.Graph;
 using Testcontainers;
 using Testcontainers.MsSql;
 using GymWebApp.Tests.Integration.Common;
+using GymWebApp.Tests.Integration.Helpers;
 using DatabaseHelper = GymWebApp.Tests.SharedHelpers.DatabaseHelper;
 
 namespace GymWebApp.Tests.E2E.Common;
@@ -79,11 +80,16 @@ public class E2eContainerHelper : IAsyncLifetime
         await RestoreDatabaseFromBackupAsync(masterConnectionString, sqlPassword);
         Console.WriteLine("[E2E] Database restored from backup");
 
+        // El .bak solo trae el user de base de datos (huérfano); los logins nunca viajan en un
+        // respaldo. Sin login el user no se puede usar, así que se crea después del restore.
+        await FitnessGymLoginHelper.CreateAsync(masterConnectionString, sqlPassword);
+        Console.WriteLine($"[E2E] Login '{FitnessGymLoginHelper.LoginName}' created");
+
         // Connection string para FitnessCenterDB (usando alias de red)
-        ConnectionString = $"Server=sqlserver,{SqlServerInternalPort};Database=FitnessCenterDB;User Id=sa;Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
+        ConnectionString = $"Server=sqlserver,{SqlServerInternalPort};Database=FitnessCenterDB;User Id={FitnessGymLoginHelper.LoginName};Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
 
         // Connection string for Respawn (runs from host, needs localhost + mapped port)
-        HostConnectionString = $"Server=127.0.0.1,{sqlMappedPort};Database=FitnessCenterDB;User Id=sa;Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
+        HostConnectionString = $"Server=127.0.0.1,{sqlMappedPort};Database=FitnessCenterDB;User Id={FitnessGymLoginHelper.LoginName};Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
 
         // 3. Iniciar API (placeholder - requiere imagen real del proyecto)
         _apiContainer = new ContainerBuilder()
@@ -242,7 +248,7 @@ public class E2eContainerHelper : IAsyncLifetime
     private async Task RestoreDatabaseFromBackupAsync(string masterConnectionString, string sqlPassword)
     {
         var backupFileName = ConfigHelper.GetPropertyOrDefault(
-            "TestContainers:BackupFile", "FitnessGymBackup20260906.bak");
+            "TestContainers:BackupFile", "FitnessGymDB.bak");
         var backupPath = "/backup/" + backupFileName;
         var databaseName = "FitnessCenterDB";
 

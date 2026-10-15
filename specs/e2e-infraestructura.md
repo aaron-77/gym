@@ -109,8 +109,8 @@ The E2E test environment MUST have seed data available.
 - GIVEN the API Docker image (aaron77/fitnessgymapi:v17) is built
 - THEN the image MUST include database migration and seed data execution on startup
 - AND the seed data MUST include:
-  - Test user `uno@gmail.com` with password `Password123*` (employee role)
-  - Test user `aaronhl1313@gmail.com` with password `Password123*` (client role)
+  - Test user `empleado.spiffy479@aleeas.com` with password `Password123*` (employee role)
+  - Test user `clientefitnessgym.jockey868@simplelogin.com` with password `Password123*` (client role)
   - Reference data: roles, exercise types, class types, intensity levels, difficulty levels
   - At least one sample class and one scheduled class for display testing
 

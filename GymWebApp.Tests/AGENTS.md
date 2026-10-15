@@ -73,7 +73,7 @@ GymWebApp.Tests/
 ### Reglas específicas para Tests E2E
 
 - **TODOS los tests E2E DEBEN heredar de `PlaywrightTestBase`** — Esto garantiza que los contenedores estén inicializados. Tests que solo necesitan HTTP (sin browser) deben ser tests de integración, no E2E.
-- **Las credenciales de prueba DEBEN venir de `appsettings.Testing.json`** — NUNCA hardcodear email/password en los archivos de test. Usar `TestUser` (empleado) o `TestUserCliente` (cliente).
+- **Las credenciales de prueba DEBEN venir de `appsettings.Testing.json`** — NUNCA hardcodear email/password en los archivos de test. Aplica a **tests E2E y tests de integración**. Leer de la lista tipada `TestUsers` mediante `TestUsersOptions` (entradas `Empleado`, `Cliente`, `ClienteRebeca`) o de la fachada `E2ETestSettings` para tests E2E. Agregar un usuario de prueba es agregar una entrada a esa lista, sin escribir código. La entrada `ClienteRebeca` no tiene contraseña a propósito: solo se usa para resolver identificadores.
 - **Las aserciones DEBEN verificar contenido real, no solo existencia** — DO: `Expect(heading).ToHaveTextAsync(new Regex("Clases"))`. DON'T: solo `WaitForAsync` sin verificar texto.
 - **Naming convention E2E**: `{Feature}_{Action}_{ExpectedResult}` (ej: `Login_ValidCredentials_RedirectsToHomepage`).
 - **Aislamiento**: Todos los tests E2E comparten la misma base de datos. Los tests NO deben depender del orden de ejecución entre clases.

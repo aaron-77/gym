@@ -33,7 +33,9 @@ public class ClasesControllerInscribirAClaseLimpiezaTests : IntegrationTestBase
         var token = await Factory.AuthenticateAsync(Client);
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var (clienteId, _) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
 
         // Estado de clase programada (activa = 1 típicamente)
         var estadoClaseProgramada = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -123,7 +125,9 @@ public class ClasesControllerInscribirAClaseLimpiezaTests : IntegrationTestBase
         var token = await Factory.AuthenticateAsync(Client);
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var (clienteId, _) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
 
         var estadoClaseProgramada = await DatabaseHelper.ExecuteQuerySingleAsync(
             TestContainerHelper.ConnectionString,
@@ -197,26 +201,4 @@ public class ClasesControllerInscribirAClaseLimpiezaTests : IntegrationTestBase
             slot.EntrenadorId);
         preReservasRestantes.Should().Be(0);
     }
-
-    #region Helper Methods
-
-    private async Task<(string clienteId, string empleadoId)> GetExistingUserIdsAsync()
-    {
-        // Cliente de seed (rebeca@gmail.com)
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'rebeca@gmail.com'");
-
-        // Empleado de seed (uno@gmail.com — rol empleado)
-        var empleado = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'uno@gmail.com'");
-
-        if (cliente == null || empleado == null)
-            throw new Exception("Error: No se encontraron los usuarios de prueba en el backup.");
-
-        return (cliente["Id"]!.ToString()!, empleado["Id"]!.ToString()!);
-    }
-
-    #endregion
 }

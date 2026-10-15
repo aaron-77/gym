@@ -10,9 +10,12 @@ Este documento define las pruebas E2E de happy paths para la aplicación Fitness
 - **URL Base**: `http://localhost:5080` (Nginx)
 
 ## Credenciales de Prueba
-Las credenciales se leen de `appsettings.Testing.json`:
-- **TestUser (empleado)**: `uno@gmail.com` / `Password123*`
-- **TestUserCliente**: Definido en config
+Las credenciales se leen de la lista tipada `TestUsers` en `appsettings.Testing.json`, mediante la fachada `E2ETestSettings`:
+- **Empleado** (`E2ETestSettings.TestUserEmail` / `TestUserPassword`)
+- **Cliente** (`E2ETestSettings.TestUserClienteEmail` / `TestUserClientePassword`)
+- **ClienteRebeca** (`E2ETestSettings.ClienteRebecaEmail`) — solo para resolver identificadores, nunca se autentica
+
+Agregar un usuario de prueba es agregar una entrada a esa lista; esta clase no define constantes de credenciales.
 
 ---
 
@@ -224,7 +227,7 @@ GymWebApp.Tests/
 - **Herencia**: Todas las clases heredan de `PlaywrightTestBase`
 - **Colección**: `Collection("E2E HappyPaths")`
 - **Setup**: `IAsyncLifetime` con `InitializeAsync` y `DisposeAsync`
-- **Credenciales**: Se leen de `appsettings.Testing.json`
+- **Credenciales**: Se leen de la lista tipada `TestUsers` vía `E2ETestSettings`
 - **Page Models**: Ubicados en `E2E/PageModels/`; abstraen navegación y controles de página
 - **Components**: Ubicados en `E2E/Components/`; encapsulan comportamiento de widgets reutilizables (ej. calendario)
 - **Dialog handlers**: Se registran con `Page.On<Dialog>()` antes de la acción que dispara el diálogo

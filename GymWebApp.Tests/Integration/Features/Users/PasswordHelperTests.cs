@@ -17,17 +17,16 @@ public class PasswordHelperTests : IntegrationTestBase
         : base(factory, testContainerHelper) { }
 
     [Fact]
-    public async Task VerifyPasswordAsync_WithValidClienteCredentials_ReturnsTrue()
+    public async Task VerifyPasswordAsync_WithValidEmpleadoCredentials_ReturnsTrue()
     {
         // Resolve UserManager and SignInManager from DI (PasswordHelper requires them in constructor)
         var userManager = Factory.Services.GetRequiredService<UserManager<ApplicationUser>>();
         var signInManager = Factory.Services.GetRequiredService<SignInManager<ApplicationUser>>();
         var passwordHelper = new PasswordHelper(userManager, signInManager);
 
-        // Get credentials from appsettings.Testing.json → TestUserCliente section
-        var testUserSection = ConfigHelper.GetSection("TestUser");
-        var email = testUserSection["Email"]!;
-        var password = testUserSection["Password"]!;
+        // Get credentials from appsettings.Testing.json → TestUsers list, Empleado entry
+        var email = TestUsersOptions.EmpleadoEmail;
+        var password = TestUsersOptions.EmpleadoPassword;
 
         // Act
         var result = await passwordHelper.VerifyPasswordAsync(email, password);

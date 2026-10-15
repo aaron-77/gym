@@ -14,7 +14,7 @@
         <div class="main-container">
             <div class="form-container" id="loginform">
                 <p class="title">Iniciar Sesión</p>
-                <environment include="Production,Staging">
+                <environment include="Development,Production,Staging">
                 <partial name="_TestCredentials" />
                 </environment>
                 <form class="form" method="post" action="signIn">
@@ -42,5 +42,5 @@
         </div>
 
 @section Scripts {
-    
+    <script src="~/js/testCredentialsLogin.js" asp-append-version="true"></script>
 }

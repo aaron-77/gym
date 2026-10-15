@@ -58,8 +58,7 @@ public class CancelarReagendarApiErrorWebApplicationFactory : GymFrontendWebAppl
     {
         if (string.IsNullOrEmpty(_empleadoToken))
         {
-            var testUser = ConfigHelper.GetSection("TestUser");
-            var email = testUser["Email"]!;
+            var email = TestUsersOptions.EmpleadoEmail;
             var userData = await ObtenerUsuarioRealAsync(email);
 
             var userValues = new Dictionary<string, string>
@@ -84,8 +83,7 @@ public class CancelarReagendarApiErrorWebApplicationFactory : GymFrontendWebAppl
     {
         if (string.IsNullOrEmpty(_clienteToken))
         {
-            var testUser = ConfigHelper.GetSection("TestUserCliente");
-            var email = testUser["Email"]!;
+            var email = TestUsersOptions.ClienteEmail;
             var userData = await ObtenerUsuarioRealAsync(email);
 
             var userValues = new Dictionary<string, string>

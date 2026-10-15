@@ -69,3 +69,11 @@ container-logs/
 # Original image resources (not needed in repo)
 recursosOriginales/
 fitnessGymProd/
+
+# Secrets y archivos locales (excluidos del repo)
+.env
+bd/logsapitemp.txt
+dotnet-tools.json
+
+# Respaldos de BD (171MB de .bak - nunca versionar)
+bd/respaldosbd/

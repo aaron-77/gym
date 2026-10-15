@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
+using GymWebApp.Tests.Integration.Helpers;
 using DTO.Dtos;
 using FluentAssertions;
 using CitaRequest = DTO.Dtos.Cita;
@@ -25,7 +26,12 @@ public class CitasApiTests : IntegrationTestBase
     [Fact]
     public async Task RegistrarCita_WithValidData_ReturnsOk()
     {
-        var (clienteId, entrenadorId) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
+        var entrenadorId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.EmpleadoEmail);
 
         var cita = new CitaRequest
         {
@@ -60,7 +66,12 @@ public class CitasApiTests : IntegrationTestBase
     [Fact]
     public async Task ModificarCita_WithValidData_ReturnsOk()
     {
-        var (clienteId, trainerId) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
+        var entrenadorId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.EmpleadoEmail);
         
         var fechaInicioNueva = DateTime.Now.AddDays(1).Date.AddHours(10);
         var fechaFinNueva = DateTime.Now.AddDays(1).Date.AddHours(11);
@@ -70,7 +81,7 @@ public class CitasApiTests : IntegrationTestBase
             fechaInicioCita = fechaInicioNueva,
             fechaFinCita = fechaFinNueva,
             fkCliente = clienteId,
-            fkEntrenador = trainerId,
+            fkEntrenador = entrenadorId,
             tipoCita = "Entrenamiento Personal",
             estado = "Agendada"
         };
@@ -85,7 +96,7 @@ public class CitasApiTests : IntegrationTestBase
               ORDER BY CitaID DESC",
             new() { 
                 ["@UserId"] = clienteId, 
-                ["@EntrenadorId"] = trainerId 
+                ["@EntrenadorId"] = entrenadorId 
             });
         
         var citaId = Convert.ToInt32(citaCreada!["CitaID"]);
@@ -99,7 +110,7 @@ public class CitasApiTests : IntegrationTestBase
             Id = citaId,
             fechaInicioCita = nuevaFechaInicio,
             fechaFinCita = nuevaFechaFin,
-            fkEntrenador = trainerId,
+            fkEntrenador = entrenadorId,
             estado = nuevoEstado
         };
 
@@ -119,7 +130,7 @@ public class CitasApiTests : IntegrationTestBase
 
         ((DateTime)citaActualizada!["FechaHora"]).Should().Be(nuevaFechaInicio);
         ((DateTime)citaActualizada["FechaHoraFin"]).Should().Be(nuevaFechaFin);
-        citaActualizada["EntrenadorId"]!.ToString().Should().Be(trainerId);
+        citaActualizada["EntrenadorId"]!.ToString().Should().Be(entrenadorId);
         citaActualizada["Estado"]!.ToString().Should().Be(nuevoEstado);
     }
 
@@ -217,7 +228,9 @@ public class CitasApiTests : IntegrationTestBase
     [Fact]
     public async Task GetCitasAgendadas_WithAuth_ReturnsOk()
     {
-        var (clienteId, _) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
 
         var response = await Client.GetAsync($"/api/getCitasAgendadas?idUsuario={clienteId}");
 
@@ -227,26 +240,6 @@ public class CitasApiTests : IntegrationTestBase
         result.Should().NotBeNull();
         result!.success.Should().BeTrue();
         result.message.Should().Be("consulta exitosa");
-    }
-
-    #endregion
-
-    #region Helper Methods
-
-    private async Task<(string clienteId, string entrenadorId)> GetExistingUserIdsAsync()
-    {
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'rebeca@gmail.com'");
-
-        var entrenador = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'uno@gmail.com'");
-
-        if (cliente == null || entrenador == null)
-            throw new Exception("Error: No se encontraron los usuarios de prueba en el backup.");
-
-        return (cliente["Id"]!.ToString()!, entrenador["Id"]!.ToString()!);
     }
 
     #endregion

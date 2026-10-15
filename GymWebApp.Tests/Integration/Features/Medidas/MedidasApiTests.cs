@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
+using GymWebApp.Tests.Integration.Helpers;
 using GymWebApp.Tests.Integration.Factories;
 using DTO.Dtos;
 using FluentAssertions;
@@ -52,12 +53,10 @@ public class MedidasApiTests : IntegrationTestBase
         var token = await Factory.AuthenticateAsync(Client);
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        // Get existing cliente from seed data (aaronhl1313@gmail.com)
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
+        // Get existing cliente from the configured test users
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'aaronhl1313@gmail.com'");
-
-        var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
+            TestUsersOptions.ClienteEmail);
 
         // Create valid medida request
         var medidaRequest = MedidaFactory.CrearMedidaPeso(clienteId, 75.5m);
@@ -117,12 +116,10 @@ public class MedidasApiTests : IntegrationTestBase
         var token = await Factory.AuthenticateAsClienteAsync(Client);
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        // Get existing cliente from seed data (aaronhl1313@gmail.com)
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
+        // Get existing cliente from the configured test users
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'aaronhl1313@gmail.com'");
-
-        var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
+            TestUsersOptions.ClienteEmail);
 
         var medidaRequest = MedidaFactory.CrearMedidaPeso(clienteId, 75.5m);
 
@@ -161,11 +158,9 @@ public class MedidasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'aaronhl1313@gmail.com'");
-
-        var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
+            TestUsersOptions.ClienteEmail);
 
         // Act
         var response = await Client.GetAsync($"/api/getParametrosDeMedicion?idUsuario={clienteId}");
@@ -192,11 +187,9 @@ public class MedidasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (itself)
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'aaronhl1313@gmail.com'");
-
-        var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
+            TestUsersOptions.ClienteEmail);
 
         // Act
         var response = await Client.GetAsync($"/api/getParametrosDeMedicion?idUsuario={clienteId}");
@@ -256,11 +249,9 @@ public class MedidasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'aaronhl1313@gmail.com'");
-
-        var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
+            TestUsersOptions.ClienteEmail);
 
         // Act
         var response = await Client.GetAsync($"/api/obtenerAñosConActividadDelCliente?idCliente={clienteId}");
@@ -287,11 +278,9 @@ public class MedidasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (itself)
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'aaronhl1313@gmail.com'");
-
-        var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
+            TestUsersOptions.ClienteEmail);
 
         // Act
         var response = await Client.GetAsync($"/api/obtenerAñosConActividadDelCliente?idCliente={clienteId}");
@@ -351,11 +340,9 @@ public class MedidasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'aaronhl1313@gmail.com'");
-
-        var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
+            TestUsersOptions.ClienteEmail);
 
         // Act
         var response = await Client.GetAsync($"/api/obtenerEjerciciosYParametros?idCliente={clienteId}");
@@ -382,11 +369,9 @@ public class MedidasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (itself)
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'aaronhl1313@gmail.com'");
-
-        var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
+            TestUsersOptions.ClienteEmail);
 
         // Act
         var response = await Client.GetAsync($"/api/obtenerEjerciciosYParametros?idCliente={clienteId}");
@@ -446,11 +431,9 @@ public class MedidasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'aaronhl1313@gmail.com'");
-
-        var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
+            TestUsersOptions.ClienteEmail);
 
         // Act
         var response = await Client.GetAsync($"/api/obtenerDetallesDeProgreso?idCliente={clienteId}&idParametro=1&espaciadoTemporal=individual&tipoDeBusqueda=MES");
@@ -477,11 +460,9 @@ public class MedidasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (itself)
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'aaronhl1313@gmail.com'");
-
-        var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
+            TestUsersOptions.ClienteEmail);
 
         // Act
         var response = await Client.GetAsync($"/api/obtenerDetallesDeProgreso?idCliente={clienteId}&idParametro=1&espaciadoTemporal=individual&tipoDeBusqueda=MES");
@@ -540,11 +521,9 @@ public class MedidasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente from seed data (itself)
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
             TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'aaronhl1313@gmail.com'");
-
-        var clienteId = cliente?["Id"]?.ToString() ?? throw new Exception("Cliente not found");
+            TestUsersOptions.ClienteEmail);
 
         // Act
         var response = await Client.GetAsync($"/api/progresoDeUsuario?idUsuario={clienteId}");

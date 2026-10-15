@@ -30,10 +30,12 @@ E2E tests cover **critical user paths only**. They are the slowest and most brit
 
 ### Rule: Test credentials MUST come from appsettings.Testing.json
 - NEVER hardcode email/password in test files
-- Read from configuration via `IConfiguration` or a test settings helper
+- Read from the typed `TestUsers` list via `TestUsersOptions`, or via the `E2ETestSettings` facade for E2E tests
+- Adding a test user is adding an entry to that list; no code required
 - Available test users:
-  - `TestUser`: `uno@gmail.com` / `Password123*` (employee role)
-  - `TestUserCliente`: `aaronhl1313@gmail.com` / `Password123*` (client role)
+  - `Empleado`: `empleado.spiffy479@aleeas.com` / `Password123*` (employee role)
+  - `Cliente`: `clientefitnessgym.jockey868@simplelogin.com` / `Password123*` (client role)
+  - `ClienteRebeca`: `rebeca@gmail.com` / no password — only ever used to resolve user identifiers
 
 ### Rule: Assertions MUST verify actual content, not just existence
 - DO: `Expect(heading).ToHaveTextAsync(new Regex("Clases Programadas"))`

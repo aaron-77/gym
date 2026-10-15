@@ -1,57 +1,68 @@
-﻿/*
-	Created by PCAAR\aaron using dbatools Export-DbaLogin for objects on localhost\SQLEXPRESS at 2026-01-29 12:59:06.797
-	See https://dbatools.io/Export-DbaLogin for more information
-*/
-USE master
+﻿/* ============================================================
+   LOGIN - aaronlogin (ÁMBITO: SERVIDOR / master)
+   ------------------------------------------------------------
+   Orden de ejecución:
+     1. restore.sql          (crea la BD y los users del .bak)
+     2. ESTE SCRIPT          (login.sql - crea el login)
+     3. usuarios.sql         (dropea user, lo recrea, da permisos)
 
-GO
-IF NOT EXISTS (SELECT loginname FROM master.dbo.syslogins WHERE name = 'aaronlogin') CREATE LOGIN [aaronlogin] WITH PASSWORD = 0x02003BD837E59D017096AAB4D60E223A5FB4227E9169FD30DF1C17EB24191BF71525456E4D8E425F07F8EB5EFA42BBE97AB1FCAAA6C7EA99413C7EC4E31DA2F235E1C1A4EDAC HASHED, SID = 0xF8D4F9B4DB89884EAC4833F802194E84, DEFAULT_DATABASE = [FitnessCenterDB], CHECK_POLICY = OFF, CHECK_EXPIRATION = OFF, DEFAULT_LANGUAGE = [Español]
-GO
-ALTER SERVER ROLE [sysadmin] ADD MEMBER [aaronlogin]
-GO
+   Si corrés este script ANTES del restore, no pasa nada malo:
+   el login vive en master, no depende de la BD.
+   ============================================================ */
 
-USE master
-
-GO
-Grant CONNECT SQL TO [aaronlogin]  AS [sa]
+USE [master];
 GO
 
-USE [FitnessCenterDB]
+/* ------------------------------------------------------------
+   1. LIMPIEZA - eliminar login previo
+   ------------------------------------------------------------
+   DROP LOGIN resetea el SID y borra todas las membresías
+   heredadas. Esto es lo que saca a aaronlogin de [sysadmin],
+   que es como estaba en el script viejo de dbatools.
 
-GO
-IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = N'aaronlogin')
-CREATE USER [aaronlogin] FOR LOGIN [aaronlogin] WITH DEFAULT_SCHEMA=[dbo]
-GO
-ALTER ROLE [db_datareader] ADD MEMBER [aaronlogin]
-GO
-ALTER ROLE [db_datawriter] ADD MEMBER [aaronlogin]
-GO
-ALTER ROLE [db_owner] ADD MEMBER [aaronlogin]
-GO
-Grant CONNECT TO [aaronlogin]  AS [dbo]
-GO
-
-USE master
-
-GO
-IF NOT EXISTS (SELECT loginname FROM master.dbo.syslogins WHERE name = 'PCAAR\aaron') CREATE LOGIN [PCAAR\aaron] FROM WINDOWS WITH DEFAULT_DATABASE = [master], DEFAULT_LANGUAGE = [us_english]
-GO
-ALTER SERVER ROLE [sysadmin] ADD MEMBER [PCAAR\aaron]
+   Efecto secundario: el USER que apunte a este login queda
+   huérfano hasta que corras usuarios.sql. Es intencional.
+   ------------------------------------------------------------ */
+IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = N'aaronlogin' AND type = N'S')
+BEGIN
+    DROP LOGIN [aaronlogin];
+END
 GO
 
-USE master
+/* ------------------------------------------------------------
+   2. CREAR LOGIN
+   ------------------------------------------------------------
+   CHECK_POLICY = OFF es OBLIGATORIO si la password no cumple
+   la política de Windows (8+ car., mayúscula, minúscula,
+   número, símbolo). Con la política ON, CREATE LOGIN falla
+   con error de complejidad.
 
-GO
-Grant CONNECT SQL TO [PCAAR\aaron]  AS [sa]
+   No se agrega a NINGÚN server role. El login nace mínimo.
+   ------------------------------------------------------------ */
+CREATE LOGIN [aaronlogin]
+WITH
+    PASSWORD           = N'fitnessgymuser',
+    DEFAULT_DATABASE   = [FitnessCenterDB],
+    DEFAULT_LANGUAGE   = [Español],
+    CHECK_POLICY       = OFF,
+    CHECK_EXPIRATION   = OFF;
 GO
 
-USE [FitnessCenterDB]
-
-GO
-IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = N'dbo')
-CREATE USER [dbo] FOR LOGIN [PCAAR\aaron] WITH DEFAULT_SCHEMA=[dbo]
-GO
-ALTER ROLE [db_owner] ADD MEMBER [dbo]
-GO
-Grant CONNECT TO [PCAAR\aaron]  AS [dbo]
+/* ------------------------------------------------------------
+   3. VERIFICACIÓN (no es error, es reporte)
+   ------------------------------------------------------------
+   Esperado: is_disabled = 0, tipo = SQL_LOGIN.
+   Si querés confirmar que NO quedó en sysadmin, corré:
+     SELECT * FROM sys.server_role_members m
+     JOIN sys.server_principals p ON m.member_principal_id = p.principal_id
+     WHERE p.name = 'aaronlogin';
+   (no debe devolver filas)
+   ------------------------------------------------------------ */
+SELECT
+    name            = sp.name,
+    type            = sp.type_desc,
+    is_disabled     = sp.is_disabled,
+    default_db      = SUSER_SNAME(sp.default_database_name)
+FROM sys.server_principals sp
+WHERE sp.name = N'aaronlogin';
 GO

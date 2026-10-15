@@ -28,7 +28,9 @@ public class CancelarClasesProgramadasTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing users (clienteId only - entrenador comes from slot)
-        var (clienteId, _) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
 
         // Obtener slot disponible de forma segura (fecha futura +7 días)
         var fechaClase = DateOnly.FromDateTime(DateTime.Now.AddDays(7));
@@ -169,7 +171,12 @@ public class CancelarClasesProgramadasTests : IntegrationTestBase
         var token = await Factory.AuthenticateAsync(Client);
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var (clienteId, entrenadorId) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
+        var entrenadorId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.EmpleadoEmail);
 
         var claseActiva = ClaseFactory.CrearClaseActiva();
         var savedClase = await DatabaseHelper.NonQueryAsyncTyped(
@@ -248,7 +255,12 @@ public class CancelarClasesProgramadasTests : IntegrationTestBase
         var token = await Factory.AuthenticateAsync(Client);
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        var (clienteId, entrenadorId) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
+        var entrenadorId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.EmpleadoEmail);
 
         var claseActiva = ClaseFactory.CrearClaseActiva();
         var savedClase = await DatabaseHelper.NonQueryAsyncTyped(
@@ -308,26 +320,6 @@ public class CancelarClasesProgramadasTests : IntegrationTestBase
         result.Should().NotBeNull();
         result!.success.Should().BeTrue();
         result.message.Should().Contain("Sin petición de reagendación");
-    }
-
-    #endregion
-
-    #region Helper Methods
-
-    private async Task<(string clienteId, string entrenadorId)> GetExistingUserIdsAsync()
-    {
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'rebeca@gmail.com'");
-
-        var entrenador = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'uno@gmail.com'");
-
-        if (cliente == null || entrenador == null)
-            throw new Exception("Error: No se encontraron los usuarios de prueba en el backup.");
-
-        return (cliente["Id"]!.ToString()!, entrenador["Id"]!.ToString()!);
     }
 
     #endregion

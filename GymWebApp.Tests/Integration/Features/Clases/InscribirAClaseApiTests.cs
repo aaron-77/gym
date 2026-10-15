@@ -25,8 +25,10 @@ public class InscribirAClaseApiTests : IntegrationTestBase
         var token = await Factory.AuthenticateAsync(Client);
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        // Get existing client from seed data (rebeca@gmail.com)
-        var (clienteId, _) = await GetExistingUserIdsAsync();
+        // Get existing cliente from the configured test users
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
 
         // Get existing EstadoClaseProgramada (activa = 1 typically)
         var estadoClaseProgramada = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -132,8 +134,10 @@ public class InscribirAClaseApiTests : IntegrationTestBase
         var token = await Factory.AuthenticateAsync(Client);
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        // Get existing client from seed data (rebeca@gmail.com)
-        var (clienteId, _) = await GetExistingUserIdsAsync();
+        // Get existing cliente from the configured test users
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
 
         // Get existing EstadoClaseProgramada (activa = 1 typically)
         var estadoClaseProgramada = await DatabaseHelper.ExecuteQuerySingleAsync(
@@ -202,8 +206,10 @@ public class InscribirAClaseApiTests : IntegrationTestBase
         var token = await Factory.AuthenticateAsync(Client);
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-        // Get existing client from seed data (rebeca@gmail.com)
-        var (clienteId, _) = await GetExistingUserIdsAsync();
+        // Get existing cliente from the configured test users
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
 
         var requestDto = new DTOInscripcionAClase
         {
@@ -291,28 +297,6 @@ public class InscribirAClaseApiTests : IntegrationTestBase
         var result = await response.Content.ReadFromJsonAsync<DTOResponse<int>>();
         result.Should().NotBeNull();
         result!.success.Should().BeFalse();
-    }
-
-    #endregion
-
-    #region Helper Methods
-
-    private async Task<(string clienteId, string empleadoId)> GetExistingUserIdsAsync()
-    {
-        // Get cliente user (rebeca@gmail.com from seed data)
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'rebeca@gmail.com'");
-
-        // Get empleado user (uno@gmail.com from seed data - has empleado role)
-        var empleado = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'uno@gmail.com'");
-
-        if (cliente == null || empleado == null)
-            throw new Exception("Error: No se encontraron los usuarios de prueba en el backup.");
-
-        return (cliente["Id"]!.ToString()!, empleado["Id"]!.ToString()!);
     }
 
     #endregion

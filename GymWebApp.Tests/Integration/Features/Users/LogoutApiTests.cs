@@ -25,8 +25,8 @@ public class LogoutApiTests : IntegrationTestBase
         await SetAuthHeaderAsync();
         var loginResponse = await Client.PostAsJsonAsync("/api/autenticar", new UserCredentials
         {
-            correo = "uno@gmail.com",
-            contrasena = "Password123*"
+            correo = TestUsersOptions.EmpleadoEmail,
+            contrasena = TestUsersOptions.EmpleadoPassword
         });
 
         var loginResult = await loginResponse.Content.ReadFromJsonAsync<DTOResponse<DTOLoggedUser>>();

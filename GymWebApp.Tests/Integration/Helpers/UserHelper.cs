@@ -26,4 +26,20 @@ public static class UserHelper
         );
         return userFromDb?["Id"]?.ToString() ?? throw new InvalidOperationException("No users found");
     }
+
+    /// <summary>
+    /// Resuelve el identificador de un usuario por su nombre de usuario, cuyo valor
+    /// es el correo de la cuenta. El valor viaja como parámetro de la consulta,
+    /// nunca interpolado dentro de su texto.
+    /// </summary>
+    public static async Task<string> GetUserIdByEmailAsync(string connectionString, string email)
+    {
+        var userFromDb = await DatabaseHelper.ExecuteQuerySingleAsync(
+            connectionString,
+            "SELECT TOP 1 Id FROM AspNetUsers WHERE UserName = @UserName",
+            new() { ["@UserName"] = email }
+        );
+        return userFromDb?["Id"]?.ToString()
+            ?? throw new InvalidOperationException($"No user found with username {email}");
+    }
 }

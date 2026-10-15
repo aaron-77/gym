@@ -2,6 +2,7 @@ using Microsoft.Data.SqlClient;
 using Respawn;
 using Respawn.Graph;
 using Testcontainers.MsSql;
+using GymWebApp.Tests.Integration.Helpers;
 
 namespace GymWebApp.Tests.Integration.Common;
 
@@ -60,7 +61,11 @@ public class TestContainerHelper : IAsyncLifetime
         await masterConnection.OpenAsync();
         await RestoreDatabaseFromBackupAsync(masterConnection);
 
-        _connectionString = $"{serverPart};Database=FitnessCenterDB;User Id=sa;Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
+        // El .bak solo trae el user de base de datos (huérfano); los logins nunca viajan en un
+        // respaldo. Sin login el user no se puede usar, así que se crea después del restore.
+        await FitnessGymLoginHelper.CreateAsync(masterConnectionString, sqlPassword);
+
+        _connectionString = $"{serverPart};Database=FitnessCenterDB;User Id={FitnessGymLoginHelper.LoginName};Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
 
         await InitializeRespawnAsync();
     }
@@ -161,7 +166,7 @@ public class TestContainerHelper : IAsyncLifetime
     private async Task RestoreDatabaseFromBackupAsync(SqlConnection connection)
     {
         var backupFileName = ConfigHelper.GetPropertyOrDefault(
-            "TestContainers:BackupFile", "FitnessGymBackup20260906.bak");
+            "TestContainers:BackupFile", "FitnessGymDB.bak");
         var backupPath = "/backup/" + backupFileName;
         var databaseName = "FitnessCenterDB";
 

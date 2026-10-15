@@ -23,10 +23,11 @@ public class AutenticarUsuarioApiTests : IntegrationTestBase
     public async Task Autenticar_WithValidCredentials_Returns200OkAndDTOLoggedUser()
     {
         // Arrange
+        var email = TestUsersOptions.UnoEmail;
         var loginRequest = new UserCredentials
         {
-            correo = "uno@gmail.com",
-            contrasena = "Password123*"
+            correo = email,
+            contrasena = TestUsersOptions.UnoPassword
         };
 
         // Act
@@ -42,7 +43,7 @@ public class AutenticarUsuarioApiTests : IntegrationTestBase
         result.payload.Should().NotBeNull();
         result.payload!.Id.Should().NotBeEmpty();
         result.payload.NombreCompleto.Should().NotBeEmpty();
-        result.payload.Correo.Should().Be("uno@gmail.com");
+        result.payload.Correo.Should().Be(email);
         result.payload.AccessToken.Should().NotBeEmpty();
     }
 
@@ -56,10 +57,11 @@ public class AutenticarUsuarioApiTests : IntegrationTestBase
     [Fact]
     public async Task Autenticar_WithInvalidCredentials_Returns401Unauthorized()
     {
-        // Arrange
+        // Arrange — real account from config, deliberately wrong password: the failure
+        // must come from the password, not from an unknown email.
         var loginRequest = new UserCredentials
         {
-            correo = "uno@gmail.com",
+            correo = TestUsersOptions.EmpleadoEmail,
             contrasena = "WrongPassword123"
         };
 

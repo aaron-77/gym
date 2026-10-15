@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using GymWebApp.Tests.Integration.Common;
+using GymWebApp.Tests.Integration.Helpers;
 using GymWebApp.Tests.Factories;
 using GymWebApp.Tests.Common;
 using DTO.Dtos;
@@ -26,7 +27,12 @@ public class RutinasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing users from seed data
-        var (clienteId, entrenadorId) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
+        var entrenadorId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.EmpleadoEmail);
 
         // Create request DTO
         var requestDto = RutinaFactory.CrearRutinaValida(
@@ -54,13 +60,17 @@ public class RutinasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing user IDs
-        var (clienteId, _) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
 
         // First create a routine
-        var (_, trainerId) = await GetExistingUserIdsAsync();
+        var entrenadorId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.EmpleadoEmail);
         var rutinaRequest = RutinaFactory.CrearRutinaValida(
             usuarioId: clienteId,
-            entrenadorId: trainerId);
+            entrenadorId: entrenadorId);
 
         var rutinaResponse = await Client.PostAsJsonAsync("/api/registrarRutina", rutinaRequest);
         rutinaResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -102,7 +112,9 @@ public class RutinasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing user ID
-        var (clienteId, _) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
 
         // Act
         var response = await Client.GetAsync($"/api/consultarRutinas?UsuarioID={clienteId}");
@@ -124,7 +136,9 @@ public class RutinasApiTests : IntegrationTestBase
         Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         // Get existing cliente ID
-        var (clienteId, _) = await GetExistingUserIdsAsync();
+        var clienteId = await UserHelper.GetUserIdByEmailAsync(
+            TestContainerHelper.ConnectionString,
+            TestUsersOptions.ClienteRebecaEmail);
 
         // Act
         var response = await Client.GetAsync($"/api/consultarRutinas?UsuarioID={clienteId}");
@@ -178,28 +192,6 @@ public class RutinasApiTests : IntegrationTestBase
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
-    }
-
-    #endregion
-
-    #region Helper Methods
-
-    private async Task<(string clienteId, string entrenadorId)> GetExistingUserIdsAsync()
-    {
-        // Get cliente user (rebeca@gmail.com from seed data)
-        var cliente = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'rebeca@gmail.com'");
-
-        // Get empleado user (uno@gmail.com from seed data - has empleado role)
-        var entrenador = await DatabaseHelper.ExecuteQuerySingleAsync(
-            TestContainerHelper.ConnectionString,
-            "SELECT TOP 1 Id FROM AspNetUsers WHERE Email = 'uno@gmail.com'");
-
-        if (cliente == null || entrenador == null)
-            throw new Exception("Error: No se encontraron los usuarios de prueba en el backup.");
-
-        return (cliente["Id"]!.ToString()!, entrenador["Id"]!.ToString()!);
     }
 
     #endregion

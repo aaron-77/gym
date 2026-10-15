@@ -27,9 +27,10 @@ public class CambiarPasswordApiTests : IntegrationTestBase
     public async Task CambiarPassword_WithValidEmailAndPasswords_Returns200Ok()
     {
         // Arrange
+        var email = TestUsersOptions.EmpleadoEmail;
         var changePasswordRequest = new UserPassEdit
         {
-            Email = "uno@gmail.com",
+            Email = email,
             NewPassword = "NewPassword123!",
             ConfirmPassword = "NewPassword123!"
         };
@@ -37,7 +38,7 @@ public class CambiarPasswordApiTests : IntegrationTestBase
         var originalHash = await DatabaseHelper.ExecuteScalarAsync<string>(
             _connectionString,
             "SELECT PasswordHash FROM AspNetUsers WHERE Email = @Email",
-            new Dictionary<string, object?> { { "@Email", "uno@gmail.com" } });
+            new Dictionary<string, object?> { { "@Email", email } });
 
         try
         {
@@ -62,7 +63,7 @@ public class CambiarPasswordApiTests : IntegrationTestBase
                     new Dictionary<string, object?>
                     {
                         { "@Hash", originalHash },
-                        { "@Email", "uno@gmail.com" }
+                        { "@Email", email }
                     });
             }
         }
