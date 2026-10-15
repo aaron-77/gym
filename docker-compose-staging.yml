@@ -1,0 +1,43 @@
+services:
+  fitnessgym_api:
+    image: fitnessgymapi
+    ports:
+      - "127.0.0.1:8090:5274"
+    build:
+      context: .
+      dockerfile: API/DockerFile
+    container_name: apicontainer
+    environment:
+      TZ: "America/Mexico_City"
+      ASPNETCORE_ENVIRONMENT: "Staging"
+      ASPNETCORE_URLS: "http://0.0.0.0:5274"
+      SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
+      DB_CONNECTION_STRING: "Server=fitnessgym_bd;Database=FitnessCenterDB;User Id=fitnessgymlogin;Password=Terrabreak13;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True"
+    networks:
+      - fitnessgym-net
+
+  fitnessgym_frontend:
+    image: fitnessgymfrontend
+    depends_on:
+      - "fitnessgym_api"
+    ports:
+      - "127.0.0.1:8091:5062"
+    build:
+      context: .
+      dockerfile: GymFrontend/DockerFile
+    container_name: frontendcontainer
+    environment:
+      TZ: "America/Mexico_City"
+      ASPNETCORE_ENVIRONMENT: "Staging"
+      ASPNETCORE_URLS: "http://0.0.0.0:5062"
+      BACKEND_BASE_ADDRESS: "http://0.0.0.0:5274"
+      SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
+      DB_CONNECTION_STRING: "Server=fitnessgym_bd;Authentication=SqlPassword;Integrated Security=False ;User Id=fitnessgymlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False"
+    networks:
+      - fitnessgym-net
+
+networks:
+  fitnessgym-net:
+    external : true
+    name: fitnessgym-net
+    driver: bridge

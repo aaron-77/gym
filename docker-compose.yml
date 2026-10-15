@@ -19,7 +19,7 @@ services:
            ASPNETCORE_ENVIRONMENT: "Production"
            ASPNETCORE_URLS: "http://0.0.0.0:5274"    
            SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
-           DB_CONNECTION_STRING: "Server=host.docker.internal;Database=FitnessCenterDB;User Id=aaronlogin;Password=Terrabreak13;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True"
+           DB_CONNECTION_STRING: "Server=host.docker.internal;Database=FitnessCenterDB;User Id=fitnessgymlogin;Password=Terrabreak13;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True"
             
    fitnessgym_frontend:
        image: fitnessgymfrontend
@@ -39,4 +39,4 @@ services:
            ASPNETCORE_URLS: "http://0.0.0.0:5062"
            BACKEND_BASE_ADDRESS: "http://0.0.0.0:5274"
            SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
-           DB_CONNECTION_STRING: "Server=host.docker.internal;Authentication=SqlPassword;Integrated Security=False ;User Id=aaronlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False"
+           DB_CONNECTION_STRING: "Server=host.docker.internal;Authentication=SqlPassword;Integrated Security=False ;User Id=fitnessgymlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False"

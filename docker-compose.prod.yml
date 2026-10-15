@@ -7,12 +7,14 @@ services:
            - "127.0.0.1:8090:5274"
        container_name: apicontainer
        environment:
-           TZ: "America/Mexico_City"
-           ASPNETCORE_ENVIRONMENT: "Production"
-           ASPNETCORE_URLS: "http://0.0.0.0:5274"    
-           SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
-           DB_CONNECTION_STRING: "Server=20.121.120.227;Database=FitnessCenterDB;User Id=aaronlogin;Password=Terrabreak13;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True"
-            
+            TZ: "America/Mexico_City"
+            ASPNETCORE_ENVIRONMENT: "Production"
+            ASPNETCORE_URLS: "http://0.0.0.0:5274"    
+            SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
+            DB_CONNECTION_STRING: "Server=fitnessgym_bd;Database=FitnessCenterDB;User Id=fitnessgymlogin;Password=Terrabreak13;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True"
+       networks:
+           - fitnessgym-net
+             
    fitnessgym_frontend:
        image: aaron77/fitnessgymfrontend:latest
        depends_on: 
@@ -26,4 +28,12 @@ services:
            ASPNETCORE_URLS: "http://0.0.0.0:5062"
            BACKEND_BASE_ADDRESS: "http://0.0.0.0:5274"
            SECRET_TOKEN_KEY: "SkinHGTRRYIK777RRRyjjkiyo*?-XvTr"
-           DB_CONNECTION_STRING: "Server=20.121.120.227;Authentication=SqlPassword;Integrated Security=False ;User Id=aaronlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False"
+           DB_CONNECTION_STRING: "Server=fitnessgym_bd;Authentication=SqlPassword;Integrated Security=False ;User Id=fitnessgymlogin;Password=Terrabreak13;Database=FitnessCenterDB;TrustServerCertificate=True;Trusted_Connection=False"
+       networks:
+           - fitnessgym-net
+
+networks:
+   fitnessgym-net:
+       external: true
+       name: fitnessgym-net
+       driver: bridge
