@@ -1,0 +1,61 @@
+# docker-compose.template.yml - Plantilla general de la app FitnessGym
+#
+# Interpolacion por variables de entorno (no usar .env en el template).
+#
+# Variables OBLIGATORIAS (sin default - compose falla al arrancar si faltan):
+#   SECRET_TOKEN_KEY        - clave JWT/secret del token
+#   DB_CONNECTION_STRING    - connection string fusionada (ver abajo)
+#
+# Variables OPCIONALES (usan default si no estan definidas):
+#   TZ, ASPNETCORE_ENVIRONMENT, API_HOST_PORT, FRONTEND_HOST_PORT
+#
+# Literales (contrato con nginx/contenedor - NO parametrizar):
+#   ASPNETCORE_URLS, BACKEND_BASE_ADDRESS, puertos del lado del contenedor
+#
+# Connection string fusionada (unica para api y frontend) a exportar como
+# DB_CONNECTION_STRING:
+#   Server=fitnessgym_bd;Database=FitnessCenterDB;User Id=fitnessgymlogin;Password=CHANGE_ME;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True;Authentication=SqlPassword;Integrated Security=False;Trusted_Connection=False
+
+services:
+  fitnessgym_api:
+    image: fitnessgymapi
+    ports:
+      - "127.0.0.1:${API_HOST_PORT:-8090}:5274"
+    build:
+      context: .
+      dockerfile: API/DockerFile
+    container_name: apicontainer
+    environment:
+      TZ: "${TZ:-America/Mexico_City}"
+      ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT:-Development}"
+      ASPNETCORE_URLS: "http://0.0.0.0:5274"
+      SECRET_TOKEN_KEY: "${SECRET_TOKEN_KEY:?SECRET_TOKEN_KEY es obligatoria}"
+      DB_CONNECTION_STRING: "${DB_CONNECTION_STRING:?DB_CONNECTION_STRING es obligatoria}"
+    networks:
+      - fitnessgym-net
+
+  fitnessgym_frontend:
+    image: fitnessgymfrontend
+    depends_on:
+      - "fitnessgym_api"
+    ports:
+      - "127.0.0.1:${FRONTEND_HOST_PORT:-8091}:5062"
+    build:
+      context: .
+      dockerfile: GymFrontend/DockerFile
+    container_name: frontendcontainer
+    environment:
+      TZ: "${TZ:-America/Mexico_City}"
+      ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT:-Development}"
+      ASPNETCORE_URLS: "http://0.0.0.0:5062"
+      BACKEND_BASE_ADDRESS: "http://0.0.0.0:5274"
+      SECRET_TOKEN_KEY: "${SECRET_TOKEN_KEY:?SECRET_TOKEN_KEY es obligatoria}"
+      DB_CONNECTION_STRING: "${DB_CONNECTION_STRING:?DB_CONNECTION_STRING es obligatoria}"
+    networks:
+      - fitnessgym-net
+
+networks:
+  fitnessgym-net:
+    external: true
+    name: fitnessgym-net
+    driver: bridge

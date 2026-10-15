@@ -52,6 +52,14 @@ test-results/*
 # Docker
 .docker/
 
+# Docker Compose (solo los templates docker-compose.template.yml van al repo)
+/docker-compose.yml
+/docker-compose-local.yml
+/docker-compose-staging.yml
+/docker-compose.prod.yml
+/bd/docker-compose-local.yml
+/bd/docker-compose.prod.yml
+
 # Container logs
 container-logs/
 

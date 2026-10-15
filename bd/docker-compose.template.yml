@@ -1,0 +1,42 @@
+# bd/docker-compose.template.yml - Plantilla general de la BD FitnessGym (SQL Server)
+#
+# Interpolacion por variables de entorno (no usar .env en el template).
+#
+# Variables OBLIGATORIAS (sin default - compose falla al arrancar si faltan):
+#   MSSQL_SA_PASSWORD  - password del sa de SQL Server
+#
+# Variables OPCIONALES (usan default si no estan definidas):
+#   TZ, ACCEPT_EULA, MSSQL_PID, BD_HOST_PORT
+#
+# Literales (contrato de la app - NO parametrizar):
+#   puerto del lado del contenedor (1433), volumes, networks
+
+services:
+  fitnessgym_bd:
+    image: fitnessgymbd:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fitnessgymdbcontainer
+    ports:
+      - "127.0.0.1:${BD_HOST_PORT:-1435}:1433"
+    environment:
+      TZ: "${TZ:-America/Mexico_City}"
+      ACCEPT_EULA: "${ACCEPT_EULA:-Y}"
+      MSSQL_PID: "${MSSQL_PID:-developer}"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD es obligatoria}"
+    volumes:
+      - fitnessgym-mssql-data:/var/opt/mssql/data
+      - fitnessgym-mssql-log:/var/opt/mssql/log
+    networks:
+      - fitnessgym-net
+
+volumes:
+  fitnessgym-mssql-data:
+  fitnessgym-mssql-log:
+
+networks:
+  fitnessgym-net:
+    external: true
+    name: fitnessgym-net
+    driver: bridge
