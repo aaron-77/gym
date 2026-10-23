@@ -25,6 +25,19 @@ Cada componente corre como un contenedor independiente orquestado con Docker Com
 
 El diagrama refleja este flujo: navegador → Nginx → (Frontend / API) → SQL Server, todo dentro de la red Docker.
 
+### Nginx
+
+El reverse proxy se ejecuta a partir de una **imagen personalizada** de Nginx. La configuración se define por medio de **templates** que se renderizan al arrancar el contenedor mediante **inyección de variables de entorno**, lo que facilita modificar los datos necesarios del reverse proxy sin tener que construir una nueva imagen.
+
+Las variables que se inyectan son:
+
+* **`GYM_PRIMARY_DOMAIN`:** dominio principal del despliegue.
+* **`GYM_APP_DOMAIN`:** dominio de la aplicación.
+* **`GYM_API_UPSTREAM`:** dirección del backend de la API.
+* **`GYM_FRONTEND_UPSTREAM`:** dirección del frontend.
+* **`GYM_SSL_DHPARAM`:** ruta del archivo de parámetros Diffie-Hellman para TLS.
+* **`GYM_CLIENT_MAX_BODY_SIZE`:** tamaño máximo del cuerpo de las peticiones.
+
 ### Frontend
 
 Es la **capa de presentación** del sistema. Está construida con **ASP.NET Core MVC**, **Razor**, **JavaScript**, **CSS** y **Bootstrap 5.3**.
