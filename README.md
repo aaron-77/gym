@@ -100,12 +100,28 @@ Esta separación permite que las diferentes capas compartan los mismos modelos d
 
 ### Base de datos
 
-El sistema utiliza **SQL Server 2022** como base de datos.Esta no es una capa formal de la aplicacion,es solo para compartir el esquema y los procedimeitnos almacanedos que conforman la base de datos y hacer visisble el trabajo realizado en la base de datos. tambien srive como respaldo de la bd y apoyo para migraciones posteriores a otros motores de bd.
+El sistema utiliza **SQL Server 2022** como base de datos.
 
-Esta capa tiene como objetivo la construcción de las imágenes de la base de datos con Docker y mostrar el contenido de la base de datos, para que pueda verse cómo están construidas las funcionalidades del sistema que están hechas en SQL y T-SQL.
+Su objetivo es compartir el esquema de la base de datos, los procedimientos almacenados y las funciones que conforman el sistema, así como el contenido de la base de datos para que pueda verse cómo están construidas las funcionalidades que están hechas en SQL y T-SQL; además incluye la construcción de la imagen de la base de datos con Docker y los scripts utilizados para su construcción. También sirve como respaldo de la base de datos y apoyo para migraciones posteriores a otros motores.
 
 La base de datos contiene tablas, procedimientos almacenados y funciones utilizados por la aplicación y todos los objetos utilizados en la bd, esta capa es solamnete para facilitar la gestion de los scripts de bd del sistemay su respaldo, no contiene proyectos .csproj ejecutables.
 
 La base de datos se ejecuta en un **contenedor**. La imagen incorpora un healthcheck que verifica que la base esté operativa, lo que permite que los servicios dependientes y los tests esperen a que esté lista antes de conectarse.
 
 Además del almacenamiento de datos, la base de datos ejecuta funcionalidad propia mediante **procedimientos almacenados** y **funciones**, como la búsqueda y el cálculo de horarios disponibles, y el registro de clases programadas e inscripciones.
+
+### Testing (GymWebApp.Tests)
+
+El proyecto **GymWebApp.Tests** concentra todas las pruebas del sistema y se ejecuta con **xUnit**. Las pruebas están organizadas en tres tipos de acuerdo al alcance que cubren:
+
+* **Unitarias:** prueban métodos individuales sin levantar infraestructura.
+* **De integración:** pruebas de integración de las funcionalidades del sistema usando **WebApplicationFactory** para levantar la API y un contenedor de prueba para la base de datos.
+* **E2E:** verifican los flujos críticos de usuario a través de toda la pila (browser → Nginx → API → BD → Frontend) con **Playwright**; se utiliza **Testcontainers** para levantar la aplicación y toda la infraestructura necesaria.
+
+**Stack de testing:** WebApplicationFactory, FluentAssertions, Respawn, NSubstitute, Bogus, Playwright .NET, TSQL y Testcontainers.
+
+Los patrones que implementa el proyecto son:
+
+* **AAA (Arrange, Act, Assert):** las pruebas se estructuran en tres fases, preparación del estado y de los objetos de prueba, ejecución de la acción a probar, y verificación de los resultados.
+* **Page Model:** cada página o componente de la interfaz se encapsula en una clase que conoce sus selectores y realiza acciones sobre ella. Las pruebas solo declaran el flujo del usuario y las aserciones, sin manipular el HTML. Los beneficios son reducir la duplicación de acciones compartidas, simplificar el mantenimiento ante cambios en la interfaz, y mantener una separación clara entre la abstracción de la interfaz y la lógica de la prueba.
+* **Test Base Class y Shared Fixture:** tanto las pruebas de integración como las E2E heredan de una clase base que se encarga de la inicialización y el ciclo de vida comunes, como levantar contenedores, reiniciar la base de datos y entregar clientes o servicios listos para usar. La instancia compartida entre las pruebas de una misma clase se maneja por medio de un fixture compartido. Cada clase de prueba concreta define únicamente su escenario y sus aserciones, garantizando la misma inicialización en todas las pruebas y evitando la duplicación de lógica.
