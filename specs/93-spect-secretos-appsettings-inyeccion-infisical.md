@@ -2,7 +2,7 @@
 
 ## 1. Resumen
 
-Las cadenas de conexión con autenticación SqlPassword de la API y del frontend contienen la contraseña real del login de base de datos escrita adentro de archivos de configuración trackeados y publicados en GitHub: la misma contraseña aparece en más de una decena de puntos repartidos en cinco ambientes declarados y en una carpeta de publicación que no debería estar en el repositorio.
+Las cadenas de conexión con autenticación SqlPassword de la API y del frontend contienen la contraseña real del login de base de datos escrita adentro de archivos de configuración trackeados y publicados en GitHub: la misma contraseña aparece en más de una decena de puntos repartidos entre los ambientes declarados.
 
 Esta spec saca todas esas cadenas de los archivos de configuración: cada `appsettings` de ambiente queda con la sección de conexión sin valor y el proceso recibe la cadena completa por variable de entorno en el momento de ejecución. Los valores viven exclusivamente en Infisical (un valor por concepto de entorno) y el ejecutable de cada aplicación se lanza bajo el envoltorio del CLI de Infisical, que resuelve el entorno elegido e inyecta las variables al proceso. El patrón ya está precedido en el repo por el flujo de Nginx de la spec 91: los archivos trackeados quedan sin secretos y un componente de ejecución completa los valores al arrancar.
 
@@ -42,8 +42,6 @@ Al terminar, ningún archivo trackeado contiene la contraseña de base de datos,
 | `GymFrontend/appsettings.Development.json` | 1 | Ídem |
 | `GymFrontend/appsettings.Production.json` | 2 | Claves `windowsConnection` y `DefaultConnection` |
 | `GymFrontend/appsettings.Staging.json` | 1 | Clave `DefaultConnection` |
-| `GymFrontend/appp/appsettings.json` | 1 | Ídem, en carpeta de publicación |
-| `GymFrontend/appp/appsettings.Development.json` | 1 | Ídem |
 
 Claves que quedan sin cambio por no contener secretos: `windowsConnection` de la API (autenticación integrada de Windows), placeholder SMTP de los appsettings (valores ficticios), y el resto de secciones de configuración.
 
@@ -99,7 +97,7 @@ Motivo del primero: hoy dos salidas de consola imprimen la cadena entera, y con 
 ## 5. Acciones que debe realizar
 
 1. Dar de alta los tres secretos `DB_CONNECTION_STRING` en Infisical (tarea humana fuera del repo).
-2. Vaciar los valores secretos de los nueve archivos listados en 3.1, dejando la cadena vacía y la documentación textual.
+2. Vaciar los valores secretos de los siete archivos listados en 3.1, dejando la cadena vacía y la documentación textual.
 3. Excluir `API/Properties/launchSettings.json` del repositorio: remoción del tracking de git y agregado a .gitignore, sin modificar el archivo local.
 4. Ampliar `extraContext/code-style/configuration.md` con la variable nueva y la regla de doble subrayado para connection strings.
 5. Ampliar el README en la sección de despliegue con la forma de lanzamiento por Infisical (una mención, no nueva sección).
@@ -124,7 +122,7 @@ Motivo del primero: hoy dos salidas de consola imprimen la cadena entera, y con 
 
 ## 8. Fuera del alcance de esta spec
 
-- `GymFrontend/appp/`: el tratamiento de archivos se aplica solo si la carpeta sigue trackeada; su remoción del repositorio (noventa y tres megabytes de artefactos de publicación con dos secretos adentro) es un cambio de limpieza propio y prioritario.
+- `GymFrontend/appp/`: **excluida de esta spec por decisión del usuario**. Su remoción del repositorio (cientos de artefactos de publicación con secretos adentro) es un cambio de limpieza propio y prioritario, que resolverá sus dos appsettings de una vez.
 - Rotación de la contraseña ya comprometida en el historial de git: trámite humano obligatorio, previo o posterior a esta externalización.
 - Fallback de clave JWT del arranque de la API: decisión de diseño aparte.
 - `appsettings.Testing.json`: pertenece a la spec 94.

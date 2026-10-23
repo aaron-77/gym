@@ -74,6 +74,9 @@ fitnessGymProd/
 .env
 bd/logsapitemp.txt
 dotnet-tools.json
+API/Properties/launchSettings.json
+.infisical.json
+bd/.infisical.json
 
 # Respaldos de BD (171MB de .bak - nunca versionar)
 bd/respaldosbd/

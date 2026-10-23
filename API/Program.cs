@@ -35,10 +35,6 @@ using DTO.Dtos;
 
 try
 {
-    Console.WriteLine("========================================");
-    Console.WriteLine("INICIANDO API...");
-    Console.WriteLine("========================================");
-
     var builder = WebApplication.CreateBuilder(args);
 
     // Rate Limiting
@@ -75,7 +71,9 @@ try
         .WriteTo.File("logs/api-.log", rollingInterval: RollingInterval.Day)
         .CreateLogger();
     builder.Host.UseSerilog();
-    Console.WriteLine("WebApplicationBuilder creado");
+
+    Log.Information("Iniciando API...");
+    Log.Information("WebApplicationBuilder creado");
 
     if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
     {
@@ -92,16 +90,16 @@ try
     builder.Services.Configure<JwtSettings>(jwtSection);
     var claimsSection = builder.Configuration.GetSection("ClaimsSettings");
     builder.Services.Configure<ClaimsSettings>(claimsSection);
-    Console.WriteLine("Configuracion JWT cargada");
+    Log.Information("Configuracion JWT cargada");
 
     // Connection String
     var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
-    
+
     if (string.IsNullOrEmpty(dbConnectionString))
     {
         dbConnectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
     }
-    Console.WriteLine($"[PROGRAM] Connection string usado: {dbConnectionString}");
+    Log.Information("Connection string usado: {ConnectionString}", ResumirCadenaDeConexion(dbConnectionString));
 
     bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
     string aspnetcore_urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? "";
@@ -115,8 +113,15 @@ try
     {
         dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING") ?? dbConnectionString;
     }
-    Console.WriteLine($"[PROGRAM] Connection string final: {dbConnectionString}");
-    Console.WriteLine("Connection string configurado");
+    Log.Information("Connection string final: {ConnectionString}", ResumirCadenaDeConexion(dbConnectionString));
+    Log.Information("Connection string configurado");
+
+    if (string.IsNullOrWhiteSpace(dbConnectionString))
+    {
+        throw new InvalidOperationException(
+            "Falta la variable de entorno DB_CONNECTION_STRING: no hay cadena de conexion disponible para este entorno. " +
+            "Lance el proceso con el envoltorio de Infisical (infisical run) o complete la variable.");
+    }
 
     var jwtSettings = jwtSection.Get<JwtSettings>();
 
@@ -126,17 +131,27 @@ try
         ?? builder.Configuration["JwtSettings:Secret"]
         ?? builder.Configuration["JwtSettings:SecretKey"]
         ?? jwtSettings?.SecretKey
-        ?? builder.Configuration["JwtSettings:Secret"]
-        ?? "__development_secret_key_replace_for_production__"; // fallback para migraciones/local
+        ?? builder.Configuration["JwtSettings:Secret"];
+
+    if (string.IsNullOrWhiteSpace(secretKeyString))
+    {
+        if (builder.Environment.IsProduction() || builder.Environment.IsStaging())
+        {
+            throw new InvalidOperationException(
+                "Falta la variable de entorno SECRET_TOKEN_KEY: no hay clave secreta JWT para firmar tokens en este entorno. " +
+                "Lance el proceso con el envoltorio de Infisical (infisical run) o complete la variable.");
+        }
+        secretKeyString = "__development_secret_key_replace_for_production__"; // fallback para migraciones/local
+    }
 
     var key = Encoding.UTF8.GetBytes(secretKeyString);
-    Console.WriteLine("JWT key obtenida (o fallback) para configuraci�n");
+    Log.Information("JWT key obtenida (o fallback) para configuraci�n");
 
     // Identity
     builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
         .AddEntityFrameworkStores<FitnessCenterDbContext>()
         .AddDefaultTokenProviders();
-    Console.WriteLine("Identity configurado");
+    Log.Information("Identity configurado");
 
     // Authentication
     builder.Services.AddAuthentication(options =>
@@ -158,17 +173,17 @@ try
         };
     });
     
-    Console.WriteLine("JWT Authentication configurado");
+    Log.Information("JWT Authentication configurado");
 
     //allowed oriogins contiene el dns de amazon
     var allowedOrigins = builder.Configuration
         .GetSection("AllowedCorsOrigins")
         .Get<string[]>() ?? Array.Empty<string>();
-    Console.WriteLine($"CORS allowed origins: {string.Join(", ", allowedOrigins)}");
+    Log.Information("CORS allowed origins: {AllowedOrigins}", string.Join(", ", allowedOrigins));
 
     // CORS
     builder.Services.AddCorsConfiguration(builder.Environment.IsStaging(), allowedOrigins);
-    Console.WriteLine("CORS configurado");
+    Log.Information("CORS configurado");
 
     // Controllers y SignalR
     builder.Services.AddControllers(options =>
@@ -201,12 +216,12 @@ try
         };
     });
     builder.Services.AddSignalR();
-    Console.WriteLine("Controllers y SignalR registrados");
+    Log.Information("Controllers y SignalR registrados");
 
     // Swagger
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-    Console.WriteLine("Swagger configurado");
+    Log.Information("Swagger configurado");
 
 
     builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
@@ -214,7 +229,7 @@ try
         options.UseSqlServer(dbConnectionString);
         
     });
-    Console.WriteLine("DbContext configurado");
+    Log.Information("DbContext configurado");
 
     // Email
     var smtpSettings = builder.Configuration.GetSection("SmtpSettings");
@@ -223,7 +238,7 @@ try
     string smtpUsername = smtpSettings["Username"];
     string smtpPassword = smtpSettings["Password"];
     builder.Services.AddScoped(sp => new EmailManagerMailKit(smtpServer, smtpPort, smtpUsername, smtpPassword));
-    Console.WriteLine("Email configurado");
+    Log.Information("Email configurado");
 
     // HttpClient
     builder.Services.AddScoped<AuthHeaderHandler>();
@@ -234,7 +249,7 @@ try
     {
         client.BaseAddress = new Uri(baseApiUrl);
     }).AddHttpMessageHandler<AuthHeaderHandler>();
-    Console.WriteLine("HttpClient configurado");
+    Log.Information("HttpClient configurado");
 
     // Servicios personalizados
     builder.Services.AddScoped<HorariosService>();
@@ -252,7 +267,7 @@ try
     builder.Services.AddScoped<IValidadorFechasInscripcionesYClasesProgramadas, ValidadorFechasInscripcionesYClasesProgramadas>();
     builder.Services.AddScoped<IValidadorClaseExistente, ValidadorClaseExistente>();
     builder.Services.AddScoped<IValidadorClaseProgramadaExistente, ValidadorClaseProgramadaExistente>();
-    Console.WriteLine("Servicios personalizados registrados");
+    Log.Information("Servicios personalizados registrados");
 
     // Quartz
     builder.Services.AddQuartz(configuration => {
@@ -270,21 +285,19 @@ try
             }));
     });
     builder.Services.AddQuartzHostedService(option => option.WaitForJobsToComplete = true);
-    Console.WriteLine("Quartz configurado");
+    Log.Information("Quartz configurado");
 
     // Authorization y capas adicionales
     builder.Services.AddAuthorization();
     builder.Services.AddDataAccess();
     builder.Services.AddBusinessLayer();
-    Console.WriteLine("Authorization, DataAccess y BusinessLayer registrados");
+    Log.Information("Authorization, DataAccess y BusinessLayer registrados");
 
-    Console.WriteLine("========================================");
-    Console.WriteLine("CONSTRUYENDO APLICACION...");
-    Console.WriteLine("========================================");
+    Log.Information("Construyendo aplicacion...");
 
     var app = builder.Build();
     
-    Console.WriteLine("App construida exitosamente");
+    Log.Information("App construida exitosamente");
     
     // Configuraci�n del pipeline
     if (app.Environment.IsDevelopment())
@@ -292,7 +305,7 @@ try
         
         app.UseSwagger();
         app.UseSwaggerUI();
-        Console.WriteLine("Swagger habilitado (Development)");
+        Log.Information("Swagger habilitado (Development)");
     }
     if (app.Environment.IsStaging())
     {
@@ -306,13 +319,13 @@ try
 
 
         });
-        Console.WriteLine("Swagger habilitado (Development)");
+        Log.Information("Swagger habilitado (Development)");
     }
     if (app.Environment.IsProduction() ) {
         app.UseForwardedHeaders();
     }
     
-    Console.WriteLine("HTTPS Redirection configurado");
+    Log.Information("HTTPS lo termina el reverse proxy de Nginx; Kestrel queda en HTTP interno");
 
     app.UseCors("originsPolicyOne");
 
@@ -343,22 +356,22 @@ try
         }
         await next();
     });
-    Console.WriteLine("CORS aplicado");
+    Log.Information("CORS aplicado");
 
     if (app.Environment.IsStaging() || app.Environment.IsProduction())
     {
         app.UseRateLimiter();
-        Console.WriteLine("Rate Limiter aplicado (Staging/Production)");
+        Log.Information("Rate Limiter aplicado (Staging/Production)");
     }
 
     app.UseAuthentication();
-    Console.WriteLine("Authentication middleware agregado");
+    Log.Information("Authentication middleware agregado");
 
     app.UseAuthorization();
-    Console.WriteLine("Authorization middleware agregado");
+    Log.Information("Authorization middleware agregado");
 
     app.MapHub<ReservacionesHub>("/reservacionesHub");
-    Console.WriteLine("SignalR Hub mapeado");
+    Log.Information("SignalR Hub mapeado");
 
     app.MapHealthChecks("/api/health", new HealthCheckOptions
     {
@@ -369,14 +382,12 @@ try
             await JsonSerializer.SerializeAsync(context.Response.Body, result);
         }
     }).RequireRateLimiting("HealthPolicy");
-    Console.WriteLine("Health check endpoint configurado en /api/health con rate limiting (100 req/min)");
+    Log.Information("Health check endpoint configurado en /api/health con rate limiting (100 req/min)");
 
     app.MapControllers();
-    Console.WriteLine("Controllers mapeados");
+    Log.Information("Controllers mapeados");
 
-    Console.WriteLine("========================================");
-    Console.WriteLine("API LISTA - INICIANDO SERVIDOR...");
-    Console.WriteLine("========================================");
+    Log.Information("API lista - iniciando servidor...");
 
     app.Run();
 }
@@ -386,4 +397,22 @@ catch (Exception ex)
     Environment.Exit(1);
 }
 
-public partial class Program { }
+public partial class Program
+{
+    /// <summary>
+    /// Resumen seguro de la cadena de conexión para logs: solo servidor y base de datos,
+    /// sin credenciales (requisito de la spec 93: la jamás debe aparecer en logs).
+    /// </summary>
+    public static string ResumirCadenaDeConexion(string? cadena)
+    {
+        if (string.IsNullOrWhiteSpace(cadena)) return "(sin valor)";
+        var partes = cadena.Split(';');
+        var servidor = partes.FirstOrDefault(p =>
+            p.Trim().StartsWith("Server=", StringComparison.OrdinalIgnoreCase) ||
+            p.Trim().StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))?.Trim();
+        var baseDeDatos = partes.FirstOrDefault(p =>
+            p.Trim().StartsWith("Database=", StringComparison.OrdinalIgnoreCase) ||
+            p.Trim().StartsWith("Initial Catalog=", StringComparison.OrdinalIgnoreCase))?.Trim();
+        return $"servidor={servidor}; base={baseDeDatos}";
+    }
+}

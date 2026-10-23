@@ -121,7 +121,14 @@ namespace GymFrontend
 
                 var jwtSettings = jwtSection.Get<JwtSettings>();
                 var pagesSettings = pagesSection.Get<PagesSettings>();
-                var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY"));
+                var secretTokenKey = Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY");
+                if (string.IsNullOrWhiteSpace(secretTokenKey))
+                {
+                    throw new InvalidOperationException(
+                        "Falta la variable de entorno SECRET_TOKEN_KEY: no hay clave secreta JWT disponible para este entorno. " +
+                        "Lance el proceso con el envoltorio de Infisical (infisical run) o complete la variable.");
+                }
+                var key = Encoding.UTF8.GetBytes(secretTokenKey);
                 var loginPath = pagesSettings.Login;
                 var accessDeniedPath = pagesSettings.Forbidden;
                 Log.Logger.Information("Login Path: {LoginPath}", loginPath);
@@ -185,6 +192,13 @@ namespace GymFrontend
                 var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
                     ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
+                if (string.IsNullOrWhiteSpace(dbConnectionString))
+                {
+                    throw new InvalidOperationException(
+                        "Falta la variable de entorno DB_CONNECTION_STRING: no hay cadena de conexion disponible para este entorno. " +
+                        "Lance el proceso con el envoltorio de Infisical (infisical run) o complete la variable.");
+                }
+
                 builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
                     options.UseSqlServer(dbConnectionString));
                 Log.Logger.Information("DbContext configurado");
@@ -247,7 +261,7 @@ namespace GymFrontend
                     Log.Logger.Information("Modo Development");
                 }
 
-                Log.Logger.Information("HTTPS Redirection configurado");
+                Log.Logger.Information("HTTPS lo termina el reverse proxy de Nginx; Kestrel queda en HTTP interno");
 
                 app.UseStaticFiles();
                 Log.Logger.Information("Static Files configurado");

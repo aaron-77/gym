@@ -25,6 +25,8 @@ Cada componente corre como un contenedor independiente orquestado con Docker Com
 
 El diagrama refleja este flujo: navegador → Nginx → (Frontend / API) → SQL Server, todo dentro de la red Docker, excepto la comunicación en tiempo real por SignalR, la cual se hace del cliente a Nginx y de Nginx al API directamente.
 
+Los datos sensibles del entorno (cadenas de conexión y demás secretos) no viven en los archivos versionados: se inyectan al proceso por **variables de entorno mediante Infisical** (`infisical run`). Tanto el frontend como la API resuelven su conexión a la base por la variable `DB_CONNECTION_STRING` (ver `specs/93-spect-secretos-appsettings-inyeccion-infisical.md`).
+
 ### Nginx
 
 El reverse proxy se ejecuta a partir de una **imagen personalizada** de Nginx. La configuración se define por medio de **templates** al arrancar el contenedor mediante **inyección de variables de entorno**, lo que facilita modificar los datos necesarios del reverse proxy sin tener que construir una nueva imagen.
