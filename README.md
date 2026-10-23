@@ -4,13 +4,13 @@ FitnessGym es un sistema de administración de gimnasios que permite a los clien
 
 Los empleados también pueden gestionar los horarios de las clases para los instructores y administrar las inscripciones de los clientes en tiempo real. El sistema permite reagendar las inscripciones a las clases y envía notificaciones por correo electrónico relacionadas con las citas de los clientes.
 
-**Stack tecnológico:** .NET 8, SignalR, SQL, SQL Server 2022, procedimientos almacenados, Razor, JavaScript, CSS, Bootstrap 5.3, Nginx 1.28, Docker 20.10 y 29, ASP.NET Core Identity, Azure VM(Anteriormente S3,EC2 y RDS) y SSL.
+**Stack tecnológico:** .NET 8, SignalR, SQL, SQL Server 2022, procedimientos almacenados, Razor, JavaScript, CSS, Bootstrap 5.3, Nginx 1.28, Docker 20.10 y 29, ASP.NET Core Identity, Azure VM (anteriormente S3, EC2 y RDS) y SSL.
 
 ## Arquitectura
 
 FitnessGym utiliza una **arquitectura por capas**, lo que permite separar responsabilidades y facilita el mantenimiento, las pruebas y la evolución del sistema.
 
-Toda la aplicación se ejecuta en **contenedores**: la API, el frontend, el reverse proxy con Nginx y la base de datos SQL Server. Los servicios se comunican entre sí a través de una **red Docker interna**, y Nginx actúa como **único punto de entrada expuesto al exterior**. La API, el frontend y la base de datos no son accesibles públicamente. La información de la base de datos se **persiste en volúmenes Docker** .
+Toda la aplicación se ejecuta en **contenedores**: la API, el frontend, el reverse proxy con Nginx y la base de datos SQL Server. Los servicios se comunican entre sí a través de una **red Docker interna**, y Nginx actúa como **único punto de entrada expuesto al exterior**. La API, el frontend y la base de datos no son accesibles públicamente. La información de la base de datos se **persiste en volúmenes Docker**.
 
 ![Diagrama de despliegue](docsgit/diagrama%20de%20despluiegue.png)
 
@@ -23,11 +23,11 @@ Cada componente corre como un contenedor independiente orquestado con Docker Com
 * **API:** contenedor ASP.NET Core Web API con SignalR y Quartz.
 * **Base de datos:** contenedor SQL Server 2022 con imagen propia.
 
-El diagrama refleja este flujo: navegador → Nginx → (Frontend / API) → SQL Server, todo dentro de la red Docker, excepto la comunicacion en tiempo real por signalR la cual se hace del cliente a nginx y de nginx al API directamnete.
+El diagrama refleja este flujo: navegador → Nginx → (Frontend / API) → SQL Server, todo dentro de la red Docker, excepto la comunicación en tiempo real por SignalR, la cual se hace del cliente a Nginx y de Nginx al API directamente.
 
 ### Nginx
 
-El reverse proxy se ejecuta a partir de una **imagen personalizada** de Nginx. La configuración se define por medio de **templates**  al arrancar el contenedor mediante **inyección de variables de entorno**, lo que facilita modificar los datos necesarios del reverse proxy sin tener que construir una nueva imagen.
+El reverse proxy se ejecuta a partir de una **imagen personalizada** de Nginx. La configuración se define por medio de **templates** al arrancar el contenedor mediante **inyección de variables de entorno**, lo que facilita modificar los datos necesarios del reverse proxy sin tener que construir una nueva imagen.
 
 Las variables que se inyectan son:
 
@@ -42,11 +42,11 @@ Las variables que se inyectan son:
 
 Es la **capa de presentación** del sistema. Está construida con **ASP.NET Core MVC**, **Razor**, **JavaScript**, **CSS** y **Bootstrap 5.3**.
 
-Se encarga de mostrar la UI al usuario. Las peticiones del navegador llegan primero a Nginx y después al frontend. Cuando el frontend necesita información de la API, realiza la petición desde el servidor mediante la capa BL. De esta forma, el navegador no necesita comunicarse directamente con la API. El frontend recibe la respuesta de la API, prepara la información necesaria para la vista y finalmente devuelve la respuesta al navegador a través de Nginx, esto se hace para evitar la exposicion de los tokens en javascript por medio del uso de cookies seguras http only,de esta manera se dismiuye el reisgo de robo de tokens dado que las cookies http only solo son enviadas y leidas por el servidor.
+Se encarga de mostrar la UI al usuario. Las peticiones del navegador llegan primero a Nginx y después al frontend. Cuando el frontend necesita información de la API, realiza la petición desde el servidor mediante la capa BL. De esta forma, el navegador no necesita comunicarse directamente con la API. El frontend recibe la respuesta de la API, prepara la información necesaria para la vista y finalmente devuelve la respuesta al navegador a través de Nginx, esto se hace para evitar la exposición de los tokens en JavaScript por medio del uso de cookies seguras http only; de esta manera se disminuye el riesgo de robo de tokens, dado que las cookies http only solo son enviadas y leídas por el servidor.
 
 ### BL (Business Logic)
 
-La capa BL contiene los elementos propios de la capa de negocio, asi como un cliente http y clases relacionadas para gestionar la comunicacion del frontend con el api de forma reutilizable.
+La capa BL contiene los elementos propios de la capa de negocio, así como un cliente HTTP y clases relacionadas para gestionar la comunicación del frontend con la API de forma reutilizable.
 
 Esta capa incluye:
 
@@ -61,15 +61,15 @@ Esta capa incluye:
 
 La API es el **punto de entrada del backend** y está construida con **ASP.NET Core Web API**.
 
-Su responsabilidad es recibir las peticiones del frontend, ejecutar las operaciones correspondientes y devolver las respuestas con los datos solcitados en los casos que aplique.
+Su responsabilidad es recibir las peticiones del frontend, ejecutar las operaciones correspondientes y devolver las respuestas con los datos solicitados en los casos que aplique.
 
 La API contiene:
 
 * **Controladores:** exponen los endpoints REST organizados por dominio.
-* **Servicios:** contienen operaciones reutilizables que encapsulan la logica de  procesos de registro,consulta, eliminacion,etc junto con sus respectivas llamnadas a validaciones de neegocio(estas ultimas separadas en sus calses reséctivas), para que de esta forma los controladores tengan una sepracion clara de responsabilidades encargandose solo de los correspondiente a la gestion de pticiones http y se conserven mas limpios.
+* **Servicios:** contienen operaciones reutilizables que encapsulan la lógica de procesos de registro, consulta, eliminación, etc., junto con sus respectivas llamadas a validaciones de negocio (estas últimas separadas en sus clases respectivas), para que de esta forma los controladores tengan una separación clara de responsabilidades, encargándose solo de lo correspondiente a la gestión de peticiones HTTP y conservándose más limpios.
 * **SignalR Hubs:** permiten actualizar información en tiempo real, como horarios y reservas.
 * **Trabajos en segundo plano:** utiliza Quartz para ejecutar tareas como los recordatorios de citas.
-* **Configuración de infraestructura:** incluye servicios que encapsulan logica de  autenticación mediante JWT y logica de actualizacionde datos en tiempo real.
+* **Configuración de infraestructura:** incluye servicios que encapsulan la lógica de autenticación mediante JWT y la lógica de actualización de datos en tiempo real.
 
 ### DataAccess
 
@@ -106,7 +106,7 @@ Su objetivo es compartir el esquema de la base de datos, los procedimientos alma
 
 La base de datos se ejecuta en un **contenedor**. La imagen incorpora un healthcheck que verifica que la base esté operativa, lo que permite que los servicios dependientes y los tests esperen a que esté lista antes de conectarse.
 
-Algunos ejemplos d ela funcionalidad implementada en bd son **procedimientos almacenados** y **funciones**, para la búsqueda y el cálculo de horarios disponibles, y el registro de clases programadas e inscripciones.
+Algunos ejemplos de la funcionalidad implementada en la base de datos son **procedimientos almacenados** y **funciones**, para la búsqueda y el cálculo de horarios disponibles, y el registro de clases programadas e inscripciones.
 
 ### Testing (GymWebApp.Tests)
 
@@ -120,6 +120,6 @@ El proyecto **GymWebApp.Tests** concentra todas las pruebas del sistema y se eje
 
 Los patrones que implementa el proyecto son:
 
-* **AAA (Arrange, Act, Assert):** las pruebas se estructuran en tres fases siguendo el patron AAA, preparación del estado y de los objetos de prueba(Arrange), ejecución de la acción a probar (ACT), y verificación de los resultados(Assert).
+* **AAA (Arrange, Act, Assert):** las pruebas se estructuran en tres fases siguiendo el patrón AAA: preparación del estado y de los objetos de prueba (Arrange), ejecución de la acción a probar (Act), y verificación de los resultados (Assert).
 * **Page Model:** cada página o componente de la interfaz se encapsula en una clase que conoce sus selectores y realiza acciones sobre ella. Las pruebas solo declaran el flujo del usuario y las aserciones, sin manipular el HTML. Los beneficios son reducir la duplicación de acciones compartidas, simplificar el mantenimiento ante cambios en la interfaz, y mantener una separación clara entre la abstracción de la interfaz y la lógica de la prueba.
 * **Test Base Class y Shared Fixture:** tanto las pruebas de integración como las E2E heredan de una clase base que se encarga de la inicialización y el ciclo de vida comunes, como levantar contenedores, reiniciar la base de datos y entregar clientes o servicios listos para usar. La instancia compartida entre las pruebas de una misma clase se maneja por medio de un fixture compartido. Cada clase de prueba concreta define únicamente su escenario y sus aserciones, garantizando la misma inicialización en todas las pruebas y evitando la duplicación de lógica.
