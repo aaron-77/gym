@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using DotNet.Testcontainers.Builders;
 using Respawn;
 using Respawn.Graph;
 using Testcontainers.MsSql;
@@ -33,8 +34,6 @@ public class TestContainerHelper : IAsyncLifetime
 
         var sqlPassword = ConfigHelper.GetProperty("SqlServer:Password");
 
-        var backupHostPath = "/mnt/archivos/estudio/proyectos/gym/bd/respaldosbd";
-
         if (_msSqlContainer != null)
         {
             try { await _msSqlContainer.DisposeAsync(); } catch { }
@@ -42,27 +41,29 @@ public class TestContainerHelper : IAsyncLifetime
         }
 
         _msSqlContainer = new MsSqlBuilder()
-            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+            .WithImage("fitnessgymbd:latest")
             .WithPassword(sqlPassword)
             .WithEnvironment("TZ", "America/Mexico_City")
-            .WithBindMount(backupHostPath, "/backup")
+            // failingStreak 150 x intervalo 2s = 5 min de gracia: durante el recovery
+            // el health reporta "starting" y cada poll cuenta como fallo.
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilContainerIsHealthy(150, o => o
+                    .WithInterval(TimeSpan.FromSeconds(2))
+                    .WithTimeout(TimeSpan.FromMinutes(5))))
             .Build();
 
         await _msSqlContainer.StartAsync();
-
-        await WaitForContainerReady();
 
         var fullConnectionString = _msSqlContainer.GetConnectionString();
         var serverPart = fullConnectionString.Split(';')[0];
 
         var masterConnectionString = $"{serverPart};Database=master;User Id=sa;Password={sqlPassword};TrustServerCertificate=True";
 
+        // La imagen fitnessgymbd:latest ya trae FitnessCenterDB restaurada. El login a nivel
+        // servidor se crea/verifica igual: es idempotente y garantiza la autenticación aunque
+        // la imagen se reconstruya sin el login.
         await using var masterConnection = DatabaseHelper.GetSqlConnection(masterConnectionString);
         await masterConnection.OpenAsync();
-        await RestoreDatabaseFromBackupAsync(masterConnection);
-
-        // El .bak solo trae el user de base de datos (huérfano); los logins nunca viajan en un
-        // respaldo. Sin login el user no se puede usar, así que se crea después del restore.
         await FitnessGymLoginHelper.CreateAsync(masterConnectionString, sqlPassword);
 
         _connectionString = $"{serverPart};Database=FitnessCenterDB;User Id={FitnessGymLoginHelper.LoginName};Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
@@ -71,28 +72,6 @@ public class TestContainerHelper : IAsyncLifetime
     }
 
     Task IAsyncLifetime.InitializeAsync() => InitializeImplAsync();
-
-    private async Task WaitForContainerReady()
-    {
-        var maxRetries = 30;
-        var delay = TimeSpan.FromSeconds(1);
-
-        for (int i = 0; i < maxRetries; i++)
-        {
-            try
-            {
-                await using var connection = DatabaseHelper.GetSqlConnection(_msSqlContainer!.GetConnectionString());
-                await connection.OpenAsync();
-                return;
-            }
-            catch
-            {
-                await Task.Delay(delay);
-            }
-        }
-
-        throw new Exception("SQL Server container failed to start");
-    }
 
     private async Task InitializeRespawnAsync()
     {
@@ -161,52 +140,6 @@ public class TestContainerHelper : IAsyncLifetime
                 new Table("sysdiagrams")
             }
         });
-    }
-
-    private async Task RestoreDatabaseFromBackupAsync(SqlConnection connection)
-    {
-        var backupFileName = ConfigHelper.GetPropertyOrDefault(
-            "TestContainers:BackupFile", "FitnessGymDB.bak");
-        var backupPath = "/backup/" + backupFileName;
-        var databaseName = "FitnessCenterDB";
-
-        var fileListSql = "RESTORE FILELISTONLY FROM DISK = @BackupPath";
-
-        List<string> moveStatements = new();
-
-        await using (var fileListCommand = connection.CreateCommand())
-        {
-            fileListCommand.CommandText = fileListSql;
-            fileListCommand.Parameters.AddWithValue("@BackupPath", backupPath);
-
-            await using var reader = await fileListCommand.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                var logicalName = reader.GetString(0);
-                var type = reader.GetString(2);
-
-                var extension = type == "L" ? ".ldf" : ".mdf";
-                var newPath = $"/var/opt/mssql/data/{databaseName}{extension}";
-                moveStatements.Add($"MOVE '{logicalName}' TO '{newPath}'");
-            }
-        }
-
-        var moveClause = string.Join(", ", moveStatements);
-
-        var sql = $@"
-            BEGIN TRY
-                RESTORE DATABASE [{databaseName}] FROM DISK = @BackupPath WITH REPLACE, RECOVERY, {moveClause};
-            END TRY
-            BEGIN CATCH
-                ALTER DATABASE [{databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-                RESTORE DATABASE [{databaseName}] FROM DISK = @BackupPath WITH REPLACE, RECOVERY, {moveClause};
-            END CATCH;
-        ";
-
-        await using var command = connection.CreateCommand();
-        command.CommandText = sql;
-        command.Parameters.AddWithValue("@BackupPath", backupPath);
-        await command.ExecuteNonQueryAsync();
     }
 
     public async Task ResetDatabaseAsync()

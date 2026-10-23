@@ -1,16 +1,14 @@
 # docker-compose.template.yml - Plantilla general de la app FitnessGym
 #
-# Interpolacion por variables de entorno (no usar .env en el template).
+# Solo los secretos se mapean a variables de entorno; el resto son valores
+# fijos (referencia: docker-compose.prod.yml).
 #
 # Variables OBLIGATORIAS (sin default - compose falla al arrancar si faltan):
 #   SECRET_TOKEN_KEY        - clave JWT/secret del token
 #   DB_CONNECTION_STRING    - connection string fusionada (ver abajo)
 #
-# Variables OPCIONALES (usan default si no estan definidas):
-#   TZ, ASPNETCORE_ENVIRONMENT, API_HOST_PORT, FRONTEND_HOST_PORT
-#
-# Literales (contrato con nginx/contenedor - NO parametrizar):
-#   ASPNETCORE_URLS, BACKEND_BASE_ADDRESS, puertos del lado del contenedor
+# Literales (NO parametrizar):
+#   TZ, ASPNETCORE_ENVIRONMENT, ASPNETCORE_URLS, BACKEND_BASE_ADDRESS, puertos
 #
 # Connection string fusionada (unica para api y frontend) a exportar como
 # DB_CONNECTION_STRING:
@@ -20,14 +18,14 @@ services:
   fitnessgym_api:
     image: fitnessgymapi
     ports:
-      - "127.0.0.1:${API_HOST_PORT:-8090}:5274"
+      - "127.0.0.1:8090:5274"
     build:
       context: .
       dockerfile: API/DockerFile
     container_name: apicontainer
     environment:
-      TZ: "${TZ:-America/Mexico_City}"
-      ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT:-Development}"
+      TZ: "America/Mexico_City"
+      ASPNETCORE_ENVIRONMENT: "Production"
       ASPNETCORE_URLS: "http://0.0.0.0:5274"
       SECRET_TOKEN_KEY: "${SECRET_TOKEN_KEY:?SECRET_TOKEN_KEY es obligatoria}"
       DB_CONNECTION_STRING: "${DB_CONNECTION_STRING:?DB_CONNECTION_STRING es obligatoria}"
@@ -39,14 +37,14 @@ services:
     depends_on:
       - "fitnessgym_api"
     ports:
-      - "127.0.0.1:${FRONTEND_HOST_PORT:-8091}:5062"
+      - "127.0.0.1:8091:5062"
     build:
       context: .
       dockerfile: GymFrontend/DockerFile
     container_name: frontendcontainer
     environment:
-      TZ: "${TZ:-America/Mexico_City}"
-      ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT:-Development}"
+      TZ: "America/Mexico_City"
+      ASPNETCORE_ENVIRONMENT: "Production"
       ASPNETCORE_URLS: "http://0.0.0.0:5062"
       BACKEND_BASE_ADDRESS: "http://0.0.0.0:5274"
       SECRET_TOKEN_KEY: "${SECRET_TOKEN_KEY:?SECRET_TOKEN_KEY es obligatoria}"

@@ -33,12 +33,6 @@ public class E2eContainerHelper : IAsyncLifetime
     private int _nginxExternalPort;
     private int _frontendExternalPort;
 
-    // Backup configuration
-    private const string BackupHostPath = "/mnt/archivos/estudio/proyectos/gym/bd/respaldosbd";
-
-    // Nginx configuration
-    private const string NginxConfPath = "/mnt/archivos/estudio/proyectos/gym/GymWebApp.Tests/E2E/Common/nginx.conf";
-
     public static E2eContainerHelper Instance { get; private set; } = null!;
 
     public string FrontendBaseUrl => $"http://localhost:{_frontendExternalPort}";
@@ -59,29 +53,31 @@ public class E2eContainerHelper : IAsyncLifetime
 
         await _network.CreateAsync();
 
-        // 2. Iniciar SQL Server
+        // 2. Iniciar SQL Server (la imagen ya trae FitnessCenterDB restaurada)
         var sqlPassword = ConfigHelper.GetProperty("SqlServer:Password");
         _msSqlContainer = new MsSqlBuilder()
-            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+            .WithImage("fitnessgymbd:latest")
             .WithPassword(sqlPassword)
             .WithEnvironment("TZ", "America/Mexico_City")
+            // failingStreak 150 x intervalo 2s = 5 min de gracia: durante el recovery
+            // el health reporta "starting" y cada poll cuenta como fallo.
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilContainerIsHealthy(150, o => o
+                    .WithInterval(TimeSpan.FromSeconds(2))
+                    .WithTimeout(TimeSpan.FromMinutes(5))))
             .WithPortBinding(SqlServerInternalPort, true)
             .WithNetwork(_network)
             .WithNetworkAliases("sqlserver")
-            .WithBindMount(BackupHostPath, "/backup")
             .Build();
 
         await _msSqlContainer.StartAsync();
         var sqlMappedPort = _msSqlContainer.GetMappedPublicPort(SqlServerInternalPort);
         Console.WriteLine($"[E2E] SQL Server container started on port {sqlMappedPort}");
 
-        // Restaurar base de datos desde backup
         var masterConnectionString = $"Server=127.0.0.1,{sqlMappedPort};Database=master;User Id=sa;Password={sqlPassword};TrustServerCertificate=True";
-        await RestoreDatabaseFromBackupAsync(masterConnectionString, sqlPassword);
-        Console.WriteLine("[E2E] Database restored from backup");
 
-        // El .bak solo trae el user de base de datos (huérfano); los logins nunca viajan en un
-        // respaldo. Sin login el user no se puede usar, así que se crea después del restore.
+        // El login a nivel servidor se crea/verifica aquí: es idempotente y garantiza la
+        // autenticación aunque la imagen se reconstruya sin el login.
         await FitnessGymLoginHelper.CreateAsync(masterConnectionString, sqlPassword);
         Console.WriteLine($"[E2E] Login '{FitnessGymLoginHelper.LoginName}' created");
 
@@ -140,12 +136,21 @@ public class E2eContainerHelper : IAsyncLifetime
         Console.WriteLine($"[E2E] Frontend container started on port {_frontendExternalPort}");
 
         // 5. Iniciar Nginx como reverse proxy
+        // La imagen trae el template de producción (SSL + letsencrypt, no existe en el test).
+        // Se monta el template local sin SSL y se anulan los dominios, igual que en compose.
         _nginxContainer = new ContainerBuilder()
-            .WithImage("nginx:alpine")
+            .WithImage("fitnessgymnginx:latest")
+            .WithEnvironment(new Dictionary<string, string>
+            {
+                ["GYM_PRIMARY_DOMAIN"] = "localhost",
+                ["GYM_APP_DOMAIN"] = "localhost"
+            })
+            .WithBindMount(
+                "/mnt/archivos/estudio/proyectos/fitnessgymreverseproxy/nginx/nginx.local.conf.template",
+                "/etc/nginx/templates/nginx.conf.template")
             .WithPortBinding(NginxInternalPort, true)
             .WithNetwork(_network)
             .WithNetworkAliases("nginx")
-            .WithBindMount(NginxConfPath, "/etc/nginx/nginx.conf")
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(80))
             .Build();
 
@@ -243,64 +248,6 @@ public class E2eContainerHelper : IAsyncLifetime
         await using var connection = DatabaseHelper.GetSqlConnection(HostConnectionString);
         await connection.OpenAsync();
         await _respawner.ResetAsync(connection);
-    }
-
-    private async Task RestoreDatabaseFromBackupAsync(string masterConnectionString, string sqlPassword)
-    {
-        var backupFileName = ConfigHelper.GetPropertyOrDefault(
-            "TestContainers:BackupFile", "FitnessGymDB.bak");
-        var backupPath = "/backup/" + backupFileName;
-        var databaseName = "FitnessCenterDB";
-
-        try
-        {
-            await using var masterConnection = DatabaseHelper.GetSqlConnection(masterConnectionString);
-            await masterConnection.OpenAsync();
-
-            var fileListSql = "RESTORE FILELISTONLY FROM DISK = @BackupPath";
-            List<string> moveStatements = new();
-
-            await using (var fileListCommand = masterConnection.CreateCommand())
-            {
-                fileListCommand.CommandText = fileListSql;
-                fileListCommand.Parameters.AddWithValue("@BackupPath", backupPath);
-
-                await using var reader = await fileListCommand.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    var logicalName = reader.GetString(0);
-                    var type = reader.GetString(2);
-
-                    var extension = type == "L" ? ".ldf" : ".mdf";
-                    var newPath = $"/var/opt/mssql/data/{databaseName}{extension}";
-                    moveStatements.Add($"MOVE '{logicalName}' TO '{newPath}'");
-                }
-            }
-
-            var moveClause = string.Join(", ", moveStatements);
-
-            var sql = $@"
-                BEGIN TRY
-                    RESTORE DATABASE [{databaseName}] FROM DISK = @BackupPath WITH REPLACE, RECOVERY, {moveClause};
-                END TRY
-                BEGIN CATCH
-                    ALTER DATABASE [{databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-                    RESTORE DATABASE [{databaseName}] FROM DISK = @BackupPath WITH REPLACE, RECOVERY, {moveClause};
-                END CATCH;
-            ";
-
-            await using var command = masterConnection.CreateCommand();
-            command.CommandText = sql;
-            command.Parameters.AddWithValue("@BackupPath", backupPath);
-            await command.ExecuteNonQueryAsync();
-
-            Console.WriteLine("[E2E] Database restored successfully");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[E2E] ERROR restoring database: {ex.Message}");
-            throw;
-        }
     }
 
     public async Task DisposeImplAsync()
