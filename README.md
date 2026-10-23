@@ -4,21 +4,32 @@ FitnessGym es un sistema de administración de gimnasios que permite a los clien
 
 Los empleados también pueden gestionar los horarios de las clases para los instructores y administrar las inscripciones de los clientes en tiempo real. El sistema permite reagendar las inscripciones a las clases y envía notificaciones por correo electrónico relacionadas con las citas de los clientes.
 
-**Stack tecnológico:** .NET 8, SignalR, SQL, SQL Server 2022, procedimientos almacenados, Razor, JavaScript, CSS, Bootstrap 5.3, Nginx 1.28, Docker 20.10 y 29, ASP.NET Core Identity, AWS (EC2, RDS y S3) y SSL.
+**Stack tecnológico:** .NET 8, SignalR, SQL, SQL Server 2022, procedimientos almacenados, Razor, JavaScript, CSS, Bootstrap 5.3, Nginx 1.28, Docker 20.10 y 29, ASP.NET Core Identity, Azure VM y SSL.
 
 ## Arquitectura
 
 FitnessGym utiliza una **arquitectura por capas**, lo que permite separar responsabilidades y facilita el mantenimiento, las pruebas y la evolución del sistema.
 
-El app esta desplegada  en contendores docker,concretamente **la API y el frontend se ejecutan en contenedores Docker** y están protegidos por un **reverse proxy con Nginx** que corre en el host. Todo el sistema se ejecuta dentro del mismo sistema operativo. La base de datos SQL Server se encuentra directamnete en el host 
+Toda la aplicación se ejecuta en **contenedores**: la API, el frontend, el reverse proxy con Nginx y la base de datos SQL Server. Los servicios se comunican entre sí a través de una **red Docker interna**, y Nginx actúa como **único punto de entrada expuesto al exterior**. La API, el frontend y la base de datos no son accesibles públicamente. La información de la base de datos se **persiste en volúmenes Docker** para sobrevivir al ciclo de vida de los contenedores.
 
 ![Diagrama de despliegue](docsgit/diagrama%20de%20despluiegue.jpeg)
+
+### Despliegue en contenedores
+
+Cada componente corre como un contenedor independiente orquestado con Docker Compose:
+
+* **Nginx:** recibe todo el tráfico externo (HTTP/HTTPS, WebSockets para SignalR) y redirige a frontend o API según la ruta.
+* **Frontend:** contenedor ASP.NET Core MVC.
+* **API:** contenedor ASP.NET Core Web API con SignalR y Quartz.
+* **Base de datos:** contenedor SQL Server 2022 con imagen propia.
+
+El diagrama refleja este flujo: navegador → Nginx → (Frontend / API) → SQL Server, todo dentro de la red Docker.
 
 ### Frontend
 
 Es la **capa de presentación** del sistema. Está construida con **ASP.NET Core MVC**, **Razor**, **JavaScript**, **CSS** y **Bootstrap 5.3**.
 
-Se encarga de es mostrar la UI al usuario . Esta contruido con el patron  **Backend for Frontend (BFF)**. Las peticiones del navegador llegan primero a Nginx y después al frontend. Cuando el frontend necesita información de la API, realiza la petición desde el servidor mediante la capa .De esta forma, el navegador no necesita comunicarse directamente con la API. El frontend recibe la respuesta de la API, prepara la información necesaria para la vista y finalmente devuelve la respuesta al navegador a través de Nginx.
+Se encarga de mostrar la UI al usuario. Está construido con el patrón **Backend for Frontend (BFF)**. Las peticiones del navegador llegan primero a Nginx y después al frontend. Cuando el frontend necesita información de la API, realiza la petición desde el servidor mediante la capa BL. De esta forma, el navegador no necesita comunicarse directamente con la API. El frontend recibe la respuesta de la API, prepara la información necesaria para la vista y finalmente devuelve la respuesta al navegador a través de Nginx.
 
 ### BL (Business Logic)
 
@@ -80,3 +91,7 @@ Esta separación permite que las diferentes capas compartan los mismos modelos d
 El sistema utiliza **SQL Server 2022** como base de datos.
 
 La base de datos contiene tablas, procedimientos almacenados y funciones utilizados por la aplicación y todos los objetos utilizados en la bd, esta capa es solamnete para facilitar la gestion de los scripts de bd del sistemay su respaldo, no contiene proyectos .csproj ejecutables.
+
+La base de datos se ejecuta en un **contenedor**. La imagen incorpora un healthcheck que verifica que la base esté operativa, lo que permite que los servicios dependientes y los tests esperen a que esté lista antes de conectarse.
+
+Además del almacenamiento de datos, la base de datos ejecuta funcionalidad propia mediante **procedimientos almacenados** y **funciones**, como la búsqueda y el cálculo de horarios disponibles, y el registro de clases programadas e inscripciones.
