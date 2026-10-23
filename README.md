@@ -29,7 +29,7 @@ El diagrama refleja este flujo: navegador → Nginx → (Frontend / API) → SQL
 
 Es la **capa de presentación** del sistema. Está construida con **ASP.NET Core MVC**, **Razor**, **JavaScript**, **CSS** y **Bootstrap 5.3**.
 
-Se encarga de mostrar la UI al usuario. Está construido con el patrón **Backend for Frontend (BFF)**. Las peticiones del navegador llegan primero a Nginx y después al frontend. Cuando el frontend necesita información de la API, realiza la petición desde el servidor mediante la capa BL. De esta forma, el navegador no necesita comunicarse directamente con la API. El frontend recibe la respuesta de la API, prepara la información necesaria para la vista y finalmente devuelve la respuesta al navegador a través de Nginx.
+Se encarga de mostrar la UI al usuario. Las peticiones del navegador llegan primero a Nginx y después al frontend. Cuando el frontend necesita información de la API, realiza la petición desde el servidor mediante la capa BL. De esta forma, el navegador no necesita comunicarse directamente con la API. El frontend recibe la respuesta de la API, prepara la información necesaria para la vista y finalmente devuelve la respuesta al navegador a través de Nginx, esto se hace para evitar la exposicion de los tokens en javascript por medio del uso de cookies seguras http only.
 
 ### BL (Business Logic)
 
@@ -39,7 +39,6 @@ Esta capa incluye:
 
 * Lógica organizada por dominio.
 * Un cliente HTTP centralizado para realizar las llamadas a la API.
-* Gestión de tokens.
 * Generación de respuestas con un formato uniforme.
 * Validaciones personalizadas.
 * Manejo centralizado de errores.
@@ -88,7 +87,9 @@ Esta separación permite que las diferentes capas compartan los mismos modelos d
 
 ### Base de datos
 
-El sistema utiliza **SQL Server 2022** como base de datos.
+El sistema utiliza **SQL Server 2022** como base de datos.Esta no es una capa formal de la aplicacion,es solo para compartir el esquema y los procedimeitnos almacanedos que conforman la base de datos y hacer visisble el trabajo realizado en la base de datos. tambien srive como respaldo de la bd y apoyo para migraciones posteriores a otros motores de bd.
+
+Esta capa tiene como objetivo la construcción de las imágenes de la base de datos con Docker y mostrar el contenido de la base de datos, para que pueda verse cómo están construidas las funcionalidades del sistema que están hechas en SQL y T-SQL.
 
 La base de datos contiene tablas, procedimientos almacenados y funciones utilizados por la aplicación y todos los objetos utilizados en la bd, esta capa es solamnete para facilitar la gestion de los scripts de bd del sistemay su respaldo, no contiene proyectos .csproj ejecutables.
 
