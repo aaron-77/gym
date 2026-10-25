@@ -1,4 +1,3 @@
-using Microsoft.Data.SqlClient;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using DotNet.Testcontainers.Networks;
@@ -21,8 +20,7 @@ public class E2eContainerHelper : IAsyncLifetime
     private INetwork? _network;
     private Respawner? _respawner;
 
-    // Puertos externos
-    private const int NginxExternalPort = 5080;
+    // Puertos (lado interno de los contenedores)
     private const int ApiInternalPort = 5274;
     private const int FrontendInternalPort = 5062;
     private const int SqlServerInternalPort = 1433;
@@ -34,6 +32,11 @@ public class E2eContainerHelper : IAsyncLifetime
     private int _frontendExternalPort;
 
     public static E2eContainerHelper Instance { get; private set; } = null!;
+
+    // Respaldo de BD en el repo (bd/FitnessGymDB.bak, gitignored). La ruta se
+    // resuelve desde el output de tests (bin/Debug/net8.0 → raíz del repo).
+    private static string BdBackupPath { get; } =
+        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "bd", "FitnessGymDB.bak"));
 
     public string FrontendBaseUrl => $"http://localhost:{_frontendExternalPort}";
     public string ApiBaseUrl => $"http://localhost:{_apiExternalPort}";
@@ -53,12 +56,25 @@ public class E2eContainerHelper : IAsyncLifetime
 
         await _network.CreateAsync();
 
-        // 2. Iniciar SQL Server (la imagen ya trae FitnessCenterDB restaurada)
+        // 2. Iniciar SQL Server (la BD entra por bind mount: la imagen ya no trae el .bak)
         var sqlPassword = ConfigHelper.GetProperty("SqlServer:Password");
+
+        // Fail-fast con mensaje accionable: sin el .bak local la imagen nueva no puede
+        // restaurar FitnessCenterDB y el healthcheck nunca llega a healthy (timeout).
+        if (!File.Exists(BdBackupPath))
+            throw new FileNotFoundException(
+                $"No existe el respaldo de BD en '{BdBackupPath}'. La imagen fitnessgymbd ya no lo trae horneado: copiá el archivo a bd/FitnessGymDB.bak.");
+
         _msSqlContainer = new MsSqlBuilder()
             .WithImage("fitnessgymbd:latest")
             .WithPassword(sqlPassword)
             .WithEnvironment("TZ", "America/Mexico_City")
+            // Nuevo contrato de imagen BD (rediseño 2026-10-25): la imagen NO trae
+            // el .bak horneado - la BD entra por RUNTIME igual que en bd/docker-compose-local.yml:
+            //   bind read-only del respaldo  -> configure-db.sh lo detecta y restaura
+            //   MSSQL_APP_LOGIN_PASSWORD     -> create-login.sql lo recibe vía sqlcmd -v
+            .WithBindMount(BdBackupPath, "/var/opt/mssql/backups/FitnessGymDB.bak")
+            .WithEnvironment("MSSQL_APP_LOGIN_PASSWORD", sqlPassword)
             // failingStreak 150 x intervalo 2s = 5 min de gracia: durante el recovery
             // el health reporta "starting" y cada poll cuenta como fallo.
             .WithWaitStrategy(Wait.ForUnixContainer()
@@ -138,6 +154,14 @@ public class E2eContainerHelper : IAsyncLifetime
         // 5. Iniciar Nginx como reverse proxy
         // La imagen trae el template de producción (SSL + letsencrypt, no existe en el test).
         // Se monta el template local sin SSL y se anulan los dominios, igual que en compose.
+        // El template vive en el repo hermano (fitnessgymreverseproxy/, symlink alcanzable
+        // desde la raíz del repo: proyectos/fitnessgymreverseproxy). Se resuelve relativo
+        // al output de tests para no hardcodear una ruta de máquina.
+        var nginxLocalTemplate = Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory, "..", "..", "..", "..", "..",
+            "fitnessgymreverseproxy", "nginx", "nginx.local.conf.template"));
+        if (!File.Exists(nginxLocalTemplate))
+            throw new FileNotFoundException($"No existe el template local de nginx en '{nginxLocalTemplate}'. Verificá el repo hermano fitnessgymreverseproxy.");
         _nginxContainer = new ContainerBuilder()
             .WithImage("fitnessgymnginx:latest")
             .WithEnvironment(new Dictionary<string, string>
@@ -145,8 +169,7 @@ public class E2eContainerHelper : IAsyncLifetime
                 ["GYM_PRIMARY_DOMAIN"] = "localhost",
                 ["GYM_APP_DOMAIN"] = "localhost"
             })
-            .WithBindMount(
-                "/mnt/archivos/estudio/proyectos/fitnessgymreverseproxy/nginx/nginx.local.conf.template",
+            .WithBindMount(nginxLocalTemplate,
                 "/etc/nginx/templates/nginx.conf.template")
             .WithPortBinding(NginxInternalPort, true)
             .WithNetwork(_network)

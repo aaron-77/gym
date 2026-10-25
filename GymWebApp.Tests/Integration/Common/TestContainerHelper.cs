@@ -1,4 +1,3 @@
-using Microsoft.Data.SqlClient;
 using DotNet.Testcontainers.Builders;
 using Respawn;
 using Respawn.Graph;
@@ -14,6 +13,11 @@ public class TestContainerHelper : IAsyncLifetime
     private string? _connectionString;
 
     public static TestContainerHelper Instance { get; private set; } = null!;
+
+    // Respaldo de BD en el repo (bd/FitnessGymDB.bak, gitignored). La ruta se
+    // resuelve desde el output de tests (bin/Debug/net8.0 → raíz del repo).
+    private static string BdBackupPath { get; } =
+        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "bd", "FitnessGymDB.bak"));
 
     public string ConnectionString
     {
@@ -32,11 +36,19 @@ public class TestContainerHelper : IAsyncLifetime
         ConfigHelper.RegisterConfig("appsettings.Testing.json");
         Instance = this;
 
+        // Fail-fast con mensaje accionable: sin el .bak local la imagen nueva no puede
+        // restaurar FitnessCenterDB y el healthcheck nunca llega a healthy (timeout).
+        if (!File.Exists(BdBackupPath))
+            throw new FileNotFoundException(
+                $"No existe el respaldo de BD en '{BdBackupPath}'. La imagen fitnessgymbd ya no lo trae horneado: copiá el archivo a bd/FitnessGymDB.bak.");
+
         var sqlPassword = ConfigHelper.GetProperty("SqlServer:Password");
 
         if (_msSqlContainer != null)
         {
-            try { await _msSqlContainer.DisposeAsync(); } catch { }
+            // Un contenedor huérfano de una corrida anterior no debe impedir el arranque.
+            try { await _msSqlContainer.DisposeAsync(); }
+            catch { /* limpieza best-effort: la nueva instancia arranca limpia igual */ }
             _msSqlContainer = null;
         }
 
@@ -44,6 +56,14 @@ public class TestContainerHelper : IAsyncLifetime
             .WithImage("fitnessgymbd:latest")
             .WithPassword(sqlPassword)
             .WithEnvironment("TZ", "America/Mexico_City")
+            // Nuevo contrato de imagen BD (rediseño 2026-10-25): la imagen NO trae
+            // el .bak horneado - la BD entra por RUNTIME igual que en bd/docker-compose-local.yml:
+            //   bind read-only del respaldo  -> configure-db.sh lo detecta y restaura
+            //   MSSQL_APP_LOGIN_PASSWORD     -> create-login.sql lo recibe vía sqlcmd -v
+            // Sin el bind, no hay FitnessCenterDB y el HEALTHCHECK baked (-d FitnessCenterDB)
+            // falla eternamente -> timeout de UntilContainerIsHealthy.
+            .WithBindMount(BdBackupPath, "/var/opt/mssql/backups/FitnessGymDB.bak")
+            .WithEnvironment("MSSQL_APP_LOGIN_PASSWORD", sqlPassword)
             // failingStreak 150 x intervalo 2s = 5 min de gracia: durante el recovery
             // el health reporta "starting" y cada poll cuenta como fallo.
             .WithWaitStrategy(Wait.ForUnixContainer()
@@ -59,11 +79,9 @@ public class TestContainerHelper : IAsyncLifetime
 
         var masterConnectionString = $"{serverPart};Database=master;User Id=sa;Password={sqlPassword};TrustServerCertificate=True";
 
-        // La imagen fitnessgymbd:latest ya trae FitnessCenterDB restaurada. El login a nivel
-        // servidor se crea/verifica igual: es idempotente y garantiza la autenticación aunque
-        // la imagen se reconstruya sin el login.
-        await using var masterConnection = DatabaseHelper.GetSqlConnection(masterConnectionString);
-        await masterConnection.OpenAsync();
+        // Con la imagen rediseñada la BD entra por bind mount (ver arriba); el login
+        // a nivel servidor se crea/verifica aquí (helper idempotente, abre su propia
+        // conexión): garantiza la autenticación para el user que consulta desde el host.
         await FitnessGymLoginHelper.CreateAsync(masterConnectionString, sqlPassword);
 
         _connectionString = $"{serverPart};Database=FitnessCenterDB;User Id={FitnessGymLoginHelper.LoginName};Password={sqlPassword};TrustServerCertificate=True;Connect Timeout=60";
