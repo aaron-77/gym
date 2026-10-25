@@ -7,12 +7,14 @@ USER root
 # 3. Crear los directorios internos necesarios dentro del contenedor
 RUN mkdir -p /usr/config /var/opt/mssql/backups /var/opt/mssql/data /var/opt/mssql/log
 
-# 4. Copiar los scripts y el archivo de respaldo desde tu máquina local al contenedor
+# 4. Copiar SOLO los scripts de orquestación (limpios: sin secretos ni datos).
+#    El respaldo (FitnessGymDB.bak) y la password del login de aplicación NO se
+#    hornean: el .bak entra montado por el compose (bind, read-only) y la password
+#    por la env var MSSQL_APP_LOGIN_PASSWORD (ver bd/docker-compose.template.yml).
+#    Así la imagen es pusheable a Docker Hub sin filtrar la BD ni credenciales.
 COPY restore.sql /usr/config/restore.sql
-COPY create-login.sql /usr/config/create-login.sql
 COPY entrypoint.sh /usr/config/entrypoint.sh
 COPY configure-db.sh /usr/config/configure-db.sh
-COPY FitnessGymDB.bak /var/opt/mssql/backups/FitnessGymDB.bak
 
 # 5. Otorgar permisos de ejecución a TODOS los scripts de Bash y ajustar propiedad de carpetas
 RUN chmod +x /usr/config/entrypoint.sh /usr/config/configure-db.sh && \

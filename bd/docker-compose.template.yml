@@ -4,6 +4,9 @@
 #
 # Variables OBLIGATORIAS (sin default - compose falla al arrancar si faltan):
 #   MSSQL_SA_PASSWORD  - password del sa de SQL Server
+#   MSSQL_APP_LOGIN_PASSWORD - password con la que nace fitnessgymlogin en el
+#       arranque ( debe coincidir con la DB_CONNECTION_STRING de la aplicación;
+#       la inyecta configure-db.sh al create-login.sql vía sqlcmd -v )
 #
 # Variables OPCIONALES (usan default si no estan definidas):
 #   TZ, ACCEPT_EULA, MSSQL_PID, BD_HOST_PORT
@@ -25,9 +28,20 @@ services:
       ACCEPT_EULA: "${ACCEPT_EULA:-Y}"
       MSSQL_PID: "${MSSQL_PID:-developer}"
       MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD es obligatoria}"
+      MSSQL_APP_LOGIN_PASSWORD: "${MSSQL_APP_LOGIN_PASSWORD:?MSSQL_APP_LOGIN_PASSWORD es obligatoria}"
     volumes:
       - fitnessgym-mssql-data:/var/opt/mssql/data
       - fitnessgym-mssql-log:/var/opt/mssql/log
+      # Respaldo local de la BD: entra por RUNTIME, nunca horneado en la imagen
+      # (*.bak está gitignored; el archivo debe existir localmente en bd/).
+      # Entra SIEMPRE y es de solo lectura; configure-db.sh salta el restore
+      # si el volumen de datos ya está poblado (IF NOT EXISTS en restore.sql).
+      - type: bind
+        source: ./FitnessGymDB.bak
+        target: /var/opt/mssql/backups/FitnessGymDB.bak
+        read_only: true
+        bind:
+          create_host_path: false
     networks:
       - fitnessgym-net
 

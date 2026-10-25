@@ -34,14 +34,21 @@ fi
 
 echo "SQL Server está ONLINE. Ejecutando script de restauración..."
 
-# Ejecutar el script de restauración
-/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -d master -i /usr/config/restore.sql -b
+# Ejecutar el script de restauración SOLO si hay respaldo montado. Desde el
+# rediseño (imagen sin .bak horneado), el archivo existe únicamente cuando el
+# compose lo trae por bind mount. Si no está, el volumen ya está poblado o es
+# un arranque sin datos: no es un error.
+if [ -s /var/opt/mssql/backups/FitnessGymDB.bak ]; then
+	/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -d master -i /usr/config/restore.sql -b
 
-if [ $? -eq 0 ]; then
-	echo "Restauración de la base de datos completada exitosamente."
+	if [ $? -eq 0 ]; then
+		echo "Restauración de la base de datos completada exitosamente."
+	else
+		echo "ERROR al ejecutar restore.sql."
+		exit 1
+	fi
 else
-	echo "ERROR al ejecutar restore.sql."
-	exit 1
+	echo "Sin respaldo en /var/opt/mssql/backups/ - saltando restore (volumen ya poblado o arranque limpio)."
 fi
 
 # Esperar a que la base responda antes de tocarla. El loop de arriba valida
@@ -69,13 +76,33 @@ fi
 
 echo "FitnessCenterDB responde. Ejecutando script de login..."
 
+# La password del login de aplicación llega por env var (inyectada por compose
+# como MSSQL_APP_LOGIN_PASSWORD, ver bd/docker-compose.template.yml). sqlcmd
+# sustituye $(APP_LOGIN_PASSWORD) ANTES de parsear el T-SQL, por lo que la
+# limitación del DDL con SQL dinámico no aplica.
+# Fallo temprano y explícito si el compose no la inyecta.
+if [ -z "$MSSQL_APP_LOGIN_PASSWORD" ]; then
+	echo "ERROR: MSSQL_APP_LOGIN_PASSWORD no está definida (el compose debe inyectarla)."
+	exit 1
+fi
+
 # Crear el login de aplicación y religar el user que el respaldo trae.
 # Se ejecuta SIEMPRE, sin condicionarse a que el restore haya ocurrido: el
 # restore.sql usa IF NOT EXISTS y en un volumen ya poblado no restaura nada,
 # pero el login puede seguir sin existir.
-/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -d master -i /usr/config/create-login.sql -b
+# La invocación corre con set +x: este script arranca con set -x y docker logs
+# imprimiría la password si viajara en la línea de comando visible del xtrace.
+# RET guarda el exit code porque $? se pierde al reactivar set -x.
+{ set +x
+	/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" \
+		-C -d master \
+		-v APP_LOGIN_PASSWORD="$MSSQL_APP_LOGIN_PASSWORD" \
+		-i /usr/config/create-login.sql -b
+	RET=$?
+	set -x
+}
 
-if [ $? -eq 0 ]; then
+if [ "$RET" -eq 0 ]; then
 	echo "Login de aplicación creado y religado correctamente."
 else
 	echo "ERROR al ejecutar create-login.sql."

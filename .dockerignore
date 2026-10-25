@@ -1,0 +1,87 @@
+# .dockerignore (raíz del repo) — aplica a los builds con context: . (raíz)
+# Docker BuildKit SOLO lee el .dockerignore de la raíz del contexto;
+# los de API/ y GymFrontend/ son histórico/inertes (ver auditoría 2026-10-25).
+#
+# Reglas de composición:
+#   - Los builds de API y GymFrontend usan context= raíz y solo necesitan
+#     API/, BL/, DTO/, DataAccess/, GymFrontend/ (sin appp/ ni settings dev).
+#   - Todo lo demás del repo puede quedar fuera del contexto: menos bytes
+#     subidos al daemon y cero riesgo de filtrar archivos sensibles.
+
+# ── Control de versiones e IDEs ───────────────────────────────────────
+.git/
+.gitignore
+.gitattributes
+.idea/
+.vscode/
+.vs/
+.cursor/
+*.user
+*.suo
+
+# ── Herramientas de agentes / config personal (no van a ninguna imagen) ─
+.opencode/
+.qwen/
+openspec/
+.atl/
+openCodeConfigs/
+.gga
+.infisical.json
+extraContext/
+Emulators.repo
+docsgit/
+
+# ── Documentación y specs (innecesarias dentro de la imagen) ────────────
+specs/
+AGENTS.md
+README.md
+*.md
+
+# ── BD: NUNCA entra al contexto raíz (evita filtrar .bak / SQL con secretos)
+# (el build de BD usa context: bd/, este archivo no lo afecta)
+bd/
+RESTAURACIONDE\ BSD\ SQL.txt
+temp.sql
+
+# ── Basura de sesión / logs ────────────────────────────────────────────
+errores.txt
+erroresef.txt
+salidamigraciones.txt
+tatus
+dotnet-test-implementer.txt
+*.log
+**/logs/
+
+# ── Resultados de tests ─────────────────────────────────────────────────
+test-results/
+GymWebApp.Tests/
+
+# ── Salida compilada (NUNCA horneada en imágenes) ──────────────────────
+**/bin/
+**/obj/
+GymFrontend/appp/
+[Dd]ebug/
+[Rr]elease/
+**/*.dll
+**/*.exe
+
+# ── SECRETOS / configuración de entorno ────────────────────────────────
+# Inyección real = variables de entorno vía compose/Infisical (spec 93-96).
+.env
+.env.*
+**/appsettings.Development.json
+**/appsettings.Staging.json
+**/appsettings.Testing.json
+**/launchSettings.json
+**/*.pem
+**/*.key
+**/*.pfx
+**/*.p12
+
+# ── Docker (no anidar Dockerfiles/composes como contexto de sí mismos) ──
+docker-compose*.yml
+docker-compose*.yaml
+Dockerfile*
+.dockerignore
+nginx/
+build-images.sh

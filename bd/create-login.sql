@@ -19,16 +19,15 @@
 -- sys.server_principals y sys.database_principals se pueda distinguir de un
 -- vistazo cuál es el login y cuál es el user.
 --
--- La contraseña va como literal: el DDL de SQL Server no admite variables ni
--- siquiera dentro de sp_executesql ("CREATE LOGIN x WITH PASSWORD = @pwd"
--- revienta con "Incorrect syntax near '@pwd'"). Se escapan las comillas simples
--- duplicándolas, que es la única regla de una literal T-SQL.
---
--- PENDIENTE: la contraseña está escrita acá a propósito para que coincida con
--- la que declaran las connection strings de la aplicación. Es el mismo hueco de
--- secretos en claro que arrastran los docker-compose y los appsettings; cuando
--- se ataque ese tema, este script tiene que recibir el valor por variable de
--- entorno en lugar de literal.
+-- La contraseña NO va como literal. sqlcmd sustituye la variable de scripting
+-- $(APP_LOGIN_PASSWORD) en pre-procesamiento (ANTES de que el T-SQL llegue al
+-- servidor), que es distinto al @pwd del SQL dinámico revientado ("Incorrect
+-- syntax near '@pwd'"). El valor lo inyecta configure-db.sh vía:
+--   sqlcmd ... -v APP_LOGIN_PASSWORD="$MSSQL_APP_LOGIN_PASSWORD"
+--   (env var MSSQL_APP_LOGIN_PASSWORD, requerida por bd/docker-compose.template.yml)
+-- Este archivo no contiene credenciales: es seguro para el repo y la imagen.
+-- Regla si la password contuviera caracteres especiales: escapar comillas
+-- simples duplicándolas.
 -- ============================================================================
 
 
@@ -39,13 +38,13 @@ PRINT '[1/4] Creando login fitnessgymlogin (ámbito servidor)...';
 
 IF EXISTS (SELECT 1 FROM sys.server_principals WHERE name = N'fitnessgymlogin')
 BEGIN
-    ALTER LOGIN [fitnessgymlogin] WITH PASSWORD = N'Terrabreak13';
+    ALTER LOGIN [fitnessgymlogin] WITH PASSWORD = N'$(APP_LOGIN_PASSWORD)';
     PRINT '       El login ya existía  -> contraseña actualizada.';
 END
 ELSE
 BEGIN
     CREATE LOGIN [fitnessgymlogin]
-        WITH PASSWORD           = N'Terrabreak13',
+        WITH PASSWORD           = N'$(APP_LOGIN_PASSWORD)',
              DEFAULT_DATABASE    = [FitnessCenterDB],
              DEFAULT_LANGUAGE    = [Español],
              CHECK_POLICY        = OFF,
