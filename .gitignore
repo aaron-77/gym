@@ -80,3 +80,6 @@ bd/.infisical.json
 
 # Respaldos de BD (171MB de .bak - nunca versionar)
 bd/respaldosbd/
+
+# Script de versionado/build de imágenes Docker (local)
+/build-images.sh
