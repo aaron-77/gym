@@ -3,16 +3,6 @@
 # Solo los secretos se mapean a variables de entorno; el resto son valores
 # fijos (referencia: docker-compose.prod.yml).
 #
-# Variables OBLIGATORIAS (sin default - compose falla al arrancar si faltan):
-#   SECRET_TOKEN_KEY        - clave JWT/secret del token
-#   DB_CONNECTION_STRING    - connection string fusionada (ver abajo)
-#
-# Literales (NO parametrizar):
-#   TZ, ASPNETCORE_ENVIRONMENT, ASPNETCORE_URLS, BACKEND_BASE_ADDRESS, puertos
-#
-# Connection string fusionada (unica para api y frontend) a exportar como
-# DB_CONNECTION_STRING:
-#   Server=fitnessgym_bd;Database=FitnessCenterDB;User Id=fitnessgymlogin;Password=CHANGE_ME;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True;Authentication=SqlPassword;Integrated Security=False;Trusted_Connection=False
 
 services:
   fitnessgym_api:
