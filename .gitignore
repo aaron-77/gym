@@ -83,3 +83,6 @@ bd/respaldosbd/
 
 # Script de versionado/build de imágenes Docker (local)
 /build-images.sh
+/azure-redeploy.sh
+/RESTAURACIONDE BSD SQL.txt
+/errores.txt
