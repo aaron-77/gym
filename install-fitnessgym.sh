@@ -30,14 +30,14 @@ download_if_missing() {
   mv "$tmp" "$file"
 }
 
-APP_FILE="$INSTALL_DIR/docker-compose.installer.dev.yml"
+APP_FILE="$INSTALL_DIR/docker-compose.app.installer.dev.yml"
 DB_FILE="$INSTALL_DIR/docker-compose.bd.installer.dev.yml"
-PROXY_FILE="$INSTALL_DIR/docker-compose.installer.dev.yml"
+PROXY_FILE="$INSTALL_DIR/docker-compose.nginx.installer.dev.yml"
 ENV_FILE="$INSTALL_DIR/.env"
 ENV_EXAMPLE="$INSTALL_DIR/.env.example"
-download_if_missing "$APP_FILE" "$APP_BASE/docker-compose.installer.dev.yml"
+download_if_missing "$APP_FILE" "$APP_BASE/docker-compose.app.installer.dev.yml"
 download_if_missing "$DB_FILE" "$APP_BASE/bd/docker-compose.installer.dev.yml"
-download_if_missing "$PROXY_FILE" "$PROXY_BASE/docker-compose.installer.dev.yml"
+download_if_missing "$PROXY_FILE" "$PROXY_BASE/docker-compose.nginx.installer.dev.yml"
 if [[ ! -s "$ENV_FILE" ]]; then
   download_if_missing "$ENV_EXAMPLE" "$APP_BASE/.env.example"
   mv "$ENV_EXAMPLE" "$ENV_FILE"
