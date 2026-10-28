@@ -117,6 +117,13 @@ if ($LASTEXITCODE -ne 0) {
     docker network create fitnessgym-net *> $null
     if ($LASTEXITCODE -ne 0) { Stop-WithError 'No se pudo crear la red Docker fitnessgym-net.' }
 }
+# Forzar imagen de nginx dev
+if (Test-Path -LiteralPath $proxyFile) {
+    $content = Get-Content -LiteralPath $proxyFile -Raw
+    $content = $content -replace '(?m)^\s*image:\s*.*$', '    image: aaron77/fitnessgymnginxdev:latest'
+    [IO.File]::WriteAllText($proxyFile, $content)
+}
+try { docker pull aaron77/fitnessgymnginxdev:latest *> $null } catch {}
 Push-Location $installDir
 try {
     $composeFiles = @('-f', $dbFile, '-f', $appFile, '-f', $proxyFile)

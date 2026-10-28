@@ -89,6 +89,11 @@ if [[ "$NGINX_PORT" == 8090 || "$NGINX_PORT" == 8091 || "$NGINX_PORT" == 1433 ]]
 fi
 
 docker network inspect fitnessgym-net >/dev/null 2>&1 || docker network create fitnessgym-net >/dev/null || fail 'No se pudo crear la red Docker fitnessgym-net.'
+# Forzar imagen de nginx dev
+if [[ -f "$PROXY_FILE" ]]; then
+  sed -i -E 's/^[[:space:]]*image:[[:space:]]*.*/    image: aaron77\/fitnessgymnginxdev:latest/' "$PROXY_FILE" 2>/dev/null || true
+fi
+docker pull aaron77/fitnessgymnginxdev:latest >/dev/null 2>&1 || true
 cd "$INSTALL_DIR"
 docker compose -f "$DB_FILE" -f "$APP_FILE" -f "$PROXY_FILE" config -q || fail 'Los Compose no son válidos o falta configuración en .env.'
 docker compose -f "$DB_FILE" -f "$APP_FILE" -f "$PROXY_FILE" up -d || fail 'Docker Compose no pudo iniciar los contenedores.'
