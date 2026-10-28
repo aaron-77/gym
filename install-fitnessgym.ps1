@@ -117,11 +117,18 @@ if ($LASTEXITCODE -ne 0) {
     docker network create fitnessgym-net *> $null
     if ($LASTEXITCODE -ne 0) { Stop-WithError 'No se pudo crear la red Docker fitnessgym-net.' }
 }
-# Forzar imagen de nginx dev
+# Forzar imagen de nginx dev solo para el servicio nginx
 if (Test-Path -LiteralPath $proxyFile) {
-    $content = Get-Content -LiteralPath $proxyFile -Raw
-    $content = $content -replace '(?m)^\s*image:\s*.*$', '    image: aaron77/fitnessgymnginxdev:latest'
-    [IO.File]::WriteAllText($proxyFile, $content)
+    $lines = Get-Content -LiteralPath $proxyFile
+    $out = New-Object System.Collections.Generic.List[string]
+    $inNginx = $false
+    foreach ($line in $lines) {
+        if ($line -match '^\s*nginx:\s*$') { $inNginx = $true; $out.Add($line); continue }
+        if ($inNginx -and $line -match '^\s{2}[a-zA-Z0-9_-]+:\s*$' -and $line -notmatch '^\s{4}') { $inNginx = $false }
+        if ($inNginx -and $line -match '^\s*image:\s*') { $out.Add('    image: aaron77/fitnessgymnginxdev:latest'); continue }
+        $out.Add($line)
+    }
+    [IO.File]::WriteAllLines($proxyFile, $out, [Text.UTF8Encoding]::new($false))
 }
 try { docker pull aaron77/fitnessgymnginxdev:latest *> $null } catch {}
 Push-Location $installDir
