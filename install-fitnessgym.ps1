@@ -41,12 +41,12 @@ function Get-ComposeFile([string] $Path, [string] $Uri) {
 
 $appFile = Join-Path $installDir 'docker-compose.installer.dev.yml'
 $dbFile = Join-Path $installDir 'docker-compose.bd.installer.dev.yml'
-$proxyFile = Join-Path $installDir 'docker-compose.nginx.yml'
+$proxyFile = Join-Path $installDir 'docker-compose.installer.dev.yml'
 $envFile = Join-Path $installDir '.env'
 $envExample = Join-Path $installDir '.env.example'
 Get-ComposeFile $appFile "$appBase/docker-compose.installer.dev.yml"
 Get-ComposeFile $dbFile "$appBase/bd/docker-compose.installer.dev.yml"
-Get-ComposeFile $proxyFile "$proxyBase/docker-compose.yml"
+Get-ComposeFile $proxyFile "$proxyBase/docker-compose.installer.dev.yml"
 Get-ComposeFile $envExample "$appBase/.env.example"
 if (-not (Test-Path -LiteralPath $envFile) -or (Get-Item -LiteralPath $envFile).Length -eq 0) {
     Copy-Item -LiteralPath $envExample -Destination $envFile -Force
