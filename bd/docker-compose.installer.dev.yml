@@ -1,0 +1,26 @@
+services:
+  fitnessgym_bd:
+    image: aaron77/fitnessgymbd:latest
+    container_name: fitnessgymdbcontainer
+    ports:
+      - "127.0.0.1:${BD_HOST_PORT}:${BD_CONTAINER_PORT:-1433}"
+    environment:
+      TZ: "${TZ}"
+      ACCEPT_EULA: "${ACCEPT_EULA}"
+      MSSQL_PID: "${MSSQL_PID}"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD es obligatoria}"
+      MSSQL_APP_LOGIN_PASSWORD: "${MSSQL_APP_LOGIN_PASSWORD:?MSSQL_APP_LOGIN_PASSWORD es obligatoria}"
+    volumes:
+      - fitnessgym-mssql-data:/var/opt/mssql/data
+      - fitnessgym-mssql-log:/var/opt/mssql/log
+    networks:
+      - fitnessgym-net
+
+volumes:
+  fitnessgym-mssql-data:
+  fitnessgym-mssql-log:
+
+networks:
+  fitnessgym-net:
+    external: true
+    name: fitnessgym-net
