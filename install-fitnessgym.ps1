@@ -41,7 +41,7 @@ function Get-ComposeFile([string] $Path, [string] $Uri) {
 
 $appFile = Join-Path $installDir 'docker-compose.installer.dev.yml'
 $dbFile = Join-Path $installDir 'docker-compose.bd.installer.dev.yml'
-$proxyFile = Join-Path $installDir 'docker-compose.nginx.yml'
+$proxyFile = Join-Path $installDir 'docker-compose.installer.dev.yml'
 $envFile = Join-Path $installDir '.env'
 $envExample = Join-Path $installDir '.env.example'
 Get-ComposeFile $appFile "$appBase/docker-compose.installer.dev.yml"

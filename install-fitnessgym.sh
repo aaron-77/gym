@@ -32,7 +32,7 @@ download_if_missing() {
 
 APP_FILE="$INSTALL_DIR/docker-compose.installer.dev.yml"
 DB_FILE="$INSTALL_DIR/docker-compose.bd.installer.dev.yml"
-PROXY_FILE="$INSTALL_DIR/docker-compose.nginx.yml"
+PROXY_FILE="$INSTALL_DIR/docker-compose.installer.dev.yml"
 ENV_FILE="$INSTALL_DIR/.env"
 ENV_EXAMPLE="$INSTALL_DIR/.env.example"
 download_if_missing "$APP_FILE" "$APP_BASE/docker-compose.installer.dev.yml"
