@@ -102,8 +102,6 @@ fi
 
 if [ "$RET" -eq 0 ]; then
 	echo "Login de aplicación creado y religado correctamente."
-	# Compose no debe declarar la BD saludable hasta que el login esté listo.
-	touch /tmp/fitnessgym-db-ready
 else
 	echo "ERROR al ejecutar create-login.sql."
 	exit 1
