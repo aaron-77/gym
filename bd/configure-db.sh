@@ -34,10 +34,8 @@ fi
 
 echo "SQL Server está ONLINE. Ejecutando script de restauración..."
 
-# Ejecutar el script de restauración SOLO si hay respaldo montado. Desde el
-# rediseño (imagen sin .bak horneado), el archivo existe únicamente cuando el
-# compose lo trae por bind mount. Si no está, el volumen ya está poblado o es
-# un arranque sin datos: no es un error.
+# Ejecutar el script de restauración si el respaldo incluido en la imagen existe.
+# Si no está, el volumen ya está poblado o es un arranque sin datos: no es un error.
 if [ -s /var/opt/mssql/backups/FitnessGymDB.bak ]; then
 	/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -d master -i /usr/config/restore.sql -b
 
@@ -104,6 +102,8 @@ fi
 
 if [ "$RET" -eq 0 ]; then
 	echo "Login de aplicación creado y religado correctamente."
+	# Compose no debe declarar la BD saludable hasta que el login esté listo.
+	touch /tmp/fitnessgym-db-ready
 else
 	echo "ERROR al ejecutar create-login.sql."
 	exit 1

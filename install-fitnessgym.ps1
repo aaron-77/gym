@@ -22,9 +22,9 @@ try { $null = Invoke-WebRequest -Uri 'https://github.com' -Method Head -TimeoutS
 catch { Stop-WithError 'No hay conexión con GitHub. No se inició el despliegue.' }
 
 New-Item -ItemType Directory -Path $installDir -Force | Out-Null
-function Get-ComposeFile([string] $Path, [string] $Uri) {
+function Get-ComposeFile([string] $Path, [string] $Uri, [switch] $Refresh) {
     if (Test-Path -LiteralPath $Path -PathType Leaf) {
-        if ((Get-Item -LiteralPath $Path).Length -gt 0) { Write-Host "Ya existe; se conserva: $([IO.Path]::GetFileName($Path))"; return }
+        if ((Get-Item -LiteralPath $Path).Length -gt 0 -and -not $Refresh) { Write-Host "Ya existe; se conserva: $([IO.Path]::GetFileName($Path))"; return }
         Remove-Item -LiteralPath $Path
     }
     $temporaryPath = "$Path.download"
@@ -44,10 +44,10 @@ $dbFile = Join-Path $installDir 'docker-compose.bd.installer.dev.yml'
 $proxyFile = Join-Path $installDir 'docker-compose.nginx.installer.dev.yml'
 $envFile = Join-Path $installDir '.env'
 $envExample = Join-Path $installDir '.env.example'
-Get-ComposeFile $appFile "$appBase/docker-compose.app.installer.dev.yml"
-Get-ComposeFile $dbFile "$appBase/bd/docker-compose.installer.dev.yml"
+Get-ComposeFile $appFile "$appBase/docker-compose.app.installer.dev.yml" -Refresh
+Get-ComposeFile $dbFile "$appBase/bd/docker-compose.installer.dev.yml" -Refresh
 Get-ComposeFile $proxyFile "$proxyBase/docker-compose.nginx.installer.dev.yml"
-Get-ComposeFile $envExample "$appBase/.env.example"
+Get-ComposeFile $envExample "$appBase/.env.example" -Refresh
 if (-not (Test-Path -LiteralPath $envFile) -or (Get-Item -LiteralPath $envFile).Length -eq 0) {
     Copy-Item -LiteralPath $envExample -Destination $envFile -Force
 }

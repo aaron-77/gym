@@ -29,20 +29,26 @@ download_if_missing() {
   [[ -s "$tmp" ]] || { rm -f "$tmp"; fail "La descarga está vacía: $url"; }
   mv "$tmp" "$file"
 }
+download_file() {
+  local file="$1" url="$2" tmp="${1}.download"
+  printf 'Descargando %s\n' "$(basename "$file")"
+  curl -fL --connect-timeout 10 --max-time 120 "$url" -o "$tmp" || { rm -f "$tmp"; fail "No se pudo descargar $url"; }
+  [[ -s "$tmp" ]] || { rm -f "$tmp"; fail "La descarga está vacía: $url"; }
+  mv "$tmp" "$file"
+}
 
 APP_FILE="$INSTALL_DIR/docker-compose.app.installer.dev.yml"
 DB_FILE="$INSTALL_DIR/docker-compose.bd.installer.dev.yml"
 PROXY_FILE="$INSTALL_DIR/docker-compose.nginx.installer.dev.yml"
 ENV_FILE="$INSTALL_DIR/.env"
 ENV_EXAMPLE="$INSTALL_DIR/.env.example"
-download_if_missing "$APP_FILE" "$APP_BASE/docker-compose.app.installer.dev.yml"
-download_if_missing "$DB_FILE" "$APP_BASE/bd/docker-compose.installer.dev.yml"
+download_file "$APP_FILE" "$APP_BASE/docker-compose.app.installer.dev.yml"
+download_file "$DB_FILE" "$APP_BASE/bd/docker-compose.installer.dev.yml"
 download_if_missing "$PROXY_FILE" "$PROXY_BASE/docker-compose.nginx.installer.dev.yml"
+download_file "$ENV_EXAMPLE" "$APP_BASE/.env.example"
 if [[ ! -s "$ENV_FILE" ]]; then
-  download_if_missing "$ENV_EXAMPLE" "$APP_BASE/.env.example"
-  mv "$ENV_EXAMPLE" "$ENV_FILE"
+  cp "$ENV_EXAMPLE" "$ENV_FILE"
 else
-  download_if_missing "$ENV_EXAMPLE" "$APP_BASE/.env.example"
   while IFS= read -r line; do
     [[ "$line" =~ ^([A-Za-z_][A-Za-z0-9_]*)=(.*)$ ]] || continue
     key="${BASH_REMATCH[1]}"
