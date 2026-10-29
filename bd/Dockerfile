@@ -21,11 +21,5 @@ RUN chmod +x /usr/config/entrypoint.sh /usr/config/configure-db.sh && \
 # 6. Regresar al usuario por defecto 'mssql' por seguridad
 USER mssql
 
-# 7. Healthcheck: FitnessCenterDB responde solo cuando termina su recovery.
-#    Queda embebido en la imagen; los tests esperan UntilContainerIsHealthy().
-#    -C: confía el certificado self-signed; -b: exit != 0 en error (lo exige el healthcheck).
-HEALTHCHECK --interval=5s --timeout=5s --start-period=30s --retries=12 \
-    CMD test -f /tmp/fitnessgym-db-ready && /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d FitnessCenterDB -Q "SELECT 1" || exit 1
-
-# 8. Definir el punto de entrada que coordinará la ejecución al arrancar el contenedor
+# 7. Definir el punto de entrada que coordinará la ejecución al arrancar el contenedor
 ENTRYPOINT ["/usr/config/entrypoint.sh"]
