@@ -90,11 +90,8 @@ foreach ($secretKey in @('SECRET_TOKEN_KEY', 'MSSQL_SA_PASSWORD', 'MSSQL_APP_LOG
         Set-EnvValue $secretKey (New-RandomSecret ($secretKey -ne 'SECRET_TOKEN_KEY'))
     }
 }
-$connectionString = Read-EnvValue 'DB_CONNECTION_STRING'
-if (-not $connectionString -or $connectionString -eq '__GENERATE_AT_INSTALL__') {
-    $connectionString = "Server=$(Read-EnvValue 'DB_SERVER');Database=$(Read-EnvValue 'DB_NAME');User Id=$(Read-EnvValue 'DB_APP_LOGIN');Password=$(Read-EnvValue 'MSSQL_APP_LOGIN_PASSWORD');TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True"
-    Set-EnvValue 'DB_CONNECTION_STRING' $connectionString
-}
+$appLoginPassword = Read-EnvValue 'MSSQL_APP_LOGIN_PASSWORD'
+Set-EnvValue 'DB_CONNECTION_STRING' "Server=fitnessgym_bd;Database=FitnessCenterDB;User Id=fitnessgymlogin;Password=$appLoginPassword;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True"
 
 function Test-LocalPortFree([int] $Port) {
     $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $Port)

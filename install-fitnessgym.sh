@@ -68,13 +68,8 @@ for secret_key in SECRET_TOKEN_KEY MSSQL_SA_PASSWORD MSSQL_APP_LOGIN_PASSWORD; d
     set_env_value "$secret_key" "$generated_secret"
   fi
 done
-if [[ "$(get_env_value DB_CONNECTION_STRING)" == "__GENERATE_AT_INSTALL__" || -z "$(get_env_value DB_CONNECTION_STRING)" ]]; then
-  db_server="$(get_env_value DB_SERVER)"
-  db_name="$(get_env_value DB_NAME)"
-  db_user="$(get_env_value DB_APP_LOGIN)"
-  db_password="$(get_env_value MSSQL_APP_LOGIN_PASSWORD)"
-  set_env_value DB_CONNECTION_STRING "Server=$db_server;Database=$db_name;User Id=$db_user;Password=$db_password;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True"
-fi
+app_login_password="$(get_env_value MSSQL_APP_LOGIN_PASSWORD)"
+set_env_value DB_CONNECTION_STRING "Server=fitnessgym_bd;Database=FitnessCenterDB;User Id=fitnessgymlogin;Password=$app_login_password;TrustServerCertificate=True;MultipleActiveResultSets=True;Encrypt=True"
 
 port_is_free() { ! (echo >/dev/tcp/127.0.0.1/"$1") >/dev/null 2>&1; }
 NGINX_PORT="$(get_env_value HOST_HTTP_PORT)"
