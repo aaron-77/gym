@@ -28,6 +28,7 @@
 *.tmp
 *.temp
 *.bak
+!bd/FitnessGymDB.bak
 *.swp
 *.swo
 
@@ -79,7 +80,7 @@ API/Properties/launchSettings.json
 .infisical.json
 bd/.infisical.json
 
-# Respaldos de BD (171MB de .bak - nunca versionar)
+# Respaldos locales de BD; se versiona solo el respaldo distribuible de la imagen.
 bd/respaldosbd/
 
 # Script de versionado/build de imágenes Docker (local)

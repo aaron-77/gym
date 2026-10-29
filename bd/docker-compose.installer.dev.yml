@@ -1,6 +1,7 @@
 services:
   fitnessgym_bd:
     image: aaron77/fitnessgymbd:latest
+    pull_policy: always
     container_name: fitnessgymdbcontainer
     ports:
       - "127.0.0.1:${BD_HOST_PORT}:${BD_CONTAINER_PORT:-1433}"
