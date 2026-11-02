@@ -40,10 +40,12 @@ download_file() {
 APP_FILE="$INSTALL_DIR/docker-compose.app.installer.dev.yml"
 DB_FILE="$INSTALL_DIR/docker-compose.bd.installer.dev.yml"
 PROXY_FILE="$INSTALL_DIR/docker-compose.nginx.installer.dev.yml"
+CREATE_LOGIN_FILE="$INSTALL_DIR/create-login.sql"
 ENV_FILE="$INSTALL_DIR/.env"
 ENV_EXAMPLE="$INSTALL_DIR/.env.example"
 download_file "$APP_FILE" "$APP_BASE/docker-compose.app.installer.dev.yml"
 download_file "$DB_FILE" "$APP_BASE/bd/docker-compose.installer.dev.yml"
+download_file "$CREATE_LOGIN_FILE" "$APP_BASE/bd/create-login.sql"
 download_if_missing "$PROXY_FILE" "$PROXY_BASE/docker-compose.nginx.installer.dev.yml"
 download_file "$ENV_EXAMPLE" "$APP_BASE/.env.example"
 if [[ ! -s "$ENV_FILE" ]]; then

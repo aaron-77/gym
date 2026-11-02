@@ -83,6 +83,10 @@ if [ -z "$MSSQL_APP_LOGIN_PASSWORD" ]; then
 	echo "ERROR: MSSQL_APP_LOGIN_PASSWORD no está definida (el compose debe inyectarla)."
 	exit 1
 fi
+if [ ! -s /usr/config/create-login.sql ]; then
+	echo "ERROR: No se encontró /usr/config/create-login.sql. El compose debe montar el archivo descargado por el instalador."
+	exit 1
+fi
 
 # Crear el login de aplicación y religar el user que el respaldo trae.
 # Se ejecuta SIEMPRE, sin condicionarse a que el restore haya ocurrido: el
