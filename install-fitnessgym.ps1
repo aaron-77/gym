@@ -42,10 +42,12 @@ function Get-ComposeFile([string] $Path, [string] $Uri, [switch] $Refresh) {
 $appFile = Join-Path $installDir 'docker-compose.app.installer.dev.yml'
 $dbFile = Join-Path $installDir 'docker-compose.bd.installer.dev.yml'
 $proxyFile = Join-Path $installDir 'docker-compose.nginx.installer.dev.yml'
+$createLoginFile = Join-Path $installDir 'create-login.sql'
 $envFile = Join-Path $installDir '.env'
 $envExample = Join-Path $installDir '.env.example'
 Get-ComposeFile $appFile "$appBase/docker-compose.app.installer.dev.yml" -Refresh
 Get-ComposeFile $dbFile "$appBase/bd/docker-compose.installer.dev.yml" -Refresh
+Get-ComposeFile $createLoginFile "$appBase/bd/create-login.sql" -Refresh
 Get-ComposeFile $proxyFile "$proxyBase/docker-compose.nginx.installer.dev.yml"
 Get-ComposeFile $envExample "$appBase/.env.example" -Refresh
 if (-not (Test-Path -LiteralPath $envFile) -or (Get-Item -LiteralPath $envFile).Length -eq 0) {

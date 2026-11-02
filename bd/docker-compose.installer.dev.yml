@@ -14,6 +14,12 @@ services:
     volumes:
       - fitnessgym-mssql-data:/var/opt/mssql/data
       - fitnessgym-mssql-log:/var/opt/mssql/log
+      - type: bind
+        source: ./create-login.sql
+        target: /usr/config/create-login.sql
+        read_only: true
+        bind:
+          create_host_path: false
     networks:
       - fitnessgym-net
 

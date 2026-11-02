@@ -20,8 +20,7 @@ if [ ! -t 0 ]; then
 fi
 
 info "Directorio de instalación: $INSTALL_DIR"
-info "Se van a detener y eliminar los contenedores del stack FitnessGym levantados con los installers."
-info "Se mantendrán los volúmenes de la base de datos (fitnessgym-mssql-data, fitnessgym-mssql-log)."
+info "Se van a detener y eliminar los contenedores y volúmenes del stack FitnessGym levantados con los installers."
 echo ""
 read -rp "¿Desea continuar? [s/N]: " confirm
 [[ "${confirm,,}" =~ ^s|si|y|yes$ ]] || { info "Operación cancelada."; exit 0; }
@@ -34,13 +33,22 @@ COMPOSE_FILES=()
 [ -f "$PROXY_FILE" ] && COMPOSE_FILES+=(-f "$PROXY_FILE")
 
 if (( ${#COMPOSE_FILES[@]} > 0 )); then
-  info "Deteniendo y eliminando contenedores/ redes del stack..."
-  docker compose "${COMPOSE_FILES[@]}" down --remove-orphans 2>/dev/null || true
+  info "Deteniendo y eliminando contenedores, redes y volúmenes del stack..."
+  docker compose "${COMPOSE_FILES[@]}" down --remove-orphans --volumes 2>/dev/null || fail 'No se pudieron eliminar los contenedores y volúmenes del stack.'
 else
-  info "No se encontraron archivos compose. Intentando limpieza por nombre de contenedor..."
+  info "No se encontraron archivos compose. Limpiando contenedores y sus volúmenes por nombre..."
+  VOLUMES_TO_REMOVE=()
   for c in apicontainer frontendcontainer fitnessgymdbcontainer fitnessgym-nginx; do
+    if docker inspect "$c" >/dev/null 2>&1; then
+      while IFS= read -r volume; do
+        if [[ -n "$volume" ]]; then VOLUMES_TO_REMOVE+=("$volume"); fi
+      done < <(docker inspect --format '{{range .Mounts}}{{if eq .Type "volume"}}{{println .Name}}{{end}}{{end}}' "$c" 2>/dev/null)
+    fi
     docker rm -f "$c" 2>/dev/null || true
   done
+  if (( ${#VOLUMES_TO_REMOVE[@]} > 0 )); then
+    docker volume rm "${VOLUMES_TO_REMOVE[@]}" 2>/dev/null || fail 'No se pudieron eliminar todos los volúmenes montados por el stack.'
+  fi
 fi
 
 echo ""
@@ -58,12 +66,11 @@ echo ""
 read -rp "¿Desea eliminar también los archivos descargados para la instalación (.env, .env.example y los docker-compose)? [s/N]: " ans_files
 if [[ "${ans_files,,}" =~ ^s|si|y|yes$ ]]; then
   info "Eliminando archivos de instalación..."
-  rm -f "$APP_FILE" "$DB_FILE" "$PROXY_FILE" "$ENV_FILE" "$ENV_EXAMPLE" \
-        "$APP_FILE.download" "$DB_FILE.download" "$PROXY_FILE.download" "$ENV_EXAMPLE.download" 2>/dev/null || true
+  rm -f "$APP_FILE" "$DB_FILE" "$PROXY_FILE" "$INSTALL_DIR/create-login.sql" "$ENV_FILE" "$ENV_EXAMPLE" \
+        "$APP_FILE.download" "$DB_FILE.download" "$PROXY_FILE.download" "$INSTALL_DIR/create-login.sql.download" "$ENV_EXAMPLE.download" 2>/dev/null || true
   # Eliminar directorio si queda vacío
   rmdir "$INSTALL_DIR" 2>/dev/null || true
 fi
 
 echo ""
-ok "Limpieza completada."
-info "Los volúmenes de BD se han conservado. Para eliminarlos manualmente: docker volume rm fitnessgym-mssql-data fitnessgym-mssql-log"
+ok "Limpieza completada. Se eliminaron los volúmenes de BD del stack."
