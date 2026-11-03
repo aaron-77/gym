@@ -1,6 +1,7 @@
 services:
   fitnessgym_api:
     image: aaron77/fitnessgymapi:latest
+    pull_policy: always
     ports:
       - "127.0.0.1:${API_HOST_PORT:-8090}:5274"
     container_name: apicontainer
@@ -15,6 +16,7 @@ services:
 
   fitnessgym_frontend:
     image: aaron77/fitnessgymfrontend:latest
+    pull_policy: always
     depends_on:
       - "fitnessgym_api"
     ports:
