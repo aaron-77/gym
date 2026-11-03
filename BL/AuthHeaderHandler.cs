@@ -17,13 +17,30 @@ public class AuthHeaderHandler : DelegatingHandler
     {
         try
         {
-            var backendAddress = _configuration["EndPoints:api:nossl"]; //Environment.GetEnvironmentVariable("BACKEND_BASE_ADDRESS");
-            var frontendAddress = _configuration["EndPoints:api:frontend"];//Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+            var backendAddress = _configuration["BACKEND_BASE_ADDRESS"];
+            if (string.IsNullOrWhiteSpace(backendAddress))
+            {
+                backendAddress = _configuration["EndPoints:api:nossl"];
+            }
+
+            var frontendAddress = _configuration["FRONTEND_BASE_ADDRESS"];
+            if (string.IsNullOrWhiteSpace(frontendAddress))
+            {
+                frontendAddress = _configuration["EndPoints:api:frontend"];
+            }
+
+            if (string.IsNullOrWhiteSpace(frontendAddress))
+            {
+                frontendAddress = _configuration["EndPoints:frontend:nossl"];
+            }
 
             var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
             var idToken = _httpContextAccessor.HttpContext?.Request.Cookies["AuthToken"];
-            bool isApiRequest = request.RequestUri.ToString().Contains(backendAddress, StringComparison.OrdinalIgnoreCase);
-            bool isFrontendRequest = request.RequestUri.ToString().Contains(frontendAddress, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(frontendAddress);
+            var requestUrl = request.RequestUri?.ToString();
+            bool isApiRequest = !string.IsNullOrWhiteSpace(backendAddress)
+                && requestUrl?.Contains(backendAddress, StringComparison.OrdinalIgnoreCase) == true;
+            bool isFrontendRequest = !string.IsNullOrWhiteSpace(frontendAddress)
+                && requestUrl?.Contains(frontendAddress, StringComparison.OrdinalIgnoreCase) == true;
             string logMessage = $"\n\nREUQEST URL: {request.RequestUri.ToString()}\n IDTOKEN: {idToken}\n ACCESSTOKEN: {accessToken}\n isApiRequest: {isApiRequest}\n isFrontnedRequest: {isFrontendRequest} \n\n";                
             Console.WriteLine(logMessage);
 
