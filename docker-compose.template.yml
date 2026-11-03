@@ -36,7 +36,7 @@ services:
       TZ: "America/Mexico_City"
       ASPNETCORE_ENVIRONMENT: "Production"
       ASPNETCORE_URLS: "http://0.0.0.0:5062"
-      BACKEND_BASE_ADDRESS: "http://0.0.0.0:5274"
+      BACKEND_BASE_ADDRESS: "http://fitnessgym_api:5274"
       SECRET_TOKEN_KEY: "${SECRET_TOKEN_KEY:?SECRET_TOKEN_KEY es obligatoria}"
       DB_CONNECTION_STRING: "${DB_CONNECTION_STRING:?DB_CONNECTION_STRING es obligatoria}"
     networks:

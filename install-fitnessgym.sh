@@ -46,7 +46,7 @@ ENV_EXAMPLE="$INSTALL_DIR/.env.example"
 download_file "$APP_FILE" "$APP_BASE/docker-compose.app.installer.dev.yml"
 download_file "$DB_FILE" "$APP_BASE/bd/docker-compose.installer.dev.yml"
 download_file "$CREATE_LOGIN_FILE" "$APP_BASE/bd/create-login.sql"
-download_if_missing "$PROXY_FILE" "$PROXY_BASE/docker-compose.nginx.installer.dev.yml"
+download_file "$PROXY_FILE" "$PROXY_BASE/docker-compose.nginx.installer.dev.yml"
 download_file "$ENV_EXAMPLE" "$APP_BASE/.env.example"
 if [[ ! -s "$ENV_FILE" ]]; then
   cp "$ENV_EXAMPLE" "$ENV_FILE"

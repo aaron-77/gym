@@ -48,7 +48,7 @@ $envExample = Join-Path $installDir '.env.example'
 Get-ComposeFile $appFile "$appBase/docker-compose.app.installer.dev.yml" -Refresh
 Get-ComposeFile $dbFile "$appBase/bd/docker-compose.installer.dev.yml" -Refresh
 Get-ComposeFile $createLoginFile "$appBase/bd/create-login.sql" -Refresh
-Get-ComposeFile $proxyFile "$proxyBase/docker-compose.nginx.installer.dev.yml"
+Get-ComposeFile $proxyFile "$proxyBase/docker-compose.nginx.installer.dev.yml" -Refresh
 Get-ComposeFile $envExample "$appBase/.env.example" -Refresh
 if (-not (Test-Path -LiteralPath $envFile) -or (Get-Item -LiteralPath $envFile).Length -eq 0) {
     Copy-Item -LiteralPath $envExample -Destination $envFile -Force
@@ -116,20 +116,6 @@ if ($LASTEXITCODE -ne 0) {
     docker network create fitnessgym-net *> $null
     if ($LASTEXITCODE -ne 0) { Stop-WithError 'No se pudo crear la red Docker fitnessgym-net.' }
 }
-# Forzar imagen de nginx dev solo para el servicio nginx
-if (Test-Path -LiteralPath $proxyFile) {
-    $lines = Get-Content -LiteralPath $proxyFile
-    $out = New-Object System.Collections.Generic.List[string]
-    $inNginx = $false
-    foreach ($line in $lines) {
-        if ($line -match '^\s*nginx:\s*$') { $inNginx = $true; $out.Add($line); continue }
-        if ($inNginx -and $line -match '^\s{2}[a-zA-Z0-9_-]+:\s*$' -and $line -notmatch '^\s{4}') { $inNginx = $false }
-        if ($inNginx -and $line -match '^\s*image:\s*') { $out.Add('    image: aaron77/fitnessgymnginxdev:latest'); continue }
-        $out.Add($line)
-    }
-    [IO.File]::WriteAllLines($proxyFile, $out, [Text.UTF8Encoding]::new($false))
-}
-try { docker pull aaron77/fitnessgymnginxdev:latest *> $null } catch {}
 Push-Location $installDir
 try {
     $composeFiles = @('-f', $dbFile, '-f', $appFile, '-f', $proxyFile)

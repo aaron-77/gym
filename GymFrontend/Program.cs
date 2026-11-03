@@ -23,10 +23,6 @@ namespace GymFrontend
         {
             try
             {
-                Console.WriteLine("========================================");
-                Console.WriteLine("INICIANDO FRONTEND...");
-                Console.WriteLine("========================================");
-
                 var builder = WebApplication.CreateBuilder(args);
                 // se añade serilog
                 Log.Logger = new LoggerConfiguration()
@@ -65,40 +61,41 @@ namespace GymFrontend
                     });
                 }
 
-                Log.Logger.Information("WebApplicationBuilder creado");
-
-                Log.Logger.Information("=== DEBUGGING URLS ===");
-                Log.Logger.Information("ASPNETCORE_URLS env: {Urls}", Environment.GetEnvironmentVariable("ASPNETCORE_URLS"));
-                Log.Logger.Information("ASPNETCORE_URLS config: {Urls}", builder.Configuration["ASPNETCORE_URLS"]);
-                Log.Logger.Information("Urls property: {Urls}", string.Join(", ", builder.WebHost.GetSetting("urls") ?? "null"));
-                Log.Logger.Information("======================");
-
-                string aspnetcoreUrls = builder.Configuration["ASPNETCORE_URLS"] ?? "";
-                aspnetcoreUrls = aspnetcoreUrls.Trim().ToLowerInvariant();
-                Log.Logger.Information("URLs procesadas");
-
                 builder.Services.AddControllersWithViews();
-                Log.Logger.Information("Controllers con Views agregados");
 
                 builder.Services.AddHttpContextAccessor();
-                Log.Logger.Information("HttpContextAccessor registrado");
 
                 builder.Services.AddScoped<AuthHeaderHandler>();
                 bool useSsl = builder.Configuration.GetValue<bool>("UseSsl");
-                Log.Logger.Information("SSL configurado: {UseSsl}", useSsl);
 
-                // Escoge la URL del backend según si las URLs contienen https
-                string baseApiUrlForClientHttp = builder.Configuration[
-                    aspnetcoreUrls.Contains("https") ? "EndPoints:api:ssl" : "EndPoints:api:nossl"
-                ] ?? "http://localhost:5274";
+                // Permite que cada entorno indique cómo el frontend alcanza al API.
+                // Si no hay variable de entorno, conserva la configuración existente.
+                string? baseApiUrlForClientHttp = builder.Configuration["BACKEND_BASE_ADDRESS"];
+                if (string.IsNullOrWhiteSpace(baseApiUrlForClientHttp))
+                {
+                    string apiEndpointKey = useSsl ? "EndPoints:api:ssl" : "EndPoints:api:nossl";
+                    baseApiUrlForClientHttp = builder.Configuration[apiEndpointKey];
+                }
+
+                if (string.IsNullOrWhiteSpace(baseApiUrlForClientHttp))
+                {
+                    throw new InvalidOperationException(
+                        "Falta BACKEND_BASE_ADDRESS y no se encontró EndPoints:api:ssl/nossl en la configuración.");
+                }
+
+                if (!Uri.TryCreate(baseApiUrlForClientHttp, UriKind.Absolute, out var baseApiUri) ||
+                    (baseApiUri.Scheme != Uri.UriSchemeHttp && baseApiUri.Scheme != Uri.UriSchemeHttps))
+                {
+                    throw new InvalidOperationException(
+                        "BACKEND_BASE_ADDRESS o EndPoints:api debe contener una URL absoluta HTTP o HTTPS.");
+                }
+
                 Log.Logger.Information("Base API URL: {BaseApiUrl}", baseApiUrlForClientHttp);
 
                 builder.Services.AddHttpClient<IHttpCustomClient, HttpCustomClient>(client =>
                 {
-                    client.BaseAddress = new Uri(baseApiUrlForClientHttp);
+                    client.BaseAddress = baseApiUri;
                 }).AddHttpMessageHandler<AuthHeaderHandler>();
-                Log.Logger.Information("HttpClient configurado");
-
                 // Managers
                 builder.Services.AddScoped<EndPointsManager>();
                 builder.Services.AddScoped<MedidasManager>();
@@ -110,17 +107,20 @@ namespace GymFrontend
                 builder.Services.AddScoped<ClasesManager>();
                 builder.Services.AddScoped<JwtTokenGenerator>();
                 builder.Services.AddScoped<CookieService>();
-                Log.Logger.Information("Managers registrados");
-
                 var jwtSection = builder.Configuration.GetSection("JwtSettings");
                 var pagesSection = builder.Configuration.GetSection("pages");
                 builder.Services.Configure<JwtSettings>(jwtSection);
                 builder.Services.Configure<PagesSettings>(pagesSection);
                 builder.Services.Configure<TestCredentialsForRealUsers>(builder.Configuration.GetSection("TestCredentialsForRealUsers"));
-                Log.Logger.Information("Configuracion JWT y Pages cargada");
+                var jwtSettings = jwtSection.Get<JwtSettings>()
+                    ?? throw new InvalidOperationException("Falta la sección JwtSettings en la configuración.");
+                var pagesSettings = pagesSection.Get<PagesSettings>()
+                    ?? throw new InvalidOperationException("Falta la sección pages en la configuración.");
+                if (string.IsNullOrWhiteSpace(pagesSettings.Login) || string.IsNullOrWhiteSpace(pagesSettings.Forbidden))
+                {
+                    throw new InvalidOperationException("pages.Login y pages.Forbidden deben estar configurados.");
+                }
 
-                var jwtSettings = jwtSection.Get<JwtSettings>();
-                var pagesSettings = pagesSection.Get<PagesSettings>();
                 var secretTokenKey = Environment.GetEnvironmentVariable("SECRET_TOKEN_KEY");
                 if (string.IsNullOrWhiteSpace(secretTokenKey))
                 {
@@ -131,8 +131,6 @@ namespace GymFrontend
                 var key = Encoding.UTF8.GetBytes(secretTokenKey);
                 var loginPath = pagesSettings.Login;
                 var accessDeniedPath = pagesSettings.Forbidden;
-                Log.Logger.Information("Login Path: {LoginPath}", loginPath);
-                Log.Logger.Information("Access Denied Path: {AccessDeniedPath}", accessDeniedPath);
 
                 builder.Services.AddAuthentication(options =>
                 {
@@ -176,17 +174,12 @@ namespace GymFrontend
                         }
                     };
                 });
-                Log.Logger.Information("JWT Authentication configurado");
-
                 builder.Services.ConfigureApplicationCookie(options =>
                 {
                     options.LoginPath = loginPath;
                     options.AccessDeniedPath = accessDeniedPath;
                 });
-                Log.Logger.Information("Application Cookie configurado");
-
                 builder.Services.AddAuthorization();
-                Log.Logger.Information("Authorization agregado");
 
                 // Connection String para el DbContext
                 var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
@@ -201,52 +194,23 @@ namespace GymFrontend
 
                 builder.Services.AddDbContext<DataAccess.EntityFramework.FitnessCenterDbContext>(options =>
                     options.UseSqlServer(dbConnectionString));
-                Log.Logger.Information("DbContext configurado");
 
                 builder.Services.AddRazorPages();
-                Log.Logger.Information("Razor Pages agregado");
 
                 builder.Services.AddDataAccess();
                 builder.Services.AddBusinessLayer();
-                Log.Logger.Information("DataAccess y BusinessLayer registrados");
-
-                Log.Logger.Information("========================================");
-                Log.Logger.Information("CONSTRUYENDO APLICACION...");
-                Log.Logger.Information("========================================");
 
                 var app = builder.Build();
-                Log.Logger.Information("App construida exitosamente");
 
                 if (app.Environment.IsStaging() || app.Environment.IsProduction())
                 {
                     app.UseForwardedHeaders();
                 }
                 var logger = app.Services.GetRequiredService<ILogger<Program>>();
-                var config = app.Configuration;
 
                 app.Lifetime.ApplicationStarted.Register(() =>
                 {
-                    var addresses = app.Urls;
-                    var useSslConfig = config.GetValue<bool>("UseSsl");
-                    var jwtSettingsConfig = config.GetSection("JwtSettings").Get<JwtSettings>();
-
-                    logger.LogInformation("");
-                    logger.LogInformation("APLICACION INICIADA");
-                    logger.LogInformation("");
-
-                    foreach (var address in addresses)
-                    {
-                        logger.LogInformation("Escuchando en: {Address}", address);
-                    }
-
-                    logger.LogInformation("--- CONFIGURACION ACTIVA ---");
-                    logger.LogInformation("SSL Habilitado: {UseSsl}", useSslConfig);
-                    logger.LogInformation("Issuer: {Issuer}", jwtSettingsConfig?.Issuer);
-                    logger.LogInformation("Audiencia Frontend: {Audience}", useSslConfig ? jwtSettingsConfig?.FrontendAudienceSsl : jwtSettingsConfig?.FrontAudiencie);
-                    logger.LogInformation("Expiracion Token: {ExpiryMinutes} minutos", jwtSettingsConfig?.ExpiryMinutes);
-                    logger.LogInformation("");
-
-                    logger.LogInformation("Configuracion JWT cargada correctamente");
+                    logger.LogInformation("Frontend iniciado en {Addresses}", string.Join(", ", app.Urls));
                 });
 
                 // Configure the HTTP request pipeline.
@@ -254,26 +218,15 @@ namespace GymFrontend
                 {
                     app.UseExceptionHandler("/Home/Error");
                     app.UseHsts();
-                    Log.Logger.Information("Modo Production - Exception Handler y HSTS configurados");
                 }
-                else
-                {
-                    Log.Logger.Information("Modo Development");
-                }
-
-                Log.Logger.Information("HTTPS lo termina el reverse proxy de Nginx; Kestrel queda en HTTP interno");
 
                 app.UseStaticFiles();
-                Log.Logger.Information("Static Files configurado");
 
                 app.UseRouting();
-                Log.Logger.Information("Routing configurado");
 
                 app.UseAuthentication();
-                Log.Logger.Information("Authentication middleware agregado");
 
                 app.UseAuthorization();
-                Log.Logger.Information("Authorization middleware agregado");
 
                 app.MapHealthChecks("/health", new HealthCheckOptions
                 {
@@ -284,42 +237,15 @@ namespace GymFrontend
                         await JsonSerializer.SerializeAsync(context.Response.Body, result);
                     }
                 }).RequireRateLimiting("HealthPolicy");
-                Log.Logger.Information("Health check endpoint configurado en /health con rate limiting (100 req/min)");
-
                 app.MapControllers();
                 app.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
-                Log.Logger.Information("Controller Routes mapeadas");
-
-                Log.Logger.Information("========================================");
-                Log.Logger.Information("FRONTEND LISTO - INICIANDO SERVIDOR...");
-                Log.Logger.Information("========================================");
-
                 await app.RunAsync();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("========================================");
-                Console.WriteLine("ERROR CRITICO AL INICIAR FRONTEND:");
-                Console.WriteLine("========================================");
-                Console.WriteLine("Tipo: " + ex.GetType().Name);
-                Console.WriteLine("Mensaje: " + ex.Message);
-                Console.WriteLine("----------------------------------------");
-                Console.WriteLine("Stack Trace:");
-                Console.WriteLine(ex.StackTrace);
-
-                if (ex.InnerException != null)
-                {
-                    Console.WriteLine("----------------------------------------");
-                    Console.WriteLine("Inner Exception:");
-                    Console.WriteLine("Tipo: " + ex.InnerException.GetType().Name);
-                    Console.WriteLine("Mensaje: " + ex.InnerException.Message);
-                    Console.WriteLine(ex.InnerException.StackTrace);
-                }
-
-                Console.WriteLine("========================================");
-
+                Log.Fatal(ex, "Error crítico al iniciar el frontend.");
                 Environment.Exit(1);
             }
         }
