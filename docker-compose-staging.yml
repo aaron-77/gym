@@ -1,0 +1,47 @@
+services:
+  fitnessgym_api:
+    image: fitnessgymapi
+    ports:
+      - "127.0.0.1:8090:5274"
+    build:
+      context: .
+      dockerfile: API/DockerFile
+      args:
+        BUILD_ENVIRONMENT: Staging
+    container_name: apicontainer
+    environment:
+      TZ: "America/Mexico_City"
+      ASPNETCORE_ENVIRONMENT: "Staging"
+      ASPNETCORE_URLS: "http://0.0.0.0:5274"
+      SECRET_TOKEN_KEY: "${SECRET_TOKEN_KEY:?SECRET_TOKEN_KEY es obligatoria}"
+      DB_CONNECTION_STRING: "${DB_CONNECTION_STRING:?DB_CONNECTION_STRING es obligatoria}"
+    networks:
+      - fitnessgym-net
+
+  fitnessgym_frontend:
+    image: fitnessgymfrontend
+    depends_on:
+      - "fitnessgym_api"
+    ports:
+      - "127.0.0.1:8091:5062"
+    build:
+      context: .
+      dockerfile: GymFrontend/DockerFile
+      args:
+        BUILD_ENVIRONMENT: Staging
+    container_name: frontendcontainer
+    environment:
+      TZ: "America/Mexico_City"
+      ASPNETCORE_ENVIRONMENT: "Staging"
+      ASPNETCORE_URLS: "http://0.0.0.0:5062"
+      BACKEND_BASE_ADDRESS: "http://fitnessgym_api:5274"
+      SECRET_TOKEN_KEY: "${SECRET_TOKEN_KEY:?SECRET_TOKEN_KEY es obligatoria}"
+      DB_CONNECTION_STRING: "${DB_CONNECTION_STRING:?DB_CONNECTION_STRING es obligatoria}"
+    networks:
+      - fitnessgym-net
+
+networks:
+  fitnessgym-net:
+    external : true
+    name: fitnessgym-net
+    driver: bridge
