@@ -6,6 +6,88 @@ Los empleados también pueden gestionar los horarios de las clases para los inst
 
 **Stack tecnológico:** .NET 8, SignalR, SQL, SQL Server 2022, procedimientos almacenados, Razor, JavaScript, CSS, Bootstrap 5.3, Nginx 1.28, Docker 20.10 y 29, ASP.NET Core Identity, Azure VM (anteriormente S3, EC2 y RDS) y SSL.
 
+## Instalación
+
+**Requisitos:** Docker con Compose v2 y conexión a Internet. En Linux/macOS también Bash y `curl`; en Windows, PowerShell.
+
+### Con instalador (recomendado)
+
+**Linux o macOS**
+
+```bash
+curl -fL https://raw.githubusercontent.com/aaron-77/gym/main/install-fitnessgym.sh -o install-fitnessgym.sh
+chmod +x install-fitnessgym.sh
+./install-fitnessgym.sh
+```
+
+**Windows (PowerShell)**
+
+```powershell
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/aaron-77/gym/main/install-fitnessgym.ps1 -OutFile .\install-fitnessgym.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\install-fitnessgym.ps1
+```
+
+El instalador descarga los Compose y las imágenes publicadas (API, frontend, SQL Server y Nginx), genera los secretos en un `.env` local, crea la red `fitnessgym-net` y levanta el stack. Si el puerto 80 está ocupado, te permite elegir otro.
+
+Al terminar muestra la URL, por defecto `http://localhost`. Conserva el directorio de instalación y su `.env` para mantener las credenciales generadas. Los datos de la base se guardan en volúmenes Docker.
+
+### Desinstalación
+
+```bash
+curl -fL https://raw.githubusercontent.com/aaron-77/gym/main/uninstall-fitnessgym.sh -o uninstall-fitnessgym.sh
+chmod +x uninstall-fitnessgym.sh
+./uninstall-fitnessgym.sh
+```
+
+```powershell
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/aaron-77/gym/main/uninstall-fitnessgym.ps1 -OutFile .\uninstall-fitnessgym.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\uninstall-fitnessgym.ps1
+```
+
+Elimina los contenedores y volúmenes del stack, por lo que **borra permanentemente los datos de la base de datos**. Después pregunta si también quieres borrar las imágenes y los archivos descargados.
+
+### Manual con Docker Compose
+
+Ejecuta los comandos desde Bash o WSL.
+
+1. **Descarga los archivos** en un mismo directorio (`create-login.sql` debe quedar junto a los Compose):
+
+   ```bash
+   mkdir -p "$HOME/fitnessgym-install" && cd "$HOME/fitnessgym-install"
+   APP_BASE="https://raw.githubusercontent.com/aaron-77/gym/main"
+   PROXY_BASE="https://raw.githubusercontent.com/aaron-77/fitnessgymreverseproxy/main"
+   curl -fL "$APP_BASE/docker-compose.app.installer.dev.yml" -o docker-compose.app.installer.dev.yml
+   curl -fL "$APP_BASE/bd/docker-compose.installer.dev.yml" -o docker-compose.bd.installer.dev.yml
+   curl -fL "$APP_BASE/bd/create-login.sql" -o create-login.sql
+   curl -fL "$PROXY_BASE/docker-compose.nginx.installer.dev.yml" -o docker-compose.nginx.installer.dev.yml
+   curl -fL "$APP_BASE/.env.example" -o .env.example
+   cp .env.example .env
+   ```
+
+2. **Configura los secretos.** En `.env`, reemplaza los marcadores de `SECRET_TOKEN_KEY`, `MSSQL_SA_PASSWORD`, `MSSQL_APP_LOGIN_PASSWORD` y `DB_CONNECTION_STRING`. La contraseña de `DB_CONNECTION_STRING` debe coincidir con `MSSQL_APP_LOGIN_PASSWORD`.
+
+   *Alternativa con Infisical:* ejecuta `infisical init`, guarda esas cuatro variables en tu proyecto y antepón `infisical run --env=dev --path=/ --` a los comandos del paso 4 (ajusta `--env` y `--path` a donde guardaste los secretos). Sus valores tienen prioridad sobre `.env`. Ver la [referencia de `infisical run`](https://infisical.com/docs/cli/reference).
+
+3. **Cambia la imagen de Nginx** en `docker-compose.nginx.installer.dev.yml` a `aaron77/fitnessgymnginx:latest` (el instalador automático lo hace por ti).
+
+4. **Crea la red y levanta el stack:**
+
+   ```bash
+   docker network inspect fitnessgym-net >/dev/null 2>&1 || docker network create fitnessgym-net
+
+   COMPOSE="docker compose --env-file .env \
+     -f docker-compose.bd.installer.dev.yml \
+     -f docker-compose.app.installer.dev.yml \
+     -f docker-compose.nginx.installer.dev.yml"
+
+   $COMPOSE pull
+   $COMPOSE up -d
+   ```
+
+   Con Infisical: `infisical run --env=dev --path=/ -- $COMPOSE up -d`.
+
+La imagen de la base incluye `FitnessGymDB.bak`, que se restaura automáticamente en el primer arranque. Los volúmenes `fitnessgym-mssql-data` y `fitnessgym-mssql-log` conservan los datos entre reinicios: `docker compose down` los mantiene y `docker compose down --volumes` los elimina.
+
 ## Arquitectura
 
 FitnessGym utiliza una **arquitectura por capas**, lo que permite separar responsabilidades y facilita el mantenimiento, las pruebas y la evolución del sistema.
@@ -25,7 +107,7 @@ Cada componente corre como un contenedor independiente orquestado con Docker Com
 
 El diagrama refleja este flujo: navegador → Nginx → (Frontend / API) → SQL Server, todo dentro de la red Docker, excepto la comunicación en tiempo real por SignalR, la cual se hace del cliente a Nginx y de Nginx al API directamente.
 
-Los datos sensibles del entorno (cadenas de conexión y demás secretos) no viven en los archivos versionados: se inyectan al proceso por **variables de entorno mediante Infisical** (`infisical run`). Tanto el frontend como la API resuelven su conexión a la base por la variable `DB_CONNECTION_STRING` (ver `specs/93-spect-secretos-appsettings-inyeccion-infisical.md`).
+Los datos sensibles no viven en archivos versionados. Los instaladores generan secretos y los guardan en el `.env` local del directorio de instalación; en el despliegue manual pueden inyectarse con **Infisical** (`infisical run`) o configurarse en un `.env` local no versionado. En ambos casos, los contenedores los reciben por variables de entorno. Tanto el frontend como la API usan `DB_CONNECTION_STRING` para conectarse a la base (ver `specs/93-spect-secretos-appsettings-inyeccion-infisical.md`).
 
 ### Nginx
 
@@ -106,7 +188,7 @@ El sistema utiliza **SQL Server 2022** como base de datos.
 
 Su objetivo es compartir el esquema de la base de datos, los procedimientos almacenados y las funciones que conforman el sistema, así como el contenido de la base de datos para que pueda verse cómo están construidas las funcionalidades que están hechas en SQL y T-SQL; además incluye la construcción de la imagen de la base de datos con Docker y los scripts utilizados para su construcción. También sirve como respaldo de la base de datos y apoyo para migraciones posteriores a otros motores. No contiene proyectos .csproj ejecutables.
 
-La base de datos se ejecuta en un **contenedor**. La imagen incorpora un healthcheck que verifica que la base esté operativa, lo que permite que los servicios dependientes y los tests esperen a que esté lista antes de conectarse.
+La base de datos se ejecuta en un **contenedor**. Su script de inicio espera a que SQL Server esté disponible, restaura `FitnessGymDB.bak` cuando corresponde y configura el login de la aplicación. Los datos se conservan en volúmenes Docker; el estado de esos volúmenes determina si la base se restaura de nuevo.
 
 Algunos ejemplos de la funcionalidad implementada en la base de datos son **procedimientos almacenados** y **funciones**, para la búsqueda y el cálculo de horarios disponibles, y el registro de clases programadas e inscripciones.
 

@@ -52,13 +52,13 @@ else
 fi
 
 echo ""
-read -rp "¿Desea eliminar también las imágenes descargadas (aaron77/fitnessgymapi, aaron77/fitnessgymfrontend, aaron77/fitnessgymbd, aaron77/fitnessgymnginxdev)? [s/N]: " ans_img
+read -rp "¿Desea eliminar también las imágenes descargadas (aaron77/fitnessgymapi, aaron77/fitnessgymfrontend, aaron77/fitnessgymbd, aaron77/fitnessgymnginx)? [s/N]: " ans_img
 if [[ "${ans_img,,}" =~ ^s|si|y|yes$ ]]; then
   info "Eliminando imágenes..."
   docker rmi -f aaron77/fitnessgymapi:latest 2>/dev/null || true
   docker rmi -f aaron77/fitnessgymfrontend:latest 2>/dev/null || true
   docker rmi -f aaron77/fitnessgymbd:latest 2>/dev/null || true
-  docker rmi -f aaron77/fitnessgymnginxdev:latest 2>/dev/null || true
+  docker rmi -f aaron77/fitnessgymnginx:latest 2>/dev/null || true
   docker image prune -f 2>/dev/null || true
 fi
 

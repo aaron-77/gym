@@ -48,6 +48,23 @@ download_file "$DB_FILE" "$APP_BASE/bd/docker-compose.installer.dev.yml"
 download_file "$CREATE_LOGIN_FILE" "$APP_BASE/bd/create-login.sql"
 download_file "$PROXY_FILE" "$PROXY_BASE/docker-compose.nginx.installer.dev.yml"
 download_file "$ENV_EXAMPLE" "$APP_BASE/.env.example"
+
+# El Compose remoto de instalación todavía apunta a la variante nginxdev.
+# Cambiarla aquí y fallar si el formato remoto ya no contiene esa referencia.
+PROXY_FILE_TMP="${PROXY_FILE}.tmp"
+if ! awk '
+  /^[[:space:]]*image:[[:space:]]*aaron77\/fitnessgymnginxdev:latest[[:space:]]*$/ {
+    sub(/aaron77\/fitnessgymnginxdev:latest/, "aaron77/fitnessgymnginx:latest")
+    matches++
+  }
+  { print }
+  END { if (matches != 1) exit 1 }
+' "$PROXY_FILE" > "$PROXY_FILE_TMP"; then
+  rm -f "$PROXY_FILE_TMP"
+  fail 'El Compose de Nginx no contiene exactamente una referencia a aaron77/fitnessgymnginxdev:latest.'
+fi
+mv "$PROXY_FILE_TMP" "$PROXY_FILE"
+
 if [[ ! -s "$ENV_FILE" ]]; then
   cp "$ENV_EXAMPLE" "$ENV_FILE"
 else
@@ -92,17 +109,6 @@ if [[ "$NGINX_PORT" == 8090 || "$NGINX_PORT" == 8091 || "$NGINX_PORT" == 1433 ]]
 fi
 
 docker network inspect fitnessgym-net >/dev/null 2>&1 || docker network create fitnessgym-net >/dev/null || fail 'No se pudo crear la red Docker fitnessgym-net.'
-# Forzar imagen de nginx dev (solo para el servicio nginx)
-if [[ -f "$PROXY_FILE" ]]; then
-  awk '
-    /^  nginx:[[:space:]]*$/ { in_nginx=1; print; next }
-    in_nginx && /^[[:space:]]*container_name:/{ print; next }
-    in_nginx && /^[[:space:]]*image:[[:space:]]*/ { print "    image: aaron77/fitnessgymnginxdev:latest"; next }
-    in_nginx && /^[[:space:]]*[a-zA-Z0-9_-]+:[[:space:]]*/ && $0 !~ /^[[:space:]]*(ports|volumes|environment|depends_on|networks|healthcheck|restart|command|env_file|labels|logging)[[:space:]]*:$/ { in_nginx=0 }
-    { print }
-  ' "$PROXY_FILE" > "$PROXY_FILE.tmp" && mv "$PROXY_FILE.tmp" "$PROXY_FILE"
-fi
-docker pull aaron77/fitnessgymnginxdev:latest 2>/dev/null || true
 cd "$INSTALL_DIR"
 docker compose -f "$DB_FILE" -f "$APP_FILE" -f "$PROXY_FILE" config -q || fail 'Los Compose no son válidos o falta configuración en .env.'
 docker compose -f "$DB_FILE" -f "$APP_FILE" -f "$PROXY_FILE" up -d || fail 'Docker Compose no pudo iniciar los contenedores.'

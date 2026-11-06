@@ -50,6 +50,19 @@ Get-ComposeFile $dbFile "$appBase/bd/docker-compose.installer.dev.yml" -Refresh
 Get-ComposeFile $createLoginFile "$appBase/bd/create-login.sql" -Refresh
 Get-ComposeFile $proxyFile "$proxyBase/docker-compose.nginx.installer.dev.yml" -Refresh
 Get-ComposeFile $envExample "$appBase/.env.example" -Refresh
+
+# El Compose remoto de instalación todavía apunta a la variante nginxdev.
+# Cambiarla aquí y fallar si el formato remoto ya no contiene esa referencia.
+$proxyComposeContent = [IO.File]::ReadAllText($proxyFile)
+$oldNginxImage = 'aaron77/fitnessgymnginxdev:latest'
+$newNginxImage = 'aaron77/fitnessgymnginx:latest'
+$nginxImageReferences = $proxyComposeContent.Split($oldNginxImage).Length - 1
+if ($nginxImageReferences -ne 1) {
+    Stop-WithError 'El Compose de Nginx no contiene exactamente una referencia a aaron77/fitnessgymnginxdev:latest.'
+}
+$proxyComposeContent = $proxyComposeContent.Replace($oldNginxImage, $newNginxImage)
+[IO.File]::WriteAllText($proxyFile, $proxyComposeContent, [Text.UTF8Encoding]::new($false))
+
 if (-not (Test-Path -LiteralPath $envFile) -or (Get-Item -LiteralPath $envFile).Length -eq 0) {
     Copy-Item -LiteralPath $envExample -Destination $envFile -Force
 }

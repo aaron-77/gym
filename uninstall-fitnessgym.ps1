@@ -58,13 +58,13 @@ try {
 } finally { Pop-Location }
 
 Write-Host ""
-$ansImg = Read-Host "¿Desea eliminar también las imágenes descargadas (aaron77/fitnessgymapi, aaron77/fitnessgymfrontend, aaron77/fitnessgymbd, aaron77/fitnessgymnginxdev)? [s/N]"
+$ansImg = Read-Host "¿Desea eliminar también las imágenes descargadas (aaron77/fitnessgymapi, aaron77/fitnessgymfrontend, aaron77/fitnessgymbd, aaron77/fitnessgymnginx)? [s/N]"
 if ($ansImg -match '^(?i)s|si|y|yes$') {
     Write-Info "Eliminando imágenes..."
     docker rmi -f aaron77/fitnessgymapi:latest *> $null
     docker rmi -f aaron77/fitnessgymfrontend:latest *> $null
     docker rmi -f aaron77/fitnessgymbd:latest *> $null
-    docker rmi -f aaron77/fitnessgymnginxdev:latest *> $null
+    docker rmi -f aaron77/fitnessgymnginx:latest *> $null
     docker image prune -f *> $null
 }
 
