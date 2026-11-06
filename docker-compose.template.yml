@@ -12,6 +12,8 @@ services:
     build:
       context: .
       dockerfile: API/DockerFile
+      args:
+        BUILD_ENVIRONMENT: Production
     container_name: apicontainer
     environment:
       TZ: "America/Mexico_City"
@@ -31,6 +33,8 @@ services:
     build:
       context: .
       dockerfile: GymFrontend/DockerFile
+      args:
+        BUILD_ENVIRONMENT: Production
     container_name: frontendcontainer
     environment:
       TZ: "America/Mexico_City"

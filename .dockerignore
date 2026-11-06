@@ -3,8 +3,8 @@
 # los de API/ y GymFrontend/ son histórico/inertes (ver auditoría 2026-10-25).
 #
 # Reglas de composición:
-#   - Los builds de API y GymFrontend usan context= raíz y solo necesitan
-#     API/, BL/, DTO/, DataAccess/, GymFrontend/ (sin appp/ ni settings dev).
+#   - Los builds de API y GymFrontend usan context= raíz; los Dockerfiles
+#     conservan solo el appsettings del entorno seleccionado por build-arg.
 #   - Todo lo demás del repo puede quedar fuera del contexto: menos bytes
 #     subidos al daemon y cero riesgo de filtrar archivos sensibles.
 
@@ -69,9 +69,6 @@ GymFrontend/appp/
 # Inyección real = variables de entorno vía compose/Infisical (spec 93-96).
 .env
 .env.*
-**/appsettings.Development.json
-**/appsettings.Staging.json
-**/appsettings.Testing.json
 **/launchSettings.json
 **/*.pem
 **/*.key
