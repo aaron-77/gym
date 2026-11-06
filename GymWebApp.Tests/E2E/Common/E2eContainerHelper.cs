@@ -136,6 +136,7 @@ public class E2eContainerHelper : IAsyncLifetime
             {
                 ["ASPNETCORE_URLS"] = $"http://+:{FrontendInternalPort}",
                 ["DB_CONNECTION_STRING"] = ConnectionString,
+                ["BACKEND_BASE_ADDRESS"] = "http://fitnessgym_api:5274",
                 ["ASPNETCORE_ENVIRONMENT"] = "Staging",
                 ["SECRET_TOKEN_KEY"] = ConfigHelper.GetProperty("JwtSettings:SecretKey"),
                 ["TZ"] = "America/Mexico_City"

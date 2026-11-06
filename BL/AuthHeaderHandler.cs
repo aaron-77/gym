@@ -41,43 +41,29 @@ public class AuthHeaderHandler : DelegatingHandler
                 && requestUrl?.Contains(backendAddress, StringComparison.OrdinalIgnoreCase) == true;
             bool isFrontendRequest = !string.IsNullOrWhiteSpace(frontendAddress)
                 && requestUrl?.Contains(frontendAddress, StringComparison.OrdinalIgnoreCase) == true;
-            string logMessage = $"\n\nREUQEST URL: {request.RequestUri.ToString()}\n IDTOKEN: {idToken}\n ACCESSTOKEN: {accessToken}\n isApiRequest: {isApiRequest}\n isFrontnedRequest: {isFrontendRequest} \n\n";                
-            Console.WriteLine(logMessage);
+            Console.WriteLine(
+                $"[HTTP REQUEST] {request.Method} {request.RequestUri}; " +
+                $"IsApiRequest={isApiRequest}; IsFrontendRequest={isFrontendRequest}");
 
             if (!string.IsNullOrEmpty(accessToken) && isApiRequest)
             {
-                logMessage= $"\n\nACCESS TOKEN ADDED: {accessToken}\n\n";
-                Console.WriteLine(logMessage);
-
                 request.Headers.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
             }
 
             if (!string.IsNullOrEmpty(idToken) && isFrontendRequest)
             {
-                logMessage= $"\n\nID TOKEN ADDED: {accessToken}\n\n";
-                Console.WriteLine(logMessage);
                 request.Headers.Authorization =
                     new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", idToken);
-            }
-            Console.WriteLine($"[HTTP REQUEST] {request.Method} {request.RequestUri}");
-            logMessage= $"\n\nHEADERS ADDED TO REQUEST: {accessToken}\n\n";
-            Console.WriteLine(logMessage);
-            foreach (var header in request.Headers)
-            {
-                    
-                Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
             }
 
             return await base.SendAsync(request, cancellationToken);
         }
         catch (Exception ex)
         {
-            string logMessage = $"[ERROR] M�todo: SendAsync (AuthHeaderHandler) | " +
-                $"L�nea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
-                $"Causa: {ex.GetType().Name} - {ex.Message} | " +
-                $"RequestUri: {request?.RequestUri} | " +
-                $"Stack Trace: {ex.StackTrace}";
+            string logMessage = $"[ERROR] Método: SendAsync (AuthHeaderHandler) | " +
+                $"Línea: {new System.Diagnostics.StackTrace(ex, true).GetFrame(0)?.GetFileLineNumber()} | " +
+                $"Causa: {ex.GetType().Name} - {ex.Message}";
             Console.WriteLine(logMessage);
             
             // Re-throw the exception to allow normal error handling
