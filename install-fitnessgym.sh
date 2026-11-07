@@ -49,19 +49,20 @@ download_file "$CREATE_LOGIN_FILE" "$APP_BASE/bd/create-login.sql"
 download_file "$PROXY_FILE" "$PROXY_BASE/docker-compose.nginx.installer.dev.yml"
 download_file "$ENV_EXAMPLE" "$APP_BASE/.env.example"
 
-# El Compose remoto de instalación todavía apunta a la variante nginxdev.
-# Cambiarla aquí y fallar si el formato remoto ya no contiene esa referencia.
+NGINX_IMAGE="aaron77/fitnessgymnginx:latest"
 PROXY_FILE_TMP="${PROXY_FILE}.tmp"
-if ! awk '
-  /^[[:space:]]*image:[[:space:]]*aaron77\/fitnessgymnginxdev:latest[[:space:]]*$/ {
-    sub(/aaron77\/fitnessgymnginxdev:latest/, "aaron77/fitnessgymnginx:latest")
+if ! awk -v image="$NGINX_IMAGE" '
+  /^[[:space:]]*image:[[:space:]]*(aaron77\/)?fitnessgymnginx(dev)?(:[^[:space:]]+)?[[:space:]]*$/ {
+    match($0, /^[[:space:]]*image:[[:space:]]*/)
+    print substr($0, 1, RLENGTH) image
     matches++
+    next
   }
   { print }
-  END { if (matches != 1) exit 1 }
+  END { if (matches < 1) exit 1 }
 ' "$PROXY_FILE" > "$PROXY_FILE_TMP"; then
   rm -f "$PROXY_FILE_TMP"
-  fail 'El Compose de Nginx no contiene exactamente una referencia a aaron77/fitnessgymnginxdev:latest.'
+  fail "El Compose de Nginx no contiene una imagen de fitnessgymnginx que se pueda normalizar a $NGINX_IMAGE."
 fi
 mv "$PROXY_FILE_TMP" "$PROXY_FILE"
 

@@ -59,6 +59,7 @@ if [[ "${ans_img,,}" =~ ^s|si|y|yes$ ]]; then
   docker rmi -f aaron77/fitnessgymfrontend:latest 2>/dev/null || true
   docker rmi -f aaron77/fitnessgymbd:latest 2>/dev/null || true
   docker rmi -f aaron77/fitnessgymnginx:latest 2>/dev/null || true
+  docker rmi -f aaron77/fitnessgymnginxdev:latest 2>/dev/null || true
   docker image prune -f 2>/dev/null || true
 fi
 

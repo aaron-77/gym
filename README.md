@@ -4,11 +4,16 @@ FitnessGym es un sistema de administración de gimnasios que permite a los clien
 
 Los empleados también pueden gestionar los horarios de las clases para los instructores y administrar las inscripciones de los clientes en tiempo real. El sistema permite reagendar las inscripciones a las clases y envía notificaciones por correo electrónico relacionadas con las citas de los clientes.
 
-**Stack tecnológico:** .NET 8, SignalR, SQL, SQL Server 2022, procedimientos almacenados, Razor, JavaScript, CSS, Bootstrap 5.3, Nginx 1.28, Docker 20.10 y 29, ASP.NET Core Identity, Azure VM (anteriormente S3, EC2 y RDS) y SSL.
+**Stack tecnológico:** .NET 8, SignalR, SQL, SQL Server 2022, procedimientos almacenados, Razor, JavaScript, CSS, Bootstrap 5.3, Nginx 1.28, Docker 20.10 y 29, ASP.NET Core Identity, Azure VM ,S3, EC2 y RDS y SSL.
 
 ## Instalación
 
-**Requisitos:** Docker con Compose v2 y conexión a Internet. En Linux/macOS también Bash y `curl`; en Windows, PowerShell.
+**Requisitos:**
+
+* Docker y Docker Compose v2.
+* Conexión a Internet.
+* Linux/macOS: Bash y `curl`.
+* Windows: PowerShell 5.1 o 7.
 
 ### Con instalador (recomendado)
 
@@ -68,7 +73,7 @@ Ejecuta los comandos desde Bash o WSL.
 
    *Alternativa con Infisical:* ejecuta `infisical init`, guarda esas cuatro variables en tu proyecto y antepón `infisical run --env=dev --path=/ --` a los comandos del paso 4 (ajusta `--env` y `--path` a donde guardaste los secretos). Sus valores tienen prioridad sobre `.env`. Ver la [referencia de `infisical run`](https://infisical.com/docs/cli/reference).
 
-3. **Cambia la imagen de Nginx** en `docker-compose.nginx.installer.dev.yml` a `aaron77/fitnessgymnginx:latest` (el instalador automático lo hace por ti).
+3. **Imagen de Nginx:** `docker-compose.nginx.installer.dev.yml` debe usar `aaron77/fitnessgymnginx:latest`.
 
 4. **Crea la red y levanta el stack:**
 
@@ -111,7 +116,7 @@ Los datos sensibles no viven en archivos versionados. Los instaladores generan s
 
 ### Nginx
 
-El reverse proxy se ejecuta a partir de una **imagen personalizada** de Nginx. La configuración se define por medio de **templates** al arrancar el contenedor mediante **inyección de variables de entorno**, lo que facilita modificar los datos necesarios del reverse proxy sin tener que construir una nueva imagen.
+El reverse proxy se ejecuta a partir de una **imagen personalizada** de Nginx. La configuración se define por medio de **templates** al arrancar el contenedor mediante **inyección de variables de entorno**, lo que facilita modificar los datos necesarios del reverse proxy sin tener que construir una nueva imagen, incluyendo el sportorte opciona para ssl.
 
 Las variables que se inyectan son:
 

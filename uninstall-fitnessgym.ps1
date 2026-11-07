@@ -65,6 +65,7 @@ if ($ansImg -match '^(?i)s|si|y|yes$') {
     docker rmi -f aaron77/fitnessgymfrontend:latest *> $null
     docker rmi -f aaron77/fitnessgymbd:latest *> $null
     docker rmi -f aaron77/fitnessgymnginx:latest *> $null
+    docker rmi -f aaron77/fitnessgymnginxdev:latest *> $null
     docker image prune -f *> $null
 }
 
