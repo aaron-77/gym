@@ -8,12 +8,7 @@ Los empleados también pueden gestionar los horarios de las clases para los inst
 
 ## Instalación
 
-**Requisitos:**
-
-* Docker y Docker Compose v2.
-* Conexión a Internet.
-* Linux/macOS: Bash y `curl`.
-* Windows: PowerShell 5.1 o 7.
+**Requisitos:** Docker con Compose v2 y conexión a Internet. En Linux/macOS también Bash y `curl`; en Windows, PowerShell.
 
 ### Con instalador (recomendado)
 
@@ -34,7 +29,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\install-fitnessgym.ps1
 
 El instalador descarga los Compose y las imágenes publicadas (API, frontend, SQL Server y Nginx), genera los secretos en un `.env` local, crea la red `fitnessgym-net` y levanta el stack. Si el puerto 80 está ocupado, te permite elegir otro.
 
-Al terminar muestra la URL, por defecto `http://localhost`. Conserva el directorio de instalación y su `.env` para mantener las credenciales generadas. Los datos de la base se guardan en volúmenes Docker.
+Al terminar muestra la URL, por defecto `http://localhost`. Tambien descarga y guarda en disco un archivo .env con las configuraciones por defecto, si necesitas modificar algun dato de confguracion puedes hacerlo aho. Los datos de la base se guardan en volúmenes Docker.
 
 ### Desinstalación
 
@@ -51,53 +46,415 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\uninstall-fitnessgym.ps1
 
 Elimina los contenedores y volúmenes del stack, por lo que **borra permanentemente los datos de la base de datos**. Después pregunta si también quieres borrar las imágenes y los archivos descargados.
 
-### Manual con Docker Compose
+## Manual con Docker Compose
 
-Ejecuta los comandos desde Bash o WSL.
+Elige el bloque de tu sistema: **Linux/macOS** (Bash y `curl`) o **Windows** (PowerShell 5.1 o 7). Cada bloque de código tiene su propio botón de copiar. En los pasos con varios comandos hay un bloque completo y, justo debajo, cada comando en su propio bloque.
 
-1. **Descarga los archivos** en un mismo directorio (`create-login.sql` debe quedar junto a los Compose):
+### 1. Descargar los archivos
 
-   ```bash
-   mkdir -p "$HOME/fitnessgym-install" && cd "$HOME/fitnessgym-install"
-   APP_BASE="https://raw.githubusercontent.com/aaron-77/gym/main"
-   PROXY_BASE="https://raw.githubusercontent.com/aaron-77/fitnessgymreverseproxy/main"
-   curl -fL "$APP_BASE/docker-compose.app.installer.dev.yml" -o docker-compose.app.installer.dev.yml
-   curl -fL "$APP_BASE/bd/docker-compose.installer.dev.yml" -o docker-compose.bd.installer.dev.yml
-   curl -fL "$APP_BASE/bd/create-login.sql" -o create-login.sql
-   curl -fL "$PROXY_BASE/docker-compose.nginx.installer.dev.yml" -o docker-compose.nginx.installer.dev.yml
-   curl -fL "$APP_BASE/.env.example" -o .env.example
-   cp .env.example .env
-   ```
+Los archivos se descargaran en un mismo directorio, si cambias el directorio de los archivos asegurate de que todos queden en el mismo para que puedas seguir con las instalación. 
 
-2. **Configura los secretos.** En `.env`, reemplaza los marcadores de `SECRET_TOKEN_KEY`, `MSSQL_SA_PASSWORD`, `MSSQL_APP_LOGIN_PASSWORD` y `DB_CONNECTION_STRING`. La contraseña de `DB_CONNECTION_STRING` debe coincidir con `MSSQL_APP_LOGIN_PASSWORD`.
+> Si copias los comandos uno por uno, hazlo en orden y en la misma terminal: los últimos dependen de la carpeta a la que entró el primero.
 
-   *Alternativa con Infisical:* ejecuta `infisical init`, guarda esas cuatro variables en tu proyecto y antepón `infisical run --env=dev --path=/ --` a los comandos del paso 4 (ajusta `--env` y `--path` a donde guardaste los secretos). Sus valores tienen prioridad sobre `.env`. Ver la [referencia de `infisical run`](https://infisical.com/docs/cli/reference).
+#### Linux / macOS (Bash)
 
-3. **Imagen de Nginx:** `docker-compose.nginx.installer.dev.yml` debe usar `aaron77/fitnessgymnginx:latest`.
+Bloque completo:
 
-4. **Crea la red y levanta el stack:**
+```bash
+mkdir -p "$HOME/fitnessgym-install" && cd "$HOME/fitnessgym-install"
+curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/docker-compose.app.installer.dev.yml" -o docker-compose.app.installer.dev.yml
+curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/bd/docker-compose.installer.dev.yml" -o docker-compose.bd.installer.dev.yml
+curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/bd/create-login.sql" -o create-login.sql
+curl -fL "https://raw.githubusercontent.com/aaron-77/fitnessgymreverseproxy/main/docker-compose.nginx.installer.dev.yml" -o docker-compose.nginx.installer.dev.yml
+curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/.env.example" -o .env.example
+cp .env.example .env
+```
 
-   ```bash
-   docker network inspect fitnessgym-net >/dev/null 2>&1 || docker network create fitnessgym-net
+**A continuación el mismo proceso de arriba  con los comandos por separado para copiarlos paso a paso con exlplicación de cada uno:**
 
-   COMPOSE="docker compose --env-file .env \
-     -f docker-compose.bd.installer.dev.yml \
-     -f docker-compose.app.installer.dev.yml \
-     -f docker-compose.nginx.installer.dev.yml"
+Crear la carpeta y entrar en ella:
 
-   $COMPOSE pull
-   $COMPOSE up -d
-   ```
+```bash
+mkdir -p "$HOME/fitnessgym-install" && cd "$HOME/fitnessgym-install"
+```
 
-   Con Infisical: `infisical run --env=dev --path=/ -- $COMPOSE up -d`.
+Descargar el Compose de la aplicación:
 
-La imagen de la base incluye `FitnessGymDB.bak`, que se restaura automáticamente en el primer arranque. Los volúmenes `fitnessgym-mssql-data` y `fitnessgym-mssql-log` conservan los datos entre reinicios: `docker compose down` los mantiene y `docker compose down --volumes` los elimina.
+```bash
+curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/docker-compose.app.installer.dev.yml" -o docker-compose.app.installer.dev.yml
+```
 
+Descargar el Compose de la base de datos:
+
+```bash
+curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/bd/docker-compose.installer.dev.yml" -o docker-compose.bd.installer.dev.yml
+```
+
+Descargar el script SQL:
+
+```bash
+curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/bd/create-login.sql" -o create-login.sql
+```
+
+Descargar el Compose de Nginx:
+
+```bash
+curl -fL "https://raw.githubusercontent.com/aaron-77/fitnessgymreverseproxy/main/docker-compose.nginx.installer.dev.yml" -o docker-compose.nginx.installer.dev.yml
+```
+
+Descargar el archivo de ejemplo de variables:
+
+```bash
+curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/.env.example" -o .env.example
+```
+
+Crear el `.env`:
+
+```bash
+cp .env.example .env
+```
+
+#### Windows (PowerShell)
+
+Bloque completo:
+
+```powershell
+New-Item -ItemType Directory -Force -Path "$HOME\fitnessgym-install" | Out-Null
+Set-Location "$HOME\fitnessgym-install"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/docker-compose.app.installer.dev.yml" -OutFile "docker-compose.app.installer.dev.yml"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/bd/docker-compose.installer.dev.yml" -OutFile "docker-compose.bd.installer.dev.yml"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/bd/create-login.sql" -OutFile "create-login.sql"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/fitnessgymreverseproxy/main/docker-compose.nginx.installer.dev.yml" -OutFile "docker-compose.nginx.installer.dev.yml"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/.env.example" -OutFile ".env.example"
+Copy-Item .env.example .env
+```
+
+**A continuación el mismo proceso de arriba  con los comandos por separado para copiarlos paso a paso con exlplicación de cada uno:**
+
+Crear la carpeta:
+
+```powershell
+New-Item -ItemType Directory -Force -Path "$HOME\fitnessgym-install" | Out-Null
+```
+
+Entrar en la carpeta:
+
+```powershell
+Set-Location "$HOME\fitnessgym-install"
+```
+
+Descargar el Compose de la aplicación:
+
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/docker-compose.app.installer.dev.yml" -OutFile "docker-compose.app.installer.dev.yml"
+```
+
+Descargar el Compose de la base de datos:
+
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/bd/docker-compose.installer.dev.yml" -OutFile "docker-compose.bd.installer.dev.yml"
+```
+
+Descargar el script SQL:
+
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/bd/create-login.sql" -OutFile "create-login.sql"
+```
+
+Descargar el Compose de Nginx:
+
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/fitnessgymreverseproxy/main/docker-compose.nginx.installer.dev.yml" -OutFile "docker-compose.nginx.installer.dev.yml"
+```
+
+Descargar el archivo de ejemplo de variables:
+
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/.env.example" -OutFile ".env.example"
+```
+
+Crear el `.env`:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+### 2. Configurar los secretos
+
+En `.env`, reemplaza los marcadores de `SECRET_TOKEN_KEY`, `MSSQL_SA_PASSWORD`, `MSSQL_APP_LOGIN_PASSWORD` y `DB_CONNECTION_STRING`. La contraseña de `DB_CONNECTION_STRING` debe coincidir con `MSSQL_APP_LOGIN_PASSWORD`. También puedes usar un gestor de secretos para inyectar las variables de entorno.
+
+Abrir el archivo en Linux / macOS:
+
+```bash
+nano .env
+```
+
+Abrir el archivo en Windows:
+
+```powershell
+notepad .env
+```
+
+### 3. Crear la red y levantar el stack
+
+Ejecuta el bloque desde la carpeta `fitnessgym-install`.
+
+#### Linux / macOS (Bash)
+
+Bloque completo:
+
+```bash
+docker network inspect fitnessgym-net >/dev/null 2>&1 || docker network create fitnessgym-net
+
+docker compose --env-file .env \
+  -f docker-compose.bd.installer.dev.yml \
+  -f docker-compose.app.installer.dev.yml \
+  -f docker-compose.nginx.installer.dev.yml \
+  up -d
+```
+
+**Comandos por separado por si quieres copiar paso a paso comando por comando con la explciacion de cada uno:**
+
+Crear la red si no existe:
+
+```bash
+docker network inspect fitnessgym-net >/dev/null 2>&1 || docker network create fitnessgym-net
+```
+
+Levantar el stack:
+
+```bash
+docker compose --env-file .env \
+  -f docker-compose.bd.installer.dev.yml \
+  -f docker-compose.app.installer.dev.yml \
+  -f docker-compose.nginx.installer.dev.yml \
+  up -d
+```
+
+#### Windows (PowerShell)
+
+Bloque completo:
+
+```powershell
+docker network inspect fitnessgym-net 2>$null | Out-Null
+if ($LASTEXITCODE -ne 0) { docker network create fitnessgym-net }
+
+docker compose --env-file .env `
+  -f docker-compose.bd.installer.dev.yml `
+  -f docker-compose.app.installer.dev.yml `
+  -f docker-compose.nginx.installer.dev.yml `
+  up -d
+```
+
+> En PowerShell 5.1, si solo se ejecuta la primera línea al pegar, presiona Enter una vez más.
+
+**Comandos por separado por si quieres copiar paso a paso comando por comando con la explciacion de cada uno:**
+
+Crear la red si no existe (estas dos líneas van juntas):
+
+```powershell
+docker network inspect fitnessgym-net 2>$null | Out-Null
+if ($LASTEXITCODE -ne 0) { docker network create fitnessgym-net }
+```
+
+Levantar el stack:
+
+```powershell
+docker compose --env-file .env `
+  -f docker-compose.bd.installer.dev.yml `
+  -f docker-compose.app.installer.dev.yml `
+  -f docker-compose.nginx.installer.dev.yml `
+  up -d
+```
+
+### 4. Datos y volúmenes
+
+La imagen de la base incluye `FitnessGymDB.bak`, que se restaura automáticamente en el primer arranque. Los volúmenes `fitnessgym-mssql-data` y `fitnessgym-mssql-log` conservan los datos entre reinicios.
+
+#### Detener el stack conservando los datos
+
+Linux / macOS:
+
+```bash
+docker compose --env-file .env \
+  -f docker-compose.bd.installer.dev.yml \
+  -f docker-compose.app.installer.dev.yml \
+  -f docker-compose.nginx.installer.dev.yml \
+  down
+```
+
+Windows:
+
+```powershell
+docker compose --env-file .env `
+  -f docker-compose.bd.installer.dev.yml `
+  -f docker-compose.app.installer.dev.yml `
+  -f docker-compose.nginx.installer.dev.yml `
+  down
+```
+
+#### Detener el stack y eliminar los datos de la base
+
+Linux / macOS:
+
+```bash
+docker compose --env-file .env \
+  -f docker-compose.bd.installer.dev.yml \
+  -f docker-compose.app.installer.dev.yml \
+  -f docker-compose.nginx.installer.dev.yml \
+  down --volumes
+```
+
+Windows:
+
+```powershell
+docker compose --env-file .env `
+  -f docker-compose.bd.installer.dev.yml `
+  -f docker-compose.app.installer.dev.yml `
+  -f docker-compose.nginx.installer.dev.yml `
+  down --volumes
+``````
+
+### 2. Configurar los secretos
+
+En `.env`, reemplaza los marcadores de `SECRET_TOKEN_KEY`, `MSSQL_SA_PASSWORD`, `MSSQL_APP_LOGIN_PASSWORD` y `DB_CONNECTION_STRING`. La contraseña de `DB_CONNECTION_STRING` debe coincidir con `MSSQL_APP_LOGIN_PASSWORD`. También puedes usar un gestor de secretos para inyectar las variables de entorno.
+
+Abrir el archivo en Linux / macOS:
+
+```bash
+nano .env
+```
+
+Abrir el archivo en Windows:
+
+```powershell
+notepad .env
+```
+
+### 3. Crear la red y levantar el stack
+
+Ejecuta el bloque desde la carpeta `fitnessgym-install`.
+
+#### Linux / macOS (Bash)
+
+Bloque completo:
+
+```bash
+docker network inspect fitnessgym-net >/dev/null 2>&1 || docker network create fitnessgym-net
+
+docker compose --env-file .env \
+  -f docker-compose.bd.installer.dev.yml \
+  -f docker-compose.app.installer.dev.yml \
+  -f docker-compose.nginx.installer.dev.yml \
+  up -d
+```
+
+**Comandos por separado:**
+
+Crear la red si no existe:
+
+```bash
+docker network inspect fitnessgym-net >/dev/null 2>&1 || docker network create fitnessgym-net
+```
+
+Levantar el stack:
+
+```bash
+docker compose --env-file .env \
+  -f docker-compose.bd.installer.dev.yml \
+  -f docker-compose.app.installer.dev.yml \
+  -f docker-compose.nginx.installer.dev.yml \
+  up -d
+```
+
+#### Windows (PowerShell)
+
+Bloque completo:
+
+```powershell
+docker network inspect fitnessgym-net 2>$null | Out-Null
+if ($LASTEXITCODE -ne 0) { docker network create fitnessgym-net }
+
+docker compose --env-file .env `
+  -f docker-compose.bd.installer.dev.yml `
+  -f docker-compose.app.installer.dev.yml `
+  -f docker-compose.nginx.installer.dev.yml `
+  up -d
+```
+
+> En PowerShell 5.1, si solo se ejecuta la primera línea al pegar, presiona Enter una vez más.
+
+**Comandos por separado:**
+
+Crear la red si no existe (estas dos líneas van juntas):
+
+```powershell
+docker network inspect fitnessgym-net 2>$null | Out-Null
+if ($LASTEXITCODE -ne 0) { docker network create fitnessgym-net }
+```
+
+Levantar el stack:
+
+```powershell
+docker compose --env-file .env `
+  -f docker-compose.bd.installer.dev.yml `
+  -f docker-compose.app.installer.dev.yml `
+  -f docker-compose.nginx.installer.dev.yml `
+  up -d
+```
+
+### 4. Datos y volúmenes
+
+La imagen de la base incluye `FitnessGymDB.bak`, que se restaura automáticamente en el primer arranque. Los volúmenes `fitnessgym-mssql-data` y `fitnessgym-mssql-log` conservan los datos entre reinicios.
+
+#### Detener el stack conservando los datos
+
+Linux / macOS:
+
+```bash
+docker compose --env-file .env \
+  -f docker-compose.bd.installer.dev.yml \
+  -f docker-compose.app.installer.dev.yml \
+  -f docker-compose.nginx.installer.dev.yml \
+  down
+```
+
+Windows:
+
+```powershell
+docker compose --env-file .env `
+  -f docker-compose.bd.installer.dev.yml `
+  -f docker-compose.app.installer.dev.yml `
+  -f docker-compose.nginx.installer.dev.yml `
+  down
+```
+
+#### Detener el stack y eliminar los datos de la base
+
+Linux / macOS:
+
+```bash
+docker compose --env-file .env \
+  -f docker-compose.bd.installer.dev.yml \
+  -f docker-compose.app.installer.dev.yml \
+  -f docker-compose.nginx.installer.dev.yml \
+  down --volumes
+```
+
+Windows:
+
+```powershell
+docker compose --env-file .env `
+  -f docker-compose.bd.installer.dev.yml `
+  -f docker-compose.app.installer.dev.yml `
+  -f docker-compose.nginx.installer.dev.yml `
+  down --volumes
+```
 ## Arquitectura
 
 FitnessGym utiliza una **arquitectura por capas**, lo que permite separar responsabilidades y facilita el mantenimiento, las pruebas y la evolución del sistema.
 
-Toda la aplicación se ejecuta en **contenedores**: la API, el frontend, el reverse proxy con Nginx y la base de datos SQL Server. Los servicios se comunican entre sí a través de una **red Docker interna**, y Nginx actúa como **único punto de entrada expuesto al exterior**. La API, el frontend y la base de datos no son accesibles públicamente. La información de la base de datos se **persiste en volúmenes Docker**.
+Toda la aplicación se ejecuta en **contenedores**: el API, el frontend, el reverse proxy con Nginx y la base de datos SQL Server. Los servicios se comunican entre sí a través de una **red Docker interna**, y Nginx actúa como **único punto de entrada expuesto al exterior**. La API, el frontend y la base de datos no son accesibles públicamente. La información de la base de datos se **persiste en volúmenes Docker**.
 
 ![Diagrama de despliegue](docsgit/diagrama%20de%20despluiegue.png)
 
@@ -112,7 +469,7 @@ Cada componente corre como un contenedor independiente orquestado con Docker Com
 
 El diagrama refleja este flujo: navegador → Nginx → (Frontend / API) → SQL Server, todo dentro de la red Docker, excepto la comunicación en tiempo real por SignalR, la cual se hace del cliente a Nginx y de Nginx al API directamente.
 
-Los datos sensibles no viven en archivos versionados. Los instaladores generan secretos y los guardan en el `.env` local del directorio de instalación; en el despliegue manual pueden inyectarse con **Infisical** (`infisical run`) o configurarse en un `.env` local no versionado. En ambos casos, los contenedores los reciben por variables de entorno. Tanto el frontend como la API usan `DB_CONNECTION_STRING` para conectarse a la base (ver `specs/93-spect-secretos-appsettings-inyeccion-infisical.md`).
+Los datos sensibles no viven en archivos versionados. Los instaladores generan secretos y los guardan en el `.env` local del directorio de instalación, tambien puedes usar un gestor de secretos si asi lo prefieres. En ambos casos, los contenedores los reciben por variables de entorno.
 
 ### Nginx
 
@@ -120,12 +477,18 @@ El reverse proxy se ejecuta a partir de una **imagen personalizada** de Nginx. L
 
 Las variables que se inyectan son:
 
-* **`GYM_PRIMARY_DOMAIN`:** dominio principal del despliegue.
-* **`GYM_APP_DOMAIN`:** dominio de la aplicación.
-* **`GYM_API_UPSTREAM`:** dirección del backend de la API.
-* **`GYM_FRONTEND_UPSTREAM`:** dirección del frontend.
-* **`GYM_SSL_DHPARAM`:** ruta del archivo de parámetros Diffie-Hellman para TLS.
-* **`GYM_CLIENT_MAX_BODY_SIZE`:** tamaño máximo del cuerpo de las peticiones.
+   * **`GYM_PRIMARY_DOMAIN`:** dominio principal del despliegue.
+   * **`GYM_APP_DOMAIN`:** dominio de la aplicación.
+   * **`GYM_API_UPSTREAM`:** dirección del backend de la API.
+   * **`GYM_FRONTEND_UPSTREAM`:** dirección del frontend.
+   * **`GYM_SSL_DHPARAM`:** ruta del archivo de parámetros Diffie-Hellman para TLS.
+   * **`GYM_CLIENT_MAX_BODY_SIZE`:** tamaño máximo del cuerpo de las peticiones.
+   * **`GYM_SSL_CERT`:**(opcional, solo aplica cuando usas ssl) ruta, dentro del contenedor, del certificado `fullchain.pem`. La lee el entrypoint; si el archivo no existe, NGINX arranca solo con HTTP. Debe empezar con el valor de `GYM_SSL_CERTS_CONTAINER_PATH`.
+   * **`GYM_SSL_KEY`:** (opcional, solo aplica cuando usas ssl) ruta, dentro del contenedor, de la clave privada `privkey.pem`. Se usa junto con `GYM_SSL_CERT` y también debe empezar con el valor de `GYM_SSL_CERTS_CONTAINER_PATH`.
+   * **`GYM_SSL_DHPARAM`:** (opcional, solo aplica cuando usas ssl) ruta, dentro del contenedor, del archivo de parámetros Diffie-Hellman (`dhparam.pem`) para TLS.
+   * **`GYM_SSL_CERTS_HOST_PATH`:** (opcional, solo aplica cuando usas ssl) ruta en el host del directorio de certificados (por defecto `/etc/letsencrypt`). Se monta como volumen de solo lectura en el Compose de producción.
+   * **`GYM_SSL_CERTS_CONTAINER_PATH`:** (opcional, solo aplica cuando usas ssl) ruta, dentro del contenedor, donde se monta el directorio de certificados del host. Es el valor común de `GYM_SSL_CERT` y `GYM_SSL_KEY`: aunque se usa en partes distintas del proceso (el montaje del volumen y el entrypoint), si la cambias debes actualizar también esas dos variables.
+   * **`GYM_SSL_DHPARAM_HOST_PATH`:** (opcional, solo aplica cuando usas ssl) ruta en el host del archivo `dhparam.pem`, que se monta en la ruta interna definida por `GYM_SSL_DHPARAM`.
 
 ### Frontend
 
