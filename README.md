@@ -46,77 +46,98 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\uninstall-fitnessgym.ps1
 
 Elimina los contenedores y volúmenes del stack, por lo que **borra permanentemente los datos de la base de datos**. Después pregunta si también quieres borrar las imágenes y los archivos descargados.
 
-## Manual con Docker Compose
+# Instalación manual con Docker Compose
 
-Elige el bloque de tu sistema: **Linux/macOS** (Bash y `curl`) o **Windows** (PowerShell 5.1 o 7). Cada bloque de código tiene su propio botón de copiar. En los pasos con varios comandos hay un bloque completo y, justo debajo, cada comando en su propio bloque.
+> ⚠️ **Advertencia importante:** completa **absolutamente todos los pasos, del 1 al 5**, antes de intentar probar el sistema. Si te saltas alguno, la aplicación no funcionará correctamente. El paso 6 (probar el sistema) solo debe hacerse cuando los pasos 1, 2, 3, 4 y 5 estén terminados sin errores.
 
-### 1. Descargar los archivos
+Elige los comandos de tu sistema: **Linux/macOS** (Bash) o **Windows** (PowerShell).
 
-Los archivos se descargaran en un mismo directorio, si cambias el directorio de los archivos asegurate de que todos queden en el mismo para que puedas seguir con las instalación. 
+Cada paso con varios comandos tiene dos partes:
+- **Comandos de instalación manual:** los pegas de una sola vez.
+- **Mismos comandos anteriores pero paso a paso con explicación:** cada comando por separado.
 
-> Si copias los comandos uno por uno, hazlo en orden y en la misma terminal: los últimos dependen de la carpeta a la que entró el primero.
+## Requisitos
 
-#### Linux / macOS (Bash)
+- Docker con Docker Compose
+- `sqlcmd` instalado (se usa desde tu máquina, no dentro del contenedor)
+  - Windows: `winget install sqlcmd`
+  - macOS: `brew install sqlcmd`
+  - Linux: descarga el binario desde [go-sqlcmd/releases](https://github.com/microsoft/go-sqlcmd/releases) y agrégalo al `PATH`
 
-Bloque completo:
+Comprueba que funciona con `sqlcmd -?`. En Windows, si no lo encuentra, abre una terminal nueva.
+
+## 1. Descargar los archivos
+
+Todo se descarga en una misma carpeta, así que no la cambies entre pasos. Si copias los comandos uno por uno, hazlo en orden y en la misma terminal, porque los últimos dependen de la carpeta a la que entró el primero.
+
+### Linux / macOS
+
+**Comandos de instalación manual**
 
 ```bash
 mkdir -p "$HOME/fitnessgym-install" && cd "$HOME/fitnessgym-install"
 curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/docker-compose.app.installer.dev.yml" -o docker-compose.app.installer.dev.yml
 curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/bd/docker-compose.installer.dev.yml" -o docker-compose.bd.installer.dev.yml
 curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/bd/create-login.sql" -o create-login.sql
+curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/bd/restore.sql" -o restore.sql
 curl -fL "https://raw.githubusercontent.com/aaron-77/fitnessgymreverseproxy/main/docker-compose.nginx.installer.dev.yml" -o docker-compose.nginx.installer.dev.yml
 curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/.env.example" -o .env.example
 cp .env.example .env
 ```
 
-**A continuación el mismo proceso de arriba  con los comandos por separado para copiarlos paso a paso con exlplicación de cada uno:**
+**Mismos comandos anteriores pero paso a paso con explicación**
 
-Crear la carpeta y entrar en ella:
+Crea la carpeta de instalación y entra en ella:
 
 ```bash
 mkdir -p "$HOME/fitnessgym-install" && cd "$HOME/fitnessgym-install"
 ```
 
-Descargar el Compose de la aplicación:
+Descarga el Compose de la aplicación:
 
 ```bash
 curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/docker-compose.app.installer.dev.yml" -o docker-compose.app.installer.dev.yml
 ```
 
-Descargar el Compose de la base de datos:
+Descarga el Compose de la base de datos:
 
 ```bash
 curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/bd/docker-compose.installer.dev.yml" -o docker-compose.bd.installer.dev.yml
 ```
 
-Descargar el script SQL:
+Descarga el script que crea el login de la aplicación:
 
 ```bash
 curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/bd/create-login.sql" -o create-login.sql
 ```
 
-Descargar el Compose de Nginx:
+Descarga el script que restaura la base de datos:
+
+```bash
+curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/bd/restore.sql" -o restore.sql
+```
+
+Descarga el Compose de Nginx:
 
 ```bash
 curl -fL "https://raw.githubusercontent.com/aaron-77/fitnessgymreverseproxy/main/docker-compose.nginx.installer.dev.yml" -o docker-compose.nginx.installer.dev.yml
 ```
 
-Descargar el archivo de ejemplo de variables:
+Descarga el archivo de ejemplo de variables:
 
 ```bash
 curl -fL "https://raw.githubusercontent.com/aaron-77/gym/main/.env.example" -o .env.example
 ```
 
-Crear el `.env`:
+Crea tu `.env` a partir del ejemplo:
 
 ```bash
 cp .env.example .env
 ```
 
-#### Windows (PowerShell)
+### Windows
 
-Bloque completo:
+**Comandos de instalación manual**
 
 ```powershell
 New-Item -ItemType Directory -Force -Path "$HOME\fitnessgym-install" | Out-Null
@@ -124,84 +145,96 @@ Set-Location "$HOME\fitnessgym-install"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/docker-compose.app.installer.dev.yml" -OutFile "docker-compose.app.installer.dev.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/bd/docker-compose.installer.dev.yml" -OutFile "docker-compose.bd.installer.dev.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/bd/create-login.sql" -OutFile "create-login.sql"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/bd/restore.sql" -OutFile "restore.sql"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/fitnessgymreverseproxy/main/docker-compose.nginx.installer.dev.yml" -OutFile "docker-compose.nginx.installer.dev.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/.env.example" -OutFile ".env.example"
 Copy-Item .env.example .env
 ```
 
-**A continuación el mismo proceso de arriba  con los comandos por separado para copiarlos paso a paso con exlplicación de cada uno:**
+**Mismos comandos anteriores pero paso a paso con explicación**
 
-Crear la carpeta:
+Crea la carpeta de instalación:
 
 ```powershell
 New-Item -ItemType Directory -Force -Path "$HOME\fitnessgym-install" | Out-Null
 ```
 
-Entrar en la carpeta:
+Entra en la carpeta:
 
 ```powershell
 Set-Location "$HOME\fitnessgym-install"
 ```
 
-Descargar el Compose de la aplicación:
+Descarga el Compose de la aplicación:
 
 ```powershell
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/docker-compose.app.installer.dev.yml" -OutFile "docker-compose.app.installer.dev.yml"
 ```
 
-Descargar el Compose de la base de datos:
+Descarga el Compose de la base de datos:
 
 ```powershell
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/bd/docker-compose.installer.dev.yml" -OutFile "docker-compose.bd.installer.dev.yml"
 ```
 
-Descargar el script SQL:
+Descarga el script que crea el login de la aplicación:
 
 ```powershell
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/bd/create-login.sql" -OutFile "create-login.sql"
 ```
 
-Descargar el Compose de Nginx:
+Descarga el script que restaura la base de datos:
+
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/bd/restore.sql" -OutFile "restore.sql"
+```
+
+Descarga el Compose de Nginx:
 
 ```powershell
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/fitnessgymreverseproxy/main/docker-compose.nginx.installer.dev.yml" -OutFile "docker-compose.nginx.installer.dev.yml"
 ```
 
-Descargar el archivo de ejemplo de variables:
+Descarga el archivo de ejemplo de variables:
 
 ```powershell
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/aaron-77/gym/main/.env.example" -OutFile ".env.example"
 ```
 
-Crear el `.env`:
+Crea tu `.env` a partir del ejemplo:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-### 2. Configurar los secretos
+## 2. Configurar el `.env`
 
-En `.env`, reemplaza los marcadores de `SECRET_TOKEN_KEY`, `MSSQL_SA_PASSWORD`, `MSSQL_APP_LOGIN_PASSWORD` y `DB_CONNECTION_STRING`. La contraseña de `DB_CONNECTION_STRING` debe coincidir con `MSSQL_APP_LOGIN_PASSWORD`. También puedes usar un gestor de secretos para inyectar las variables de entorno.
-
-Abrir el archivo en Linux / macOS:
+Ábrelo con:
 
 ```bash
 nano .env
 ```
 
-Abrir el archivo en Windows:
-
 ```powershell
 notepad .env
 ```
 
-### 3. Crear la red y levantar el stack
+(el primero es para Linux/macOS, el segundo para Windows). Reemplaza los valores de:
 
-Ejecuta el bloque desde la carpeta `fitnessgym-install`.
+- `SECRET_TOKEN_KEY`
+- `MSSQL_SA_PASSWORD`
+- `MSSQL_APP_LOGIN_PASSWORD`
+- `DB_CONNECTION_STRING`
 
-#### Linux / macOS (Bash)
+La contraseña dentro de `DB_CONNECTION_STRING` debe ser la misma que `MSSQL_APP_LOGIN_PASSWORD`.
 
-Bloque completo:
+## 3. Crear la red y levantar los contenedores
+
+Ejecuta esto desde la carpeta `fitnessgym-install`.
+
+### Linux / macOS
+
+**Comandos de instalación manual**
 
 ```bash
 docker network inspect fitnessgym-net >/dev/null 2>&1 || docker network create fitnessgym-net
@@ -213,15 +246,15 @@ docker compose --env-file .env \
   up -d
 ```
 
-**Comandos por separado por si quieres copiar paso a paso comando por comando con la explciacion de cada uno:**
+**Mismos comandos anteriores pero paso a paso con explicación**
 
-Crear la red si no existe:
+Crea la red `fitnessgym-net` solo si todavía no existe:
 
 ```bash
 docker network inspect fitnessgym-net >/dev/null 2>&1 || docker network create fitnessgym-net
 ```
 
-Levantar el stack:
+Levanta la base de datos, la aplicación y Nginx en segundo plano:
 
 ```bash
 docker compose --env-file .env \
@@ -231,9 +264,9 @@ docker compose --env-file .env \
   up -d
 ```
 
-#### Windows (PowerShell)
+### Windows
 
-Bloque completo:
+**Comandos de instalación manual**
 
 ```powershell
 docker network inspect fitnessgym-net 2>$null | Out-Null
@@ -246,18 +279,18 @@ docker compose --env-file .env `
   up -d
 ```
 
-> En PowerShell 5.1, si solo se ejecuta la primera línea al pegar, presiona Enter una vez más.
+> En PowerShell 5.1, si al pegar solo se ejecuta la primera línea, presiona Enter otra vez.
 
-**Comandos por separado por si quieres copiar paso a paso comando por comando con la explciacion de cada uno:**
+**Mismos comandos anteriores pero paso a paso con explicación**
 
-Crear la red si no existe (estas dos líneas van juntas):
+Crea la red `fitnessgym-net` solo si todavía no existe (las dos líneas van juntas: la primera comprueba y la segunda crea la red si la comprobación falló):
 
 ```powershell
 docker network inspect fitnessgym-net 2>$null | Out-Null
 if ($LASTEXITCODE -ne 0) { docker network create fitnessgym-net }
 ```
 
-Levantar el stack:
+Levanta la base de datos, la aplicación y Nginx en segundo plano:
 
 ```powershell
 docker compose --env-file .env `
@@ -267,13 +300,198 @@ docker compose --env-file .env `
   up -d
 ```
 
-### 4. Datos y volúmenes
+## 4. Restaurar la base de datos
 
-La imagen de la base incluye `FitnessGymDB.bak`, que se restaura automáticamente en el primer arranque. Los volúmenes `fitnessgym-mssql-data` y `fitnessgym-mssql-log` conservan los datos entre reinicios.
+El `.bak` se restaura solo en el primer arranque. Este paso sirve para verificarlo o hacerlo a mano. Siempre se usa la cuenta `sa`, porque el login de la aplicación no tiene permisos para restaurar.
 
-#### Detener el stack conservando los datos
+### Linux / macOS
 
-Linux / macOS:
+**Comandos de instalación manual**
+
+```bash
+docker ps --filter name=fitnessgymdbcontainer
+
+set -a; source .env; set +a
+
+sqlcmd -S localhost,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -h -1 \
+  -Q "SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = 'FitnessCenterDB'"
+
+sqlcmd -S localhost,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master -i ./restore.sql
+```
+
+**Mismos comandos anteriores pero paso a paso con explicación**
+
+Comprueba que el contenedor de la base esté corriendo:
+
+```bash
+docker ps --filter name=fitnessgymdbcontainer
+```
+
+Carga las variables del `.env` en la terminal actual para poder usar `$MSSQL_SA_PASSWORD`:
+
+```bash
+set -a; source .env; set +a
+```
+
+Verifica si la base `FitnessCenterDB` ya existe. Si devuelve su nombre, ya está restaurada y puedes pasar al paso 5; si no devuelve nada, ejecuta el siguiente comando:
+
+```bash
+sqlcmd -S localhost,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -h -1 \
+  -Q "SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = 'FitnessCenterDB'"
+```
+
+Restaura la base ejecutando `restore.sql`:
+
+```bash
+sqlcmd -S localhost,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master -i ./restore.sql
+```
+
+### Windows
+
+**Comandos de instalación manual**
+
+```powershell
+docker ps --filter name=fitnessgymdbcontainer
+
+$envMap = @{}
+Get-Content .env | ForEach-Object {
+    if ($_ -match '^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)$') { $envMap[$matches[1]] = $matches[2] }
+}
+$saPassword  = $envMap['MSSQL_SA_PASSWORD']
+$appPassword = $envMap['MSSQL_APP_LOGIN_PASSWORD']
+
+sqlcmd -S localhost,1433 -U sa -P $saPassword -C -h -1 `
+  -Q "SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = 'FitnessCenterDB'"
+
+sqlcmd -S localhost,1433 -U sa -P $saPassword -C -b -d master -i .\restore.sql
+```
+
+**Mismos comandos anteriores pero paso a paso con explicación**
+
+Comprueba que el contenedor de la base esté corriendo:
+
+```powershell
+docker ps --filter name=fitnessgymdbcontainer
+```
+
+Lee el `.env` y guarda las contraseñas en variables de PowerShell (ejecuta las 6 líneas juntas):
+
+```powershell
+$envMap = @{}
+Get-Content .env | ForEach-Object {
+    if ($_ -match '^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)$') { $envMap[$matches[1]] = $matches[2] }
+}
+$saPassword  = $envMap['MSSQL_SA_PASSWORD']
+$appPassword = $envMap['MSSQL_APP_LOGIN_PASSWORD']
+```
+
+Verifica si la base `FitnessCenterDB` ya existe. Si devuelve su nombre, ya está restaurada y puedes pasar al paso 5; si no devuelve nada, ejecuta el siguiente comando:
+
+```powershell
+sqlcmd -S localhost,1433 -U sa -P $saPassword -C -h -1 `
+  -Q "SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = 'FitnessCenterDB'"
+```
+
+Restaura la base ejecutando `restore.sql`:
+
+```powershell
+sqlcmd -S localhost,1433 -U sa -P $saPassword -C -b -d master -i .\restore.sql
+```
+
+`restore.sql` se puede ejecutar sin riesgo: si `FitnessCenterDB` ya existe, no hace nada.
+
+> Si tu compose publica la base en otro puerto, cambia `localhost,1433` por el valor de `BD_HOST_PORT`.
+
+## 5. Crear el login de la aplicación
+
+Este paso va después del restore, porque necesita que `FitnessCenterDB` ya exista. Crea el login `fitnessgymlogin` y le da los permisos necesarios. Si el login ya existe, solo actualiza su contraseña.
+
+### Linux / macOS
+
+**Comandos de instalación manual**
+
+```bash
+set -a; source .env; set +a
+
+sqlcmd -S localhost,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master \
+  -v "APP_LOGIN_PASSWORD=$MSSQL_APP_LOGIN_PASSWORD" \
+  -i ./create-login.sql
+```
+
+**Mismos comandos anteriores pero paso a paso con explicación**
+
+Carga las variables del `.env` (sáltate este comando si sigues en la misma terminal del paso 4):
+
+```bash
+set -a; source .env; set +a
+```
+
+Crea el login y sus permisos, pasando la contraseña de la aplicación al script:
+
+```bash
+sqlcmd -S localhost,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master \
+  -v "APP_LOGIN_PASSWORD=$MSSQL_APP_LOGIN_PASSWORD" \
+  -i ./create-login.sql
+```
+
+### Windows
+
+**Comandos de instalación manual**
+
+```powershell
+$envMap = @{}
+Get-Content .env | ForEach-Object {
+    if ($_ -match '^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)$') { $envMap[$matches[1]] = $matches[2] }
+}
+$saPassword  = $envMap['MSSQL_SA_PASSWORD']
+$appPassword = $envMap['MSSQL_APP_LOGIN_PASSWORD']
+
+sqlcmd -S localhost,1433 -U sa -P $saPassword -C -b -d master `
+  -v "APP_LOGIN_PASSWORD=$appPassword" `
+  -i .\create-login.sql
+```
+
+**Mismos comandos anteriores pero paso a paso con explicación**
+
+Lee el `.env` y guarda las contraseñas en variables (sáltate este bloque si sigues en la misma terminal del paso 4):
+
+```powershell
+$envMap = @{}
+Get-Content .env | ForEach-Object {
+    if ($_ -match '^\s*([A-Za-z_][A-Za-z0-9_]*)=(.*)$') { $envMap[$matches[1]] = $matches[2] }
+}
+$saPassword  = $envMap['MSSQL_SA_PASSWORD']
+$appPassword = $envMap['MSSQL_APP_LOGIN_PASSWORD']
+```
+
+Crea el login y sus permisos, pasando la contraseña de la aplicación al script:
+
+```powershell
+sqlcmd -S localhost,1433 -U sa -P $saPassword -C -b -d master `
+  -v "APP_LOGIN_PASSWORD=$appPassword" `
+  -i .\create-login.sql
+```
+
+Si todo salió bien, verás los cuatro pasos marcados con `[OK]` y ningún `[ERROR]`.
+
+## 6. Probar el sistema
+
+> ⚠️ Antes de continuar, confirma que completaste los **pasos 1 al 5** sin errores.
+
+Después de seguir estos pasos, FitnessGym queda instalado de forma manual y listo para usarse.
+
+1. Abre tu navegador y entra a **http://localhost**. Deberías ver la página principal de FitnessGym.
+2. Haz clic en la opción **Login** del menú.
+3. Cuando se abra la página de inicio de sesión, elige el botón **Empleado** o **Cliente**, según la parte del sistema que quieras ver.
+4. Una vez dentro, explora las funcionalidades del sistema.
+
+## Detener el sistema
+
+Los datos viven en los volúmenes `fitnessgym-mssql-data` y `fitnessgym-mssql-log`, así que se conservan entre reinicios.
+
+### Conservando los datos
+
+**Linux / macOS**
 
 ```bash
 docker compose --env-file .env \
@@ -283,7 +501,7 @@ docker compose --env-file .env \
   down
 ```
 
-Windows:
+**Windows**
 
 ```powershell
 docker compose --env-file .env `
@@ -293,9 +511,11 @@ docker compose --env-file .env `
   down
 ```
 
-#### Detener el stack y eliminar los datos de la base
+### Borrando también los datos de la base
 
-Linux / macOS:
+Esto elimina los volúmenes y **no se puede deshacer**.
+
+**Linux / macOS**
 
 ```bash
 docker compose --env-file .env \
@@ -305,7 +525,7 @@ docker compose --env-file .env \
   down --volumes
 ```
 
-Windows:
+**Windows**
 
 ```powershell
 docker compose --env-file .env `
