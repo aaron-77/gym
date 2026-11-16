@@ -63,6 +63,13 @@ else
 fi
 
 mkdir -p "$INSTALL_DIR"
+STATE_FILE="$INSTALL_DIR/.infisical-installer-state"
+if [[ "$CONFIG_SOURCE" == 'infisical' ]]; then
+  printf 'MODE=%s\nENV=%s\nAPP_PROJECT_ID=%s\nDB_PROJECT_ID=%s\nPROXY_PROJECT_ID=%s\n' \
+    "$CONFIG_SOURCE" "$INFISICAL_ENV" "$APP_PROJECT_ID" "$DB_PROJECT_ID" "$PROXY_PROJECT_ID" > "$STATE_FILE"
+else
+  [[ ! -e "$STATE_FILE" ]] || rm -f "$STATE_FILE"
+fi
 download_if_missing() {
   local file="$1" url="$2" tmp="${1}.download"
   if [[ -s "$file" ]]; then
