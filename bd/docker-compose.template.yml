@@ -9,10 +9,10 @@
 #       la inyecta configure-db.sh al create-login.sql vía sqlcmd -v )
 #
 # Variables OPCIONALES (usan default si no estan definidas):
-#   TZ, ACCEPT_EULA, MSSQL_PID, BD_HOST_PORT
+#   TZ, ACCEPT_EULA, BD_HOST_PORT
 #
 # Literales (contrato de la app - NO parametrizar):
-#   puerto del lado del contenedor (1433), volumes, networks
+#   puerto del lado del contenedor (1433), MSSQL_PID (Express), volumes, networks
 
 services:
   fitnessgym_bd:
@@ -26,7 +26,7 @@ services:
     environment:
       TZ: "${TZ:-America/Mexico_City}"
       ACCEPT_EULA: "${ACCEPT_EULA:-Y}"
-      MSSQL_PID: "${MSSQL_PID:-developer}"
+      MSSQL_PID: Express
       MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD es obligatoria}"
       MSSQL_APP_LOGIN_PASSWORD: "${MSSQL_APP_LOGIN_PASSWORD:?MSSQL_APP_LOGIN_PASSWORD es obligatoria}"
     volumes:

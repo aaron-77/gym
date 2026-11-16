@@ -8,7 +8,7 @@ services:
     environment:
       TZ: "${TZ}"
       ACCEPT_EULA: "${ACCEPT_EULA}"
-      MSSQL_PID: "${MSSQL_PID}"
+      MSSQL_PID: Express
       MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD es obligatoria}"
       MSSQL_APP_LOGIN_PASSWORD: "${MSSQL_APP_LOGIN_PASSWORD:?MSSQL_APP_LOGIN_PASSWORD es obligatoria}"
     volumes:
