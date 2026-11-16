@@ -70,7 +70,7 @@ Comportamiento observable esperado:
 | 6 | Generación de token (solo si el paso 5 no lo encontró) | Solicita client id y client secret (el secreto sin eco en pantalla); ejecuta el login de Infisical por método universal-auth en modo no interactivo y de salida en claro, de forma que el CLI imprima únicamente el token de acceso; captura el token; lo exporta en la sesión en curso (el CLI de Infisical resuelve `infisical run` desde esa variable); actualiza `.bashrc`: si ya existe una línea de exportación del token la reemplaza, y si no existe la agrega al final del archivo | Si el login falla, detiene la instalación con el mensaje de error del CLI |
 | 7 | IDs de proyecto (solo modo Infisical) | Pide el ID de Infisical uno por uno, indicando en cada prompt el proyecto al que corresponde: primero fitnessgymapp, luego fitnessgymbd, luego fitnessgymnginx | Detiene la instalación si algún ID queda vacío |
 | 8 | Origen `.env` | Continúa con el flujo existente sin modificaciones: descarga de plantilla, generación de secretos, cadena de conexión, renegociación de puerto | — |
-| 9 | Ejecución de Compose (modo Infisical) | Ejecuta cada proyecto por separado, en orden: base de datos, aplicación, proxy Nginx. Cada ejecución envuelve el comando de Compose de ese proyecto con el archivo Compose correspondiente, el modificador de entorno con el valor elegido en el paso 4 y el modificador de ID de proyecto con el ID recogido en el paso 7 | Detiene la instalación si alguna ejecución falla |
+| 9 | Ejecución de Compose (modo Infisical) | Ejecuta cada proyecto por separado, en orden: base de datos, aplicación, proxy Nginx. Cada ejecución envuelve el levantamiento en modo desprendido (`up -d`) del comando de Compose de ese proyecto con el archivo Compose correspondiente, el modificador de entorno con el valor elegido en el paso 4 y el modificador de ID de proyecto con el ID recogido en el paso 7 | Detiene la instalación si alguna ejecución falla |
 | 10 | Ejecución de Compose (modo `.env`) | Validación de configuración y levantamiento combinado de los tres archivos, tal como hoy | Igual que hoy |
 
 Notas de diseño:
@@ -99,6 +99,7 @@ Notas de diseño:
 - **Configuración externa (spec 93):** los archivos trackeados declaran forma; el origen elegido (`.env` o Infisical) provee valores al momento de ejecución.
 - **Una sola fuente de verdad por modo:** ningún modo mezcla orígenes; el modo Infisical no genera ni consulta el `.env`, y el modo `.env` no invoca el CLI de Infisical.
 - **Fail fast con mensajes accionables:** cada validación nueva detiene la instalación nombrando la causa y la remediación, igual que los chequeos previos existentes.
+- **Reporte íntegro de errores de Infisical:** toda falla de un comando de Infisical (login, lectura de secretos, ejecución de Compose) se reporta con el mensaje del instalador, el código de salida del comando y la salida de error íntegra del CLI como detalle, en lugar de descartarla o dejarla mezclada sin jerarquía. La salida capturada en una ejecución exitosa también se muestra, de modo que no se oculta información al operador.
 - **Persistencia idempotente:** la escritura en `.bashrc` verifica existencia previa para no acumular líneas duplicadas en reinstalaciones.
 
 ## 4. Archivos a crear y modificar
@@ -122,7 +123,7 @@ Notas de diseño:
 - [ ] En modo Infisical no se genera ni modifica el archivo `.env` y no se ejecuta la generación local de secretos
 - [ ] En modo Infisical, si `HOST_HTTP_PORT` no está definida en Infisical, la instalación continúa con un aviso y el mensaje final indica que el puerto lo define el Compose, sin interrumpir
 - [ ] En modo Infisical, ninguna variable de configuración faltante interrumpe la instalación; solo se registran avisos
-- [ ] Un fallo de Compose o de Infisical en cualquier proyecto detiene la instalación con mensaje claro
+- [ ] Un fallo de Compose o de Infisical en cualquier proyecto detiene la instalación con mensaje claro que incluye el código de salida y la salida de error íntegra del CLI como detalle
 - [ ] La URL final se imprime cuando el puerto es conocido (ambos modos con `HOST_HTTP_PORT` resuelto)
 
 ## 6. Fuera del alcance de esta spec

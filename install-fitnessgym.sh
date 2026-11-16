@@ -36,7 +36,14 @@ if [[ "$config_origin" == 2 ]]; then
     read -rs -p 'Client Secret de Infisical (universal-auth): ' infisical_client_secret
     printf '\n'
     [[ -n "$infisical_client_id" && -n "$infisical_client_secret" ]] || fail 'Client ID y Client Secret son obligatorios para generar el token.'
-    INFISICAL_TOKEN="$(infisical login --method=universal-auth --client-id="$infisical_client_id" --client-secret="$infisical_client_secret" --plain --silent)" || fail 'El login de Infisical falló. Verificá el Client ID y el Client Secret.'
+    login_err="$(mktemp)"
+    INFISICAL_TOKEN="$(infisical login --method=universal-auth --client-id="$infisical_client_id" --client-secret="$infisical_client_secret" --plain --silent 2>"$login_err")" || {
+      printf 'ERROR: El login de Infisical falló. Verificá el Client ID y el Client Secret.\n' >&2
+      [[ -s "$login_err" ]] && { printf 'Detalle del error:\n' >&2; cat "$login_err" >&2; }
+      rm -f "$login_err"
+      exit 1
+    }
+    rm -f "$login_err"
     [[ -n "$INFISICAL_TOKEN" ]] || fail 'El login de Infisical no devolvió un token.'
     export INFISICAL_TOKEN
     if grep -q '^export INFISICAL_TOKEN=' "$HOME/.bashrc" 2>/dev/null; then
@@ -73,6 +80,25 @@ download_file() {
   curl -fL --connect-timeout 10 --max-time 120 "$url" -o "$tmp" || { rm -f "$tmp"; fail "No se pudo descargar $url"; }
   [[ -s "$tmp" ]] || { rm -f "$tmp"; fail "La descarga está vacía: $url"; }
   mv "$tmp" "$file"
+}
+
+run_infisical_compose() {
+  local fail_msg="$1" project_id="$2" compose_file="$3" err_file="${INSTALL_DIR}/.infisical-run.err" exit_code=0
+  if infisical run --env="$INFISICAL_ENV" --projectId="$project_id" -- docker compose -f "$compose_file" up -d 2>"$err_file"; then
+    [[ -s "$err_file" ]] && cat "$err_file" >&2
+    rm -f "$err_file"
+    return 0
+  fi
+  exit_code=$?
+  printf 'ERROR: %s (código de salida %s).\n' "$fail_msg" "$exit_code" >&2
+  if [[ -s "$err_file" ]]; then
+    printf 'Detalle del error:\n' >&2
+    cat "$err_file" >&2
+  else
+    printf 'El comando no emitió salida de error; verificá conectividad y credenciales de Infisical.\n' >&2
+  fi
+  rm -f "$err_file"
+  return 1
 }
 
 APP_FILE="$INSTALL_DIR/docker-compose.app.installer.dev.yml"
@@ -152,12 +178,15 @@ if [[ "$CONFIG_SOURCE" == 'env' ]]; then
     set_env_value HOST_HTTP_PORT "$NGINX_PORT"
   fi
 else
-  NGINX_PORT="$(infisical secrets get HOST_HTTP_PORT --env="$INFISICAL_ENV" --projectId="$PROXY_PROJECT_ID" --plain 2>/dev/null)" || NGINX_PORT=''
+  port_err="$(mktemp)"
+  NGINX_PORT="$(infisical secrets get HOST_HTTP_PORT --env="$INFISICAL_ENV" --projectId="$PROXY_PROJECT_ID" --plain 2>"$port_err")" || NGINX_PORT=''
   if [[ -z "$NGINX_PORT" ]]; then
     printf 'AVISO: la variable HOST_HTTP_PORT no está definida en Infisical para el entorno elegido; se espera que el Compose correspondiente tenga un valor por defecto. La instalación continúa.\n' >&2
+    [[ -s "$port_err" ]] && { printf 'Detalle:\n' >&2; cat "$port_err" >&2; }
   elif [[ "$NGINX_PORT" == 8090 || "$NGINX_PORT" == 8091 || "$NGINX_PORT" == 1433 ]] || ! port_is_free "$NGINX_PORT"; then
     printf 'ADVERTENCIA: el puerto %s está ocupado o reservado. La configuración proviene de Infisical; no se modifica nada.\n' "$NGINX_PORT" >&2
   fi
+  rm -f "$port_err"
 fi
 
 docker network inspect fitnessgym-net >/dev/null 2>&1 || docker network create fitnessgym-net >/dev/null || fail 'No se pudo crear la red Docker fitnessgym-net.'
@@ -166,9 +195,9 @@ if [[ "$CONFIG_SOURCE" == 'env' ]]; then
   docker compose -f "$DB_FILE" -f "$APP_FILE" -f "$PROXY_FILE" config -q || fail 'Los Compose no son válidos o falta configuración en .env.'
   docker compose -f "$DB_FILE" -f "$APP_FILE" -f "$PROXY_FILE" up -d || fail 'Docker Compose no pudo iniciar los contenedores.'
 else
-  infisical run --env="$INFISICAL_ENV" --projectId="$DB_PROJECT_ID" -- docker compose -f "$DB_FILE" -d || fail 'Docker Compose no pudo iniciar la base de datos vía Infisical.'
-  infisical run --env="$INFISICAL_ENV" --projectId="$APP_PROJECT_ID" -- docker compose -f "$APP_FILE" -d || fail 'Docker Compose no pudo iniciar la aplicación vía Infisical.'
-  infisical run --env="$INFISICAL_ENV" --projectId="$PROXY_PROJECT_ID" -- docker compose -f "$PROXY_FILE" -d || fail 'Docker Compose no pudo iniciar el proxy vía Infisical.'
+  run_infisical_compose 'Docker Compose no pudo iniciar la base de datos vía Infisical' "$DB_PROJECT_ID" "$DB_FILE" || exit 1
+  run_infisical_compose 'Docker Compose no pudo iniciar la aplicación vía Infisical' "$APP_PROJECT_ID" "$APP_FILE" || exit 1
+  run_infisical_compose 'Docker Compose no pudo iniciar el proxy vía Infisical' "$PROXY_PROJECT_ID" "$PROXY_FILE" || exit 1
 fi
 
 if [[ -n "$NGINX_PORT" ]]; then
