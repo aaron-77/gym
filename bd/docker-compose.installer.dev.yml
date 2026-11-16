@@ -7,7 +7,7 @@ services:
       - "127.0.0.1:${BD_HOST_PORT}:${BD_CONTAINER_PORT:-1433}"
     environment:
       TZ: "${TZ}"
-      ACCEPT_EULA: "${ACCEPT_EULA}"
+      ACCEPT_EULA: "${ACCEPT_EULA:-Y}"
       MSSQL_PID: Express
       MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD es obligatoria}"
       MSSQL_APP_LOGIN_PASSWORD: "${MSSQL_APP_LOGIN_PASSWORD:?MSSQL_APP_LOGIN_PASSWORD es obligatoria}"

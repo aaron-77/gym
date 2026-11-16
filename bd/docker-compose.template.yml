@@ -9,7 +9,8 @@
 #       la inyecta configure-db.sh al create-login.sql vía sqlcmd -v )
 #
 # Variables OPCIONALES (usan default si no estan definidas):
-#   TZ, ACCEPT_EULA, BD_HOST_PORT
+#   TZ, ACCEPT_EULA (default Y - no hace falta inyectarla en Infisical),
+#   BD_HOST_PORT
 #
 # Literales (contrato de la app - NO parametrizar):
 #   puerto del lado del contenedor (1433), MSSQL_PID (Express), volumes, networks
