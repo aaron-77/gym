@@ -10,7 +10,7 @@ Los empleados también pueden gestionar los horarios de las clases para los inst
 
 En esta sección se muestran dos formas de instalar FitnessGym. La **instalación manual** (más abajo) sigue los pasos por defecto para instalar la aplicación en tu computadora local, en un entorno de desarrollo (dev). El **instalador** te da, además, la opción de hacer una instalación en producción.
 
-**Requisitos:** Docker con Compose v2 y conexión a Internet. En Linux/macOS también Bash y `curl`; en Windows, PowerShell.
+**Requisitos:** Docker con Compose v2 y conexión a Internet. En Linux/macOS también Bash y `curl` y sqlcmd ; en Windows, PowerShell y sql server instalado o tambien sqlcmd.
 
 ### Con instalador (recomendado)
 
@@ -75,7 +75,7 @@ Cada paso con varios comandos tiene dos partes:
 - `sqlcmd` instalado (se usa desde tu máquina, no dentro del contenedor)
   - Windows: `winget install sqlcmd`
   - macOS: `brew install sqlcmd`
-  - Linux: descarga el binario desde [go-sqlcmd/releases](https://github.com/microsoft/go-sqlcmd/releases) y agrégalo al `PATH`
+  - Linux: descarga los paquetes necesarios de acuerdo a tu distribucion de linux [sitio oficial de microsoft](https://learn.microsoft.com/en-us/sql/linux/install-upgrade/setup-tools?view=sql-server-ver17&tabs=redhat-install) y agrégalo al `PATH`
 
 Comprueba que funciona con `sqlcmd -?`. En Windows, si no lo encuentra, abre una terminal nueva.
 
