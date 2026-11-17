@@ -13,6 +13,9 @@
 #      local como aaron77/<img>:<NEXT>; la :latest LOCAL queda taggeada como <img>:<NEXT>.
 #   4. Build local siempre taggeado :latest; el contexto lo define el docker compose con
 #      "local" en el NOMBRE de archivo que referencie la imagen (build.context/dockerfile).
+#      El BUILD_ENVIRONMENT se pregunta al INICIO de la corrida (Development/Staging/
+#      Production) y viaja como --build-arg; el valor del compose local queda como
+#      default de referencia y NO se modifica en disco.
 #   5. Fallo de build → preguntar: continuar con la siguiente o abortar (abortar = sin push).
 #   6. Push ÚNICO al final, solo de las imágenes construidas OK:
 #      aaron77/<img>:<NEXT> (congelada) + aaron77/<img>:latest (rotación).
@@ -101,6 +104,24 @@ while [ ${#SELECTED[@]} -eq 0 ]; do
   fi
 done
 ok "Seleccionadas: ${SELECTED[*]}"
+
+# ------------------------------------------------------------------
+# Entorno de build — una selección para toda la corrida
+# ------------------------------------------------------------------
+echo
+info "Entorno a hornear en las imágenes (BUILD_ENVIRONMENT):"
+echo "  [1] Development"
+echo "  [2] Staging"
+echo "  [3] Production"
+# shellcheck disable=SC2162
+read -r -p "Entorno: " ENV_SEL
+case "$ENV_SEL" in
+  1) SELECTED_ENV='Development' ;;
+  2) SELECTED_ENV='Staging' ;;
+  3) SELECTED_ENV='Production' ;;
+  *) die "Opción inválida: '$ENV_SEL'." ;;
+esac
+ok "Entorno seleccionado: ${SELECTED_ENV}"
 
 # ==================================================================
 # Helpers de versión — bash puro + comandos docker (sin python3)
@@ -300,7 +321,12 @@ for IMG in "${SELECTED[@]}"; do
       fi
       BUILD_ENV_ARGS=()
       if [ -n "$BUILD_ENVIRONMENT" ]; then
-        BUILD_ENV_ARGS=(--build-arg "BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT}")
+        # El compose local declara el ARG (indica que su Dockerfile lo consume);
+        # el valor real es el elegido al inicio de la corrida.
+        if [ "$BUILD_ENVIRONMENT" != "$SELECTED_ENV" ]; then
+          info "El compose local declaraba BUILD_ENVIRONMENT=${BUILD_ENVIRONMENT}; se usa la selección de esta corrida: ${SELECTED_ENV}."
+        fi
+        BUILD_ENV_ARGS=(--build-arg "BUILD_ENVIRONMENT=${SELECTED_ENV}")
       fi
       info "Build: docker build -t ${IMG}:latest -f ${DFARG[1]} ${BUILD_ENV_ARGS[*]} ${CTX:-.}"
       if docker build "${DFARG[@]}" "${BUILD_ENV_ARGS[@]}" -t "${IMG}:latest" "${CTX:-.}"; then

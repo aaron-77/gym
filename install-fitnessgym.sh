@@ -108,13 +108,19 @@ run_infisical_compose() {
   return 1
 }
 
-APP_FILE="$INSTALL_DIR/docker-compose.app.installer.dev.yml"
+# El compose de la app depende del entorno seleccionado: prod usa la variante
+# con ASPNETCORE_ENVIRONMENT=Production; dev y staging la de Development.
+if [[ "$CONFIG_SOURCE" == 'infisical' && "$INFISICAL_ENV" == 'prod' ]]; then
+  APP_FILE="$INSTALL_DIR/docker-compose.app.installer.prod.yml"
+else
+  APP_FILE="$INSTALL_DIR/docker-compose.app.installer.dev.yml"
+fi
 DB_FILE="$INSTALL_DIR/docker-compose.bd.installer.dev.yml"
 PROXY_FILE="$INSTALL_DIR/docker-compose.nginx.installer.dev.yml"
 CREATE_LOGIN_FILE="$INSTALL_DIR/create-login.sql"
 ENV_FILE="$INSTALL_DIR/.env"
 ENV_EXAMPLE="$INSTALL_DIR/.env.example"
-download_file "$APP_FILE" "$APP_BASE/docker-compose.app.installer.dev.yml"
+download_file "$APP_FILE" "$APP_BASE/$(basename "$APP_FILE")"
 download_file "$DB_FILE" "$APP_BASE/bd/docker-compose.installer.dev.yml"
 download_file "$CREATE_LOGIN_FILE" "$APP_BASE/bd/create-login.sql"
 download_file "$PROXY_FILE" "$PROXY_BASE/docker-compose.nginx.installer.dev.yml"

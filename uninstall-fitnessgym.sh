@@ -74,6 +74,12 @@ if [[ -s "$STATE_FILE" ]]; then
   fi
 fi
 
+# Si la instalación fue con entorno prod, la app se levantó con la variante
+# Production del compose; para la bajada hay que usar el mismo archivo.
+if (( USE_INFISICAL )) && [[ "$STATE_ENV" == 'prod' ]]; then
+  APP_FILE="$INSTALL_DIR/docker-compose.app.installer.prod.yml"
+fi
+
 if (( USE_INFISICAL )); then
   info "Bajando el stack con Infisical (entorno: $INFISICAL_ENV) según el estado guardado por el instalador..."
   if command -v infisical >/dev/null 2>&1; then
