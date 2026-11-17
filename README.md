@@ -245,7 +245,7 @@ Una vez abierto el `.env`, reemplaza los valores de:
 - `SECRET_TOKEN_KEY`
 - `MSSQL_SA_PASSWORD`
 - `MSSQL_APP_LOGIN_PASSWORD`
-- `DB_CONNECTION_STRING`
+- `DB_CONNECTION_STRING`: reemplaza **solo la contraseña**, es decir, el texto `__REEMPLAZA_AQUI__`; el resto de la cadena ya viene armada y no la modifiques.
 
 La contraseña dentro de `DB_CONNECTION_STRING` debe ser la misma que `MSSQL_APP_LOGIN_PASSWORD`.
 
