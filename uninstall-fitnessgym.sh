@@ -74,10 +74,12 @@ if [[ -s "$STATE_FILE" ]]; then
   fi
 fi
 
-# Si la instalación fue con entorno prod, la app se levantó con la variante
-# Production del compose; para la bajada hay que usar el mismo archivo.
+# Si la instalación fue con entorno prod, la app y el proxy se levantaron con
+# las variantes Production de sus composes; para la bajada hay que usar los
+# mismos archivos.
 if (( USE_INFISICAL )) && [[ "$STATE_ENV" == 'prod' ]]; then
   APP_FILE="$INSTALL_DIR/docker-compose.app.installer.prod.yml"
+  PROXY_FILE="$INSTALL_DIR/docker-compose.nginx.installer.prod.yml"
 fi
 
 if (( USE_INFISICAL )); then
