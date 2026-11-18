@@ -10,7 +10,7 @@ Los empleados también pueden gestionar los horarios de las clases para los inst
 
 En esta sección se muestran dos formas de instalar FitnessGym. La **instalación manual** (más abajo) sigue los pasos por defecto para instalar la aplicación en tu computadora local, en un entorno de desarrollo (dev). El **instalador** te da, además, la opción de hacer una instalación en producción.
 
-**Requisitos:** Docker con Compose v2 y conexión a Internet. En Linux/macOS también Bash y `curl` y sqlcmd ; en Windows, PowerShell y sql server instalado o tambien sqlcmd.
+**Requisitos:** Docker con Compose v2 y conexión a Internet. En Linux/macOS también Bash y `curl`; en Windows, PowerShell.
 
 ### Con instalador (recomendado)
 
@@ -75,7 +75,7 @@ Cada paso con varios comandos tiene dos partes:
 - `sqlcmd` instalado (se usa desde tu máquina, no dentro del contenedor)
   - Windows: `winget install sqlcmd`
   - macOS: `brew install sqlcmd`
-  - Linux: descarga los paquetes necesarios de acuerdo a tu distribucion de linux [sitio oficial de microsoft](https://learn.microsoft.com/en-us/sql/linux/install-upgrade/setup-tools?view=sql-server-ver17&tabs=redhat-install) y agrégalo al `PATH`
+  - Linux: descarga el binario desde [go-sqlcmd/releases](https://github.com/microsoft/go-sqlcmd/releases) y agrégalo al `PATH`
 
 Comprueba que funciona con `sqlcmd -?`. En Windows, si no lo encuentra, abre una terminal nueva.
 
@@ -245,9 +245,11 @@ Una vez abierto el `.env`, reemplaza los valores de:
 - `SECRET_TOKEN_KEY`
 - `MSSQL_SA_PASSWORD`
 - `MSSQL_APP_LOGIN_PASSWORD`
-- `DB_CONNECTION_STRING`: reemplaza **solo la contraseña**, es decir, el texto `__REEMPLAZA_AQUI__`; el resto de la cadena ya viene armada y no la modifiques.
+- `DB_CONNECTION_STRING`
 
 La contraseña dentro de `DB_CONNECTION_STRING` debe ser la misma que `MSSQL_APP_LOGIN_PASSWORD`.
+
+> ⚠️ **Advertencia:** la variable `SECRET_TOKEN_KEY` debe tener **al menos 32 caracteres**.
 
 ## Paso 3. Crear la red y levantar el contenedor de la base de datos
 
@@ -326,7 +328,7 @@ Antes de restaurar se cargan las variables del `.env` en la terminal. Así el co
 ```bash
 set -a; source .env; set +a
 
-sqlcmd -S localhost,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master -i ./restore.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master -i ./restore.sql
 ```
 
 **Mismos comandos anteriores pero paso a paso con explicación**
@@ -340,7 +342,7 @@ set -a; source .env; set +a
 Restaura la base ejecutando `restore.sql`:
 
 ```bash
-sqlcmd -S localhost,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master -i ./restore.sql
+sqlcmd -S 127.0.0.1,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master -i ./restore.sql
 ```
 
 ### Paso 4 en Windows
@@ -381,7 +383,7 @@ sqlcmd -S localhost,1433 -U sa -P $saPassword -C -b -d master -i .\restore.sql
 
 > Si `sqlcmd` no logra conectarse, espera unos segundos a que SQL Server termine de iniciar y vuelve a intentarlo.
 
-> Si tu compose publica la base en otro puerto, cambia `localhost,1433` por el valor de `BD_HOST_PORT`.
+> Si tu compose publica la base en otro puerto, cambia el puerto `1433` de los comandos `sqlcmd` por el valor de `BD_HOST_PORT`.
 
 ## Paso 5. Crear el login de la aplicación
 
@@ -394,7 +396,7 @@ Este paso va después del restore, porque necesita que `FitnessCenterDB` ya exis
 ```bash
 set -a; source .env; set +a
 
-sqlcmd -S localhost,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master \
+sqlcmd -S 127.0.0.1,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master \
   -v "APP_LOGIN_PASSWORD=$MSSQL_APP_LOGIN_PASSWORD" \
   -i ./create-login.sql
 ```
@@ -410,7 +412,7 @@ set -a; source .env; set +a
 Crea el login y sus permisos, pasando la contraseña de la aplicación al script:
 
 ```bash
-sqlcmd -S localhost,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master \
+sqlcmd -S 127.0.0.1,1433 -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d master \
   -v "APP_LOGIN_PASSWORD=$MSSQL_APP_LOGIN_PASSWORD" \
   -i ./create-login.sql
 ```
