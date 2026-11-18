@@ -49,12 +49,12 @@ build/
 *.jfm
 _ReSharper*/
 *.DotSettings.user
-appsettings.Development.json
-appsettings.Staging.json
+# Los appsettings de los 3 entornos SÍ viajan en el contexto (la imagen los incluye
+# todos; el activo se elige en runtime con ASPNETCORE_ENVIRONMENT).
+# Los secretos NO van horneados: llegan por variables de entorno.
 # Archivos de configuración local
 .env
 .env.*
-#appsettings.Development.json
 launchSettings.json
 
 # Logs
