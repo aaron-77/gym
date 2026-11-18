@@ -568,10 +568,11 @@ docker compose --env-file .env `
 
 ### Desinstalación manual
 
-Para desinstalar FitnessGym por completo hay que hacer dos cosas, en este orden:
+Para desinstalar FitnessGym por completo hay que hacer tres cosas, en este orden:
 
 1. **Eliminar todos los contenedores junto con sus datos y volúmenes**, ejecutando el `docker compose down --volumes` que aparece abajo. Ejecútalo desde la carpeta `fitnessgym-install` y **antes** de borrar los archivos, porque necesita los Compose y el `.env`. Esto **no se puede deshacer**: borra permanentemente los datos de la base de datos.
-2. **Borrar manualmente todos los archivos descargados** durante la instalación manual (lista más abajo).
+2. **Eliminar las cuatro imágenes de Docker de FitnessGym** con `docker rmi` (lista y comando abajo). Debe hacerse después del paso anterior, porque una imagen no se puede eliminar mientras un contenedor la esté usando. Solo se eliminan esas cuatro imágenes; las demás imágenes que tengas en tu equipo no se tocan.
+3. **Borrar manualmente todos los archivos descargados** durante la instalación manual (lista más abajo).
 
 `docker compose down` elimina los contenedores y, con la opción `--volumes`, también los volúmenes con los datos de la base.
 
@@ -595,7 +596,34 @@ docker compose --env-file .env `
   down --volumes
 ```
 
-Después, elimina manualmente cada uno de estos archivos de la carpeta `fitnessgym-install` (`$HOME/fitnessgym-install` en Linux/macOS y `$HOME\fitnessgym-install` en Windows):
+Con los contenedores y volúmenes eliminados, elimina únicamente estas imágenes de FitnessGym:
+
+- `aaron77/fitnessgymapi:latest`
+- `aaron77/fitnessgymfrontend:latest`
+- `aaron77/fitnessgymbd:latest`
+- `aaron77/fitnessgymnginx:latest`
+
+**Linux / macOS**
+
+```bash
+docker rmi \
+  aaron77/fitnessgymapi:latest \
+  aaron77/fitnessgymfrontend:latest \
+  aaron77/fitnessgymbd:latest \
+  aaron77/fitnessgymnginx:latest
+```
+
+**Windows**
+
+```powershell
+docker rmi `
+  aaron77/fitnessgymapi:latest `
+  aaron77/fitnessgymfrontend:latest `
+  aaron77/fitnessgymbd:latest `
+  aaron77/fitnessgymnginx:latest
+```
+
+Por último, elimina manualmente cada uno de estos archivos de la carpeta `fitnessgym-install` (`$HOME/fitnessgym-install` en Linux/macOS y `$HOME\fitnessgym-install` en Windows):
 
 - `docker-compose.app.installer.dev.yml`
 - `docker-compose.bd.installer.dev.yml`
